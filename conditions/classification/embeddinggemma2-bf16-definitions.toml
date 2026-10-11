@@ -16,5 +16,6 @@ text_only = true
 
 [options]
 prompt = "definitions"
-task_prefix = "task: classification | query: "
+sentence_prefix = "task: classification | query: "
+category_prefix = "task: classification | query: "
 max_input_tokens = 8192

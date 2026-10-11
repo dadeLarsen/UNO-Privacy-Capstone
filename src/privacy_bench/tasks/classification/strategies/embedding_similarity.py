@@ -1,6 +1,7 @@
 """Classify without training: embed the sentence and each category's description, pick the most similar."""
 
 import json
+import re
 
 import torch
 
@@ -21,6 +22,14 @@ def category_texts(prompt_spec: dict) -> list:
     return [label + (": " + definitions[label] if definitions else "") for label in LABELS]
 
 
+def instruction_name(prefix: str) -> str:
+    """A chart name for an instruction prefix: the task of 'task: <task> | query: ', or 'document'."""
+    query = re.fullmatch(r"task: (.+) \| query: ", prefix)
+    if query:
+        return query.group(1)
+    return "document" if re.fullmatch(r"title: .+ \| text: ", prefix) else prefix.strip()
+
+
 class EmbeddingSimilarityStrategy:
     name = "embedding-similarity"
     timing_scope = "embedding_forward"
@@ -29,22 +38,27 @@ class EmbeddingSimilarityStrategy:
 
     @staticmethod
     def condition_label(spec: dict) -> str:
-        return "Embedding\nsimilarity\n" + display_name(spec["prompt_spec"]["name"]).lower()
+        sentence, category = spec["sentence_prefix"], spec["category_prefix"]
+        instructions = (instruction_name(sentence) if sentence == category else
+                        f"sentence: {instruction_name(sentence)}\ncategories: {instruction_name(category)}")
+        return "Embedding\nsimilarity\n" + display_name(spec["prompt_spec"]["name"]).lower() + "\n" + instructions
 
     def __init__(self, condition: Condition):
         self.model = model_settings(condition, optional={"device": "cuda", "text_only": False})
-        self.options = option_settings(condition, required=("prompt", "task_prefix", "max_input_tokens"))
-        if not isinstance(self.options["task_prefix"], str) or not self.options["task_prefix"].strip():
-            raise ValueError("task_prefix must be the model's nonempty instruction prefix")
+        self.options = option_settings(condition, required=("prompt", "sentence_prefix", "category_prefix",
+                                                            "max_input_tokens"))
+        for key in ("sentence_prefix", "category_prefix"):
+            if not isinstance(self.options[key], str) or not self.options[key].strip():
+                raise ValueError(f"{key} must be one of the model's nonempty instruction prefixes")
         self.prompt_spec = load_prompt(self.options["prompt"])
         self._texts = category_texts(self.prompt_spec)
         self._backend = self._categories = None
 
     @property
     def input_spec(self) -> dict:
-        prefix = self.options["task_prefix"]
         return {"name": "embedding-similarity", "prompt_spec": self.prompt_spec, "labels": list(LABELS),
-                "category_texts": self._texts, "sentence_prefix": prefix, "category_prefix": prefix,
+                "category_texts": self._texts, "sentence_prefix": self.options["sentence_prefix"],
+                "category_prefix": self.options["category_prefix"],
                 "similarity": "cosine of float32 embeddings", "max_input_tokens": self.options["max_input_tokens"],
                 "truncation": False, "batch_size": 1}
 
@@ -57,8 +71,8 @@ class EmbeddingSimilarityStrategy:
         backend = SentenceEmbedder(snapshot, precision=self.model["precision"], device=self.model["device"],
                                    max_input_tokens=self.options["max_input_tokens"], text_only=self.model["text_only"])
         metadata = backend.load()
-        # The category embeddings are computed once, at load, with the same prefix as every sentence.
-        outputs = [backend.embed(backend.encode(text, self.options["task_prefix"])) for text in self._texts]
+        # The category embeddings are computed once, at load, with the category prefix.
+        outputs = [backend.embed(backend.encode(text, self.options["category_prefix"])) for text in self._texts]
         self._categories = torch.nn.functional.normalize(torch.stack([out["embedding"] for out in outputs]), dim=1)
         self._backend = backend
         return {**snapshot_identity(self.model["id"], self.model["revision"], snapshot), **metadata,
@@ -71,7 +85,8 @@ class EmbeddingSimilarityStrategy:
                 "selection": "argmax cosine similarity; first category wins exact ties"}
 
     def prepare(self, row) -> dict:
-        return {"text_sha256": text_sha256(row.text), "encoded": self._backend.encode(row.text, self.options["task_prefix"])}
+        return {"text_sha256": text_sha256(row.text),
+                "encoded": self._backend.encode(row.text, self.options["sentence_prefix"])}
 
     def describe(self, prepared) -> dict:
         return {"input_tokens": len(prepared["encoded"]["input_ids"])}
