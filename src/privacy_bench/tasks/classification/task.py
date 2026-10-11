@@ -31,7 +31,7 @@ class ClassificationTask:
         }
         return Selection(items=rows, identity=identity, references=accepted)
 
-    def build_strategy(self, condition: Condition, selection: Selection):
+    def build_strategy(self, condition: Condition):
         try:
             factory = STRATEGIES[condition.strategy]
         except KeyError:

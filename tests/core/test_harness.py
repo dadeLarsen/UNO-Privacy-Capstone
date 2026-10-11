@@ -7,7 +7,7 @@ import pytest
 
 from privacy_bench.core.conditions import parse_condition
 from privacy_bench.core.files import digest_json, read_json, read_jsonl
-from privacy_bench.core.harness import execute
+from privacy_bench.core.harness import evaluate_run, execute
 from privacy_bench.core.protocols import Selection
 from privacy_bench.core.runs import SCHEMA_VERSION, load_run
 
@@ -80,7 +80,7 @@ class FakeTask:
     def select_items(self, condition):
         return Selection(items=self.items, identity={"sample": "fake", "n": len(self.items)})
 
-    def build_strategy(self, condition, selection):
+    def build_strategy(self, condition):
         self.strategy = FakeStrategy(condition.options["limit"], **self.strategy_options)
         return self.strategy
 
@@ -197,3 +197,19 @@ def test_condition_for_another_task_is_refused(tmp_path):
     with pytest.raises(ValueError, match="for task 'classification'"):
         execute(FakeTask(), other, tmp_path / "run")
     assert not (tmp_path / "run").exists()
+
+
+def test_evaluate_run_rescores_saved_responses_and_checks_the_recorded_identity(tmp_path):
+    task, output = FakeTask(), tmp_path / "run"
+    execute(task, CONDITION, output)
+    (output / "evaluation" / "scores.json").write_text("stale", encoding="utf-8")
+    task.evaluated = None
+    assert evaluate_run(task, output) == {"n": 3}
+    assert task.evaluated == ["id-0", "id-1", "id-2"]
+    assert read_json(output / "evaluation" / "scores.json") == {"n": 3}
+    task.items = task.items[:2]
+    with pytest.raises(ValueError, match="no longer matches"):
+        evaluate_run(task, output)
+    (output / "condition.toml").write_text(CONDITION.source_text.replace("limit = 10", "limit = 11"), encoding="utf-8")
+    with pytest.raises(ValueError, match="condition.toml differs"):
+        evaluate_run(FakeTask(), output)

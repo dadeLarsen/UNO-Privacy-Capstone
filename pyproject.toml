@@ -18,6 +18,9 @@ dependencies = [
     "transformers==5.16.1",
 ]
 
+[project.scripts]
+pbench = "privacy_bench.cli:main"
+
 [dependency-groups]
 dev = ["pytest==9.1.1"]
 

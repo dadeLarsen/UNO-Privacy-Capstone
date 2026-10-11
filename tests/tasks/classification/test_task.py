@@ -61,4 +61,4 @@ def test_unknown_strategy_is_rejected_before_any_model_loads():
     task = ClassificationTask()
     condition = parse_condition("pilot", PILOT.replace('"prompted"', '"telepathy"'))
     with pytest.raises(ValueError, match="Unknown classification strategy 'telepathy'"):
-        task.build_strategy(condition, task.select_items(condition))
+        task.build_strategy(condition)

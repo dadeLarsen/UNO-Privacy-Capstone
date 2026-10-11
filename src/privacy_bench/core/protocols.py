@@ -35,6 +35,9 @@ class Strategy(Protocol):
     def timing_scope(self) -> str:
         """What a response's ``seconds`` measures."""
 
+    def download(self) -> dict:
+        """Cache the pinned model files while online; inference never downloads."""
+
     def load(self) -> dict:
         """Load the model and return its provenance metadata."""
 
@@ -54,7 +57,7 @@ class Task(Protocol):
     def select_items(self, condition: Condition) -> Selection:
         """Load and validate the items and references named by the condition."""
 
-    def build_strategy(self, condition: Condition, selection: Selection) -> Strategy:
+    def build_strategy(self, condition: Condition) -> Strategy:
         """Validate the strategy settings without loading any model."""
 
     def evaluate(self, selection: Selection, responses: list, output: Path) -> dict:
