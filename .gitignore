@@ -8,3 +8,5 @@ dist/
 
 # Summaries and plots are regenerated from tracked run records by `pbench compare`.
 results/comparisons/
+# Scores are regenerated from tracked responses by `pbench evaluate`.
+results/runs/**/evaluation/
