@@ -15,6 +15,7 @@ dependencies = [
     "sentence-transformers==6.1.0",
     "tokenizers==0.23.2",
     "torch==2.8.0",
+    "torchvision==0.23.0",
     "transformers==5.19.0",
 ]
 
@@ -84,6 +85,7 @@ constraint-dependencies = [
 
 [tool.uv.sources]
 torch = { index = "pytorch-cu128" }
+torchvision = { index = "pytorch-cu128" }
 
 [[tool.uv.index]]
 name = "pytorch-cu128"
