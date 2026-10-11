@@ -1,0 +1,25 @@
+[
+  {
+    "prompt_sha256": "aebb52a3885c2e9c1f0ae07734f4d75c09251c424cf3924ec58930569e947fa5",
+    "raw_output": "{\"label_id\": 4}",
+    "raw_output_with_special_tokens": "{\"label_id\": 4}<|im_end|>",
+    "input_tokens": 344,
+    "output_tokens": 8,
+    "output_token_ids": [
+      4913,
+      1502,
+      842,
+      788,
+      220,
+      19,
+      92,
+      151645
+    ],
+    "input_token_sha256": "6f0248506f2fe601b376c41d507854731e15f5b737fd79423d2939303b4cd8f3",
+    "rendered_prompt_sha256": "1fb0065f8eae11b952a10f82863d6279c80fab700fef0b8eb3b1851b0cd6b7cb",
+    "seconds": 1.8892806000076234,
+    "peak_allocated_bytes": 16794802176,
+    "peak_reserved_bytes": 16982736896,
+    "reached_output_token_limit": false
+  }
+]
