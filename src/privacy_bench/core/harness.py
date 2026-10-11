@@ -4,11 +4,11 @@ from collections import Counter
 import json
 from pathlib import Path
 
-from .conditions import Condition, parse_condition
+from .conditions import Condition
 from .files import digest_json, write_json
 from .protocols import Task
 from .provenance import environment, utc_now
-from .runs import SCHEMA_VERSION, cost_summary, load_run
+from .runs import SCHEMA_VERSION, cost_summary, load_run, run_condition
 
 
 def _preflight(strategy, items, output: Path):
@@ -116,10 +116,7 @@ def execute(task: Task, condition: Condition, output: Path) -> dict:
 def evaluate_run(task: Task, path: Path) -> dict:
     """Score a saved run again with the current scorer, rewriting its evaluation/ folder."""
     run = load_run(path, require_complete=False)
-    condition = parse_condition(run.record["condition"]["name"],
-                                (run.path / "condition.toml").read_text(encoding="utf-8"))
-    if condition.sha256 != run.record["condition_sha256"]:
-        raise ValueError(f"condition.toml differs from the condition recorded in run.json: {path}")
+    condition = run_condition(run)
     if condition.task != task.name:
         raise ValueError(f"Run {path} belongs to task {condition.task!r}, not {task.name!r}")
     selection = task.select_items(condition)

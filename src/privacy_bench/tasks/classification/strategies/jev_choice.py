@@ -7,7 +7,7 @@ from ....core.conditions import Condition
 from ....models.jev.bundle import download_bundle, resolve_bundle
 from ....models.jev.judge import CHOICE_LETTERS, JEVJudge, choice_prompt
 from ....models.hub import snapshot_identity
-from ..prompts import load_prompt, validate_prompt_spec
+from ..prompts import display_name, load_prompt, validate_prompt_spec
 from ..taxonomy import LABELS
 from .settings import first_argmax, model_settings, option_settings, text_sha256
 
@@ -38,6 +38,12 @@ def make_input_spec(prompt_spec: dict, max_input_tokens: int) -> dict:
 class JEVChoiceStrategy:
     name = "jev-choice"
     timing_scope = "model_forward_and_decision_head"
+    timing_description = "JEV forward pass + decision head"
+    generates_text = False
+
+    @staticmethod
+    def condition_label(spec: dict) -> str:
+        return "JEV choice\n" + display_name(spec["prompt_spec"]["name"]).lower()
 
     def __init__(self, condition: Condition):
         self.model = model_settings(condition, optional={"device": "cuda", "min_free_vram_gib": 2.0})

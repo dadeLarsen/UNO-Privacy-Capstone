@@ -6,6 +6,14 @@ from ...core.files import read_json
 from ...core.paths import data_file
 from .taxonomy import LABELS
 
+DISPLAY_NAMES = {"definitions": "Definitions", "labels-only": "Labels only",
+                 "definitions-guidance": "Definitions + guidance"}
+
+
+def display_name(name: str) -> str:
+    """How a prompt is named on charts."""
+    return DISPLAY_NAMES.get(name, name)
+
 
 def validate_prompt_spec(spec) -> dict:
     if not isinstance(spec, dict) or set(spec) != {"name", "definitions", "guidance"}:

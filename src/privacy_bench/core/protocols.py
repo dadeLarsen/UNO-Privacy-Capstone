@@ -6,13 +6,24 @@ a task with one model backend. The harness runs any strategy over any task's ite
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Protocol, Sequence
+from typing import Any, NamedTuple, Protocol, Sequence
 
 from .conditions import Condition
 
 
 class Item(Protocol):
     id: str
+
+
+class Panel(NamedTuple):
+    """One bar chart in a comparison figure."""
+
+    field: str
+    title: str
+    axis: str
+    scale: float
+    style: str  # percent, score, seconds, memory, or tokens
+    better: str  # higher, lower, or neutral
 
 
 @dataclass(frozen=True)
@@ -26,6 +37,12 @@ class Selection:
 
 class Strategy(Protocol):
     name: str
+    timing_description: str  # what "seconds" covers, in words for chart notes
+    generates_text: bool  # whether the answer is text the model wrote, rather than a chosen score
+
+    @staticmethod
+    def condition_label(spec: dict) -> str:
+        """The chart group for runs with this input specification."""
 
     @property
     def input_spec(self) -> dict:
@@ -65,3 +82,15 @@ class Task(Protocol):
 
     def summary_line(self, metrics: dict) -> str:
         """One line of headline scores for the terminal."""
+
+    def score_for_comparison(self, run, scoring: dict) -> dict:
+        """Rescore a saved run; returns {"metrics": flat values, "cohort": what all compared runs must share}."""
+
+    def quality_panels(self, scoring: dict) -> list:
+        """The task's quality charts, as Panel values over the metric names it scores."""
+
+    def condition_label(self, run) -> str:
+        """The x-axis group for a run, for example its prompt or strategy."""
+
+    def describe_comparison(self, rows: list, scoring: dict) -> dict:
+        """{"context": one line under the title, "footnotes": notes on timing, validity, and scoring}."""
