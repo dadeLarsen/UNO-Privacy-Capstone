@@ -1,0 +1,5 @@
+* text=auto eol=lf
+
+# Frozen inputs and run records are pinned by SHA-256; never convert their line endings.
+data/** -text
+results/** -text

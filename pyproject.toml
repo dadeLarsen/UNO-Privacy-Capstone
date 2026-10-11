@@ -1,0 +1,6 @@
+[project]
+name = "privacy-bench"
+version = "0.1.0"
+description = "Model benchmarks for an offline privacy-policy reader."
+requires-python = ">=3.12,<3.13"
+dependencies = []
