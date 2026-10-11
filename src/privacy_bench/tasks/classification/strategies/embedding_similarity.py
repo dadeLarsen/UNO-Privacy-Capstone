@@ -29,7 +29,7 @@ class EmbeddingSimilarityStrategy:
 
     @staticmethod
     def condition_label(spec: dict) -> str:
-        return "Embedding similarity\n" + display_name(spec["prompt_spec"]["name"]).lower()
+        return "Embedding\nsimilarity\n" + display_name(spec["prompt_spec"]["name"]).lower()
 
     def __init__(self, condition: Condition):
         self.model = model_settings(condition, optional={"device": "cuda", "text_only": False})

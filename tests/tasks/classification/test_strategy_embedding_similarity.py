@@ -40,7 +40,7 @@ def test_input_spec_names_the_category_texts_and_the_shared_prefix(make_conditio
     assert len(spec["category_texts"]) == 10 and spec["labels"] == list(LABELS)
     assert spec["sentence_prefix"] == spec["category_prefix"] == "task: classification | query: "
     assert spec["truncation"] is False and spec["max_input_tokens"] == 8192
-    assert EmbeddingSimilarityStrategy.condition_label(spec) == "Embedding similarity\ndefinitions"
+    assert EmbeddingSimilarityStrategy.condition_label(spec) == "Embedding\nsimilarity\ndefinitions"
 
 
 class FakeEmbedder:
