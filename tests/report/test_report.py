@@ -42,7 +42,8 @@ class EchoStrategy:
 
     def predict(self, item):
         answer = item.answer if self.condition.model["precision"] != "int8" or item.id != "b" else "wrong"
-        return {"answer": answer, "seconds": 0.5, "input_tokens": 4, "peak_allocated_bytes": 2**30}
+        return {"answer": answer, "seconds": 1.5 if item.id == "c" else 0.5, "input_tokens": 4,
+                "peak_allocated_bytes": 2**30}
 
 
 class ToyTask:
@@ -64,9 +65,12 @@ class ToyTask:
         return ""
 
     def score_for_comparison(self, run, scoring):
-        correct = sum(response["answer"] == response["id"].upper() for response in run.responses)
-        return {"metrics": {"n": len(run.responses), "accuracy": correct / len(run.responses)},
-                "cohort": {"items": run.record["item_ids"], **scoring}}
+        """Score the run's items, or only the items its [scoring] table lists."""
+        items = scoring.get("items", run.record["item_ids"])
+        responses = [response for response in run.responses if response["id"] in items]
+        correct = sum(response["answer"] == response["id"].upper() for response in responses)
+        return {"metrics": {"n": len(responses), "accuracy": correct / len(responses)},
+                "cohort": {"items": items, **scoring}, "item_ids": items}
 
     def quality_panels(self, scoring):
         return [Panel("accuracy", "Accuracy", "Correct (%)", 100, "percent", "higher")]
@@ -99,6 +103,16 @@ def test_summary_rescores_each_run_and_adds_task_agnostic_costs(tmp_path):
     assert rows[0]["load_seconds"] == 1.5 and rows[1]["precision"] == "int8"
     write_summary(rows, tmp_path / "out" / "summary.csv")
     assert (tmp_path / "out" / "summary.csv").read_text(encoding="utf-8").startswith("run,condition,strategy")
+
+
+def test_costs_average_only_the_items_the_task_scored(tmp_path):
+    task = ToyTask(items=("a", "b", "c"))
+    run = make_run(tmp_path, "m1", "bf16", "plain", task=task)
+    whole = summarize(task, comparison([run]), runs_root=tmp_path)[0]
+    subset = parse_comparison("toy-subset", f'task = "toy"\nruns = ["{run}"]\n[scoring]\nitems = ["a", "c"]\n')
+    part = summarize(task, subset, runs_root=tmp_path)[0]
+    assert whole["n"] == 3 and whole["mean_seconds"] == pytest.approx(2.5 / 3)
+    assert part["n"] == 2 and part["mean_seconds"] == 1.0
 
 
 def test_runs_scored_on_different_items_are_refused(tmp_path):

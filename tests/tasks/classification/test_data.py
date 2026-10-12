@@ -9,9 +9,10 @@ import pytest
 from privacy_bench.core.files import digest_json, read_json
 from privacy_bench.core.paths import data_file
 from privacy_bench.tasks.classification.data import (
-    EXAMPLES_TASK, MANIFEST_SCHEMA_VERSION, MARKED_TASK, SAMPLE_TASK, Row, accepted_gold_digest, load_accepted_gold,
-    make_example_manifest, make_full_manifest, make_manifest, make_random_manifest, make_stratified_manifest,
-    normalized_text, read_dataset, sample_strata, select_examples, select_rows,
+    EXAMPLES_TASK, MANIFEST_SCHEMA_VERSION, MARKED_TASK, SAMPLE_TASK, TEST_PURPOSE, TUNING_PURPOSE, Row,
+    accepted_gold_digest, increasing_id_runs, load_accepted_gold, make_example_manifest, make_full_manifest,
+    make_half_manifests, make_manifest, make_random_manifest, make_stratified_manifest, normalized_text, read_dataset,
+    sample_strata, select_examples, select_rows,
 )
 from privacy_bench.tasks.classification.taxonomy import (
     HEADER, LABELS, SOURCE_HEADER, SOURCE_LABELS, taxonomy_metadata,
@@ -257,6 +258,49 @@ def test_marked_samples_reject_bad_selections_unlabeled_sentences_and_missing_st
         select_rows(marked_dataset, resigned(manifest))
 
 
+def test_halves_alternate_whole_runs_of_rising_ids(tmp_path):
+    # Four runs of rising IDs: 10-12, 5-6, 3-4 (one unlabeled), and 1.
+    rows = [("10", "a", (8,)), ("11", "b", (8,)), ("12", "c", (1,)), ("5", "d", (9,)), ("6", "e", (8, 9)),
+            ("3", "f", (0,)), ("4", "g", ()), ("1", "h", (3,))]
+    dataset = read_dataset(write_target_csv(tmp_path / "runs.csv", rows), allow_target=True)
+    assert [[row.id for row in run] for run in increasing_id_runs(dataset.rows)] == \
+        [["10", "11", "12"], ["5", "6"], ["3", "4"], ["1"]]
+    halves = make_half_manifests(dataset)
+    assert halves == make_half_manifests(dataset)
+    tuning, test = halves["tuning"], halves["test"]
+    assert tuning["ids"] == ["10", "11", "12", "3"] and test["ids"] == ["5", "6", "1"]
+    assert (tuning["purpose"], test["purpose"]) == (TUNING_PURPOSE, TEST_PURPOSE)
+    assert (tuning["half"], tuning["id_runs"]) == ("tuning", 4)
+    assert (tuning["id_runs_in_half"], test["id_runs_in_half"]) == (2, 2)
+    for manifest in (tuning, test):
+        selected = select_rows(dataset, manifest)
+        assert manifest["task"] == MARKED_TASK and sample_strata(manifest, selected) is None
+
+
+@pytest.mark.parametrize("change, message", [
+    (lambda manifest: {**manifest, "ids": manifest["ids"][::-1]}, "alternate ID runs in file order"),
+    (lambda manifest: {**manifest, "ids": manifest["ids"][:-1]}, "alternate ID runs in file order"),
+    (lambda manifest: {**manifest, "purpose": TEST_PURPOSE}, "name its half"),
+    (lambda manifest: {**manifest, "half": "both"}, "name its half"),
+])
+def test_half_samples_must_match_their_split(tmp_path, change, message):
+    rows = [("1", "a", (8,)), ("2", "b", (1,)), ("1000", "c", (9,)), ("3", "d", (0,)), ("4", "e", (8,))]
+    dataset = read_dataset(write_target_csv(tmp_path / "runs.csv", rows), allow_target=True)
+    with pytest.raises(ValueError, match=message):
+        select_rows(dataset, resigned(change(make_half_manifests(dataset)["tuning"])))
+
+
+def test_halves_need_integer_ids_and_two_runs(tmp_path):
+    named = read_dataset(write_target_csv(tmp_path / "named.csv", [("1", "a", (8,)), ("x", "b", (8,))]),
+                         allow_target=True)
+    with pytest.raises(ValueError, match="decimal integer IDs"):
+        make_half_manifests(named)
+    rising = read_dataset(write_target_csv(tmp_path / "rising.csv", [("1", "a", (8,)), ("2", "b", (8,))]),
+                          allow_target=True)
+    with pytest.raises(ValueError, match="at least two ID runs"):
+        make_half_manifests(rising)
+
+
 def test_example_lists_leave_out_held_out_sentences_and_their_repeats(write_dataset, tmp_path):
     rows = [Row("held", "Held-out sentence", (0,)), Row("repeat", "  shared   TEXT ", (1,)),
             Row("keep-a", "Kept sentence", (2,)), Row("keep-b", "Another kept sentence", (2,)),
@@ -299,7 +343,7 @@ class TestRealExamples:
 
 
 class TestRealAPPSI:
-    """APPSI-139, its accepted labels, and its three samples must agree and redraw exactly."""
+    """APPSI-139, its accepted labels, its three samples, and its two halves must agree and redraw exactly."""
 
     def test_accepted_labels_keep_every_original_label_and_add_astra_labels(self):
         dataset = read_dataset(data_file("datasets", "appsi139-sentences", suffix=".csv"), allow_target=True)
@@ -326,6 +370,16 @@ class TestRealAPPSI:
         assert sizes == {"appsi139-all": 13291, "appsi139-random-1000": 1000, "appsi139-balanced-50": 460}
         counts = built["appsi139-balanced-50"]["stratum_counts"]
         assert counts == {label: 10 if label == "Do Not Track" else 50 for label in LABELS}
+
+    def test_halves_redraw_exactly_and_split_every_sentence_once(self):
+        dataset = read_dataset(data_file("datasets", "appsi139-sentences", suffix=".csv"), allow_target=True)
+        ids = {}
+        for half, manifest in make_half_manifests(dataset).items():
+            saved = read_json(data_file("classification", "samples", f"appsi139-{half}-half", suffix=".json"))
+            assert json.loads(json.dumps(manifest)) == saved, half
+            ids[half] = [row.id for row in select_rows(dataset, saved)]
+        assert (len(ids["tuning"]), len(ids["test"])) == (7233, 6058)
+        assert sorted(ids["tuning"] + ids["test"]) == sorted(row.id for row in dataset.rows)
 
 
 class TestRealPilot:

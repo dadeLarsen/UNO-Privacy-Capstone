@@ -134,7 +134,7 @@ uv run pbench evaluate results/runs/classification/<condition>/<UTC start>
 ```
 
 - `run` checks every input before the first model call and never truncates one. It refuses an existing output folder, keeps every completed response if the run fails or is interrupted, and records the git commit and any uncommitted diff, the full package list, the resolved model commit, and the exact input specification.
-- `compare` rescores each listed run with the current code, refuses runs scored on different items or reference answers, and writes `summary.csv`, `matrix-overview.png`, and `matrix-overview.svg` under `results/comparisons/<name>/`.
+- `compare` rescores each listed run with the current code, optionally on a smaller sample that every run covers, refuses runs scored on different items or reference answers, and writes `summary.csv`, `matrix-overview.png`, and `matrix-overview.svg` under `results/comparisons/<name>/`.
 - `evaluate` rewrites a run's `evaluation/` folder from its saved responses.
 
 Some strategies apply weights fitted to labeled examples, such as a small classification head on frozen embeddings. Fit them once, before the runs that use them:

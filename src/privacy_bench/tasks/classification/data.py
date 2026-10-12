@@ -14,7 +14,11 @@ MANIFEST_SCHEMA_VERSION = 2
 SAMPLE_TASK = "single_label_10_categories"
 # Sentences in these samples may carry several labels; a prediction matching any of them is correct.
 MARKED_TASK = "marked_labels_10_categories"
-MARKED_SELECTIONS = ("all", "random", "balanced_per_marked_category")
+MARKED_SELECTIONS = ("all", "random", "balanced_per_marked_category", "alternate_increasing_id_runs")
+TEST_PURPOSE = "test_on_a_different_corpus"
+# A fit may tune on a sample with this purpose; it is never one a result is reported on.
+TUNING_PURPOSE = "tune_on_a_different_corpus"
+HALF_PURPOSES = {"tuning": TUNING_PURPOSE, "test": TEST_PURPOSE}
 # Example lists hold sentences a fit learns from; they are never scored.
 EXAMPLES_TASK = "single_label_examples_10_categories"
 
@@ -146,14 +150,14 @@ def make_manifest(dataset, per_class=20, seed=42) -> dict:
     return manifest
 
 
-def _marked_manifest(dataset, selection: str, ids: list, **fields) -> dict:
+def _marked_manifest(dataset, selection: str, ids: list, *, purpose=TEST_PURPOSE, **fields) -> dict:
     manifest = {
         "schema_version": MANIFEST_SCHEMA_VERSION,
         **taxonomy_metadata(),
         "dataset_sha256": dataset.sha256,
         "labels": list(LABELS),
         "task": MARKED_TASK,
-        "purpose": "test_on_a_different_corpus",
+        "purpose": purpose,
         "selection": selection,
         **fields,
         "ids": ids,
@@ -215,6 +219,41 @@ def make_stratified_manifest(dataset, labels: dict, *, labels_name: str, per_cla
         strata={row_id: strata[row_id] for row_id in ids})
 
 
+def increasing_id_runs(rows) -> list:
+    """Split rows, in file order, into maximal runs whose integer IDs rise from row to row."""
+    if any(not row.id.isdecimal() for row in rows):
+        raise ValueError("Splitting by ID runs needs decimal integer IDs")
+    runs = []
+    for row in rows:
+        if runs and int(row.id) > int(runs[-1][-1].id):
+            runs[-1].append(row)
+        else:
+            runs.append([row])
+    return runs
+
+
+def make_half_manifests(dataset) -> dict:
+    """Split the labeled sentences into a tuning half and a test half, keeping each run of rising IDs whole.
+
+    A corpus without policy IDs, such as APPSI-139, lists each policy's sentences in rising ID order, so a
+    run of rising IDs holds whole policies and neither half sees a policy the other has. Runs alternate
+    between the halves in file order, starting with the tuning half.
+    """
+    runs = increasing_id_runs(dataset.rows)
+    halves = {"tuning": [], "test": []}
+    run_counts = Counter()
+    for index, run in enumerate(runs):
+        half = "tuning" if index % 2 == 0 else "test"
+        halves[half].extend(row for row in run if row.labels)
+        run_counts[half] += 1
+    if not halves["tuning"] or not halves["test"]:
+        raise ValueError("Splitting into halves needs labeled sentences in at least two ID runs")
+    return {half: _marked_manifest(dataset, "alternate_increasing_id_runs", [row.id for row in rows],
+                                   purpose=HALF_PURPOSES[half], half=half, id_runs=len(runs),
+                                   id_runs_in_half=run_counts[half])
+            for half, rows in halves.items()}
+
+
 def _check_marked_sample(dataset, manifest, rows):
     selection = manifest.get("selection")
     if selection not in MARKED_SELECTIONS:
@@ -228,6 +267,13 @@ def _check_marked_sample(dataset, manifest, rows):
         if (not isinstance(strata, dict) or set(strata) != set(manifest["ids"])
                 or any(type(value) is not int or not 0 <= value < len(LABELS) for value in strata.values())):
             raise ValueError("A balanced sample must give one valid category stratum for every sentence")
+    if selection == "alternate_increasing_id_runs":
+        half = manifest.get("half")
+        if half not in HALF_PURPOSES or manifest.get("purpose") != HALF_PURPOSES[half]:
+            raise ValueError(f"A half sample must name its half, {' or '.join(map(repr, HALF_PURPOSES))}, "
+                             "and that half's purpose")
+        if manifest["ids"] != make_half_manifests(dataset)[half]["ids"]:
+            raise ValueError(f"A {half} half must list the sentences of its alternate ID runs in file order")
 
 
 def sample_strata(manifest, rows) -> dict | None:

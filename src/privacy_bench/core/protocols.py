@@ -84,7 +84,11 @@ class Task(Protocol):
         """One line of headline scores for the terminal."""
 
     def score_for_comparison(self, run, scoring: dict) -> dict:
-        """Rescore a saved run; returns {"metrics": flat values, "cohort": what all compared runs must share}."""
+        """Rescore a saved run.
+
+        Returns {"metrics": flat values, "cohort": what all compared runs must share, "item_ids": the
+        scored items, whose responses alone the comparison's costs average}.
+        """
 
     def quality_panels(self, scoring: dict) -> list:
         """The task's quality charts, as Panel values over the metric names it scores."""

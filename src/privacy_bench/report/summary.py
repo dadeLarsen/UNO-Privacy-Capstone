@@ -29,7 +29,8 @@ def summarize(task: Task, comparison: Comparison, runs_root=RUNS_DIR) -> list:
             raise ValueError(f"Run {path} belongs to task {run.record['task']!r}, not {task.name!r}")
         scored = task.score_for_comparison(run, comparison.scoring)
         model = run.record["condition"]["model"]
-        costs = cost_summary(run.responses)
+        scored_ids = set(scored["item_ids"])
+        costs = cost_summary([response for response in run.responses if response["id"] in scored_ids])
         rows.append({
             "run": path, "condition": run.record["condition"]["name"], "strategy": run.record["strategy"],
             "condition_label": task.condition_label(run), "legend_label": comparison.labels.get(path, ""),

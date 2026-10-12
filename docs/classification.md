@@ -37,6 +37,7 @@ APPSI-139 annotates sentences from app privacy policies, a different corpus from
 - `data/classification/samples/appsi139-all.json`: every sentence.
 - `data/classification/samples/appsi139-random-1000.json`: 1,000 sentences drawn with seed 42, in the corpus's own category mix.
 - `data/classification/samples/appsi139-balanced-50.json`: up to 50 sentences per category, drawn with seed 42 among sentences whose accepted labels include that category. The scarcest category draws first and each sentence is drawn for one category, its stratum. Only 10 sentences carry Do Not Track, so the sample has 460 sentences.
+- `data/classification/samples/appsi139-tuning-half.json` and `appsi139-test-half.json`: APPSI-139 in two halves, for fits that tune on it. Its rows fall into 71 runs of rising source IDs. At every run boundary checked, a new policy starts, so each run appears to hold whole policies. The runs alternate between the halves in file order, starting with the tuning half: 7,233 tuning sentences in 36 runs and 6,058 test sentences in 35. A fit may tune only on a sample whose purpose is tuning, and its results are reported on the test half. `tools/split_appsi139.py` froze both, and a test redraws them exactly.
 
 APPSI-139 has no policy IDs either, and 47 of its sentences repeat an OPP-115 sentence word for word.
 
@@ -61,6 +62,8 @@ Strategies that do not generate text (a classifier head, a JEV decision head, em
 
 `pbench evaluate` and `pbench compare` always rescore from `responses.jsonl` with the current code, so a comparison never mixes scoring versions.
 
+A comparison's `[scoring]` table takes `gold` and, optionally, `sample`. With a `sample`, every run is scored on that sample's sentences alone, and its costs average over those sentences too; each run must have a response for all of them. That puts runs made on all of APPSI-139 beside runs made on its test half.
+
 ## Strategies
 
 | Strategy | Backend | What the model receives | Timing covers |
@@ -69,7 +72,7 @@ Strategies that do not generate text (a classifier head, a JEV decision head, em
 | `classifier-head` | sequence classifier | the raw sentence | the classifier forward pass |
 | `jev-choice` | JEV judge | JEV's bare choice template with the ten categories and definitions as options A–J | the backbone forward pass and the decision head |
 | `embedding-similarity` | sentence embedder | the sentence after the condition's `sentence_prefix`; each category's name and definition are embedded once, after its `category_prefix` | the embedding forward pass |
-| `embedding-head` | sentence embedder | the sentence after the `prefix` its fit used; a fitted head from `results/fits/` scores the categories (see [Fitted heads](#fitted-heads)) | the embedding forward pass; the head's 10-row product is not timed |
+| `embedding-head` | sentence embedder | the sentence after the `prefix` its fit used; a fitted head from `results/fits/`, possibly prior-shifted, scores the categories (see [Fitted heads](#fitted-heads)) | the embedding forward pass; the head's 10-row product is not timed |
 
 No strategy truncates an input: every input is checked against the condition's limit before the first model call, and one input over the limit stops the run.
 
@@ -83,3 +86,12 @@ The `embedding-heads` fit embeds every example once with a sentence embedder, af
 - `logistic`: a multinomial logistic regression with `class_weight` `balanced` (every category weighs the same) or `none` (categories weigh as often as they occur among the examples). Stratified cross-validation on the examples, scored by balanced accuracy, chooses the inverse regularization strength C from `c_values`.
 
 `fit.json` reports each head's cross-validated balanced accuracy, and for logistic heads the score at every C. These scores come from OPP-115 examples only, so they say nothing about the test samples.
+
+### Prior shift
+
+A logistic head expects categories in the mix it was trained on: an even mix with balanced weights, otherwise the examples' own mix. A `prior-shift` fit moves logistic heads of an `embedding-heads` fit, its base, toward the mix of a tuning sample. A logistic head's scores are log-odds, so a new category mix adds `log target share - log training share` to each category's bias. A head's `strength` scales that shift: 0 leaves the base head as it was, and 1 assumes the tuning mix in full.
+
+- The target shares come from the tuning sample's accepted labels. Each sentence counts once, split evenly among its labels, and every category needs at least one sentence.
+- A shifted head keeps its base head's weights. A fixed `strength` is used as given. A `tuned` one is the value in the fit file's `strengths` with the highest accepted-label accuracy on the tuning sentences; the smallest value wins a tie.
+- The fit embeds the tuning sentences once, with the base fit's model and prefix, and `fit.json` reports accuracy and macro accuracy at every strength.
+- A condition names a `prior-shift` fit like any other. The strategy then loads the base fit for the model and prefix, and refuses it unless its hashes match the ones the prior-shift fit recorded.
