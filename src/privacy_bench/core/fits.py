@@ -147,6 +147,8 @@ class Fit:
 def load_fit(path) -> Fit:
     """Load a complete fit record, checking its fit file and weights against the hashes it recorded."""
     path = Path(path)
+    if not (path / "fit.json").is_file():
+        raise ValueError(f"No fit record at {path}")
     record = read_json(path / "fit.json")
     if not isinstance(record, dict) or record.get("schema_version") != FIT_SCHEMA_VERSION:
         raise ValueError(f"Not a schema {FIT_SCHEMA_VERSION} fit record: {path}")
