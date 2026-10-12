@@ -67,7 +67,7 @@ def test_input_spec_takes_the_prefix_and_head_from_the_fit(make_condition, fits_
     weight = np.zeros((len(LABELS), 4), dtype=np.float32)
     weight[3, 0] = weight[5, 1] = 1.0
     assert spec["head"]["weight_sha256"] == digest_bytes(weight.tobytes())
-    assert EmbeddingHeadStrategy.condition_label(spec) == "Embedding head\nlinear"
+    assert EmbeddingHeadStrategy.condition_label(spec) == "Embedding\nhead\nlinear"
 
 
 @pytest.mark.parametrize("model, settings, message", [

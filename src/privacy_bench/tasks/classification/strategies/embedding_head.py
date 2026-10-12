@@ -35,7 +35,7 @@ class EmbeddingHeadStrategy:
 
     @staticmethod
     def condition_label(spec: dict) -> str:
-        return "Embedding head\n" + spec["head"]["name"]
+        return "Embedding\nhead\n" + spec["head"]["name"]
 
     def __init__(self, condition: Condition):
         self.model = model_settings(condition, optional={"device": "cuda", "text_only": False})
