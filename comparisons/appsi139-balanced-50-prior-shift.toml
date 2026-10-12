@@ -1,0 +1,17 @@
+task = "classification"
+title = "APPSI-139: up to 50 sentences per category, with heads shifted toward APPSI-139's mix"
+# Accepted labels are the original mapped labels plus every label ChatGPT Astra marked.
+# The shifted heads tuned on APPSI-139's tuning half, which holds 272 of these 460 sentences.
+runs = [
+    "classification/qwen3-14b-int8-definitions-appsi139-balanced-50/20261012-022855Z",
+    "classification/jev-9b-int8-definitions-appsi139-balanced-50/20261012-014345Z",
+    "classification/privacy-model-fp32-appsi139-balanced-50/20261012-014228Z",
+    "classification/embeddinggemma2-bf16-head-linear-balanced-appsi139-balanced-50/20261012-014101Z",
+    "classification/embeddinggemma2-bf16-head-linear-frequencies-appsi139-balanced-50/20261012-014130Z",
+    "classification/embeddinggemma2-bf16-head-linear-balanced-tuned-appsi139-balanced-50/20261012-050536Z",
+    "classification/embeddinggemma2-bf16-head-linear-balanced-full-appsi139-balanced-50/20261012-051505Z",
+    "classification/embeddinggemma2-bf16-head-linear-frequencies-tuned-appsi139-balanced-50/20261012-051023Z",
+]
+
+[scoring]
+gold = "appsi139-astra"
