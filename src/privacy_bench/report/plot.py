@@ -13,6 +13,10 @@ from matplotlib.ticker import MaxNLocator, PercentFormatter
 COLORS = ("#3568b0", "#168174", "#bc6724", "#8857a5", "#bd4863", "#626c78", "#9a7b1f", "#2f8fb3")
 PRECISION_COLORS = {"fp32": "#bd4863", "bf16": "#8857a5", "fp16": "#bc6724", "int8": "#3568b0", "nf4": "#168174"}
 DIRECTIONS = {"higher": "higher is better", "lower": "lower is better", "neutral": "token cost"}
+# Panel geometry: margins and gaps as figure fractions, the panel height in inches.
+LEFT, RIGHT, WSPACE, PANEL_HEIGHT = 0.06, 0.975, 0.28, 2.45
+# Group labels wrap at this many characters a line; the figure then grows to fit the largest label.
+GROUP_LABEL_CHARACTERS = 14
 
 
 def common_footnotes(rows) -> list:
@@ -53,6 +57,25 @@ def series_labels(series, rows):
     return labels
 
 
+def group_label(label: str) -> str:
+    """Wrap each line of a group label so neighbouring labels stay narrow; words are never split."""
+    lines = []
+    for line in label.split("\n"):
+        lines.extend(textwrap.wrap(line, GROUP_LABEL_CHARACTERS, break_long_words=False,
+                                   break_on_hyphens=False) or [""])
+    return "\n".join(lines)
+
+
+def label_extent(labels) -> tuple:
+    """Width of the widest and height of the tallest label in inches, at the current tick font size."""
+    figure = Figure()
+    FigureCanvasAgg(figure)
+    renderer = figure.canvas.get_renderer()
+    boxes = [figure.text(0, 0, label, fontsize=matplotlib.rcParams["xtick.labelsize"],
+                         multialignment="center").get_window_extent(renderer) for label in labels]
+    return max(box.width for box in boxes) / figure.dpi, max(box.height for box in boxes) / figure.dpi
+
+
 def series_colors(series):
     colors = {}
     for key in series:
@@ -89,7 +112,7 @@ def draw_panel(ax, panel, rows, groups, series, colors):
     ax.tick_params(axis="both", length=0, pad=7)
     ax.set_title(f"{panel.title} · {DIRECTIONS[panel.better]}", loc="left", pad=14, weight="bold", fontsize=12)
     ax.set_ylabel(panel.axis, fontsize=10)
-    ax.set_xticks(range(len(panel_groups)), panel_groups)
+    ax.set_xticks(range(len(panel_groups)), [group_label(group) for group in panel_groups])
     ax.set_xlim(-0.55, max(1, len(panel_groups)) - 0.45)
     if panel.style == "percent":
         ax.set_yticks([0, 25, 50, 75, 100])
@@ -134,26 +157,34 @@ def draw_matrix(rows, panels, output_dir, *, title, context, footnotes, legend_g
     })
     columns = 3
     panel_rows = math.ceil(len(panels) / columns)
-    # Each panel draws one bar per run plus a gap per group; three panels share the width.
-    width = max(16, 2.0 * len(rows) + 1.0 * len(groups))
+    label_width, label_height = label_extent([group_label(group) for group in groups])
+    # Each panel draws one bar per run plus a gap per group, and each group needs room for its label;
+    # three panels share the width.
+    panel_share = (RIGHT - LEFT) / (columns + (columns - 1) * WSPACE)
+    width = max(16, 2.0 * len(rows) + 1.0 * len(groups), (label_width + 0.15) * (len(groups) + 0.1) / panel_share)
+    # Lay out the height in inches: the header, the panel rows, and the footnotes. Group labels sit
+    # between rows and above the footnotes, so taller labels make a taller figure.
     legend_rows = math.ceil(len(series) / 2)
-    height = 4.7 * panel_rows + 0.3 * (legend_rows - 1) + 0.25 * len(footnotes)
+    header = 2.4 + 0.3 * (legend_rows - 1)
+    row_gap = label_height + 0.78
+    footer = label_height + 0.52 + 0.216 * len(footnotes)
+    height = header + PANEL_HEIGHT * panel_rows + row_gap * (panel_rows - 1) + footer
     fig = Figure(figsize=(width, height))
     FigureCanvasAgg(fig)
     axes = fig.subplots(panel_rows, columns, squeeze=False)
-    bottom = (0.11 + 0.023 * len(footnotes)) * 9.4 / height
-    fig.subplots_adjust(left=0.06, right=0.975, top=0.78, bottom=bottom, wspace=0.28, hspace=0.53)
-    fig.text(0.06, 0.956, title, fontsize=22, weight="bold")
-    fig.text(0.06, 0.917, textwrap.fill(context, width=int(width * 11)), fontsize=11)
+    fig.subplots_adjust(left=LEFT, right=RIGHT, top=1 - header / height, bottom=footer / height, wspace=WSPACE,
+                        hspace=row_gap / PANEL_HEIGHT)
+    fig.text(LEFT, 1 - 0.48 / height, title, fontsize=22, weight="bold")
+    fig.text(LEFT, 1 - 0.9 / height, textwrap.fill(context, width=int(width * 11)), fontsize=11)
     handles = [Patch(facecolor=colors[key], label=label) for key, label in zip(series, labels, strict=True)]
-    legend = fig.legend(handles=handles, loc="upper left", bbox_to_anchor=(0.052, 0.88), frameon=False,
+    legend = fig.legend(handles=handles, loc="upper left", bbox_to_anchor=(0.052, 1 - 1.31 / height), frameon=False,
                         ncol=min(2, len(series)), fontsize=11)
     for ax, panel in zip(axes.flat, panels):
         draw_panel(ax, panel, rows, groups, series, colors)
     for ax in list(axes.flat)[len(panels):]:
         ax.set_visible(False)
     for i, note in enumerate(footnotes):
-        fig.text(0.06, (0.028 + (len(footnotes) - 1 - i) * 0.023) * 9.4 / height, note, fontsize=9, color="#526379")
+        fig.text(LEFT, (0.263 + (len(footnotes) - 1 - i) * 0.216) / height, note, fontsize=9, color="#526379")
     # Measure the rendered legend and panel titles; long legend labels need more room than
     # the row count suggests. A point-based gap stays consistent across resolutions.
     fig.canvas.draw()

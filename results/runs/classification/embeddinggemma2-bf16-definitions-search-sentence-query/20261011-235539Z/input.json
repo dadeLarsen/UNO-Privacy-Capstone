@@ -1,0 +1,49 @@
+{
+  "name": "embedding-similarity",
+  "prompt_spec": {
+    "name": "definitions",
+    "definitions": {
+      "Policy Change": "Whether or how the privacy policy may change, and how users are informed of changes.",
+      "Third Party Sharing/Collection": "Disclosure of user information to third parties, or collection of user information by third parties.",
+      "User Choice/Control": "Choices users have about collection, use, or sharing of their information, including consent and opting out.",
+      "Data Retention": "How long user information is kept, or criteria governing the storage period.",
+      "User Access Edit and Deletion": "Whether and how users can access, correct, update, or delete their stored information.",
+      "International and Specific Audiences": "Practices applying to specific populations, such as children or residents of particular countries or regions.",
+      "Data Security": "Measures to protect user information, or statements about the security of that information.",
+      "Do Not Track": "Whether and how browser Do Not Track signals are honored.",
+      "First Party Collection/Use": "Information the service provider collects or uses, including how and why it does so.",
+      "Other": "Introductions, general policy statements, scope, headings, dates, privacy contact information, and substantive privacy practices outside the nine specific categories."
+    },
+    "guidance": []
+  },
+  "labels": [
+    "Policy Change",
+    "Third Party Sharing/Collection",
+    "User Choice/Control",
+    "Data Retention",
+    "User Access Edit and Deletion",
+    "International and Specific Audiences",
+    "Data Security",
+    "Do Not Track",
+    "First Party Collection/Use",
+    "Other"
+  ],
+  "category_texts": [
+    "Policy Change: Whether or how the privacy policy may change, and how users are informed of changes.",
+    "Third Party Sharing/Collection: Disclosure of user information to third parties, or collection of user information by third parties.",
+    "User Choice/Control: Choices users have about collection, use, or sharing of their information, including consent and opting out.",
+    "Data Retention: How long user information is kept, or criteria governing the storage period.",
+    "User Access Edit and Deletion: Whether and how users can access, correct, update, or delete their stored information.",
+    "International and Specific Audiences: Practices applying to specific populations, such as children or residents of particular countries or regions.",
+    "Data Security: Measures to protect user information, or statements about the security of that information.",
+    "Do Not Track: Whether and how browser Do Not Track signals are honored.",
+    "First Party Collection/Use: Information the service provider collects or uses, including how and why it does so.",
+    "Other: Introductions, general policy statements, scope, headings, dates, privacy contact information, and substantive privacy practices outside the nine specific categories."
+  ],
+  "sentence_prefix": "task: search result | query: ",
+  "category_prefix": "title: none | text: ",
+  "similarity": "cosine of float32 embeddings",
+  "max_input_tokens": 8192,
+  "truncation": false,
+  "batch_size": 1
+}

@@ -56,6 +56,6 @@ Strategies that do not generate text (a classifier head, a JEV decision head, em
 | `prompted` | chat model | the definitions prompt and the sentence as a JSON string, in one user turn | prompt processing and generation |
 | `classifier-head` | sequence classifier | the raw sentence | the classifier forward pass |
 | `jev-choice` | JEV judge | JEV's bare choice template with the ten categories and definitions as options A–J | the backbone forward pass and the decision head |
-| `embedding-similarity` | sentence embedder | the sentence with the model's classification prefix; each category's name and definition are embedded once, with the same prefix | the embedding forward pass |
+| `embedding-similarity` | sentence embedder | the sentence after the condition's `sentence_prefix`; each category's name and definition are embedded once, after its `category_prefix` | the embedding forward pass |
 
 No strategy truncates an input: every input is checked against the condition's limit before the first model call, and one input over the limit stops the run.

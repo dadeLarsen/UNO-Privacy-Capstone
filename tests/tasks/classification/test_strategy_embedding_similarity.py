@@ -14,7 +14,11 @@ from privacy_bench.tasks.classification.taxonomy import LABELS
 
 COMMIT = "a" * 40
 MODEL = {"id": "o/m", "revision": COMMIT, "precision": "bf16", "text_only": True}
-OPTIONS = {"prompt": "definitions", "task_prefix": "task: classification | query: ", "max_input_tokens": 8192}
+CLASSIFY = "task: classification | query: "
+SEARCH_QUERY, SEARCH_DOCUMENT = "task: search result | query: ", "title: none | text: "
+OPTIONS = {"prompt": "definitions", "sentence_prefix": CLASSIFY, "category_prefix": CLASSIFY,
+           "max_input_tokens": 8192}
+SEARCH = {**OPTIONS, "sentence_prefix": SEARCH_QUERY, "category_prefix": SEARCH_DOCUMENT}
 
 
 def test_registered_under_its_condition_name():
@@ -22,8 +26,11 @@ def test_registered_under_its_condition_name():
 
 
 @pytest.mark.parametrize("model, options, message", [
-    (MODEL, {k: v for k, v in OPTIONS.items() if k != "task_prefix"}, "missing: task_prefix"),
-    (MODEL, {**OPTIONS, "task_prefix": " "}, "task_prefix"),
+    (MODEL, {k: v for k, v in OPTIONS.items() if k != "sentence_prefix"}, "missing: sentence_prefix"),
+    (MODEL, {k: v for k, v in OPTIONS.items() if k != "category_prefix"}, "missing: category_prefix"),
+    (MODEL, {**OPTIONS, "sentence_prefix": " "}, "sentence_prefix"),
+    (MODEL, {**OPTIONS, "category_prefix": 3}, "category_prefix"),
+    (MODEL, {**OPTIONS, "task_prefix": CLASSIFY}, "unknown keys: task_prefix"),
     (MODEL, {k: v for k, v in OPTIONS.items() if k != "max_input_tokens"}, "missing: max_input_tokens"),
     ({**MODEL, "revision": "main"}, OPTIONS, "40-character"),
     ({**MODEL, "pooling": "cls"}, OPTIONS, "unknown keys: pooling"),
@@ -33,14 +40,34 @@ def test_invalid_conditions_fail_before_any_model_loads(make_condition, model, o
         EmbeddingSimilarityStrategy(make_condition("embedding-similarity", model, options))
 
 
-def test_input_spec_names_the_category_texts_and_the_shared_prefix(make_condition):
+def test_input_spec_names_the_category_texts_and_a_shared_prefix(make_condition):
     spec = EmbeddingSimilarityStrategy(make_condition("embedding-similarity", MODEL, OPTIONS)).input_spec
     assert spec["category_texts"][0].startswith("Policy Change: Whether or how the privacy policy may change")
     assert spec["category_texts"][9].startswith("Other: Introductions")
     assert len(spec["category_texts"]) == 10 and spec["labels"] == list(LABELS)
-    assert spec["sentence_prefix"] == spec["category_prefix"] == "task: classification | query: "
+    assert spec["sentence_prefix"] == spec["category_prefix"] == CLASSIFY
     assert spec["truncation"] is False and spec["max_input_tokens"] == 8192
-    assert EmbeddingSimilarityStrategy.condition_label(spec) == "Embedding\nsimilarity\ndefinitions"
+    assert EmbeddingSimilarityStrategy.condition_label(spec) == "Embedding\nsimilarity\ndefinitions\nclassification"
+
+
+def test_input_spec_and_label_keep_different_prefixes_apart(make_condition):
+    spec = EmbeddingSimilarityStrategy(make_condition("embedding-similarity", MODEL, SEARCH)).input_spec
+    assert (spec["sentence_prefix"], spec["category_prefix"]) == (SEARCH_QUERY, SEARCH_DOCUMENT)
+    assert EmbeddingSimilarityStrategy.condition_label(spec) == (
+        "Embedding\nsimilarity\ndefinitions\nsentence: search result\ncategories: document")
+    swapped = {**spec, "sentence_prefix": SEARCH_DOCUMENT, "category_prefix": SEARCH_QUERY}
+    assert EmbeddingSimilarityStrategy.condition_label(swapped).endswith(
+        "\nsentence: document\ncategories: search result")
+
+
+@pytest.mark.parametrize("prefix, name", [
+    ("task: sentence similarity | query: ", "sentence similarity"),
+    ("title: none | text: ", "document"),
+    ("title: Data Retention | text: ", "document"),
+    ("query: ", "query:"),
+])
+def test_instruction_names_come_from_the_prefix(prefix, name):
+    assert embedding_similarity.instruction_name(prefix) == name
 
 
 class FakeEmbedder:
@@ -71,7 +98,7 @@ class FakeEmbedder:
     (torch.ones(10), 0),
 ])
 def test_the_most_similar_category_wins_and_ties_go_to_the_first(make_condition, vector, expected):
-    strategy = EmbeddingSimilarityStrategy(make_condition("embedding-similarity", MODEL, OPTIONS))
+    strategy = EmbeddingSimilarityStrategy(make_condition("embedding-similarity", MODEL, SEARCH))
     fake = FakeEmbedder(vector)
     identity = {"model": "o/m", "revision": COMMIT, "resolved_revision": COMMIT, "local_snapshot": "x"}
     with patch.object(embedding_similarity, "resolve_snapshot", return_value="snapshot"), \
@@ -80,10 +107,10 @@ def test_the_most_similar_category_wins_and_ties_go_to_the_first(make_condition,
         metadata = strategy.load()
     assert constructor.call_args.kwargs == {"precision": "bf16", "device": "cuda", "max_input_tokens": 8192,
                                             "text_only": True}
-    assert [call[1] for call in fake.calls] == ["task: classification | query: "] * 10
+    assert [call[1] for call in fake.calls] == [SEARCH_DOCUMENT] * 10
     assert metadata["category_embeddings"]["input_tokens"] == [3] * 10
     response = strategy.predict(strategy.prepare(Row("x", "We keep data.", (3,))))
-    assert fake.calls[-1] == ("We keep data.", "task: classification | query: ")
+    assert fake.calls[-1] == ("We keep data.", SEARCH_QUERY)
     assert json.loads(response["raw_output"]) == {"label_id": expected}
     assert response["model_label"] == LABELS[expected] and len(response["similarities"]) == 10
     assert max(response["similarities"]) == pytest.approx(response["similarities"][expected])
