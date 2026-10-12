@@ -46,12 +46,23 @@ def _ratio(numerator, denominator):
     return numerator / denominator if denominator else 0.0
 
 
-def evaluate(rows, responses, accepted_labels=None):
-    """Join responses to rows by ID and score them; returns metrics, details, and confusion."""
+def evaluate(rows, responses, accepted_labels=None, strata=None):
+    """Join responses to rows by ID and score them; returns metrics, details, and confusion.
+
+    A prediction is correct when it matches any original label of its sentence. Per-category precision,
+    recall and F1, and the confusion matrix, use the sentences with exactly one original label. With
+    accepted labels, macro accuracy averages accepted accuracy per category, grouping each sentence by the
+    category a stratified sample drew it for, or otherwise under each of its original labels.
+    """
     if not rows or len({row.id for row in rows}) != len(rows):
         raise ValueError("Evaluation requires nonempty rows with unique IDs")
+    if any(not row.labels for row in rows):
+        raise ValueError("Every scored sentence needs at least one original label")
     if accepted_labels is not None:
         accepted_labels = normalize_accepted_labels(rows, accepted_labels)
+    if strata is not None and (set(strata) != {row.id for row in rows} or any(
+            type(value) is not int or not 0 <= value < len(LABELS) for value in strata.values())):
+        raise ValueError("Strata must give one valid category for every scored sentence")
     expected = {row.id for row in rows}
     indexed = {}
     for response in responses:
@@ -61,7 +72,7 @@ def evaluate(rows, responses, accepted_labels=None):
         if row_id not in expected or row_id in indexed:
             raise ValueError(f"Unknown or duplicate response id: {row_id}")
         indexed[row_id] = response
-    details, confusion = [], [[0] * (len(LABELS) + 1) for _ in LABELS]
+    details, confusion, single_label_rows = [], [[0] * (len(LABELS) + 1) for _ in LABELS], 0
     for row in rows:
         response = indexed.get(row.id)
         predicted, error, status = None, "", "valid"
@@ -75,15 +86,19 @@ def evaluate(rows, responses, accepted_labels=None):
                 predicted = parse_response(response.get("raw_output"))
             except ValueError as exc:
                 status, error = "invalid", str(exc)
-        confusion[row.label_id][predicted if predicted is not None else len(LABELS)] += 1
+        if len(row.labels) == 1:
+            single_label_rows += 1
+            confusion[row.labels[0]][predicted if predicted is not None else len(LABELS)] += 1
         details.append({
-            "id": row.id, "text": row.text, "gold_label_id": row.label_id,
-            "gold_label": LABELS[row.label_id], "predicted_label_id": predicted,
+            "id": row.id, "text": row.text, "gold_label_ids": json.dumps(list(row.labels)),
+            "gold_labels": "; ".join(LABELS[i] for i in row.labels), "predicted_label_id": predicted,
             "predicted_label": LABELS[predicted] if predicted is not None else "",
-            "status": status, "correct": int(predicted == row.label_id),
+            "status": status, "correct": int(predicted in row.labels),
             "raw_output": response.get("raw_output", ""), "error": error,
             **{key: response.get(key) for key in DETAIL_COST_FIELDS},
         })
+        if strata is not None:
+            details[-1]["stratum"] = LABELS[strata[row.id]]
         if accepted_labels is not None:
             details[-1].update({
                 "accepted_correct": int(predicted in accepted_labels[row.id]),
@@ -105,9 +120,11 @@ def evaluate(rows, responses, accepted_labels=None):
     statuses = Counter(detail["status"] for detail in details)
     fenced_count = sum(detail["status"] == "valid" and detail["raw_output"].lstrip().startswith("```")
                        for detail in details)
+    correct = sum(detail["correct"] for detail in details)
     metrics = {
-        "n": len(rows), "recorded_responses": len(indexed), "correct": total_tp,
-        "accuracy": _ratio(total_tp, len(rows)),
+        "n": len(rows), "recorded_responses": len(indexed), "correct": correct,
+        "accuracy": _ratio(correct, len(rows)),
+        "single_label_rows": single_label_rows,
         "macro_f1": sum(category["f1"] for category in categories) / len(LABELS),
         "micro_precision": _ratio(total_tp, total_tp + total_fp),
         "micro_recall": _ratio(total_tp, total_tp + total_fn),
@@ -120,40 +137,46 @@ def evaluate(rows, responses, accepted_labels=None):
         "per_category": categories,
         "scoring": "Accept one JSON category object, bare or enclosed by a single JSON/untagged Markdown fence; "
                    "reject extra prose, extra fields and malformed category values. "
-                   "All sample rows included. Invalid/missing outputs count as incorrect "
+                   "All sample rows included. A prediction is correct when it matches any original label "
+                   "of its sentence. Invalid/missing outputs count as incorrect "
                    "and false negatives; they do not create a false positive for a valid category. "
+                   "Precision, recall, F1 and the confusion matrix use the sentences with one original label. "
                    f"Macro F1 averages all {len(LABELS)} classes; zero denominators produce 0.",
     }
     if accepted_labels is not None:
-        accepted_by_category = Counter()
-        for detail in details:
-            accepted_by_category[detail["gold_label_id"]] += detail["accepted_correct"]
+        groups = {i: [] for i in range(len(LABELS))}
+        for row, detail in zip(rows, details, strict=True):
+            for group in ((strata[row.id],) if strata is not None else row.labels):
+                groups[group].append(detail["accepted_correct"])
         for category in categories:
-            category["accepted_correct"] = accepted_by_category[category["label_id"]]
-            category["accepted_accuracy"] = (category["accepted_correct"] / category["support"]
-                                             if category["support"] else None)
-        supported = [category for category in categories if category["support"]]
+            members = groups[category["label_id"]]
+            category["accepted_rows"] = len(members)
+            category["accepted_correct"] = sum(members)
+            category["accepted_accuracy"] = sum(members) / len(members) if members else None
+        supported = [category for category in categories if category["accepted_rows"]]
         accepted_correct = sum(detail["accepted_correct"] for detail in details)
         metrics.update({
             "scoring_mode": "any_accepted_gold_label",
             "accepted_correct": accepted_correct,
             "accepted_accuracy": accepted_correct / len(rows),
             "macro_accuracy": sum(category["accepted_accuracy"] for category in supported) / len(supported),
+            "macro_accuracy_groups": "sample strata" if strata is not None else "original labels",
             "accepted_gold_sha256": accepted_gold_digest(rows, accepted_labels),
             "accepted_scoring": "A single predicted label is correct if it matches ANY marked gold label. "
                                 "Invalid/missing/error outputs remain incorrect. Macro accuracy averages "
-                                "accepted-label accuracy across original gold categories with nonzero support. "
-                                "correct, accuracy, F1, confusion and details.correct use the original label.",
+                                "accepted-label accuracy over categories, grouping each sentence by its "
+                                "sample stratum, or else under each of its original labels. "
+                                "correct, accuracy, F1, confusion and details.correct use the original labels.",
         })
     else:
-        metrics["scoring_mode"] = "original_single_label"
+        metrics["scoring_mode"] = "original_labels"
     return metrics, details, confusion
 
 
-def write_evaluation(output, rows, responses, accepted_labels=None) -> dict:
+def write_evaluation(output, rows, responses, accepted_labels=None, strata=None) -> dict:
     """Write metrics.json, details.csv, confusion.csv, and one-hot predictions.csv."""
     output = Path(output)
-    metrics, details, confusion = evaluate(rows, responses, accepted_labels)
+    metrics, details, confusion = evaluate(rows, responses, accepted_labels, strata)
     write_json(output / "metrics.json", metrics)
     with (output / "predictions.csv").open("w", newline="", encoding="utf-8") as handle:
         writer = csv.writer(handle)

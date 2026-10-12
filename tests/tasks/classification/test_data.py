@@ -9,12 +9,15 @@ import pytest
 from privacy_bench.core.files import digest_json, read_json
 from privacy_bench.core.paths import data_file
 from privacy_bench.tasks.classification.data import (
-    MANIFEST_SCHEMA_VERSION, SAMPLE_TASK, Row, accepted_gold_digest, load_accepted_gold,
-    make_manifest, read_dataset, select_rows,
+    MANIFEST_SCHEMA_VERSION, MARKED_TASK, SAMPLE_TASK, Row, accepted_gold_digest, load_accepted_gold,
+    make_full_manifest, make_manifest, make_random_manifest, make_stratified_manifest, read_dataset,
+    sample_strata, select_rows,
 )
 from privacy_bench.tasks.classification.taxonomy import (
     HEADER, LABELS, SOURCE_HEADER, SOURCE_LABELS, taxonomy_metadata,
 )
+
+APPSI_ACCEPTED_SHA256 = "bb7ff5aa677410e4ea51accee380281c90366087203b93e9170a99ae7792cd5c"
 
 
 def resigned(manifest):
@@ -166,13 +169,15 @@ def test_audit_identifies_conflicting_duplicate_text(write_dataset):
     assert audit["single_label_rows_in_conflicting_text_groups"] == 3
 
 
-def test_reviewed_gold_must_cover_the_same_ids_and_text(tmp_path):
+def test_reviewed_gold_must_cover_every_sentence_with_the_same_text(tmp_path):
     rows = [Row("1", "First", (0,)), Row("2", "Second", (1,))]
     good = write_target_csv(tmp_path / "good.csv", [("2", "Second", (1, 9)), ("1", "First", (0,))])
     assert load_accepted_gold(good, rows) == {"1": frozenset({0}), "2": frozenset({1, 9})}
+    wider = write_target_csv(tmp_path / "wider.csv",
+                             [("1", "First", (0,)), ("2", "Second", (1,)), ("3", "Third", (2,))])
+    assert load_accepted_gold(wider, rows) == {"1": frozenset({0}), "2": frozenset({1})}
     cases = [
-        ([("1", "First", (0,))], "exactly match"),
-        ([("1", "First", (0,)), ("2", "Second", (1,)), ("3", "Third", (2,))], "exactly match"),
+        ([("1", "First", (0,))], "missing for 1 of 2 sentences: 2"),
         ([("1", "First edited", (0,)), ("2", "Second", (1,))], "text differs"),
         ([("1", "First", (2,)), ("2", "Second", (1,))], "Original gold label was removed"),
         ([("1", "First", ()), ("2", "Second", (1,))], "nonempty valid category IDs"),
@@ -187,6 +192,99 @@ def test_accepted_gold_digest_tracks_content_not_order():
     digest = accepted_gold_digest(rows, {"002": frozenset({1, 9}), "001": frozenset({0, 2, 9})})
     assert accepted_gold_digest(rows[::-1], {"001": frozenset({9, 2, 0}), "002": frozenset({9, 1})}) == digest
     assert accepted_gold_digest(rows, {"002": frozenset({1, 9}), "001": frozenset({0, 2})}) != digest
+
+
+@pytest.fixture
+def marked_dataset(tmp_path):
+    """Ten-category sentences: three per category, except Do Not Track, which one two-label sentence carries."""
+    rows = [(f"{label}-{n}", f"Sentence {label}/{n}", (label,))
+            for label in range(len(LABELS)) if label != 7 for n in range(3)]
+    rows += [("dnt", "Do Not Track and a policy change", (0, 7)), ("pair", "Choice and access", (2, 4)),
+             ("none", "No label", ())]
+    return read_dataset(write_target_csv(tmp_path / "marked.csv", rows), allow_target=True)
+
+
+def test_full_and_random_samples_cover_labeled_sentences_without_strata(marked_dataset):
+    labeled = [row.id for row in marked_dataset.rows if row.labels]
+    full = make_full_manifest(marked_dataset)
+    assert full["task"] == MARKED_TASK and full["selection"] == "all"
+    rows = select_rows(marked_dataset, full)
+    assert [row.id for row in rows] == labeled and sample_strata(full, rows) is None
+    drawn = make_random_manifest(marked_dataset, 5, seed=3)
+    assert drawn == make_random_manifest(marked_dataset, 5, seed=3)
+    assert drawn["ids"] != make_random_manifest(marked_dataset, 5, seed=4)["ids"]
+    rows = select_rows(marked_dataset, drawn)
+    assert len(rows) == 5 and set(drawn["ids"]) <= set(labeled) and sample_strata(drawn, rows) is None
+    for size in (0, len(labeled) + 1, True):
+        with pytest.raises(ValueError, match="size must be an integer"):
+            make_random_manifest(marked_dataset, size)
+
+
+def test_balanced_sample_draws_the_scarcest_category_first_and_records_strata(marked_dataset):
+    labels = {row.id: frozenset(row.labels) for row in marked_dataset.rows}
+    manifest = make_stratified_manifest(marked_dataset, labels, labels_name="toy", per_class=2, seed=5)
+    assert manifest == make_stratified_manifest(marked_dataset, labels, labels_name="toy", per_class=2, seed=5)
+    rows = select_rows(marked_dataset, manifest)
+    strata = sample_strata(manifest, rows)
+    # Only one sentence carries Do Not Track, so it must be drawn for that category, not for Policy Change.
+    assert strata["dnt"] == 7
+    assert manifest["stratum_counts"] == {label: 1 if label == "Do Not Track" else 2 for label in LABELS}
+    assert all(strata[row.id] in labels[row.id] for row in rows) and "none" not in strata
+    assert manifest["balanced_on"] == {"name": "toy",
+                                       "labels_sha256": accepted_gold_digest(marked_dataset.rows, labels)}
+    with pytest.raises(ValueError, match="positive integer"):
+        make_stratified_manifest(marked_dataset, labels, labels_name="toy", per_class=0)
+    with pytest.raises(ValueError, match="cover every dataset sentence"):
+        make_stratified_manifest(marked_dataset, {key: value for key, value in labels.items() if key != "none"},
+                                 labels_name="toy", per_class=2)
+
+
+@pytest.mark.parametrize("kind, key, change, message", [
+    ("all", "ids", lambda ids: ids[::-1], "file order"),
+    ("random", "ids", lambda ids: [*ids, "none"], "at least one label"),
+    ("random", "selection", lambda value: "weird", "selection must be one of"),
+    ("balanced", "strata", lambda strata: dict(list(strata.items())[1:]), "valid category stratum"),
+    ("balanced", "strata", lambda strata: {key: 10 for key in strata}, "valid category stratum"),
+])
+def test_marked_samples_reject_bad_selections_unlabeled_sentences_and_missing_strata(marked_dataset, kind, key,
+                                                                                     change, message):
+    labels = {row.id: frozenset(row.labels) for row in marked_dataset.rows}
+    manifest = {"all": make_full_manifest(marked_dataset),
+                "random": make_random_manifest(marked_dataset, 5),
+                "balanced": make_stratified_manifest(marked_dataset, labels, labels_name="toy", per_class=2)}[kind]
+    manifest[key] = change(manifest[key])
+    with pytest.raises(ValueError, match=message):
+        select_rows(marked_dataset, resigned(manifest))
+
+
+class TestRealAPPSI:
+    """APPSI-139, its accepted labels, and its three samples must agree and redraw exactly."""
+
+    def test_accepted_labels_keep_every_original_label_and_add_astra_labels(self):
+        dataset = read_dataset(data_file("datasets", "appsi139-sentences", suffix=".csv"), allow_target=True)
+        assert dataset.sha256 == "f1e74c1b1d21037b11b83e624789b027fb75c37fb577f55b9a93a66501862c84"
+        assert dataset.audit["total_rows"] == 13291 and dataset.audit["single_label_rows"] == 12189
+        accepted = load_accepted_gold(data_file("classification", "gold", "appsi139-astra", suffix=".csv"),
+                                      dataset.rows)
+        assert sum(accepted[row.id] != set(row.labels) for row in dataset.rows) == 4465
+        assert accepted_gold_digest(dataset.rows, accepted) == APPSI_ACCEPTED_SHA256
+
+    def test_samples_redraw_exactly_from_the_committed_files(self):
+        dataset = read_dataset(data_file("datasets", "appsi139-sentences", suffix=".csv"), allow_target=True)
+        accepted = load_accepted_gold(data_file("classification", "gold", "appsi139-astra", suffix=".csv"),
+                                      dataset.rows)
+        built = {"appsi139-all": make_full_manifest(dataset),
+                 "appsi139-random-1000": make_random_manifest(dataset, 1000, seed=42),
+                 "appsi139-balanced-50": make_stratified_manifest(dataset, accepted, labels_name="appsi139-astra",
+                                                                  per_class=50, seed=42)}
+        sizes = {}
+        for name, manifest in built.items():
+            saved = read_json(data_file("classification", "samples", name, suffix=".json"))
+            assert json.loads(json.dumps(manifest)) == saved, name
+            sizes[name] = len(select_rows(dataset, saved))
+        assert sizes == {"appsi139-all": 13291, "appsi139-random-1000": 1000, "appsi139-balanced-50": 460}
+        counts = built["appsi139-balanced-50"]["stratum_counts"]
+        assert counts == {label: 10 if label == "Do Not Track" else 50 for label in LABELS}
 
 
 class TestRealPilot:

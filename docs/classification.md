@@ -28,6 +28,18 @@ The source CSV, `data/datasets/opp115-sentences.csv`, keeps OPP-115's twelve ann
 
 The pilot is balanced, so its accuracy does not estimate accuracy on real policies. Prompts were chosen on the same 200 sentences, and the CSV has no policy IDs, so nothing here is policy-held-out.
 
+### APPSI-139
+
+APPSI-139 annotates sentences from app privacy policies, a different corpus from OPP-115's website policies, so it tests whether results carry over. `tools/prepare_appsi139.py` copied these files from the AirLLM workspace and checks the sources by SHA-256.
+
+- `data/datasets/appsi139-sentences.csv`: 13,291 sentences, already in the ten categories. The AirLLM workspace's `prepare_appsi.py` mapped APPSI's topics onto them and left out sentences with no topic or with an Edit/Control, Permission Acquisition, or Cease Operation topic. It also left out one 515-token sentence, so every model here can take every sentence. 12,189 sentences have one label and 1,102 have two or three. This mapping never produces User Choice/Control, User Access Edit and Deletion, or Do Not Track, and its Other covers contact information only.
+- `data/classification/gold/appsi139-astra.csv`: the accepted labels, which are every original label plus every label ChatGPT Astra marked when it relabeled the sentences. Astra was asked to keep the original labels and add others where a sentence was ambiguous or mislabeled. It added labels to 4,465 sentences, but it also dropped an original label on 3,595; these accepted labels keep every original label, as the instruction intended.
+- `data/classification/samples/appsi139-all.json`: every sentence.
+- `data/classification/samples/appsi139-random-1000.json`: 1,000 sentences drawn with seed 42, in the corpus's own category mix.
+- `data/classification/samples/appsi139-balanced-50.json`: up to 50 sentences per category, drawn with seed 42 among sentences whose accepted labels include that category. The scarcest category draws first and each sentence is drawn for one category, its stratum. Only 10 sentences carry Do Not Track, so the sample has 460 sentences.
+
+APPSI-139 has no policy IDs either, and 47 of its sentences repeat an OPP-115 sentence word for word.
+
 ## Output contract
 
 Every strategy produces one JSON object per sentence:
@@ -42,9 +54,9 @@ Strategies that do not generate text (a classifier head, a JEV decision head, em
 
 ## Scoring
 
-- **Accuracy**: with the reviewed gold, a prediction is correct when it matches any accepted label; without it, only the original label counts.
-- **Macro accuracy** (reviewed gold): accepted-label accuracy averaged over the original categories, each weighted equally.
-- **Macro-F1**: computed against the original single labels over all ten categories, with zero for undefined per-category values.
+- **Accuracy**: with a gold file, a prediction is correct when it matches any accepted label; without one, it must match one of the sentence's original labels.
+- **Macro accuracy** (with a gold file): accepted-label accuracy per category, averaged with each category weighted equally. A stratified sample groups each sentence by the category it was drawn for; for the pilot that is its original label. Other samples group each sentence under each of its original labels.
+- **Macro-F1**: computed against the original labels of the sentences that have exactly one, over all ten categories, with zero for undefined per-category values. That is every pilot sentence and 12,189 of APPSI-139's. The AirLLM workspace instead counted every unpredicted label of a multi-label sentence as a false negative, so its APPSI macro-F1 values are lower.
 - **Valid outputs**: the share of responses that parsed. Invalid, missing, and failed responses count as incorrect and as false negatives for their gold category; they never create a false positive.
 
 `pbench evaluate` and `pbench compare` always rescore from `responses.jsonl` with the current code, so a comparison never mixes scoring versions.

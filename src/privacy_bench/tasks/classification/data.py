@@ -12,6 +12,17 @@ from .taxonomy import HEADER, LABELS, SOURCE_HEADER, SOURCE_LABELS, SOURCE_TO_TA
 
 MANIFEST_SCHEMA_VERSION = 2
 SAMPLE_TASK = "single_label_10_categories"
+# Sentences in these samples may carry several labels; a prediction matching any of them is correct.
+MARKED_TASK = "marked_labels_10_categories"
+MARKED_SELECTIONS = ("all", "random", "balanced_per_marked_category")
+
+
+@dataclass(frozen=True)
+class References:
+    """What a sample's responses are scored against, beyond each sentence's own labels."""
+
+    accepted: dict | None  # sentence ID -> accepted label IDs, from a gold file
+    strata: dict | None  # sentence ID -> the category a stratified sample drew it for
 
 
 @dataclass(frozen=True)
@@ -133,6 +144,99 @@ def make_manifest(dataset, per_class=20, seed=42) -> dict:
     return manifest
 
 
+def _marked_manifest(dataset, selection: str, ids: list, **fields) -> dict:
+    manifest = {
+        "schema_version": MANIFEST_SCHEMA_VERSION,
+        **taxonomy_metadata(),
+        "dataset_sha256": dataset.sha256,
+        "labels": list(LABELS),
+        "task": MARKED_TASK,
+        "purpose": "test_on_a_different_corpus",
+        "selection": selection,
+        **fields,
+        "ids": ids,
+        "audit": dataset.audit,
+    }
+    manifest["manifest_sha256"] = digest_json(manifest)
+    return manifest
+
+
+def _labeled_rows(dataset) -> list:
+    rows = [row for row in dataset.rows if row.labels]
+    if not rows:
+        raise ValueError("Dataset has no labeled rows")
+    return rows
+
+
+def make_full_manifest(dataset) -> dict:
+    """Freeze every labeled sentence, in file order, for scoring against all of its labels."""
+    return _marked_manifest(dataset, "all", [row.id for row in _labeled_rows(dataset)])
+
+
+def make_random_manifest(dataset, size: int, seed=42) -> dict:
+    """Freeze a simple random sample of labeled sentences, keeping the corpus's own category mix."""
+    rows = _labeled_rows(dataset)
+    if type(size) is not int or not 0 < size <= len(rows):
+        raise ValueError(f"size must be an integer from 1 through {len(rows)}")
+    chosen = random.Random(seed).sample(rows, size)
+    return _marked_manifest(dataset, "random", [row.id for row in chosen], size=size, seed=seed)
+
+
+def make_stratified_manifest(dataset, labels: dict, *, labels_name: str, per_class: int, seed=42) -> dict:
+    """Freeze up to per_class sentences per category, drawn among sentences whose given labels include it.
+
+    ``labels`` maps every dataset sentence to the label set to balance on, such as a gold file's accepted
+    labels. The scarcest category draws first and a sentence is drawn for one category only; the manifest
+    records that category as the sentence's stratum.
+    """
+    if type(per_class) is not int or per_class < 1:
+        raise ValueError("per_class must be a positive integer")
+    rows = _labeled_rows(dataset)
+    if set(labels) != {row.id for row in dataset.rows}:
+        raise ValueError("Balancing labels must cover every dataset sentence")
+    available = {i: [row for row in rows if i in labels[row.id]] for i in range(len(LABELS))}
+    rng = random.Random(seed)
+    strata = {}
+    for i in sorted(range(len(LABELS)), key=lambda category: (len(available[category]), category)):
+        candidates = [row for row in available[i] if row.id not in strata]
+        if not candidates:
+            raise ValueError(f"No undrawn sentence carries {LABELS[i]!r}")
+        for row in rng.sample(candidates, min(per_class, len(candidates))):
+            strata[row.id] = i
+    ids = list(strata)
+    rng.shuffle(ids)
+    counts = Counter(strata.values())
+    return _marked_manifest(
+        dataset, "balanced_per_marked_category", ids, per_class=per_class, seed=seed,
+        balanced_on={"name": labels_name, "labels_sha256": accepted_gold_digest(dataset.rows, labels)},
+        stratum_counts={label: counts[i] for i, label in enumerate(LABELS)},
+        strata={row_id: strata[row_id] for row_id in ids})
+
+
+def _check_marked_sample(dataset, manifest, rows):
+    selection = manifest.get("selection")
+    if selection not in MARKED_SELECTIONS:
+        raise ValueError(f"Manifest selection must be one of {', '.join(MARKED_SELECTIONS)}")
+    if any(not row.labels for row in rows):
+        raise ValueError("Every sampled sentence needs at least one label")
+    if selection == "all" and manifest["ids"] != [row.id for row in dataset.rows if row.labels]:
+        raise ValueError("An 'all' sample must list every labeled sentence in file order")
+    if selection == "balanced_per_marked_category":
+        strata = manifest.get("strata")
+        if (not isinstance(strata, dict) or set(strata) != set(manifest["ids"])
+                or any(type(value) is not int or not 0 <= value < len(LABELS) for value in strata.values())):
+            raise ValueError("A balanced sample must give one valid category stratum for every sentence")
+
+
+def sample_strata(manifest, rows) -> dict | None:
+    """The category each sentence was drawn for when the sample was stratified, otherwise None."""
+    if manifest["task"] == SAMPLE_TASK:
+        return {row.id: row.label_id for row in rows}
+    if manifest["selection"] == "balanced_per_marked_category":
+        return {row.id: manifest["strata"][row.id] for row in rows}
+    return None
+
+
 def select_rows(dataset, manifest) -> list:
     content = {key: value for key, value in manifest.items() if key != "manifest_sha256"}
     if manifest.get("manifest_sha256") != digest_json(content):
@@ -147,8 +251,8 @@ def select_rows(dataset, manifest) -> list:
     for key, value in taxonomy_metadata().items():
         if manifest.get(key) != value:
             raise ValueError(f"Manifest taxonomy field {key!r} differs; prepare a new 10-category manifest")
-    if manifest.get("task") != SAMPLE_TASK:
-        raise ValueError(f"Manifest task must be {SAMPLE_TASK!r}; prepare a new manifest")
+    if manifest.get("task") not in (SAMPLE_TASK, MARKED_TASK):
+        raise ValueError(f"Manifest task must be {SAMPLE_TASK!r} or {MARKED_TASK!r}; prepare a new manifest")
     ids = manifest.get("ids")
     if not isinstance(ids, list) or not ids or any(type(value) is not str for value in ids):
         raise ValueError("Manifest needs nonempty string IDs")
@@ -158,13 +262,15 @@ def select_rows(dataset, manifest) -> list:
     if any(row_id not in lookup for row_id in ids):
         raise ValueError("Manifest contains unknown IDs")
     rows = [lookup[row_id] for row_id in ids]
-    if any(not row.eligible for row in rows):
+    if manifest["task"] == MARKED_TASK:
+        _check_marked_sample(dataset, manifest, rows)
+    elif any(not row.eligible for row in rows):
         raise ValueError("The sample may contain only originally single-label gold rows")
     return rows
 
 
 def normalize_accepted_labels(rows, accepted_labels) -> dict:
-    """Validate alternative gold answers without changing the original label of any row."""
+    """Validate alternative gold answers without removing any original label of a row."""
     if not isinstance(accepted_labels, dict) or set(accepted_labels) != {row.id for row in rows}:
         raise ValueError("Accepted gold IDs must exactly match the selected rows")
     normalized = {}
@@ -174,23 +280,24 @@ def normalize_accepted_labels(rows, accepted_labels) -> dict:
                 or any(type(label) is not int or not 0 <= label < len(LABELS) for label in labels)):
             raise ValueError(f"Accepted gold labels must be nonempty valid category IDs: {row.id}")
         normalized[row.id] = frozenset(labels)
-        if row.label_id not in normalized[row.id]:
+        if not set(row.labels) <= normalized[row.id]:
             raise ValueError(f"Original gold label was removed: {row.id}")
     return normalized
 
 
 def load_accepted_gold(path, rows) -> dict:
-    """Read reviewed answers for exactly the sampled sentences, checking IDs and text."""
+    """Read accepted answers for the given sentences, checking their text; the file may cover more sentences."""
     gold = read_dataset(path, allow_target=True)
     if gold.audit["input_labels"] != list(LABELS):
         raise ValueError("Reviewed gold requires the ten-category CSV header")
     indexed = {row.id: row for row in gold.rows}
-    if set(indexed) != {row.id for row in rows}:
-        raise ValueError("Reviewed gold IDs must exactly match the frozen sample sentences")
+    missing = [row.id for row in rows if row.id not in indexed]
+    if missing:
+        raise ValueError(f"Gold labels are missing for {len(missing)} of {len(rows)} sentences: {', '.join(missing)}")
     for row in rows:
         if indexed[row.id].text != row.text:
             raise ValueError(f"Reviewed gold text differs for ID {row.id!r}")
-    return normalize_accepted_labels(rows, {row_id: row.labels for row_id, row in indexed.items()})
+    return normalize_accepted_labels(rows, {row.id: indexed[row.id].labels for row in rows})
 
 
 def accepted_gold_digest(rows, accepted) -> str:
