@@ -62,6 +62,8 @@ Strategies that do not generate text (a classifier head, a JEV decision head, em
 
 `pbench evaluate` and `pbench compare` always rescore from `responses.jsonl` with the current code, so a comparison never mixes scoring versions.
 
+A comparison's `[scoring]` table takes `gold` and, optionally, `sample`. With a `sample`, every run is scored on that sample's sentences alone, and its costs average over those sentences too; each run must have a response for all of them. That puts runs made on all of APPSI-139 beside runs made on its test half.
+
 ## Strategies
 
 | Strategy | Backend | What the model receives | Timing covers |

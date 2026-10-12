@@ -14,22 +14,36 @@ IDENTITY_WITHOUT_GOLD = ("dataset", "sample", "labels", "taxonomy_id", "taxonomy
 
 
 def scoring_settings(scoring: dict) -> dict:
-    return take_settings(scoring, "Comparison [scoring]", optional={"gold": None})
+    return take_settings(scoring, "Comparison [scoring]", optional={"gold": None, "sample": None})
 
 
 def score_for_comparison(task, run: Run, scoring: dict) -> dict:
-    """Rescore a run's saved responses against the comparison's gold, on the run's own sample."""
-    gold = scoring_settings(scoring)["gold"]
+    """Rescore a run's saved responses against the comparison's gold.
+
+    Without a comparison sample, the run's own sample is scored. With one, only that sample's sentences
+    are, and the run must have covered every one of them.
+    """
+    settings = scoring_settings(scoring)
+    gold, sample = settings["gold"], settings["sample"]
     condition = run_condition(run)
-    selection = task.select_items(replace(condition, items={**condition.items, "gold": gold}))
+    own = task.select_items(replace(condition, items={**condition.items, "gold": gold}))
     recorded = run.record["items"]
-    changed = [key for key in IDENTITY_WITHOUT_GOLD if selection.identity[key] != recorded[key]]
+    changed = [key for key in IDENTITY_WITHOUT_GOLD if own.identity[key] != recorded[key]]
     if changed:
         raise ValueError(f"The data named by {run.path} no longer matches its record: {', '.join(changed)}")
+    selection = own if sample is None else task.select_items(
+        replace(condition, items={**condition.items, "gold": gold, "sample": sample}))
+    scored_ids = {row.id for row in selection.items}
+    uncovered = len(scored_ids - set(run.record["item_ids"]))
+    if uncovered:
+        raise ValueError(f"Run {run.path} has no response for {uncovered} of the {len(scored_ids)} sentences "
+                         f"in sample {sample!r}")
+    responses = [response for response in run.responses if response["id"] in scored_ids]
     references = selection.references
-    metrics, _, _ = evaluate(selection.items, run.responses, references.accepted, references.strata)
+    metrics, _, _ = evaluate(selection.items, responses, references.accepted, references.strata)
     reviewed = references.accepted is not None
     return {
+        "item_ids": [row.id for row in selection.items],
         "metrics": {
             "sample": selection.identity["sample"]["name"], "gold": gold or "",
             "n": metrics["n"], "scoring_mode": metrics["scoring_mode"],
@@ -59,7 +73,8 @@ def condition_label(run: Run) -> str:
 
 
 def describe_comparison(rows: list, scoring: dict) -> dict:
-    gold = scoring_settings(scoring)["gold"]
+    settings = scoring_settings(scoring)
+    gold = settings["gold"]
     first = rows[0]
     strategies = list(dict.fromkeys(row["strategy"] for row in rows))
     timings = [STRATEGIES[name].timing_description for name in strategies]
@@ -75,6 +90,9 @@ def describe_comparison(rows: list, scoring: dict) -> dict:
     else:
         notes.append("Accuracy accepts any original label of a sentence; macro-F1 uses the sentences with one "
                      "original label. Invalid outputs stay incorrect.")
+    if settings["sample"]:
+        notes.append(f"Every run is scored, costs included, on the sentences of {settings['sample']} alone, "
+                     "including runs made on a larger sample.")
     context = (f"{first['n']:,} sentences  |  sample {first['sample']}  |  "
                + (f"accepted labels {gold}" if gold else "original labels") + "  |  10 categories")
     return {"context": context, "footnotes": notes}
