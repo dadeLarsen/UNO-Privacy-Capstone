@@ -62,17 +62,19 @@ Earlier findings kept in the AirLLM archive (`C:\Projects\AirLLM`), from runners
 
 ```
 conditions/<task>/*.toml     one file per run condition: task, strategy, items, model, options
+fits/<task>/*.toml           one file per fit: what to learn from, the model, and the heads to fit
 comparisons/*.toml           which saved runs to put side by side, and how to score them
-data/                        source datasets, plus each task's samples, gold labels, and prompts
+data/                        source datasets, plus each task's samples, gold labels, examples, and prompts
 results/runs/<task>/<condition>/<UTC start>/   tracked run records
+results/fits/<task>/<fit>/<UTC start>/         tracked fit records, with the fitted weights
 results/comparisons/<name>/  summaries and plots, regenerated and not tracked
 src/privacy_bench/
-  core/       condition files, run records, the run loop, provenance
+  core/       condition and fit files, run and fit records, the run loop, provenance
   models/     backends: chat generation, sequence classifiers, JEV judges, sentence embeddings
   tasks/      one package per task; classification today
   report/     task-agnostic summaries and plots
   cli.py      the pbench command
-tools/        one-time migration code
+tools/        one-time code that imported runs and froze data files
 references/   design notes for the app
 ```
 
@@ -105,10 +107,19 @@ uv run pbench evaluate results/runs/classification/<condition>/<UTC start>
 - `compare` rescores each listed run with the current code, refuses runs scored on different items or reference answers, and writes `summary.csv`, `matrix-overview.png`, and `matrix-overview.svg` under `results/comparisons/<name>/`.
 - `evaluate` rewrites a run's `evaluation/` folder from its saved responses.
 
+Some strategies apply weights fitted to labeled examples, such as a small classification head on frozen embeddings. Fit them once, before the runs that use them:
+
+```powershell
+uv run pbench fit fits/classification/embeddinggemma2-opp115-heads.toml
+```
+
+`fit` checks every example against the input limit before embedding any, refuses an existing output folder, and writes `fit.toml`, `fit.json`, and `weights.safetensors` under `results/fits/<task>/<fit>/<UTC start>/`. `fit.json` records the same provenance as a run, the cross-validation results, and the hash of the weights, which a run checks before it loads them.
+
 ## Extending
 
 - **Another model for an existing strategy:** add a condition file with the model's pinned commit, then `pbench download` and `pbench run`.
 - **A new strategy:** add a class under `tasks/<task>/strategies/` and register it in that package's `STRATEGIES`. Reuse a backend from `models/`, or add one there that knows nothing about the task.
+- **A new kind of fit:** add a fitter to the task's `FITTERS` that turns a fit file into a report and named float32 tensors. The shared fit record stores and checks them.
 - **A new task**, such as simplification: add `tasks/<name>/` with a task object that selects items, builds strategies, evaluates responses, and supplies its comparison panels and notes, then register it in `tasks/__init__.py`. The run loop, run records, model backends, and cost panels apply unchanged.
 
 The classification task is described in [docs/classification.md](docs/classification.md).

@@ -1,0 +1,34 @@
+task = "classification"
+kind = "embedding-heads"
+
+[examples]
+dataset = "opp115-sentences"
+examples = "opp115-examples"
+
+[model]
+id = "google/embeddinggemma-2"
+revision = "914f7f89142e33e77833254d9c9b90c3cef7303b"
+precision = "bf16"
+device = "cuda"
+text_only = true
+
+[options]
+prefix = "task: classification | query: "
+max_input_tokens = 8192
+folds = 5
+seed = 0
+c_values = [0.01, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0, 100.0, 300.0, 1000.0]
+
+# Each category's average example embedding; nothing is trained.
+[heads.centroid]
+method = "centroid"
+
+# Every category weighs the same in training, like the balanced test samples.
+[heads.linear-balanced]
+method = "logistic"
+class_weight = "balanced"
+
+# Categories weigh as often as they occur among the OPP-115 examples.
+[heads.linear-frequencies]
+method = "logistic"
+class_weight = "none"

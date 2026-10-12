@@ -15,6 +15,8 @@ SAMPLE_TASK = "single_label_10_categories"
 # Sentences in these samples may carry several labels; a prediction matching any of them is correct.
 MARKED_TASK = "marked_labels_10_categories"
 MARKED_SELECTIONS = ("all", "random", "balanced_per_marked_category")
+# Example lists hold sentences a fit learns from; they are never scored.
+EXAMPLES_TASK = "single_label_examples_10_categories"
 
 
 @dataclass(frozen=True)
@@ -237,7 +239,8 @@ def sample_strata(manifest, rows) -> dict | None:
     return None
 
 
-def select_rows(dataset, manifest) -> list:
+def _manifest_rows(dataset, manifest, tasks) -> list:
+    """Check a frozen ID list's hash, dataset, and taxonomy, and return its rows in order."""
     content = {key: value for key, value in manifest.items() if key != "manifest_sha256"}
     if manifest.get("manifest_sha256") != digest_json(content):
         raise ValueError("Manifest hash does not match its contents; prepare a new manifest")
@@ -251,8 +254,8 @@ def select_rows(dataset, manifest) -> list:
     for key, value in taxonomy_metadata().items():
         if manifest.get(key) != value:
             raise ValueError(f"Manifest taxonomy field {key!r} differs; prepare a new 10-category manifest")
-    if manifest.get("task") not in (SAMPLE_TASK, MARKED_TASK):
-        raise ValueError(f"Manifest task must be {SAMPLE_TASK!r} or {MARKED_TASK!r}; prepare a new manifest")
+    if manifest.get("task") not in tasks:
+        raise ValueError(f"Manifest task must be {' or '.join(map(repr, tasks))}; prepare a new manifest")
     ids = manifest.get("ids")
     if not isinstance(ids, list) or not ids or any(type(value) is not str for value in ids):
         raise ValueError("Manifest needs nonempty string IDs")
@@ -261,7 +264,61 @@ def select_rows(dataset, manifest) -> list:
     lookup = {row.id: row for row in dataset.rows}
     if any(row_id not in lookup for row_id in ids):
         raise ValueError("Manifest contains unknown IDs")
-    rows = [lookup[row_id] for row_id in ids]
+    return [lookup[row_id] for row_id in ids]
+
+
+def normalized_text(text: str) -> str:
+    """Sentence text compared without case or spacing, to find a sentence repeated elsewhere."""
+    return " ".join(text.split()).lower()
+
+
+def make_example_manifest(dataset, held_out: list) -> dict:
+    """Freeze the single-label sentences a fit may learn from, keeping every test sentence out.
+
+    ``held_out`` lists each test sample as {"name", "manifest", "rows"}. A held-out sample of this
+    dataset removes its own sentences, and a sentence whose normalized text repeats any held-out
+    sentence, in any dataset, is removed too.
+    """
+    held_ids = {row.id for sample in held_out if sample["manifest"]["dataset_sha256"] == dataset.sha256
+                for row in sample["rows"]}
+    held_texts = {normalized_text(row.text) for sample in held_out for row in sample["rows"]}
+    candidates = [row for row in dataset.rows if row.eligible and row.id not in held_ids]
+    repeated = [row.id for row in candidates if normalized_text(row.text) in held_texts]
+    examples = [row for row in candidates if normalized_text(row.text) not in held_texts]
+    if not examples:
+        raise ValueError("No single-label sentence is left to learn from")
+    counts = Counter(row.label_id for row in examples)
+    manifest = {
+        "schema_version": MANIFEST_SCHEMA_VERSION,
+        **taxonomy_metadata(),
+        "dataset_sha256": dataset.sha256,
+        "labels": list(LABELS),
+        "task": EXAMPLES_TASK,
+        "purpose": "fit_examples",
+        "selection": "single_label_outside_held_out_samples",
+        "held_out": [{"name": sample["name"], "dataset_sha256": sample["manifest"]["dataset_sha256"],
+                      "manifest_sha256": sample["manifest"]["manifest_sha256"], "n": len(sample["rows"])}
+                     for sample in held_out],
+        "excluded_held_out_rows": sum(row.eligible and row.id in held_ids for row in dataset.rows),
+        "excluded_repeated_text_ids": repeated,
+        "label_counts": {label: counts[i] for i, label in enumerate(LABELS)},
+        "ids": [row.id for row in examples],
+        "audit": dataset.audit,
+    }
+    manifest["manifest_sha256"] = digest_json(manifest)
+    return manifest
+
+
+def select_examples(dataset, manifest) -> list:
+    """The single-label sentences of a frozen example list, in order."""
+    rows = _manifest_rows(dataset, manifest, (EXAMPLES_TASK,))
+    if any(not row.eligible for row in rows):
+        raise ValueError("Examples may contain only originally single-label rows")
+    return rows
+
+
+def select_rows(dataset, manifest) -> list:
+    rows = _manifest_rows(dataset, manifest, (SAMPLE_TASK, MARKED_TASK))
     if manifest["task"] == MARKED_TASK:
         _check_marked_sample(dataset, manifest, rows)
     elif any(not row.eligible for row in rows):

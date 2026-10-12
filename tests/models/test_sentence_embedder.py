@@ -5,45 +5,12 @@ from unittest.mock import patch
 
 import pytest
 from sentence_transformers import SentenceTransformer
-from sentence_transformers.sentence_transformer.modules import Normalize, Pooling, Transformer
-from tokenizers import Tokenizer
-from tokenizers.models import WordLevel
-from tokenizers.pre_tokenizers import Whitespace
-from tokenizers.processors import TemplateProcessing
 import torch
-from transformers import BertConfig, BertModel, PreTrainedTokenizerFast
 
 from privacy_bench.models import sentence_embedder as backend
 from privacy_bench.models.sentence_embedder import SentenceEmbedder
 
 PROMPT = "task: classification | query: "
-
-
-@pytest.fixture(scope="module")
-def tiny_embedder(tmp_path_factory):
-    """A randomly initialized BERT with mean pooling and normalization, saved as a sentence-transformers model."""
-    root = tmp_path_factory.mktemp("embedder")
-    vocabulary = {token: index for index, token in enumerate([
-        "[PAD]", "[UNK]", "[CLS]", "[SEP]", "task", ":", "classification", "|", "query",
-        "we", "keep", "data", "for", "years", "."])}
-    core = Tokenizer(WordLevel(vocabulary, unk_token="[UNK]"))
-    core.pre_tokenizer = Whitespace()
-    core.post_processor = TemplateProcessing(single="[CLS] $A [SEP]", special_tokens=[("[CLS]", 2), ("[SEP]", 3)])
-    tokenizer = PreTrainedTokenizerFast(tokenizer_object=core, unk_token="[UNK]", pad_token="[PAD]", cls_token="[CLS]",
-                                        sep_token="[SEP]", model_max_length=64,
-                                        model_input_names=["input_ids", "attention_mask"])
-    config = BertConfig(vocab_size=len(vocabulary), hidden_size=16, num_hidden_layers=1, num_attention_heads=2,
-                        intermediate_size=32, max_position_embeddings=64)
-    with torch.random.fork_rng(devices=[]):
-        torch.manual_seed(7)
-        bert = BertModel(config)
-    bert_dir = root / "bert"
-    bert.save_pretrained(bert_dir)
-    tokenizer.save_pretrained(bert_dir)
-    model = SentenceTransformer(modules=[Transformer(str(bert_dir)), Pooling(16, pooling_mode="mean"), Normalize()])
-    snapshot = root / "snapshot"
-    model.save(str(snapshot))
-    return snapshot
 
 
 def loaded(snapshot, limit=32):

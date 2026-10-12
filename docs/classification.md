@@ -71,3 +71,14 @@ Strategies that do not generate text (a classifier head, a JEV decision head, em
 | `embedding-similarity` | sentence embedder | the sentence after the condition's `sentence_prefix`; each category's name and definition are embedded once, after its `category_prefix` | the embedding forward pass |
 
 No strategy truncates an input: every input is checked against the condition's limit before the first model call, and one input over the limit stops the run.
+
+## Fitted heads
+
+A fit learns from labeled example sentences that no test sample contains. `data/classification/examples/opp115-examples.json` holds the 10,417 single-label OPP-115 sentences outside the pilot, minus the 73 whose text repeats a pilot or APPSI-139 sentence once case and spacing are ignored. `tools/make_opp115_examples.py` froze it, and a test redraws it exactly.
+
+The `embedding-heads` fit embeds every example once with a sentence embedder, after the fit file's `prefix`, and fits each head named in it. Every head is linear: a category's score is `weight @ embedding + bias` on the normalized embedding, and the highest score wins.
+
+- `centroid`: each category's normalized mean example embedding, with zero bias, so the scores are cosine similarities. Nothing is trained.
+- `logistic`: a multinomial logistic regression with `class_weight` `balanced` (every category weighs the same) or `none` (categories weigh as often as they occur among the examples). Stratified cross-validation on the examples, scored by balanced accuracy, chooses the inverse regularization strength C from `c_values`.
+
+`fit.json` reports each head's cross-validated balanced accuracy, and for logistic heads the score at every C. These scores come from OPP-115 examples only, so they say nothing about the test samples.

@@ -1,4 +1,4 @@
-"""pbench: run conditions, cache their models, rescore saved runs, and compare them."""
+"""pbench: run conditions, fit heads, cache models, rescore saved runs, and compare them."""
 
 import argparse
 import json
@@ -7,6 +7,7 @@ from pathlib import Path
 import sys
 
 from .core.conditions import load_condition
+from .core.fits import execute_fit, fit_directory, load_fit_spec
 from .core.harness import evaluate_run, execute
 from .core.files import read_json
 from .core.paths import COMPARISONS_DIR, REPO_ROOT
@@ -23,6 +24,13 @@ def run(args):
     output = args.output or run_directory(task.name, condition.name)
     metrics = execute(task, condition, output)
     print(task.summary_line(metrics))
+
+
+def fit(args):
+    spec = load_fit_spec(args.fit)
+    task = get_task(spec.task)
+    record = execute_fit(task, spec, args.output or fit_directory(task.name, spec.name))
+    print(f"Fitted {', '.join(record['tensors'])}")
 
 
 def download(args):
@@ -64,6 +72,10 @@ def main(argv=None):
     command.add_argument("condition", type=Path)
     command.add_argument("--output", type=Path, help="New run directory (default: results/runs/<task>/<condition>/<UTC start>)")
     command.set_defaults(handler=run)
+    command = commands.add_parser("fit", help="Fit what a fit file describes into a new fit record")
+    command.add_argument("fit", type=Path)
+    command.add_argument("--output", type=Path, help="New fit directory (default: results/fits/<task>/<fit>/<UTC start>)")
+    command.set_defaults(handler=fit)
     command = commands.add_parser("download", help="Cache a condition's pinned model while online")
     command.add_argument("condition", type=Path)
     command.set_defaults(handler=download)
