@@ -32,8 +32,36 @@ and the highest score wins. A centroid head's weights are the normalized mean em
 category's examples with zero bias, so its scores are cosine similarities. A logistic head is a
 multinomial logistic regression; stratified cross-validation on the examples, scored by balanced
 accuracy, chooses its inverse regularization strength C from ``c_values``.
+
+Fit kind ``prior-shift`` moves logistic heads of an ``embedding-heads`` fit toward the category mix of
+a tuning sample, which no reported result may use::
+
+    task = "classification"
+    kind = "prior-shift"
+
+    [base]
+    fit = "classification/embeddinggemma2-opp115-heads/20261012-011902Z"
+
+    [tuning]
+    dataset = "appsi139-sentences"
+    sample = "appsi139-tuning-half"
+    gold = "appsi139-astra"
+
+    [options]
+    strengths = [0.0, 0.5, 1.0]
+
+    [heads.linear-balanced-tuned]
+    base = "linear-balanced"
+    strength = "tuned"
+
+Each shifted head keeps its base head's weights and adds ``strength * (log target share - log training
+share)`` to its bias. A target share is a category's share of the tuning sentences, each split evenly
+among its accepted labels; the training share is even for a balanced head and the examples' own mix
+otherwise. A ``tuned`` strength is
+the one in ``strengths`` with the highest accepted-label accuracy on the tuning sentences.
 """
 
+import json
 import re
 
 import numpy as np
@@ -44,10 +72,14 @@ import torch
 
 from ...core.conditions import take_settings
 from ...core.files import digest_bytes, read_json
+from ...core.fits import load_fit, parse_fit_spec, resolve_fit
 from ...core.paths import data_file
 from ...models.hub import require_commit, resolve_snapshot, snapshot_identity
 from ...models.sentence_embedder import SentenceEmbedder
-from .data import read_dataset, select_examples
+from .data import (
+    TUNING_PURPOSE, accepted_gold_digest, load_accepted_gold, read_dataset, select_examples, select_rows,
+)
+from .scoring import evaluate
 from .taxonomy import LABELS
 
 HEAD_NAME = re.compile(r"[a-z0-9][a-z0-9-]*")
@@ -63,6 +95,38 @@ def centroid_weights(embeddings: np.ndarray, labels: np.ndarray) -> np.ndarray:
 
 def _number(value) -> bool:
     return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def embed_sentences(model: dict, prefix: str, max_input_tokens: int, rows, noun: str):
+    """Embed each row once, after the prefix; returns normalized float32 embeddings, a summary, and the model.
+
+    Every row is checked against the input limit before the first forward pass.
+    """
+    snapshot = resolve_snapshot(model["id"], model["revision"])
+    embedder = SentenceEmbedder(snapshot, precision=model["precision"], device=model["device"],
+                                max_input_tokens=max_input_tokens, text_only=model["text_only"])
+    backend = embedder.load()
+    encoded, errors = [], []
+    for row in rows:
+        try:
+            encoded.append(embedder.encode(row.text, prefix))
+        except ValueError as exc:
+            errors.append(f"ID {row.id}: {exc}")
+    if errors:
+        raise ValueError(f"{noun.capitalize()} preflight failed:\n" + "\n".join(errors))
+    vectors, seconds = [], 0.0
+    for index, item in enumerate(encoded, 1):
+        output = embedder.embed(item)
+        vectors.append(output["embedding"])
+        seconds += output["seconds"]
+        if index % 1000 == 0 or index == len(encoded):
+            print(f"Embedded {index}/{len(encoded)} {noun}s", flush=True)
+    embeddings = torch.nn.functional.normalize(torch.stack(vectors), dim=1).numpy()
+    tokens = [len(item["input_ids"]) for item in encoded]
+    summary = {"n": len(rows), "dimension": int(embeddings.shape[1]),
+               "sha256": digest_bytes(embeddings.tobytes()), "seconds": seconds,
+               "min_input_tokens": min(tokens), "max_input_tokens": max(tokens)}
+    return embeddings, summary, {**snapshot_identity(model["id"], model["revision"], snapshot), **backend}
 
 
 class EmbeddingHeadsFit:
@@ -111,36 +175,6 @@ class EmbeddingHeadsFit:
                                  f"{' or '.join(map(repr, CLASS_WEIGHTS))}")
             self.heads[name] = head
 
-    def _embed(self, rows):
-        snapshot = resolve_snapshot(self.model["id"], self.model["revision"])
-        embedder = SentenceEmbedder(snapshot, precision=self.model["precision"], device=self.model["device"],
-                                    max_input_tokens=self.options["max_input_tokens"],
-                                    text_only=self.model["text_only"])
-        backend = embedder.load()
-        # Check every example against the input limit before the first forward pass.
-        encoded, errors = [], []
-        for row in rows:
-            try:
-                encoded.append(embedder.encode(row.text, self.options["prefix"]))
-            except ValueError as exc:
-                errors.append(f"ID {row.id}: {exc}")
-        if errors:
-            raise ValueError("Example preflight failed:\n" + "\n".join(errors))
-        vectors, seconds = [], 0.0
-        for index, item in enumerate(encoded, 1):
-            output = embedder.embed(item)
-            vectors.append(output["embedding"])
-            seconds += output["seconds"]
-            if index % 1000 == 0 or index == len(encoded):
-                print(f"Embedded {index}/{len(encoded)} examples", flush=True)
-        embeddings = torch.nn.functional.normalize(torch.stack(vectors), dim=1).numpy()
-        tokens = [len(item["input_ids"]) for item in encoded]
-        summary = {"n": len(rows), "dimension": int(embeddings.shape[1]),
-                   "sha256": digest_bytes(embeddings.tobytes()), "seconds": seconds,
-                   "min_input_tokens": min(tokens), "max_input_tokens": max(tokens)}
-        model = {**snapshot_identity(self.model["id"], self.model["revision"], snapshot), **backend}
-        return embeddings, summary, model
-
     def run(self) -> dict:
         dataset = read_dataset(data_file("datasets", self.examples["dataset"], suffix=".csv"), allow_target=True)
         manifest = read_json(data_file("classification", "examples", self.examples["examples"], suffix=".json"))
@@ -149,7 +183,8 @@ class EmbeddingHeadsFit:
         missing = [LABELS[i] for i in range(len(LABELS)) if not (labels == i).any()]
         if missing:
             raise ValueError(f"Every category needs examples; none for: {', '.join(missing)}")
-        embeddings, embedding_summary, model = self._embed(rows)
+        embeddings, embedding_summary, model = embed_sentences(self.model, self.options["prefix"],
+                                                               self.options["max_input_tokens"], rows, "example")
         splits = list(StratifiedKFold(n_splits=self.options["folds"], shuffle=True,
                                       random_state=self.options["seed"]).split(embeddings, labels))
         tensors, heads = {}, {}
@@ -199,4 +234,151 @@ class EmbeddingHeadsFit:
         return {"report": report, "tensors": tensors}
 
 
-FITTERS = {fitter.kind: fitter for fitter in (EmbeddingHeadsFit,)}
+def training_shares(head: dict, label_counts: dict) -> np.ndarray:
+    """The category mix a logistic head was trained to expect: even under balanced weights, else the examples' mix."""
+    if head["class_weight"] == "balanced":
+        return np.full(len(LABELS), 1 / len(LABELS))
+    counts = np.array([label_counts[label] for label in LABELS], dtype=np.float64)
+    return counts / counts.sum()
+
+
+def accepted_shares(rows, accepted: dict) -> np.ndarray:
+    """Each category's share of the sentences, counting a sentence once, split evenly among its accepted labels."""
+    totals = np.zeros(len(LABELS))
+    for row in rows:
+        for label in accepted[row.id]:
+            totals[label] += 1 / len(accepted[row.id])
+    return totals / len(rows)
+
+
+class PriorShiftFit:
+    """Shift logistic heads from the category mix they were trained on toward a tuning sample's mix.
+
+    A head's scores are log-odds, so a different category mix adds ``log target share - log training share``
+    to each category's bias. ``strength`` scales that shift from 0 (the base head) to 1 (the tuning mix).
+    """
+
+    kind = "prior-shift"
+
+    def __init__(self, spec):
+        context = f"Fit {spec.name!r}"
+        unknown = set(spec.tables) - {"base", "tuning", "options", "heads"}
+        if unknown:
+            raise ValueError(f"{context} has unknown tables: {', '.join(sorted(unknown))}")
+        self.name = spec.name
+        self.base = take_settings(spec.tables.get("base", {}), f"{context} [base]", required=("fit",))
+        resolve_fit(self.base["fit"])
+        self.tuning = take_settings(spec.tables.get("tuning", {}), f"{context} [tuning]",
+                                    required=("dataset", "sample", "gold"))
+        self.options = take_settings(spec.tables.get("options", {}), f"{context} [options]", required=("strengths",))
+        strengths = self.options["strengths"]
+        if (not isinstance(strengths, list) or not strengths
+                or any(not _number(s) or not 0 <= s <= 1 for s in strengths) or strengths != sorted(set(strengths))):
+            raise ValueError(f"{context}: strengths must be a nonempty rising list of distinct numbers "
+                             "from 0 through 1")
+        heads = spec.tables.get("heads", {})
+        if not isinstance(heads, dict) or not heads:
+            raise ValueError(f"{context} needs at least one [heads.<name>] table")
+        self.heads = {}
+        for name, table in heads.items():
+            if not HEAD_NAME.fullmatch(name) or not isinstance(table, dict):
+                raise ValueError(f"{context}: head {name!r} needs a lowercase name of letters, digits and '-', "
+                                 "and a table")
+            head = take_settings(table, f"{context} [heads.{name}]", required=("base", "strength"))
+            if not isinstance(head["base"], str):
+                raise ValueError(f"{context}: head {name!r} base must name a head of the base fit")
+            if head["strength"] != "tuned" and (not _number(head["strength"]) or not 0 <= head["strength"] <= 1):
+                raise ValueError(f"{context}: head {name!r} strength must be 'tuned' or a number from 0 through 1")
+            self.heads[name] = head
+
+    def _load_base(self):
+        base = load_fit(resolve_fit(self.base["fit"]))
+        if base.record["kind"] != EmbeddingHeadsFit.kind:
+            raise ValueError(f"Base fit {self.base['fit']!r} is a {base.record['kind']!r} fit, "
+                             f"not {EmbeddingHeadsFit.kind!r}")
+        heads = base.record["report"]["heads"]
+        for name, head in self.heads.items():
+            if head["base"] not in heads:
+                raise ValueError(f"Base fit {self.base['fit']!r} has no head {head['base']!r}; "
+                                 f"it has {', '.join(sorted(heads))}")
+            if heads[head["base"]]["method"] != "logistic":
+                raise ValueError(f"Head {name!r}: a prior shift needs log-odds scores, from a logistic head; "
+                                 f"{head['base']!r} is a {heads[head['base']]['method']!r} head")
+        # The base fit file gives the model and prefix its heads read embeddings from.
+        settings = EmbeddingHeadsFit(parse_fit_spec(base.record["fit"]["name"],
+                                                    (base.path / "fit.toml").read_text(encoding="utf-8")))
+        return base, settings
+
+    def run(self) -> dict:
+        base, settings = self._load_base()
+        dataset = read_dataset(data_file("datasets", self.tuning["dataset"], suffix=".csv"), allow_target=True)
+        manifest = read_json(data_file("classification", "samples", self.tuning["sample"], suffix=".json"))
+        if manifest.get("purpose") != TUNING_PURPOSE:
+            raise ValueError(f"Sample {self.tuning['sample']!r} has purpose {manifest.get('purpose')!r}, not "
+                             f"{TUNING_PURPOSE!r}; a fit never tunes on a sample that results are reported on")
+        rows = select_rows(dataset, manifest)
+        accepted = load_accepted_gold(data_file("classification", "gold", self.tuning["gold"], suffix=".csv"), rows)
+        target = accepted_shares(rows, accepted)
+        missing = [LABELS[i] for i in range(len(LABELS)) if target[i] == 0]
+        if missing:
+            raise ValueError(f"Every category needs a tuning sentence to set its share; none for: {', '.join(missing)}")
+        embeddings, embedding_summary, model = embed_sentences(
+            settings.model, settings.options["prefix"], settings.options["max_input_tokens"], rows, "tuning sentence")
+        base_heads = base.record["report"]["heads"]
+        label_counts = base.record["report"]["examples"]["label_counts"]
+        strengths = [float(strength) for strength in self.options["strengths"]]
+        shifts, assumed, curves, tuned = {}, {}, {}, {}
+        for base_name in dict.fromkeys(head["base"] for head in self.heads.values()):
+            assumed[base_name] = training_shares(base_heads[base_name], label_counts)
+            shifts[base_name] = np.log(target) - np.log(assumed[base_name])
+            weight, bias = base.tensors[f"{base_name}.weight"], base.tensors[f"{base_name}.bias"]
+            curves[base_name] = []
+            for strength in strengths:
+                # The same float32 bias the shifted head stores, so these predictions are the head's own.
+                shifted = (bias + strength * shifts[base_name]).astype(np.float32)
+                predictions = (embeddings @ weight.T + shifted).argmax(axis=1)
+                responses = [{"id": row.id, "raw_output": json.dumps({"label_id": int(label)})}
+                             for row, label in zip(rows, predictions, strict=True)]
+                metrics, _, _ = evaluate(rows, responses, accepted)
+                curves[base_name].append({"strength": strength, "accuracy": metrics["accepted_accuracy"],
+                                          "macro_accuracy": metrics["macro_accuracy"]})
+            # max keeps the first of equal scores, so the weakest shift wins a tie.
+            tuned[base_name] = max(curves[base_name], key=lambda entry: entry["accuracy"])["strength"]
+            print(f"Base head {base_name}: tuned strength {tuned[base_name]:g}", flush=True)
+        tensors, heads = {}, {}
+        for name, head in self.heads.items():
+            base_name = head["base"]
+            strength = tuned[base_name] if head["strength"] == "tuned" else float(head["strength"])
+            shift = strength * shifts[base_name]
+            tensors[f"{name}.weight"] = base.tensors[f"{base_name}.weight"].copy()
+            tensors[f"{name}.bias"] = (base.tensors[f"{base_name}.bias"] + shift).astype(np.float32)
+            heads[name] = {**{key: base_heads[base_name][key] for key in ("method", "class_weight", "c")},
+                           "base_head": base_name, "strength": strength,
+                           "strength_choice": "tuned" if head["strength"] == "tuned" else "fixed",
+                           "shift": shift.tolist()}
+        report = {
+            "base": {"reference": base.reference, "fit_sha256": base.record["fit_sha256"],
+                     "weights_sha256": base.record["weights_sha256"]},
+            "model": model, "prefix": settings.options["prefix"],
+            "max_input_tokens": settings.options["max_input_tokens"],
+            "tuning": {
+                "dataset": {"name": self.tuning["dataset"], "sha256": dataset.sha256},
+                "sample": {"name": self.tuning["sample"], "manifest_sha256": manifest["manifest_sha256"],
+                           "n": len(rows)},
+                "gold": {"name": self.tuning["gold"], "accepted_gold_sha256": accepted_gold_digest(rows, accepted)},
+            },
+            "target_shares": dict(zip(LABELS, target.tolist())),
+            "target_counting": "Each tuning sentence counts once, split evenly among its accepted labels.",
+            "training_shares": {name: dict(zip(LABELS, shares.tolist())) for name, shares in assumed.items()},
+            "embeddings": embedding_summary,
+            "tuning_scores": curves,
+            "heads": heads,
+            "scoring": "Category scores are weight @ normalized embedding + bias; the highest score wins. Each bias "
+                       "is the base head's plus strength * (log target share - log training share). A tuned "
+                       "strength has the highest accepted-label accuracy on the tuning sentences; the smallest "
+                       "wins a tie.",
+        }
+        return {"report": report, "tensors": tensors}
+
+
+FITTERS = {fitter.kind: fitter for fitter in (EmbeddingHeadsFit, PriorShiftFit)}

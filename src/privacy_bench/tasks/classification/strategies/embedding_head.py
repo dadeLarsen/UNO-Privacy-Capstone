@@ -7,7 +7,9 @@ The condition names a fit record and one of its heads::
     head = "linear-balanced"
     max_input_tokens = 8192
 
-The instruction prefix comes from the fit, so sentences are embedded exactly as its examples were.
+The instruction prefix comes from the fit, so sentences are embedded exactly as its examples were. A
+``prior-shift`` fit reshapes the heads of an ``embedding-heads`` fit, its base; the model and prefix then
+come from the base fit, whose hashes must match the ones the prior-shift fit recorded.
 """
 
 import json
@@ -22,9 +24,26 @@ from ....models.sentence_embedder import SentenceEmbedder
 from ..taxonomy import LABELS
 from .settings import first_argmax, model_settings, option_settings, text_sha256
 
-FIT_KIND = "embedding-heads"
+EMBEDDING_FIT_KIND = "embedding-heads"
+PRIOR_SHIFT_KIND = "prior-shift"
+FIT_KINDS = (EMBEDDING_FIT_KIND, PRIOR_SHIFT_KIND)
 # The fit's embeddings are only valid for the same checkpoint at the same precision and module set.
 MATCHED_MODEL_KEYS = {"id": None, "revision": None, "precision": None, "text_only": False}
+HEAD_KEYS = ("method", "class_weight", "c", "base_head", "strength")
+
+
+def base_fit(fit):
+    """The embedding-heads fit a prior-shift fit was made from, checked against the hashes it recorded."""
+    recorded = fit.record["report"]["base"]
+    base = load_fit(resolve_fit(recorded["reference"]))
+    if base.record["kind"] != EMBEDDING_FIT_KIND:
+        raise ValueError(f"Base fit {recorded['reference']!r} is a {base.record['kind']!r} fit, "
+                         f"not {EMBEDDING_FIT_KIND!r}")
+    changed = [key for key in ("fit_sha256", "weights_sha256") if base.record[key] != recorded[key]]
+    if changed:
+        raise ValueError(f"Base fit {recorded['reference']!r} differs from the one {fit.reference!r} shifted: "
+                         f"{', '.join(changed)}")
+    return base
 
 
 class EmbeddingHeadStrategy:
@@ -35,27 +54,32 @@ class EmbeddingHeadStrategy:
 
     @staticmethod
     def condition_label(spec: dict) -> str:
-        return "Embedding\nhead\n" + spec["head"]["name"]
+        head = spec["head"]
+        if "strength" in head:
+            return f"Embedding\nhead\n{head['base_head']}\nprior shift {head['strength']:g}"
+        return "Embedding\nhead\n" + head["name"]
 
     def __init__(self, condition: Condition):
         self.model = model_settings(condition, optional={"device": "cuda", "text_only": False})
         self.options = option_settings(condition, required=("fit", "head", "max_input_tokens"))
         fit = load_fit(resolve_fit(self.options["fit"]))
-        if fit.record["kind"] != FIT_KIND:
-            raise ValueError(f"Fit {self.options['fit']!r} is a {fit.record['kind']!r} fit, not {FIT_KIND!r}")
-        fitted_model = fit.record["fit"]["model"]
+        if fit.record["kind"] not in FIT_KINDS:
+            raise ValueError(f"Fit {self.options['fit']!r} is a {fit.record['kind']!r} fit, "
+                             f"not {' or '.join(map(repr, FIT_KINDS))}")
+        embedding_fit = fit if fit.record["kind"] == EMBEDDING_FIT_KIND else base_fit(fit)
+        fitted_model = embedding_fit.record["fit"]["model"]
         differing = [key for key, default in MATCHED_MODEL_KEYS.items()
                      if fitted_model.get(key, default) != self.model[key]]
         if differing:
-            raise ValueError(f"Condition [model] differs from the model fit {self.options['fit']!r} used: "
+            raise ValueError(f"Condition [model] differs from the model fit {embedding_fit.reference!r} used: "
                              f"{', '.join(differing)}")
         head = self.options["head"]
         heads = fit.record["report"]["heads"]
         if head not in heads:
             raise ValueError(f"Fit {self.options['fit']!r} has no head {head!r}; it has {', '.join(sorted(heads))}")
         self._fit = fit
-        self._head = {"name": head, **{key: heads[head][key] for key in ("method", "class_weight", "c")
-                                       if key in heads[head]}}
+        self._embedding_fit = embedding_fit
+        self._head = {"name": head, **{key: heads[head][key] for key in HEAD_KEYS if key in heads[head]}}
         self._weight = torch.from_numpy(fit.tensors[f"{head}.weight"])
         self._bias = torch.from_numpy(fit.tensors[f"{head}.bias"])
         if tuple(self._weight.shape) != (len(LABELS), self._weight.shape[1]) or tuple(self._bias.shape) != (len(LABELS),):
@@ -63,15 +87,21 @@ class EmbeddingHeadStrategy:
         self._backend = None
 
     @property
+    def prefix(self) -> str:
+        return self._embedding_fit.record["report"]["prefix"]
+
+    @property
     def input_spec(self) -> dict:
-        report = self._fit.record["report"]
+        fit = {"reference": self._fit.reference, "fit_sha256": self._fit.record["fit_sha256"],
+               "weights_sha256": self._fit.record["weights_sha256"],
+               "examples": self._embedding_fit.record["report"]["examples"]["examples"]}
+        if self._fit is not self._embedding_fit:
+            fit.update({key: self._fit.record["report"][key] for key in ("base", "tuning")})
         return {
-            "name": "embedding-head", "labels": list(LABELS),
-            "fit": {"reference": self._fit.reference, "fit_sha256": self._fit.record["fit_sha256"],
-                    "weights_sha256": self._fit.record["weights_sha256"], "examples": report["examples"]["examples"]},
+            "name": "embedding-head", "labels": list(LABELS), "fit": fit,
             "head": {**self._head, "weight_sha256": digest_bytes(self._weight.numpy().tobytes()),
                      "bias_sha256": digest_bytes(self._bias.numpy().tobytes())},
-            "prefix": report["prefix"], "scores": "weight @ normalized float32 embedding + bias",
+            "prefix": self.prefix, "scores": "weight @ normalized float32 embedding + bias",
             "max_input_tokens": self.options["max_input_tokens"], "truncation": False, "batch_size": 1,
         }
 
@@ -91,7 +121,7 @@ class EmbeddingHeadStrategy:
 
     def prepare(self, row) -> dict:
         return {"text_sha256": text_sha256(row.text),
-                "encoded": self._backend.encode(row.text, self._fit.record["report"]["prefix"])}
+                "encoded": self._backend.encode(row.text, self.prefix)}
 
     def describe(self, prepared) -> dict:
         return {"input_tokens": len(prepared["encoded"]["input_ids"])}

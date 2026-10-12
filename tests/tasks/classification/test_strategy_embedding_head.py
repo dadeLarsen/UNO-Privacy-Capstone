@@ -88,7 +88,7 @@ def test_invalid_conditions_fail_before_any_model_loads(make_condition, fits_roo
 
 def test_fits_of_another_kind_are_refused(make_condition, fits_root):
     fits_root(FIT_SPEC.replace("embedding-heads", "other-kind"), name="other")
-    with pytest.raises(ValueError, match="'other-kind' fit, not 'embedding-heads'"):
+    with pytest.raises(ValueError, match="'other-kind' fit, not 'embedding-heads' or 'prior-shift'"):
         EmbeddingHeadStrategy(make_condition("embedding-head", MODEL,
                                              options(fit="classification/other/20261012-000000Z")))
 

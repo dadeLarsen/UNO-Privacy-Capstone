@@ -72,7 +72,7 @@ A comparison's `[scoring]` table takes `gold` and, optionally, `sample`. With a 
 | `classifier-head` | sequence classifier | the raw sentence | the classifier forward pass |
 | `jev-choice` | JEV judge | JEV's bare choice template with the ten categories and definitions as options A–J | the backbone forward pass and the decision head |
 | `embedding-similarity` | sentence embedder | the sentence after the condition's `sentence_prefix`; each category's name and definition are embedded once, after its `category_prefix` | the embedding forward pass |
-| `embedding-head` | sentence embedder | the sentence after the `prefix` its fit used; a fitted head from `results/fits/` scores the categories (see [Fitted heads](#fitted-heads)) | the embedding forward pass; the head's 10-row product is not timed |
+| `embedding-head` | sentence embedder | the sentence after the `prefix` its fit used; a fitted head from `results/fits/`, possibly prior-shifted, scores the categories (see [Fitted heads](#fitted-heads)) | the embedding forward pass; the head's 10-row product is not timed |
 
 No strategy truncates an input: every input is checked against the condition's limit before the first model call, and one input over the limit stops the run.
 
@@ -86,3 +86,12 @@ The `embedding-heads` fit embeds every example once with a sentence embedder, af
 - `logistic`: a multinomial logistic regression with `class_weight` `balanced` (every category weighs the same) or `none` (categories weigh as often as they occur among the examples). Stratified cross-validation on the examples, scored by balanced accuracy, chooses the inverse regularization strength C from `c_values`.
 
 `fit.json` reports each head's cross-validated balanced accuracy, and for logistic heads the score at every C. These scores come from OPP-115 examples only, so they say nothing about the test samples.
+
+### Prior shift
+
+A logistic head expects categories in the mix it was trained on: an even mix with balanced weights, otherwise the examples' own mix. A `prior-shift` fit moves logistic heads of an `embedding-heads` fit, its base, toward the mix of a tuning sample. A logistic head's scores are log-odds, so a new category mix adds `log target share - log training share` to each category's bias. A head's `strength` scales that shift: 0 leaves the base head as it was, and 1 assumes the tuning mix in full.
+
+- The target shares come from the tuning sample's accepted labels. Each sentence counts once, split evenly among its labels, and every category needs at least one sentence.
+- A shifted head keeps its base head's weights. A fixed `strength` is used as given. A `tuned` one is the value in the fit file's `strengths` with the highest accepted-label accuracy on the tuning sentences; the smallest value wins a tie.
+- The fit embeds the tuning sentences once, with the base fit's model and prefix, and `fit.json` reports accuracy and macro accuracy at every strength.
+- A condition names a `prior-shift` fit like any other. The strategy then loads the base fit for the model and prefix, and refuses it unless its hashes match the ones the prior-shift fit recorded.
