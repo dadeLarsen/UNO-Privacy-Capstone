@@ -18,7 +18,7 @@ The provisional hardware target is a desktop or laptop with **8–12 GB of total
 | --- | --- | --- |
 | Shape | A small model labels sentences; a separate generative model rewrites. | One backbone; a task adapter classifies, and the same backbone rewrites. |
 | Tested so far | `skythrone/privacy-model`, and EmbeddingGemma 2 with and without a fitted head. No rewriter tested. | `autotrust/JEV-9B`: a Qwen3.5-9B base with an unmerged LoRA judge adapter and a decision head. Classification only. |
-| Open question | A fitted head on EmbeddingGemma 2 ties the large models when every category counts equally, but trails privacy-model and Qwen3-14B on APPSI-139's natural mix (below). | Whether the base model, with the adapter disabled, rewrites well enough. |
+| Open question | A fitted head on EmbeddingGemma 2 ties the large models when every category counts equally. Shifted toward APPSI-139's category mix, it ties privacy-model on that mix instead, but no head yet leads on both (below). | Whether the base model, with the adapter disabled, rewrites well enough. |
 
 Other working decisions: hardware tiers (roughly 2–4, 8–12, and 16+ GB of RAM) may use different models; AirLLM layer streaming is tentative because it is very slow; and the app classifies one category per sentence for now, while the method should be able to return several later.
 
@@ -50,7 +50,7 @@ The three EmbeddingGemma 2 heads come from one fit on 10,417 OPP-115 sentences o
 
 ### APPSI-139
 
-APPSI-139 annotates sentences from app privacy policies, which no model here was tuned on, except possibly privacy-model, whose training data is not published. A prediction is correct if it matches any **accepted label**: the original mapped labels plus every label ChatGPT Astra marked in a relabeling ([details](docs/classification.md#appsi-139)). The balanced sample takes up to 50 sentences per category (460 in all, as only 10 carry Do Not Track); its macro accuracy, in brackets, weighs each category equally. Sources: [comparisons/appsi139-random-1000.toml](comparisons/appsi139-random-1000.toml), [comparisons/appsi139-balanced-50.toml](comparisons/appsi139-balanced-50.toml), and [comparisons/appsi139-all.toml](comparisons/appsi139-all.toml).
+APPSI-139 annotates sentences from app privacy policies, which no model here was tuned on, except possibly privacy-model, whose training data is not published, and the shifted heads [below](#shifting-the-heads-toward-appsi-139s-category-mix), which tuned on one half of it. A prediction is correct if it matches any **accepted label**: the original mapped labels plus every label ChatGPT Astra marked in a relabeling ([details](docs/classification.md#appsi-139)). The balanced sample takes up to 50 sentences per category (460 in all, as only 10 carry Do Not Track); its macro accuracy, in brackets, weighs each category equally. Sources: [comparisons/appsi139-random-1000.toml](comparisons/appsi139-random-1000.toml), [comparisons/appsi139-balanced-50.toml](comparisons/appsi139-balanced-50.toml), and [comparisons/appsi139-all.toml](comparisons/appsi139-all.toml).
 
 | Model | Strategy | Precision | 1,000 random | 460 balanced (macro) | All 13,291 |
 | --- | --- | --- | ---: | ---: | ---: |
@@ -65,18 +65,38 @@ APPSI-139 annotates sentences from app privacy policies, which no model here was
 | EmbeddingGemma 2 | category averages of examples, nothing trained | BF16 | 0.755 | 0.815 (0.830) | 0.774 |
 | EmbeddingGemma 2 | similarity to definitions, best instruction | BF16 | 0.487 | 0.641 (0.670) | |
 
-Against the original mapped labels alone, accuracy on the 1,000 random sentences is 0.65–0.71 (0.39 for the similarity run), and Qwen3-14B (0.694–0.699) falls just behind JEV-9B (0.713–0.714) and privacy-model (0.712). Speed and memory match the pilot, except that EmbeddingGemma 2 peaked at 1.3 GiB on the longest APPSI-139 sentences.
+Against the original mapped labels alone, accuracy on the 1,000 random sentences is 0.65–0.71 (0.39 for the similarity run), and Qwen3-14B (0.694–0.699) falls just behind JEV-9B (0.713–0.714) and privacy-model (0.712). Speed and memory match the pilot; EmbeddingGemma 2 peaks at 0.57 GiB on the longest test-half sentence (460 tokens). Its runs on all 13,291 sentences report up to 1.33 GiB, but a leak caused that, not the sentences: each sentence's outputs stayed on the GPU until the run ended. The leak is fixed, and it never changed a prediction.
 
 Findings:
 
-- **A linear head on frozen EmbeddingGemma 2 embeddings ties the 14B chat model when every category counts equally,** at 0.04 s per sentence and 0.5–1.3 GiB. On the pilot it scored 0.910 against Qwen3-14B INT8's 0.890, and on the balanced APPSI-139 sample 0.867 against 0.883–0.891 for Qwen3-14B and JEV-9B; neither gap is beyond chance (exact McNemar p = 0.54, 0.42, 0.22). It beat privacy-model on both (p < 0.001 and p = 0.04).
-- **On APPSI-139's natural mix, privacy-model and the large models lead.** Across all 13,291 sentences privacy-model scored 0.860 against 0.825 for the best head (p < 10⁻²⁰). Its lead comes from First Party Collection/Use, almost half of the corpus, where it scored 0.908 against 0.77–0.83, and from Other (0.943 against 0.79–0.81); the heads were ahead in every other category. On 1,000 random sentences Qwen3-14B NF4 scored 0.869, ahead of JEV-9B NF4's 0.841 (p = 0.009).
+- **A linear head on frozen EmbeddingGemma 2 embeddings ties the 14B chat model when every category counts equally,** at 0.04 s per sentence and 0.5–0.6 GiB. On the pilot it scored 0.910 against Qwen3-14B INT8's 0.890, and on the balanced APPSI-139 sample 0.867 against 0.883–0.891 for Qwen3-14B and JEV-9B; neither gap is beyond chance (exact McNemar p = 0.54, 0.42, 0.22). It beat privacy-model on both (p < 0.001 and p = 0.04).
+- **On APPSI-139's natural mix, privacy-model and the large models lead.** Across all 13,291 sentences privacy-model scored 0.860 against 0.825 for the best head (p < 10⁻²⁰). Its lead comes from First Party Collection/Use, almost half of the corpus, where it scored 0.908 against 0.77–0.83, and from Other (0.943 against 0.79–0.81); the heads were ahead in every other category. On 1,000 random sentences Qwen3-14B NF4 scored 0.869, ahead of JEV-9B NF4's 0.841 (p = 0.009). Shifting a head toward APPSI-139's mix closes the First Party gap ([below](#shifting-the-heads-toward-appsi-139s-category-mix)).
 - **Class weighting trades the balanced score against the natural one.** Weighting categories equally in training gave the best balanced scores; weighting them by OPP-115 frequency gave the best natural-mix scores. The category-averages head, which trains nothing, stays 5–6 points behind the better linear head everywhere.
 - **EmbeddingGemma 2 without a head is far behind.** Matching sentences against one definition per category scored 0.575–0.655 on the pilot and 0.487 on random APPSI-139 sentences; its errors are near misses between categories that share a topic.
 - **The instruction prefix helps EmbeddingGemma 2 only a little.** Against 0.575 with its classification instruction, sentence similarity scores 0.610 and search mode 0.605 with the sentence as the query or 0.655 with each category description as the query. Only the 0.655 gain is beyond chance on 200 sentences, and it was picked from three tries on the same pilot. Each instruction mostly changes which categories collect too many sentences; User Choice sentences go to Do Not Track under all four. Source: [comparisons/embeddinggemma2-instructions.toml](comparisons/embeddinggemma2-instructions.toml).
 - **Library versions matter for JEV-9B.** Moving from transformers 5.16.1 to 5.19.0 made JEV 1.6–2.3× faster and shifted its logits slightly; two INT8 near-ties flipped in opposite directions. Qwen3-14B and privacy-model were unaffected. The original JEV runs are kept for comparison in [comparisons/qwen-privacy-jev.toml](comparisons/qwen-privacy-jev.toml).
 - **Quantization barely changes accuracy.** Qwen3-14B: 0.890 INT8, 0.885 NF4 (0.900 BF16 with CPU offload, in the AirLLM archive). JEV-9B: 0.860, 0.860, 0.855. NF4 roughly halves memory.
 - **Rewriting has not been evaluated at all.** Every measurement here is classification.
+
+### Shifting the heads toward APPSI-139's category mix
+
+A logistic head expects the category mix it trained on: an even mix for the balanced head, OPP-115's for the frequency head. A prior shift adds `strength × (log target share − log training share)` to each category's bias ([details](docs/classification.md#prior-shift)). APPSI-139 is split into a tuning half (7,233 sentences) and a test half (6,058). Each run of rising source IDs, which appears to hold one or more whole policies, stays in one half. The tuning half alone set the target mix (First Party Collection/Use 0.42, Other 0.11) and chose the strength from 0, 0.1, …, 1 by accuracy. Every number below comes from the test half or the balanced sample. Sources: [comparisons/appsi139-test-half.toml](comparisons/appsi139-test-half.toml) and [comparisons/appsi139-balanced-50-prior-shift.toml](comparisons/appsi139-balanced-50-prior-shift.toml).
+
+| Model | Strategy | Shift strength | Test half (macro²) | 460 balanced (macro) |
+| --- | --- | ---: | ---: | ---: |
+| skythrone/privacy-model | classifier head, raw sentence | | 0.858 (0.835) | 0.824 (0.790) |
+| EmbeddingGemma 2 | fitted head: linear, classes weighted equally | 0 | 0.816 (0.858) | 0.867 (0.878) |
+| EmbeddingGemma 2 | fitted head: linear, classes weighted equally | 0.9, tuned | 0.858 (0.850) | 0.817 (0.792) |
+| EmbeddingGemma 2 | fitted head: linear, classes weighted equally | 1 | 0.856 (0.845) | 0.811 (0.786) |
+| EmbeddingGemma 2 | fitted head: linear, OPP-115 class frequencies | 0 | 0.832 (0.834) | 0.807 (0.798) |
+| EmbeddingGemma 2 | fitted head: linear, OPP-115 class frequencies | 1, tuned | 0.850 (0.845) | 0.826 (0.808) |
+
+² Over the seven categories that APPSI-139's original labels use.
+
+- **The shift closes the natural-mix gap to privacy-model.** On the test half the tuned balanced head scored 0.8575 against privacy-model's 0.8584 (exact McNemar p = 0.90), up from 0.816 unshifted (p < 10⁻²¹). First Party Collection/Use rose from 0.771 to 0.895, against privacy-model's 0.909.
+- **Other stays behind.** It rose only from 0.803 to 0.814, against privacy-model's 0.944. APPSI-139's Other holds contact information only, while OPP-115's also holds introductions and practices the categories do not cover, so this gap is about what Other means, not how common it is.
+- **The shift gives up the balanced lead.** On the balanced sample the tuned balanced head fell from 0.867 to 0.817 (p = 0.003), level with privacy-model (p = 0.82) and behind Qwen3-14B and JEV-9B (p ≤ 0.001). Rarer categories lose: Policy Change fell from 0.92 to 0.76, Data Retention from 0.92 to 0.82, and Do Not Track from 10 of 10 to 5 of 10, while First Party Collection/Use rose from 0.78 to 0.90. No head here leads on both mixes. On the tuning half, macro accuracy peaked near strength 0.3–0.4, a possible compromise that the test half has not checked.
+- **Strengths near 1 differ little.** Strength 0.9 and 1 disagree on 65 test-half sentences, split 36 to 29 (p = 0.46). The frequency head also tuned to full strength and finished at 0.850, behind the balanced head (p = 0.03).
 
 Earlier findings kept in the AirLLM archive (`C:\Projects\AirLLM`), from runners not carried over:
 
