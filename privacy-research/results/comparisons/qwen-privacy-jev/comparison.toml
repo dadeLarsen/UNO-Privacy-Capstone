@@ -1,0 +1,13 @@
+task = "classification"
+title = "Qwen3, skythrone/privacy-model, and JEV-9B"
+runs = [
+    "classification/qwen3-14b-int8-definitions/20260918-220631Z",
+    "classification/qwen3-14b-nf4-definitions/20260918-221813Z",
+    "classification/privacy-model-fp32/20261002-213049Z",
+    "classification/jev-9b-bf16-definitions/20261002-202421Z",
+    "classification/jev-9b-int8-definitions/20261002-205218Z",
+    "classification/jev-9b-nf4-definitions/20261002-205049Z",
+]
+
+[scoring]
+gold = "pilot-200-10cat-reviewed"

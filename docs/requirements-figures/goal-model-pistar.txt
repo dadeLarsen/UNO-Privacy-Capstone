@@ -1,0 +1,1216 @@
+{
+  "actors": [
+    {
+      "id": "75747d17-2c9e-5e5c-b403-1bbd3733e94f",
+      "text": "A1 User",
+      "type": "istar.Actor",
+      "x": 40,
+      "y": 50,
+      "customProperties": {
+        "Description": "Someone trying to understand a privacy policy. No legal or technical background is assumed."
+      },
+      "nodes": [
+        {
+          "id": "ae92e4c1-87c2-5a2f-aff6-68532dbd9e8b",
+          "text": "G1 Policy understood",
+          "type": "istar.Goal",
+          "x": 55,
+          "y": 309,
+          "customProperties": {
+            "Description": "The user knows what the policy says about their data: what is collected, who gets it, how long it is kept, and what choices they have."
+          }
+        },
+        {
+          "id": "03dbfe42-7233-5bbe-865f-8929b5ce605f",
+          "text": "T1 Paste policy text",
+          "type": "istar.Task",
+          "x": 320,
+          "y": 89,
+          "customProperties": {
+            "Description": "Paste the policy into the app."
+          }
+        },
+        {
+          "id": "b4da4168-c4a1-5d6e-86cc-188e1a452f98",
+          "text": "G2 Practices located",
+          "type": "istar.Goal",
+          "x": 325,
+          "y": 229,
+          "customProperties": {
+            "Description": "The user can find the sentences about a practice without reading the whole policy."
+          }
+        },
+        {
+          "id": "b4c632f3-6cc6-5802-9069-1a4e2216f237",
+          "text": "G3 Wording made clearer",
+          "type": "istar.Goal",
+          "x": 325,
+          "y": 391,
+          "customProperties": {
+            "Description": "The user gets hard passages in plainer language."
+          }
+        },
+        {
+          "id": "7d32d99e-7c7e-506a-ac27-e9a8ff5f0d54",
+          "text": "T2 Highlight and filter categories",
+          "type": "istar.Task",
+          "x": 555,
+          "y": 221,
+          "customProperties": {
+            "Description": "Turn on category highlighting and narrow it to the categories of interest."
+          }
+        },
+        {
+          "id": "7ab3292f-2f53-584d-ac20-bbac53208e07",
+          "text": "T3 Request a rewrite",
+          "type": "istar.Task",
+          "x": 560,
+          "y": 399,
+          "customProperties": {
+            "Description": "Ask the app to rewrite a passage or the whole policy."
+          }
+        },
+        {
+          "id": "6176f5e3-2ca3-571c-b2fb-6e7582c3f213",
+          "text": "T4 Pick a rewrite style",
+          "type": "istar.Task",
+          "x": 325,
+          "y": 506,
+          "customProperties": {
+            "Description": "Choose one of the three rewrite actions."
+          }
+        },
+        {
+          "id": "c527a124-574f-5660-81ae-5828d7a0a399",
+          "text": "T4a Paraphrase",
+          "type": "istar.Task",
+          "x": 165,
+          "y": 619,
+          "customProperties": {
+            "Description": "Same detail, clearer wording."
+          }
+        },
+        {
+          "id": "22c26ed6-48ff-541d-b72b-50af7f5ad3ce",
+          "text": "T4b Simplify for Kids",
+          "type": "istar.Task",
+          "x": 325,
+          "y": 619,
+          "customProperties": {
+            "Description": "Short sentences and everyday words for younger readers."
+          }
+        },
+        {
+          "id": "be09df76-6aa6-55b5-a344-bd9c04f98067",
+          "text": "T4c Simplify for Adults",
+          "type": "istar.Task",
+          "x": 510,
+          "y": 611,
+          "customProperties": {
+            "Description": "Plain language for adults. The thesis framed this around older readers."
+          }
+        },
+        {
+          "id": "4d4b4e75-60a0-5dbd-84a6-db2bf63fd947",
+          "text": "Q2 Easy to read",
+          "type": "istar.Quality",
+          "x": 325,
+          "y": 718,
+          "customProperties": {
+            "Description": "Rewrites are easier to read than the source."
+          }
+        },
+        {
+          "id": "b0b83af2-ac30-5efb-8701-c35111f7aed0",
+          "text": "Q1 Policy stays private",
+          "type": "istar.Quality",
+          "x": 605,
+          "y": 712,
+          "customProperties": {
+            "Description": "Nothing the user pastes leaves their computer."
+          }
+        }
+      ]
+    },
+    {
+      "id": "97cbe4ae-8c43-5b01-aab0-b8460c7f7271",
+      "text": "A4 Privacy Policy Reader",
+      "type": "istar.Actor",
+      "x": 1070,
+      "y": 50,
+      "customProperties": {
+        "Description": "The desktop app. Runs entirely on the user's computer."
+      },
+      "nodes": [
+        {
+          "id": "cd7f4067-03b1-53f8-a8af-a7cab645e76e",
+          "text": "T5 Split text into sentences",
+          "type": "istar.Task",
+          "x": 1105,
+          "y": 81,
+          "customProperties": {
+            "Description": "Keep the original text unchanged and give each sentence a stable ID and position."
+          }
+        },
+        {
+          "id": "3408e60a-b2ff-51ca-96fb-901718edcce6",
+          "text": "R1 Category taxonomy",
+          "type": "istar.Resource",
+          "x": 1340,
+          "y": 81,
+          "customProperties": {
+            "Description": "The ten thesis categories, each with a one-sentence definition (FR-04)."
+          }
+        },
+        {
+          "id": "07e66dc1-8a28-59d9-bf9b-d6a93a932bfe",
+          "text": "G4 Categories shown",
+          "type": "istar.Goal",
+          "x": 1105,
+          "y": 279,
+          "customProperties": {
+            "Description": "Every sentence has a category, and the app can highlight them."
+          }
+        },
+        {
+          "id": "0cfb70d4-ce12-5a6c-9e1f-3e74d2603f71",
+          "text": "T6 Classify sentences",
+          "type": "istar.Task",
+          "x": 1330,
+          "y": 201,
+          "customProperties": {
+            "Description": "Give each sentence one of the ten categories (R1)."
+          }
+        },
+        {
+          "id": "9e08ce5c-d9b2-5fca-8a6b-bcfedbe107f0",
+          "text": "T6a Embedding model + fitted head",
+          "type": "istar.Task",
+          "x": 1488,
+          "y": 81,
+          "customProperties": {
+            "Description": "A small sentence-embedding model with a linear head trained on labeled sentences. The current lead: EmbeddingGemma 2, about 0.04 s per sentence and 0.6 GiB."
+          }
+        },
+        {
+          "id": "084f2136-02cf-5290-937e-db07559de599",
+          "text": "T6b Prompt a large LLM",
+          "type": "istar.Task",
+          "x": 1715,
+          "y": 81,
+          "customProperties": {
+            "Description": "Ask a chat model such as Qwen3-14B for the category. Similar accuracy, but 10–30× slower and 10–16 GiB."
+          }
+        },
+        {
+          "id": "8bb59e5c-4f4a-5c0a-ac37-5bee54c0f8eb",
+          "text": "Q3 Accurate categories",
+          "type": "istar.Quality",
+          "x": 1825,
+          "y": 202,
+          "customProperties": {
+            "Description": "Labels match what a careful reviewer would accept."
+          }
+        },
+        {
+          "id": "54a6a178-e28d-553c-a497-9a9a11b45236",
+          "text": "R2 Local model bundle",
+          "type": "istar.Resource",
+          "x": 1340,
+          "y": 346,
+          "customProperties": {
+            "Description": "Model weights, tokenizers, and runtime files shipped with the app."
+          }
+        },
+        {
+          "id": "15cd30c4-fd7f-5dea-b2e3-79f48e01caad",
+          "text": "Q5 Responsive",
+          "type": "istar.Quality",
+          "x": 1570,
+          "y": 348,
+          "customProperties": {
+            "Description": "Results arrive quickly and the interface never freezes."
+          }
+        },
+        {
+          "id": "19efbaec-6134-5c08-913e-fff35f372be6",
+          "text": "Q6 Fits 8–12 GB memory",
+          "type": "istar.Quality",
+          "x": 1755,
+          "y": 342,
+          "customProperties": {
+            "Description": "Runs on an ordinary laptop or desktop alongside other apps."
+          }
+        },
+        {
+          "id": "8c4caeec-fee8-545e-9451-387b3ab72cfc",
+          "text": "G5 Rewrite shown",
+          "type": "istar.Goal",
+          "x": 1110,
+          "y": 429,
+          "customProperties": {
+            "Description": "A rewrite appears next to the passage it came from."
+          }
+        },
+        {
+          "id": "0db12adf-517b-5f9f-a37d-d9ee27aae906",
+          "text": "T7 Generate rewrite",
+          "type": "istar.Task",
+          "x": 1330,
+          "y": 491,
+          "customProperties": {
+            "Description": "Produce the requested rewrite with a local generative model."
+          }
+        },
+        {
+          "id": "37adf668-44b9-595e-be79-c32e9868767b",
+          "text": "T7a Small LLM kept in memory",
+          "type": "istar.Task",
+          "x": 1490,
+          "y": 491,
+          "customProperties": {
+            "Description": "A model small enough to stay loaded between requests. Not chosen yet (AR-02)."
+          }
+        },
+        {
+          "id": "36806431-234a-54ff-93b8-5ef4230c9374",
+          "text": "T7b Large LLM streamed with AirLLM",
+          "type": "istar.Task",
+          "x": 1675,
+          "y": 611,
+          "customProperties": {
+            "Description": "Load a larger model layer by layer from disk. Fits in little memory but measured far too slow (Section 8)."
+          }
+        },
+        {
+          "id": "333d80c5-d455-59cf-ad47-2545b0c68908",
+          "text": "T9 Pick models that fit the hardware",
+          "type": "istar.Task",
+          "x": 1823,
+          "y": 531,
+          "customProperties": {
+            "Description": "Detect memory and GPU, then choose model profiles tested for that hardware."
+          }
+        },
+        {
+          "id": "b47e0c92-de29-51b0-b784-0704a726829f",
+          "text": "T8 Link rewrite to source sentences",
+          "type": "istar.Task",
+          "x": 1100,
+          "y": 541,
+          "customProperties": {
+            "Description": "Each rewritten block records the sentences it came from, so the reader can check it."
+          }
+        },
+        {
+          "id": "be4ff5d9-ab67-566e-8636-d97ad848737d",
+          "text": "Q7 Works offline",
+          "type": "istar.Quality",
+          "x": 1110,
+          "y": 662,
+          "customProperties": {
+            "Description": "No internet connection is needed to install, start, or use any feature."
+          }
+        },
+        {
+          "id": "8691d28c-2456-51ed-9d04-401d7781aec3",
+          "text": "Q4 Faithful rewrites",
+          "type": "istar.Quality",
+          "x": 1450,
+          "y": 689,
+          "customProperties": {
+            "Description": "Rewrites keep the source's facts, conditions, numbers, and hedges (may, except) and add nothing."
+          }
+        }
+      ]
+    },
+    {
+      "id": "43c1d703-b282-5476-9053-2cf299ba92eb",
+      "text": "A2 Client",
+      "type": "istar.Actor",
+      "x": 40,
+      "y": 910,
+      "customProperties": {
+        "Description": "Dr. Alfredo J. Perez. Directs the functional requirements and judges whether the output is accurate and useful."
+      },
+      "nodes": [
+        {
+          "id": "88151174-b44f-5231-809f-172b554f8df0",
+          "text": "G6 Policies easier to understand",
+          "type": "istar.Goal",
+          "x": 130,
+          "y": 951,
+          "customProperties": {
+            "Description": "The research goal behind the original thesis."
+          }
+        },
+        {
+          "id": "b713c3f6-488f-5b4a-85b1-311ebd8084e0",
+          "text": "Q8 Accurate, useful output",
+          "type": "istar.Quality",
+          "x": 475,
+          "y": 987,
+          "customProperties": {
+            "Description": "Categories and rewrites are correct and actually help readers."
+          }
+        },
+        {
+          "id": "b1cb6e08-5a25-5c50-aad3-a9946bd0cd97",
+          "text": "G7 Thesis tool works locally",
+          "type": "istar.Goal",
+          "x": 135,
+          "y": 1111,
+          "customProperties": {
+            "Description": "The thesis's classify-and-rewrite tool, rebuilt to run on the user's own computer."
+          }
+        },
+        {
+          "id": "e7a593ab-93d8-5f17-90d5-91207d24f92e",
+          "text": "Q9 User privacy protected",
+          "type": "istar.Quality",
+          "x": 130,
+          "y": 1277,
+          "customProperties": {
+            "Description": "Running locally keeps policies, and what they reveal about the user, private."
+          }
+        },
+        {
+          "id": "40464fa8-3d87-5564-83fc-6dc0d6b84916",
+          "text": "T10 Set project direction",
+          "type": "istar.Task",
+          "x": 490,
+          "y": 1251,
+          "customProperties": {
+            "Description": "Answer scope questions and review results in client meetings."
+          }
+        }
+      ]
+    },
+    {
+      "id": "e5c237ef-5aa7-5fe3-a736-abae9ba8e750",
+      "text": "A3 Dev Team",
+      "type": "istar.Actor",
+      "x": 1070,
+      "y": 910,
+      "customProperties": {
+        "Description": "Ethan McGee, Dade Larsen, Tim Pippin, and Nathan Johnson."
+      },
+      "nodes": [
+        {
+          "id": "7071898d-093b-594b-99e2-33110f93339d",
+          "text": "G9 Models chosen for target hardware",
+          "type": "istar.Goal",
+          "x": 1575,
+          "y": 951,
+          "customProperties": {
+            "Description": "Classifier and rewriter chosen on evidence for each hardware tier."
+          }
+        },
+        {
+          "id": "811d1c63-7e58-58a9-b9fa-404ca76b545b",
+          "text": "G8 App delivered",
+          "type": "istar.Goal",
+          "x": 1110,
+          "y": 1119,
+          "customProperties": {
+            "Description": "The app is built, tested, and handed to the client."
+          }
+        },
+        {
+          "id": "3b66d8cf-953f-54da-bf5c-36f759f0c5ea",
+          "text": "T11 Benchmark classifiers",
+          "type": "istar.Task",
+          "x": 1380,
+          "y": 1111,
+          "customProperties": {
+            "Description": "Compare candidate classifiers on accuracy, speed, and memory (AR-01)."
+          }
+        },
+        {
+          "id": "a5468a01-789b-5b74-bf29-2497dbad9f79",
+          "text": "T12 Evaluate rewriters",
+          "type": "istar.Task",
+          "x": 1595,
+          "y": 1111,
+          "customProperties": {
+            "Description": "Review candidate rewriters for faithfulness and readability (AR-02)."
+          }
+        },
+        {
+          "id": "1fb30c46-c136-5351-9f84-d54f2e8bbf32",
+          "text": "T13 Test on varied hardware",
+          "type": "istar.Task",
+          "x": 1790,
+          "y": 1111,
+          "customProperties": {
+            "Description": "Measure speed and memory on each hardware tier (AR-03)."
+          }
+        },
+        {
+          "id": "a005c446-1000-5c70-bedd-671275b30c1f",
+          "text": "T15 Agree requirements with client",
+          "type": "istar.Task",
+          "x": 1230,
+          "y": 1206,
+          "customProperties": {
+            "Description": "Settle open scope questions with the client."
+          }
+        },
+        {
+          "id": "21ec3823-cfcf-58ad-8f10-01b31f127142",
+          "text": "R3 Labeled datasets (OPP-115, APPSI-139)",
+          "type": "istar.Resource",
+          "x": 1415,
+          "y": 1241,
+          "customProperties": {
+            "Description": "OPP-115 and APPSI-139 sentences with category labels."
+          }
+        },
+        {
+          "id": "5d952a1c-1d78-529b-8026-73b6c1b58a54",
+          "text": "G10 Offline package built",
+          "type": "istar.Goal",
+          "x": 1110,
+          "y": 1291,
+          "customProperties": {
+            "Description": "One installer or bundle per platform with everything the app needs."
+          }
+        },
+        {
+          "id": "8ff706e3-e158-5278-8e5a-38843e06526a",
+          "text": "T14 Bundle app, runtime, and models",
+          "type": "istar.Task",
+          "x": 1610,
+          "y": 1291,
+          "customProperties": {
+            "Description": "Package the UI, Python runtime, and model files for offline installation."
+          }
+        }
+      ]
+    }
+  ],
+  "orphans": [],
+  "dependencies": [
+    {
+      "id": "4a4c9d38-4c45-5ed5-9f89-2dc394f45728",
+      "text": "D1 Policy text",
+      "type": "istar.Resource",
+      "x": 855,
+      "y": 89,
+      "customProperties": {
+        "Description": "The app needs the text to analyze."
+      },
+      "source": "cd7f4067-03b1-53f8-a8af-a7cab645e76e",
+      "target": "03dbfe42-7233-5bbe-865f-8929b5ce605f"
+    },
+    {
+      "id": "24b94a7d-5ee1-57b1-81b5-da68cfc932fc",
+      "text": "D2 Categories shown",
+      "type": "istar.Goal",
+      "x": 855,
+      "y": 271,
+      "customProperties": {
+        "Description": "The user relies on the app to label and highlight sentences."
+      },
+      "source": "7d32d99e-7c7e-506a-ac27-e9a8ff5f0d54",
+      "target": "07e66dc1-8a28-59d9-bf9b-d6a93a932bfe"
+    },
+    {
+      "id": "0e17289e-0b2d-528d-a397-532966307e22",
+      "text": "D3 Rewrite",
+      "type": "istar.Resource",
+      "x": 855,
+      "y": 429,
+      "customProperties": {
+        "Description": "The user relies on the app for rewrites."
+      },
+      "source": "7ab3292f-2f53-584d-ac20-bbac53208e07",
+      "target": "8c4caeec-fee8-545e-9451-387b3ab72cfc"
+    },
+    {
+      "id": "84bae3d6-754e-5182-a220-21a43b764bb0",
+      "text": "D4 Text stays on the computer",
+      "type": "istar.Quality",
+      "x": 845,
+      "y": 712,
+      "customProperties": {
+        "Description": "The user relies on the app not to send the policy anywhere."
+      },
+      "source": "b0b83af2-ac30-5efb-8701-c35111f7aed0",
+      "target": "be4ff5d9-ab67-566e-8636-d97ad848737d"
+    },
+    {
+      "id": "f4fa34d9-2bf5-5a72-8f37-2f080ed024af",
+      "text": "D5 Tested model bundle",
+      "type": "istar.Resource",
+      "x": 1828,
+      "y": 816,
+      "customProperties": {
+        "Description": "The app needs models tested for its hardware tier."
+      },
+      "source": "333d80c5-d455-59cf-ad47-2545b0c68908",
+      "target": "7071898d-093b-594b-99e2-33110f93339d"
+    },
+    {
+      "id": "b23c873f-9136-5291-a393-98e70c120703",
+      "text": "D7 Evaluation results",
+      "type": "istar.Resource",
+      "x": 855,
+      "y": 991,
+      "customProperties": {
+        "Description": "The client relies on the team for evidence that the output is accurate and useful."
+      },
+      "source": "b713c3f6-488f-5b4a-85b1-311ebd8084e0",
+      "target": "7071898d-093b-594b-99e2-33110f93339d"
+    },
+    {
+      "id": "4c496232-5f9a-5f9d-956b-35b2ace43b41",
+      "text": "D6 Offline app delivered",
+      "type": "istar.Goal",
+      "x": 850,
+      "y": 1111,
+      "customProperties": {
+        "Description": "The client relies on the team to deliver the app."
+      },
+      "source": "b1cb6e08-5a25-5c50-aad3-a9946bd0cd97",
+      "target": "811d1c63-7e58-58a9-b9fa-404ca76b545b"
+    },
+    {
+      "id": "004f5ceb-ec47-58f2-92d7-b8f5005e3d3e",
+      "text": "D8 Requirement decisions",
+      "type": "istar.Resource",
+      "x": 855,
+      "y": 1251,
+      "customProperties": {
+        "Description": "The team needs the client's decisions on open scope questions (FR-07, FR-11, FR-26)."
+      },
+      "source": "a005c446-1000-5c70-bedd-671275b30c1f",
+      "target": "40464fa8-3d87-5564-83fc-6dc0d6b84916"
+    }
+  ],
+  "links": [
+    {
+      "id": "4bae4e8f-f600-5ca3-9e2d-bc010c4da717",
+      "type": "istar.DependencyLink",
+      "source": "cd7f4067-03b1-53f8-a8af-a7cab645e76e",
+      "target": "4a4c9d38-4c45-5ed5-9f89-2dc394f45728"
+    },
+    {
+      "id": "93d0ad1c-798e-5197-b8ad-772477f3aa5b",
+      "type": "istar.DependencyLink",
+      "source": "4a4c9d38-4c45-5ed5-9f89-2dc394f45728",
+      "target": "03dbfe42-7233-5bbe-865f-8929b5ce605f"
+    },
+    {
+      "id": "57dd62c8-c5fb-502d-be3d-c85a8eacacdb",
+      "type": "istar.DependencyLink",
+      "source": "7d32d99e-7c7e-506a-ac27-e9a8ff5f0d54",
+      "target": "24b94a7d-5ee1-57b1-81b5-da68cfc932fc"
+    },
+    {
+      "id": "e667e7fb-7244-5b83-b4a1-6fbc1bcf61d4",
+      "type": "istar.DependencyLink",
+      "source": "24b94a7d-5ee1-57b1-81b5-da68cfc932fc",
+      "target": "07e66dc1-8a28-59d9-bf9b-d6a93a932bfe"
+    },
+    {
+      "id": "a55cf781-4f3c-5b75-a981-deb7afdc76e4",
+      "type": "istar.DependencyLink",
+      "source": "7ab3292f-2f53-584d-ac20-bbac53208e07",
+      "target": "0e17289e-0b2d-528d-a397-532966307e22"
+    },
+    {
+      "id": "f8612893-fc7c-517c-9b6c-d71865e5dcb1",
+      "type": "istar.DependencyLink",
+      "source": "0e17289e-0b2d-528d-a397-532966307e22",
+      "target": "8c4caeec-fee8-545e-9451-387b3ab72cfc"
+    },
+    {
+      "id": "3b97c47a-5202-5273-a464-79dcc0e05e8a",
+      "type": "istar.DependencyLink",
+      "source": "b0b83af2-ac30-5efb-8701-c35111f7aed0",
+      "target": "84bae3d6-754e-5182-a220-21a43b764bb0"
+    },
+    {
+      "id": "75cdb139-4de2-5da8-8237-043895c2017e",
+      "type": "istar.DependencyLink",
+      "source": "84bae3d6-754e-5182-a220-21a43b764bb0",
+      "target": "be4ff5d9-ab67-566e-8636-d97ad848737d"
+    },
+    {
+      "id": "4cee4e0e-6a50-5503-90a4-cab6df01e30a",
+      "type": "istar.DependencyLink",
+      "source": "333d80c5-d455-59cf-ad47-2545b0c68908",
+      "target": "f4fa34d9-2bf5-5a72-8f37-2f080ed024af"
+    },
+    {
+      "id": "87b92f65-b732-598c-81de-607078893c5a",
+      "type": "istar.DependencyLink",
+      "source": "f4fa34d9-2bf5-5a72-8f37-2f080ed024af",
+      "target": "7071898d-093b-594b-99e2-33110f93339d"
+    },
+    {
+      "id": "af40decd-ccc2-550b-b208-e1717668e882",
+      "type": "istar.DependencyLink",
+      "source": "b713c3f6-488f-5b4a-85b1-311ebd8084e0",
+      "target": "b23c873f-9136-5291-a393-98e70c120703"
+    },
+    {
+      "id": "10d7b118-ca8a-540e-9dda-d1952229dcb0",
+      "type": "istar.DependencyLink",
+      "source": "b23c873f-9136-5291-a393-98e70c120703",
+      "target": "7071898d-093b-594b-99e2-33110f93339d"
+    },
+    {
+      "id": "f6fcfe26-c330-5e60-98ab-19b382c126a8",
+      "type": "istar.DependencyLink",
+      "source": "b1cb6e08-5a25-5c50-aad3-a9946bd0cd97",
+      "target": "4c496232-5f9a-5f9d-956b-35b2ace43b41"
+    },
+    {
+      "id": "4c5d58f4-7d2c-5410-8d8a-ac07c1fa2aa3",
+      "type": "istar.DependencyLink",
+      "source": "4c496232-5f9a-5f9d-956b-35b2ace43b41",
+      "target": "811d1c63-7e58-58a9-b9fa-404ca76b545b"
+    },
+    {
+      "id": "49d5c122-73c1-57cb-a142-2a1584c746c4",
+      "type": "istar.DependencyLink",
+      "source": "a005c446-1000-5c70-bedd-671275b30c1f",
+      "target": "004f5ceb-ec47-58f2-92d7-b8f5005e3d3e"
+    },
+    {
+      "id": "37be645d-7aa4-570b-ab78-1faee0c5156e",
+      "type": "istar.DependencyLink",
+      "source": "004f5ceb-ec47-58f2-92d7-b8f5005e3d3e",
+      "target": "40464fa8-3d87-5564-83fc-6dc0d6b84916"
+    },
+    {
+      "id": "62d2e756-d1f7-5a28-b2ac-8962c9cd2e04",
+      "type": "istar.AndRefinementLink",
+      "source": "03dbfe42-7233-5bbe-865f-8929b5ce605f",
+      "target": "ae92e4c1-87c2-5a2f-aff6-68532dbd9e8b"
+    },
+    {
+      "id": "e506ee71-31c7-5ac0-9d36-d2ba316aad84",
+      "type": "istar.AndRefinementLink",
+      "source": "b4da4168-c4a1-5d6e-86cc-188e1a452f98",
+      "target": "ae92e4c1-87c2-5a2f-aff6-68532dbd9e8b"
+    },
+    {
+      "id": "a745be0d-4a43-526c-a143-89be586c1596",
+      "type": "istar.AndRefinementLink",
+      "source": "b4c632f3-6cc6-5802-9069-1a4e2216f237",
+      "target": "ae92e4c1-87c2-5a2f-aff6-68532dbd9e8b"
+    },
+    {
+      "id": "f67474e7-2322-5b39-87ae-3f245ba20254",
+      "type": "istar.AndRefinementLink",
+      "source": "7ab3292f-2f53-584d-ac20-bbac53208e07",
+      "target": "b4c632f3-6cc6-5802-9069-1a4e2216f237"
+    },
+    {
+      "id": "5576cbec-2b44-545f-85d9-b9ffa51915a8",
+      "type": "istar.AndRefinementLink",
+      "source": "6176f5e3-2ca3-571c-b2fb-6e7582c3f213",
+      "target": "b4c632f3-6cc6-5802-9069-1a4e2216f237"
+    },
+    {
+      "id": "51ca34ff-f90a-5b1b-8031-e7a238acc61b",
+      "type": "istar.AndRefinementLink",
+      "source": "cd7f4067-03b1-53f8-a8af-a7cab645e76e",
+      "target": "07e66dc1-8a28-59d9-bf9b-d6a93a932bfe"
+    },
+    {
+      "id": "4b236811-d557-5946-923e-b8cf3e226823",
+      "type": "istar.AndRefinementLink",
+      "source": "0cfb70d4-ce12-5a6c-9e1f-3e74d2603f71",
+      "target": "07e66dc1-8a28-59d9-bf9b-d6a93a932bfe"
+    },
+    {
+      "id": "ca23aec4-9194-5df1-8954-ee8811a993c2",
+      "type": "istar.AndRefinementLink",
+      "source": "0db12adf-517b-5f9f-a37d-d9ee27aae906",
+      "target": "8c4caeec-fee8-545e-9451-387b3ab72cfc"
+    },
+    {
+      "id": "7ebb6186-541b-5eb2-a081-3141708e7a7f",
+      "type": "istar.AndRefinementLink",
+      "source": "b47e0c92-de29-51b0-b784-0704a726829f",
+      "target": "8c4caeec-fee8-545e-9451-387b3ab72cfc"
+    },
+    {
+      "id": "ce7871be-a75f-5daf-a5a6-1488c1619970",
+      "type": "istar.AndRefinementLink",
+      "source": "7071898d-093b-594b-99e2-33110f93339d",
+      "target": "811d1c63-7e58-58a9-b9fa-404ca76b545b"
+    },
+    {
+      "id": "2f6e6883-aac4-5e04-a33f-20aaa24462d8",
+      "type": "istar.AndRefinementLink",
+      "source": "5d952a1c-1d78-529b-8026-73b6c1b58a54",
+      "target": "811d1c63-7e58-58a9-b9fa-404ca76b545b"
+    },
+    {
+      "id": "12596763-88c8-54ef-8472-d4b87fa16da7",
+      "type": "istar.AndRefinementLink",
+      "source": "a005c446-1000-5c70-bedd-671275b30c1f",
+      "target": "811d1c63-7e58-58a9-b9fa-404ca76b545b"
+    },
+    {
+      "id": "7995ffe2-8a2d-570a-8ef6-848221407e73",
+      "type": "istar.AndRefinementLink",
+      "source": "3b66d8cf-953f-54da-bf5c-36f759f0c5ea",
+      "target": "7071898d-093b-594b-99e2-33110f93339d"
+    },
+    {
+      "id": "3dd0026f-ddfb-55ba-a8bb-c9d2eec63426",
+      "type": "istar.AndRefinementLink",
+      "source": "a5468a01-789b-5b74-bf29-2497dbad9f79",
+      "target": "7071898d-093b-594b-99e2-33110f93339d"
+    },
+    {
+      "id": "1d13f620-4bcb-517a-9e14-897d12b5f869",
+      "type": "istar.AndRefinementLink",
+      "source": "1fb30c46-c136-5351-9f84-d54f2e8bbf32",
+      "target": "7071898d-093b-594b-99e2-33110f93339d"
+    },
+    {
+      "id": "1e837ed6-2aef-5510-8579-ce6d682a246c",
+      "type": "istar.AndRefinementLink",
+      "source": "7d32d99e-7c7e-506a-ac27-e9a8ff5f0d54",
+      "target": "b4da4168-c4a1-5d6e-86cc-188e1a452f98"
+    },
+    {
+      "id": "b3ae3eb2-f2c8-5078-aeaf-ddac1378b133",
+      "type": "istar.AndRefinementLink",
+      "source": "b1cb6e08-5a25-5c50-aad3-a9946bd0cd97",
+      "target": "88151174-b44f-5231-809f-172b554f8df0"
+    },
+    {
+      "id": "7632cc96-4c4a-5e29-b77a-2fb7fd371cb1",
+      "type": "istar.AndRefinementLink",
+      "source": "8ff706e3-e158-5278-8e5a-38843e06526a",
+      "target": "5d952a1c-1d78-529b-8026-73b6c1b58a54"
+    },
+    {
+      "id": "0c2dc752-8830-5702-b6bd-ded2b5cda82d",
+      "type": "istar.OrRefinementLink",
+      "source": "c527a124-574f-5660-81ae-5828d7a0a399",
+      "target": "6176f5e3-2ca3-571c-b2fb-6e7582c3f213"
+    },
+    {
+      "id": "791ca244-1b3f-5cd5-8fa9-ea00af825290",
+      "type": "istar.OrRefinementLink",
+      "source": "22c26ed6-48ff-541d-b72b-50af7f5ad3ce",
+      "target": "6176f5e3-2ca3-571c-b2fb-6e7582c3f213"
+    },
+    {
+      "id": "fe503a26-0e57-512e-861c-6042c5466e15",
+      "type": "istar.OrRefinementLink",
+      "source": "be09df76-6aa6-55b5-a344-bd9c04f98067",
+      "target": "6176f5e3-2ca3-571c-b2fb-6e7582c3f213"
+    },
+    {
+      "id": "d6077010-5c49-5f5d-8ce1-ba1022bf6638",
+      "type": "istar.OrRefinementLink",
+      "source": "9e08ce5c-d9b2-5fca-8a6b-bcfedbe107f0",
+      "target": "0cfb70d4-ce12-5a6c-9e1f-3e74d2603f71"
+    },
+    {
+      "id": "64656a1d-eadd-5a3a-9942-57a3894199b3",
+      "type": "istar.OrRefinementLink",
+      "source": "084f2136-02cf-5290-937e-db07559de599",
+      "target": "0cfb70d4-ce12-5a6c-9e1f-3e74d2603f71"
+    },
+    {
+      "id": "c1db3254-39c2-52e8-8be1-1f4b2af01d91",
+      "type": "istar.OrRefinementLink",
+      "source": "37adf668-44b9-595e-be79-c32e9868767b",
+      "target": "0db12adf-517b-5f9f-a37d-d9ee27aae906"
+    },
+    {
+      "id": "58ab8c5a-80f7-546a-8ea1-9cae3fb03593",
+      "type": "istar.OrRefinementLink",
+      "source": "36806431-234a-54ff-93b8-5ef4230c9374",
+      "target": "0db12adf-517b-5f9f-a37d-d9ee27aae906"
+    },
+    {
+      "id": "94752362-6a1d-5628-be35-60a42c6ed160",
+      "type": "istar.ContributionLink",
+      "source": "c527a124-574f-5660-81ae-5828d7a0a399",
+      "target": "4d4b4e75-60a0-5dbd-84a6-db2bf63fd947",
+      "label": "help"
+    },
+    {
+      "id": "5b48952e-ff7a-5a1a-b888-a4f0df943865",
+      "type": "istar.ContributionLink",
+      "source": "22c26ed6-48ff-541d-b72b-50af7f5ad3ce",
+      "target": "4d4b4e75-60a0-5dbd-84a6-db2bf63fd947",
+      "label": "help"
+    },
+    {
+      "id": "a25058f7-f7bc-5d5b-96ed-dfc8e91d5e8b",
+      "type": "istar.ContributionLink",
+      "source": "be09df76-6aa6-55b5-a344-bd9c04f98067",
+      "target": "4d4b4e75-60a0-5dbd-84a6-db2bf63fd947",
+      "label": "help"
+    },
+    {
+      "id": "9a67e942-47f0-59ba-80ba-692370a0a0aa",
+      "type": "istar.ContributionLink",
+      "source": "9e08ce5c-d9b2-5fca-8a6b-bcfedbe107f0",
+      "target": "8bb59e5c-4f4a-5c0a-ac37-5bee54c0f8eb",
+      "label": "help"
+    },
+    {
+      "id": "785d95b7-b588-5070-a5f0-f1a29b0777c1",
+      "type": "istar.ContributionLink",
+      "source": "9e08ce5c-d9b2-5fca-8a6b-bcfedbe107f0",
+      "target": "15cd30c4-fd7f-5dea-b2e3-79f48e01caad",
+      "label": "make"
+    },
+    {
+      "id": "7763a19b-b328-594f-85ac-21d6db24878b",
+      "type": "istar.ContributionLink",
+      "source": "9e08ce5c-d9b2-5fca-8a6b-bcfedbe107f0",
+      "target": "19efbaec-6134-5c08-913e-fff35f372be6",
+      "label": "make"
+    },
+    {
+      "id": "b579dfdd-cf08-5e72-bd2b-f9bcff755ea7",
+      "type": "istar.ContributionLink",
+      "source": "084f2136-02cf-5290-937e-db07559de599",
+      "target": "8bb59e5c-4f4a-5c0a-ac37-5bee54c0f8eb",
+      "label": "help"
+    },
+    {
+      "id": "863561df-7e7c-5aa8-89b1-9611db9532b4",
+      "type": "istar.ContributionLink",
+      "source": "084f2136-02cf-5290-937e-db07559de599",
+      "target": "15cd30c4-fd7f-5dea-b2e3-79f48e01caad",
+      "label": "hurt"
+    },
+    {
+      "id": "45b23f90-bcd9-54aa-815f-07d547967ff6",
+      "type": "istar.ContributionLink",
+      "source": "084f2136-02cf-5290-937e-db07559de599",
+      "target": "19efbaec-6134-5c08-913e-fff35f372be6",
+      "label": "hurt"
+    },
+    {
+      "id": "a1be9bfd-e69d-5e7c-961a-e8affdb8f164",
+      "type": "istar.ContributionLink",
+      "source": "37adf668-44b9-595e-be79-c32e9868767b",
+      "target": "15cd30c4-fd7f-5dea-b2e3-79f48e01caad",
+      "label": "help"
+    },
+    {
+      "id": "6ab89568-16db-50fd-9807-5b2d84a32984",
+      "type": "istar.ContributionLink",
+      "source": "37adf668-44b9-595e-be79-c32e9868767b",
+      "target": "19efbaec-6134-5c08-913e-fff35f372be6",
+      "label": "help"
+    },
+    {
+      "id": "50c8b4b8-9bad-5f3f-b510-0901dee02514",
+      "type": "istar.ContributionLink",
+      "source": "36806431-234a-54ff-93b8-5ef4230c9374",
+      "target": "8691d28c-2456-51ed-9d04-401d7781aec3",
+      "label": "help"
+    },
+    {
+      "id": "fb1917e0-be03-5f6b-a88f-8a02f7a67887",
+      "type": "istar.ContributionLink",
+      "source": "36806431-234a-54ff-93b8-5ef4230c9374",
+      "target": "15cd30c4-fd7f-5dea-b2e3-79f48e01caad",
+      "label": "break"
+    },
+    {
+      "id": "c939ec96-5323-55cd-ac90-6983d234d6eb",
+      "type": "istar.ContributionLink",
+      "source": "36806431-234a-54ff-93b8-5ef4230c9374",
+      "target": "19efbaec-6134-5c08-913e-fff35f372be6",
+      "label": "help"
+    },
+    {
+      "id": "cb08cdec-219c-5dfb-963b-b2eec570426c",
+      "type": "istar.ContributionLink",
+      "source": "b47e0c92-de29-51b0-b784-0704a726829f",
+      "target": "8691d28c-2456-51ed-9d04-401d7781aec3",
+      "label": "help"
+    },
+    {
+      "id": "14417666-e03d-50fc-b311-0b82c331acd2",
+      "type": "istar.ContributionLink",
+      "source": "333d80c5-d455-59cf-ad47-2545b0c68908",
+      "target": "19efbaec-6134-5c08-913e-fff35f372be6",
+      "label": "make"
+    },
+    {
+      "id": "f134a4e8-e4f3-5c69-8919-97d20c9a1614",
+      "type": "istar.ContributionLink",
+      "source": "54a6a178-e28d-553c-a497-9a9a11b45236",
+      "target": "be4ff5d9-ab67-566e-8636-d97ad848737d",
+      "label": "make"
+    },
+    {
+      "id": "6830a96c-99cc-5724-b68c-5ae344997072",
+      "type": "istar.ContributionLink",
+      "source": "b1cb6e08-5a25-5c50-aad3-a9946bd0cd97",
+      "target": "e7a593ab-93d8-5f17-90d5-91207d24f92e",
+      "label": "make"
+    },
+    {
+      "id": "2db1681f-a61c-51cb-bab7-9d47575d6258",
+      "type": "istar.NeededByLink",
+      "source": "3408e60a-b2ff-51ca-96fb-901718edcce6",
+      "target": "0cfb70d4-ce12-5a6c-9e1f-3e74d2603f71"
+    },
+    {
+      "id": "d54d9fa8-db3f-5c38-9cb8-2593c1edf0f5",
+      "type": "istar.NeededByLink",
+      "source": "54a6a178-e28d-553c-a497-9a9a11b45236",
+      "target": "0cfb70d4-ce12-5a6c-9e1f-3e74d2603f71"
+    },
+    {
+      "id": "15287164-153d-503d-a355-04dee4a9d821",
+      "type": "istar.NeededByLink",
+      "source": "54a6a178-e28d-553c-a497-9a9a11b45236",
+      "target": "0db12adf-517b-5f9f-a37d-d9ee27aae906"
+    },
+    {
+      "id": "3cbc9e05-337a-5106-b31d-e4c6581ddeac",
+      "type": "istar.NeededByLink",
+      "source": "21ec3823-cfcf-58ad-8f10-01b31f127142",
+      "target": "3b66d8cf-953f-54da-bf5c-36f759f0c5ea"
+    },
+    {
+      "id": "5394370c-8b94-55ed-bc40-8323807d4c5e",
+      "type": "istar.QualificationLink",
+      "source": "b713c3f6-488f-5b4a-85b1-311ebd8084e0",
+      "target": "88151174-b44f-5231-809f-172b554f8df0"
+    }
+  ],
+  "display": {
+    "ae92e4c1-87c2-5a2f-aff6-68532dbd9e8b": {
+      "width": 150,
+      "height": 42
+    },
+    "03dbfe42-7233-5bbe-865f-8929b5ce605f": {
+      "width": 160,
+      "height": 42
+    },
+    "b4da4168-c4a1-5d6e-86cc-188e1a452f98": {
+      "width": 150,
+      "height": 42
+    },
+    "b4c632f3-6cc6-5802-9069-1a4e2216f237": {
+      "width": 150,
+      "height": 58
+    },
+    "7d32d99e-7c7e-506a-ac27-e9a8ff5f0d54": {
+      "width": 170,
+      "height": 58
+    },
+    "7ab3292f-2f53-584d-ac20-bbac53208e07": {
+      "width": 160,
+      "height": 42
+    },
+    "6176f5e3-2ca3-571c-b2fb-6e7582c3f213": {
+      "width": 150,
+      "height": 58
+    },
+    "c527a124-574f-5660-81ae-5828d7a0a399": {
+      "width": 130,
+      "height": 42
+    },
+    "22c26ed6-48ff-541d-b72b-50af7f5ad3ce": {
+      "width": 150,
+      "height": 42
+    },
+    "be09df76-6aa6-55b5-a344-bd9c04f98067": {
+      "width": 130,
+      "height": 58
+    },
+    "4d4b4e75-60a0-5dbd-84a6-db2bf63fd947": {
+      "width": 150,
+      "height": 55
+    },
+    "b0b83af2-ac30-5efb-8701-c35111f7aed0": {
+      "width": 150,
+      "height": 66
+    },
+    "cd7f4067-03b1-53f8-a8af-a7cab645e76e": {
+      "width": 160,
+      "height": 58
+    },
+    "3408e60a-b2ff-51ca-96fb-901718edcce6": {
+      "width": 120,
+      "height": 58
+    },
+    "07e66dc1-8a28-59d9-bf9b-d6a93a932bfe": {
+      "width": 160,
+      "height": 42
+    },
+    "0cfb70d4-ce12-5a6c-9e1f-3e74d2603f71": {
+      "width": 140,
+      "height": 58
+    },
+    "9e08ce5c-d9b2-5fca-8a6b-bcfedbe107f0": {
+      "width": 165,
+      "height": 58
+    },
+    "084f2136-02cf-5290-937e-db07559de599": {
+      "width": 140,
+      "height": 58
+    },
+    "8bb59e5c-4f4a-5c0a-ac37-5bee54c0f8eb": {
+      "width": 150,
+      "height": 66
+    },
+    "54a6a178-e28d-553c-a497-9a9a11b45236": {
+      "width": 120,
+      "height": 58
+    },
+    "15cd30c4-fd7f-5dea-b2e3-79f48e01caad": {
+      "width": 140,
+      "height": 55
+    },
+    "19efbaec-6134-5c08-913e-fff35f372be6": {
+      "width": 150,
+      "height": 66
+    },
+    "8c4caeec-fee8-545e-9451-387b3ab72cfc": {
+      "width": 150,
+      "height": 42
+    },
+    "0db12adf-517b-5f9f-a37d-d9ee27aae906": {
+      "width": 140,
+      "height": 58
+    },
+    "37adf668-44b9-595e-be79-c32e9868767b": {
+      "width": 160,
+      "height": 58
+    },
+    "36806431-234a-54ff-93b8-5ef4230c9374": {
+      "width": 180,
+      "height": 58
+    },
+    "333d80c5-d455-59cf-ad47-2545b0c68908": {
+      "width": 150,
+      "height": 58
+    },
+    "b47e0c92-de29-51b0-b784-0704a726829f": {
+      "width": 170,
+      "height": 58
+    },
+    "be4ff5d9-ab67-566e-8636-d97ad848737d": {
+      "width": 150,
+      "height": 55
+    },
+    "8691d28c-2456-51ed-9d04-401d7781aec3": {
+      "width": 140,
+      "height": 66
+    },
+    "88151174-b44f-5231-809f-172b554f8df0": {
+      "width": 160,
+      "height": 58
+    },
+    "b713c3f6-488f-5b4a-85b1-311ebd8084e0": {
+      "width": 170,
+      "height": 66
+    },
+    "b1cb6e08-5a25-5c50-aad3-a9946bd0cd97": {
+      "width": 150,
+      "height": 58
+    },
+    "e7a593ab-93d8-5f17-90d5-91207d24f92e": {
+      "width": 160,
+      "height": 66
+    },
+    "40464fa8-3d87-5564-83fc-6dc0d6b84916": {
+      "width": 140,
+      "height": 58
+    },
+    "7071898d-093b-594b-99e2-33110f93339d": {
+      "width": 170,
+      "height": 58
+    },
+    "811d1c63-7e58-58a9-b9fa-404ca76b545b": {
+      "width": 150,
+      "height": 42
+    },
+    "3b66d8cf-953f-54da-bf5c-36f759f0c5ea": {
+      "width": 140,
+      "height": 58
+    },
+    "a5468a01-789b-5b74-bf29-2497dbad9f79": {
+      "width": 130,
+      "height": 58
+    },
+    "1fb30c46-c136-5351-9f84-d54f2e8bbf32": {
+      "width": 150,
+      "height": 58
+    },
+    "a005c446-1000-5c70-bedd-671275b30c1f": {
+      "width": 160,
+      "height": 58
+    },
+    "21ec3823-cfcf-58ad-8f10-01b31f127142": {
+      "width": 170,
+      "height": 58
+    },
+    "5d952a1c-1d78-529b-8026-73b6c1b58a54": {
+      "width": 150,
+      "height": 58
+    },
+    "8ff706e3-e158-5278-8e5a-38843e06526a": {
+      "width": 180,
+      "height": 58
+    },
+    "4a4c9d38-4c45-5ed5-9f89-2dc394f45728": {
+      "width": 140,
+      "height": 42
+    },
+    "24b94a7d-5ee1-57b1-81b5-da68cfc932fc": {
+      "width": 140,
+      "height": 58
+    },
+    "0e17289e-0b2d-528d-a397-532966307e22": {
+      "width": 140,
+      "height": 42
+    },
+    "84bae3d6-754e-5182-a220-21a43b764bb0": {
+      "width": 160,
+      "height": 66
+    },
+    "f4fa34d9-2bf5-5a72-8f37-2f080ed024af": {
+      "width": 140,
+      "height": 58
+    },
+    "b23c873f-9136-5291-a393-98e70c120703": {
+      "width": 140,
+      "height": 58
+    },
+    "4c496232-5f9a-5f9d-956b-35b2ace43b41": {
+      "width": 150,
+      "height": 58
+    },
+    "004f5ceb-ec47-58f2-92d7-b8f5005e3d3e": {
+      "width": 140,
+      "height": 58
+    }
+  },
+  "tool": "pistar.2.1.0",
+  "istar": "2.0",
+  "saveDate": "Mon, 12 Oct 2026 15:38:47 GMT",
+  "diagram": {
+    "width": 2100,
+    "height": 1520,
+    "name": "Privacy Policy Reader SR model",
+    "customProperties": {
+      "Description": "Strategic Rationale model for the Requirements chapter, Figure 1."
+    }
+  }
+}

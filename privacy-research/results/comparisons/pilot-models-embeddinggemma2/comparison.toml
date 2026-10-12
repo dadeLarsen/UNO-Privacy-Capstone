@@ -1,0 +1,16 @@
+task = "classification"
+title = "Qwen3, skythrone/privacy-model, JEV-9B, and EmbeddingGemma 2"
+# Every run here used transformers 5.19.0; the imported originals are in qwen-privacy-jev.toml.
+runs = [
+    "classification/qwen3-14b-int8-definitions/20261011-225310Z",
+    "classification/qwen3-14b-nf4-definitions/20261011-225757Z",
+    "classification/privacy-model-fp32/20261011-225026Z",
+    "classification/jev-9b-bf16-definitions/20261011-225035Z",
+    "classification/jev-9b-int8-definitions/20261011-225119Z",
+    "classification/jev-9b-nf4-definitions/20261011-225227Z",
+    "classification/embeddinggemma2-bf16-definitions/20261011-230210Z",
+    "classification/embeddinggemma2-fp32-definitions/20261011-230227Z",
+]
+
+[scoring]
+gold = "pilot-200-10cat-reviewed"

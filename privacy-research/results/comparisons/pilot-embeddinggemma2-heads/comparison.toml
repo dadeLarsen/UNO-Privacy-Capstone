@@ -1,0 +1,19 @@
+task = "classification"
+title = "Pilot: fitted EmbeddingGemma 2 heads beside the other models"
+# Every run used transformers 5.19.0. The heads come from
+# results/fits/classification/embeddinggemma2-opp115-heads/20261012-011902Z.
+runs = [
+    "classification/qwen3-14b-int8-definitions/20261011-225310Z",
+    "classification/qwen3-14b-nf4-definitions/20261011-225757Z",
+    "classification/privacy-model-fp32/20261011-225026Z",
+    "classification/jev-9b-bf16-definitions/20261011-225035Z",
+    "classification/jev-9b-int8-definitions/20261011-225119Z",
+    "classification/jev-9b-nf4-definitions/20261011-225227Z",
+    "classification/embeddinggemma2-bf16-definitions-search-category-query/20261011-235557Z",
+    "classification/embeddinggemma2-bf16-head-centroid/20261012-012725Z",
+    "classification/embeddinggemma2-bf16-head-linear-balanced/20261012-012742Z",
+    "classification/embeddinggemma2-bf16-head-linear-frequencies/20261012-012759Z",
+]
+
+[scoring]
+gold = "pilot-200-10cat-reviewed"

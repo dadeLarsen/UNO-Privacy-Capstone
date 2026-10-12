@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="1200" height="800" fill="#fff"/>
+<rect x="0.5" y="0.5" width="1199" height="799" rx="0" fill="#fff" stroke="#555" stroke-width="1.5" />
+<rect x="0.5" y="0.5" width="1199" height="52" rx="0" fill="#ececec" stroke="#555" stroke-width="1.5" />
+<text x="20" y="33" font-size="17" fill="#222" font-weight="700" text-anchor="start" font-style="normal">Privacy Policy Reader</text>
+<text x="600.0" y="33" font-size="14" fill="#444" font-weight="400" text-anchor="middle" font-style="normal">BrightCart Privacy Policy (pasted)</text>
+<rect x="866" y="14" width="196" height="26" rx="13" fill="#fff" stroke="#666" stroke-width="1.2" />
+<circle cx="882" cy="27" r="5" fill="#3a3a3a"/>
+<text x="894" y="32" font-size="12" fill="#333" font-weight="400" text-anchor="start" font-style="normal">Offline · runs on this computer</text>
+<rect x="1074" y="14" width="108" height="26" rx="6" fill="#fff" stroke="#666" stroke-width="1.2" />
+<text x="1128" y="32" font-size="13" fill="#222" font-weight="400" text-anchor="middle" font-style="normal">⚙ Settings</text>
+<rect x="0.5" y="764" width="1199" height="35.5" rx="0" fill="#ececec" stroke="#555" stroke-width="1.5" />
+<text x="16" y="787" font-size="13" fill="#333" font-weight="400" text-anchor="start" font-style="normal">Simplify for Kids finished · sentences 5–7</text>
+<rect x="0.5" y="52.5" width="44" height="711" rx="0" fill="#f3f3f3" stroke="#9a9a9a" stroke-width="1.2" />
+<text x="22" y="82" font-size="18" fill="#222" font-weight="400" text-anchor="middle" font-style="normal">☰</text>
+<text x="28" y="120" font-size="12.5" fill="#444" transform="rotate(90 28 120)">Categories</text>
+<rect x="64" y="64" width="161" height="32" rx="6" fill="#f4f4f4" stroke="#c8c8c8" stroke-width="1.4" />
+<text x="144.5" y="85" font-size="13.5" fill="#aaa" font-weight="600" text-anchor="middle" font-style="normal">Analyze Categories</text>
+<line x1="234" y1="66" x2="234" y2="94" stroke="#bbb"/>
+<rect x="243" y="64" width="102" height="32" rx="6" fill="#fff" stroke="#666" stroke-width="1.4" />
+<text x="294.0" y="85" font-size="13.5" fill="#222" font-weight="600" text-anchor="middle" font-style="normal">Paraphrase</text>
+<rect x="355" y="64" width="153" height="32" rx="6" fill="#fff" stroke="#666" stroke-width="1.4" />
+<text x="431.5" y="85" font-size="13.5" fill="#222" font-weight="600" text-anchor="middle" font-style="normal">Simplify for Kids</text>
+<rect x="518" y="64" width="168" height="32" rx="6" fill="#fff" stroke="#666" stroke-width="1.4" />
+<text x="602.0" y="85" font-size="13.5" fill="#222" font-weight="600" text-anchor="middle" font-style="normal">Simplify for Adults</text>
+<text x="1180" y="85" font-size="12.5" fill="#444" font-weight="400" text-anchor="end" font-style="normal">Applies to: selection (sentences 5–7)</text>
+<line x1="44" y1="108" x2="1200" y2="108" stroke="#ccc"/>
+<text x="64" y="134" font-size="14" fill="#222" font-weight="700" text-anchor="start" font-style="normal">Original</text>
+<text x="600" y="134" font-size="12" fill="#777" font-weight="400" text-anchor="end" font-style="normal">Highlight Categories: on</text>
+<rect x="56" y="144" width="552" height="608" rx="6" fill="#fff" stroke="#666" stroke-width="1.3" />
+<rect x="70" y="154" width="5" height="23" rx="2" fill="#d7b49e" stroke="none" stroke-width="1.2" />
+<text x="80" y="171" font-size="13" fill="#222" font-weight="400" text-anchor="start" font-style="normal">At BrightCart™, your privacy is important to us.</text>
+<rect x="70" y="187" width="5" height="80" rx="2" fill="#f4a582" stroke="none" stroke-width="1.2" />
+<text x="80" y="204" font-size="13" fill="#222" font-weight="400" text-anchor="start" font-style="normal">When you sign up, place an order, or contact our support team, we collect</text>
+<text x="80" y="223" font-size="13" fill="#222" font-weight="400" text-anchor="start" font-style="normal">personal information such as your name, email address, shipping details, and</text>
+<text x="80" y="242" font-size="13" fill="#222" font-weight="400" text-anchor="start" font-style="normal">payment method to process your requests and improve your shopping</text>
+<text x="80" y="261" font-size="13" fill="#222" font-weight="400" text-anchor="start" font-style="normal">experience.</text>
+<rect x="70" y="289" width="5" height="61" rx="2" fill="#8cc265" stroke="none" stroke-width="1.2" />
+<text x="80" y="306" font-size="13" fill="#222" font-weight="400" text-anchor="start" font-style="normal">We may share certain information, such as your email address, with trusted</text>
+<text x="80" y="325" font-size="13" fill="#222" font-weight="400" text-anchor="start" font-style="normal">third-party marketing partners who assist us in delivering personalized</text>
+<text x="80" y="344" font-size="13" fill="#222" font-weight="400" text-anchor="start" font-style="normal">promotions.</text>
+<rect x="70" y="360" width="5" height="42" rx="2" fill="#8cc265" stroke="none" stroke-width="1.2" />
+<text x="80" y="377" font-size="13" fill="#222" font-weight="400" text-anchor="start" font-style="normal">These partners are required to maintain confidentiality and are not</text>
+<text x="80" y="396" font-size="13" fill="#222" font-weight="400" text-anchor="start" font-style="normal">permitted to use your data for other purposes.</text>
+<rect x="70" y="424" width="5" height="23" rx="2" fill="#6ea8fe" stroke="none" stroke-width="1.2" />
+<rect x="73" y="421" width="524" height="29" rx="4" fill="none" stroke="#2f5fb3" stroke-width="2" />
+<text x="80" y="441" font-size="13" fill="#222" font-weight="400" text-anchor="start" font-style="normal">You have the ability to manage your communication preferences at any time.</text>
+<rect x="70" y="457" width="5" height="42" rx="2" fill="#6ea8fe" stroke="none" stroke-width="1.2" />
+<rect x="73" y="454" width="524" height="48" rx="4" fill="none" stroke="#2f5fb3" stroke-width="2" />
+<text x="80" y="474" font-size="13" fill="#222" font-weight="400" text-anchor="start" font-style="normal">To stop receiving promotional emails, simply click the “unsubscribe” link in</text>
+<text x="80" y="493" font-size="13" fill="#222" font-weight="400" text-anchor="start" font-style="normal">any message or update your preferences in your account settings.</text>
+<rect x="70" y="521" width="5" height="42" rx="2" fill="#ffb74d" stroke="none" stroke-width="1.2" />
+<rect x="73" y="518" width="524" height="48" rx="4" fill="none" stroke="#2f5fb3" stroke-width="2" />
+<text x="80" y="538" font-size="13" fill="#222" font-weight="400" text-anchor="start" font-style="normal">We may retain account records for up to 30 days after you delete your</text>
+<text x="80" y="557" font-size="13" fill="#222" font-weight="400" text-anchor="start" font-style="normal">account, except where a longer period is required by law.</text>
+<rect x="70" y="585" width="5" height="23" rx="2" fill="#4db6ac" stroke="none" stroke-width="1.2" />
+<text x="80" y="602" font-size="13" fill="#222" font-weight="400" text-anchor="start" font-style="normal">We use industry-standard encryption to protect your payment information.</text>
+<rect x="80" y="630" width="510" height="9" rx="4" fill="#d4d4d4" stroke="none" stroke-width="1.2" />
+<rect x="80" y="651" width="510" height="9" rx="4" fill="#d4d4d4" stroke="none" stroke-width="1.2" />
+<rect x="80" y="672" width="306.0" height="9" rx="4" fill="#d4d4d4" stroke="none" stroke-width="1.2" />
+<rect x="624" y="144" width="560" height="608" rx="6" fill="#fff" stroke="#666" stroke-width="1.3" />
+<rect x="640" y="116" width="145" height="28" rx="5" fill="#fff" stroke="#666" stroke-width="1.2" />
+<text x="712.5" y="135" font-size="12.5" fill="#222" font-weight="700" text-anchor="middle" font-style="normal">Simplify for Kids</text>
+<rect x="791" y="116" width="96" height="28" rx="5" fill="#f0f0f0" stroke="#bbb" stroke-width="1.2" />
+<text x="839.0" y="135" font-size="12.5" fill="#999" font-weight="400" text-anchor="middle" font-style="normal">Paraphrase</text>
+<rect x="893" y="116" width="159" height="28" rx="5" fill="#f0f0f0" stroke="#bbb" stroke-width="1.2" />
+<text x="972.5" y="135" font-size="12.5" fill="#999" font-weight="400" text-anchor="middle" font-style="normal">Simplify for Adults</text>
+<rect x="640" y="164" width="528" height="107" rx="6" fill="#f7f9fd" stroke="#c9d6ee" stroke-width="1.2" />
+<text x="656" y="188" font-size="14" fill="#222" font-weight="400" text-anchor="start" font-style="normal">You can choose which emails BrightCart sends you. To stop getting</text>
+<text x="656" y="209" font-size="14" fill="#222" font-weight="400" text-anchor="start" font-style="normal">ads by email, click “unsubscribe” in any of those emails, or change</text>
+<text x="656" y="230" font-size="14" fill="#222" font-weight="400" text-anchor="start" font-style="normal">your choices in your account settings.</text>
+<text x="656" y="259" font-size="12.5" fill="#2f5fb3" font-weight="600" text-anchor="start" font-style="normal">↩ Source: sentences 5–6</text>
+<rect x="640" y="283" width="528" height="107" rx="6" fill="#f7f9fd" stroke="#c9d6ee" stroke-width="1.2" />
+<text x="656" y="307" font-size="14" fill="#222" font-weight="400" text-anchor="start" font-style="normal">After you delete your account, BrightCart may keep records about it</text>
+<text x="656" y="328" font-size="14" fill="#222" font-weight="400" text-anchor="start" font-style="normal">for up to 30 days. If a law says they have to, they may keep them</text>
+<text x="656" y="349" font-size="14" fill="#222" font-weight="400" text-anchor="start" font-style="normal">longer.</text>
+<text x="656" y="378" font-size="12.5" fill="#2f5fb3" font-weight="600" text-anchor="start" font-style="normal">↩ Source: sentence 7</text>
+<text x="640" y="416" font-size="12.5" fill="#2e5d1e" font-weight="400" text-anchor="start" font-style="normal">✓ Numbers, time limits, and exceptions match the source.</text>
+<rect x="640" y="432" width="70" height="32" rx="6" fill="#fff" stroke="#666" stroke-width="1.4" />
+<text x="675.0" y="453" font-size="12.5" fill="#222" font-weight="600" text-anchor="middle" font-style="normal">Copy</text>
+<rect x="720" y="432" width="100" height="32" rx="6" fill="#fff" stroke="#666" stroke-width="1.4" />
+<text x="770.0" y="453" font-size="12.5" fill="#222" font-weight="600" text-anchor="middle" font-style="normal">Regenerate</text>
+<text x="640" y="736" font-size="11.5" fill="#777" font-weight="400" text-anchor="start" font-style="italic">Generated on this computer. Check important details against the original.</text>
+</svg>

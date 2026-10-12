@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="1200" height="800" fill="#fff"/>
+<rect x="0.5" y="0.5" width="1199" height="799" rx="0" fill="#fff" stroke="#555" stroke-width="1.5" />
+<rect x="0.5" y="0.5" width="1199" height="52" rx="0" fill="#ececec" stroke="#555" stroke-width="1.5" />
+<text x="20" y="33" font-size="17" fill="#222" font-weight="700" text-anchor="start" font-style="normal">Privacy Policy Reader</text>
+<text x="600.0" y="33" font-size="14" fill="#444" font-weight="400" text-anchor="middle" font-style="normal">BrightCart Privacy Policy (pasted)</text>
+<rect x="866" y="14" width="196" height="26" rx="13" fill="#fff" stroke="#666" stroke-width="1.2" />
+<circle cx="882" cy="27" r="5" fill="#3a3a3a"/>
+<text x="894" y="32" font-size="12" fill="#333" font-weight="400" text-anchor="start" font-style="normal">Offline · runs on this computer</text>
+<rect x="1074" y="14" width="108" height="26" rx="6" fill="#fff" stroke="#666" stroke-width="1.2" />
+<text x="1128" y="32" font-size="13" fill="#222" font-weight="400" text-anchor="middle" font-style="normal">⚙ Settings</text>
+<rect x="0.5" y="764" width="1199" height="35.5" rx="0" fill="#ececec" stroke="#555" stroke-width="1.5" />
+<text x="16" y="787" font-size="13" fill="#333" font-weight="400" text-anchor="start" font-style="normal">Ready · 42 sentences · nothing analyzed yet</text>
+<rect x="0.5" y="52.5" width="280" height="711" rx="0" fill="#f3f3f3" stroke="#9a9a9a" stroke-width="1.2" />
+<text x="20" y="86" font-size="14" fill="#aaa" font-weight="700" text-anchor="start" font-style="normal">Highlight Categories</text>
+<rect x="222" y="72" width="38" height="20" rx="10" fill="#e4e4e4" stroke="none" stroke-width="1.2" />
+<circle cx="232" cy="82" r="8" fill="#fff"/>
+<line x1="16" y1="102" x2="264" y2="102" stroke="#ccc"/>
+<text x="20" y="126" font-size="12" fill="#777" font-weight="600" text-anchor="start" font-style="normal">Category</text>
+<text x="262" y="126" font-size="12" fill="#777" font-weight="600" text-anchor="end" font-style="normal">Sentences</text>
+<rect x="20" y="143" width="14" height="14" rx="2" fill="#fff" stroke="#c8c8c8" stroke-width="1.2" />
+<rect x="42" y="143" width="14" height="14" rx="3" fill="#e2e2e2" stroke="none" stroke-width="1.2" />
+<text x="64" y="155" font-size="13" fill="#aaa" font-weight="400" text-anchor="start" font-style="normal">First Party Collection/Use</text>
+<text x="262" y="155" font-size="13" fill="#aaa" font-weight="600" text-anchor="end" font-style="normal">—</text>
+<rect x="20" y="175" width="14" height="14" rx="2" fill="#fff" stroke="#c8c8c8" stroke-width="1.2" />
+<rect x="42" y="175" width="14" height="14" rx="3" fill="#e2e2e2" stroke="none" stroke-width="1.2" />
+<text x="64" y="187" font-size="13" fill="#aaa" font-weight="400" text-anchor="start" font-style="normal">Third Party Sharing/Collection</text>
+<text x="262" y="187" font-size="13" fill="#aaa" font-weight="600" text-anchor="end" font-style="normal">—</text>
+<rect x="20" y="207" width="14" height="14" rx="2" fill="#fff" stroke="#c8c8c8" stroke-width="1.2" />
+<rect x="42" y="207" width="14" height="14" rx="3" fill="#e2e2e2" stroke="none" stroke-width="1.2" />
+<text x="64" y="219" font-size="13" fill="#aaa" font-weight="400" text-anchor="start" font-style="normal">User Choice/Control</text>
+<text x="262" y="219" font-size="13" fill="#aaa" font-weight="600" text-anchor="end" font-style="normal">—</text>
+<rect x="20" y="239" width="14" height="14" rx="2" fill="#fff" stroke="#c8c8c8" stroke-width="1.2" />
+<rect x="42" y="239" width="14" height="14" rx="3" fill="#e2e2e2" stroke="none" stroke-width="1.2" />
+<text x="64" y="251" font-size="13" fill="#aaa" font-weight="400" text-anchor="start" font-style="normal">Do Not Track</text>
+<text x="262" y="251" font-size="13" fill="#aaa" font-weight="600" text-anchor="end" font-style="normal">—</text>
+<rect x="20" y="271" width="14" height="14" rx="2" fill="#fff" stroke="#c8c8c8" stroke-width="1.2" />
+<rect x="42" y="271" width="14" height="14" rx="3" fill="#e2e2e2" stroke="none" stroke-width="1.2" />
+<text x="64" y="283" font-size="13" fill="#aaa" font-weight="400" text-anchor="start" font-style="normal">International and Specific</text>
+<text x="64" y="299" font-size="13" fill="#aaa" font-weight="400" text-anchor="start" font-style="normal">Audiences</text>
+<text x="262" y="283" font-size="13" fill="#aaa" font-weight="600" text-anchor="end" font-style="normal">—</text>
+<rect x="20" y="319" width="14" height="14" rx="2" fill="#fff" stroke="#c8c8c8" stroke-width="1.2" />
+<rect x="42" y="319" width="14" height="14" rx="3" fill="#e2e2e2" stroke="none" stroke-width="1.2" />
+<text x="64" y="331" font-size="13" fill="#aaa" font-weight="400" text-anchor="start" font-style="normal">Data Security</text>
+<text x="262" y="331" font-size="13" fill="#aaa" font-weight="600" text-anchor="end" font-style="normal">—</text>
+<rect x="20" y="351" width="14" height="14" rx="2" fill="#fff" stroke="#c8c8c8" stroke-width="1.2" />
+<rect x="42" y="351" width="14" height="14" rx="3" fill="#e2e2e2" stroke="none" stroke-width="1.2" />
+<text x="64" y="363" font-size="13" fill="#aaa" font-weight="400" text-anchor="start" font-style="normal">Policy Change</text>
+<text x="262" y="363" font-size="13" fill="#aaa" font-weight="600" text-anchor="end" font-style="normal">—</text>
+<rect x="20" y="383" width="14" height="14" rx="2" fill="#fff" stroke="#c8c8c8" stroke-width="1.2" />
+<rect x="42" y="383" width="14" height="14" rx="3" fill="#e2e2e2" stroke="none" stroke-width="1.2" />
+<text x="64" y="395" font-size="13" fill="#aaa" font-weight="400" text-anchor="start" font-style="normal">Data Retention</text>
+<text x="262" y="395" font-size="13" fill="#aaa" font-weight="600" text-anchor="end" font-style="normal">—</text>
+<rect x="20" y="415" width="14" height="14" rx="2" fill="#fff" stroke="#c8c8c8" stroke-width="1.2" />
+<rect x="42" y="415" width="14" height="14" rx="3" fill="#e2e2e2" stroke="none" stroke-width="1.2" />
+<text x="64" y="427" font-size="13" fill="#aaa" font-weight="400" text-anchor="start" font-style="normal">User Access, Edit and Deletion</text>
+<text x="262" y="427" font-size="13" fill="#aaa" font-weight="600" text-anchor="end" font-style="normal">—</text>
+<rect x="20" y="447" width="14" height="14" rx="2" fill="#fff" stroke="#c8c8c8" stroke-width="1.2" />
+<rect x="42" y="447" width="14" height="14" rx="3" fill="#e2e2e2" stroke="none" stroke-width="1.2" />
+<text x="64" y="459" font-size="13" fill="#aaa" font-weight="400" text-anchor="start" font-style="normal">Other</text>
+<text x="262" y="459" font-size="13" fill="#aaa" font-weight="600" text-anchor="end" font-style="normal">—</text>
+<text x="20" y="494" font-size="12.5" fill="#777" font-weight="400" text-anchor="start" font-style="italic">Run Analyze Categories to label</text>
+<text x="20" y="511" font-size="12.5" fill="#777" font-weight="400" text-anchor="start" font-style="italic">each sentence. Counts and</text>
+<text x="20" y="528" font-size="12.5" fill="#777" font-weight="400" text-anchor="start" font-style="italic">highlighting appear here.</text>
+<rect x="300" y="64" width="161" height="32" rx="6" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.4" />
+<text x="380.5" y="85" font-size="13.5" fill="#fff" font-weight="600" text-anchor="middle" font-style="normal">Analyze Categories</text>
+<line x1="470" y1="66" x2="470" y2="94" stroke="#bbb"/>
+<rect x="479" y="64" width="102" height="32" rx="6" fill="#fff" stroke="#666" stroke-width="1.4" />
+<text x="530.0" y="85" font-size="13.5" fill="#222" font-weight="600" text-anchor="middle" font-style="normal">Paraphrase</text>
+<rect x="591" y="64" width="153" height="32" rx="6" fill="#fff" stroke="#666" stroke-width="1.4" />
+<text x="667.5" y="85" font-size="13.5" fill="#222" font-weight="600" text-anchor="middle" font-style="normal">Simplify for Kids</text>
+<rect x="754" y="64" width="168" height="32" rx="6" fill="#fff" stroke="#666" stroke-width="1.4" />
+<text x="838.0" y="85" font-size="13.5" fill="#222" font-weight="600" text-anchor="middle" font-style="normal">Simplify for Adults</text>
+<text x="1180" y="85" font-size="12.5" fill="#444" font-weight="400" text-anchor="end" font-style="normal">Applies to: whole policy (42 sentences)</text>
+<line x1="280" y1="108" x2="1200" y2="108" stroke="#ccc"/>
+<rect x="300" y="122" width="880" height="596" rx="6" fill="#fff" stroke="#666" stroke-width="1.4" />
+<text x="316" y="144" font-size="12" fill="#777" font-weight="600" text-anchor="start" font-style="normal">Policy text</text>
+<text x="322" y="171" font-size="14" fill="#222" font-weight="400" text-anchor="start" font-style="normal">At BrightCart™, your privacy is important to us.</text>
+<text x="322" y="206" font-size="14" fill="#222" font-weight="400" text-anchor="start" font-style="normal">When you sign up, place an order, or contact our support team, we collect personal information such as your name,</text>
+<text x="322" y="227" font-size="14" fill="#222" font-weight="400" text-anchor="start" font-style="normal">email address, shipping details, and payment method to process your requests and improve your shopping experience.</text>
+<text x="322" y="274" font-size="14" fill="#222" font-weight="400" text-anchor="start" font-style="normal">We may share certain information, such as your email address, with trusted third-party marketing partners who assist</text>
+<text x="322" y="295" font-size="14" fill="#222" font-weight="400" text-anchor="start" font-style="normal">us in delivering personalized promotions.</text>
+<text x="322" y="330" font-size="14" fill="#222" font-weight="400" text-anchor="start" font-style="normal">These partners are required to maintain confidentiality and are not permitted to use your data for other purposes.</text>
+<text x="322" y="377" font-size="14" fill="#222" font-weight="400" text-anchor="start" font-style="normal">You have the ability to manage your communication preferences at any time.</text>
+<text x="322" y="412" font-size="14" fill="#222" font-weight="400" text-anchor="start" font-style="normal">To stop receiving promotional emails, simply click the “unsubscribe” link in any message or update your preferences in</text>
+<text x="322" y="433" font-size="14" fill="#222" font-weight="400" text-anchor="start" font-style="normal">your account settings.</text>
+<text x="322" y="480" font-size="14" fill="#222" font-weight="400" text-anchor="start" font-style="normal">We may retain account records for up to 30 days after you delete your account, except where a longer period is</text>
+<text x="322" y="501" font-size="14" fill="#222" font-weight="400" text-anchor="start" font-style="normal">required by law.</text>
+<text x="322" y="548" font-size="14" fill="#222" font-weight="400" text-anchor="start" font-style="normal">We use industry-standard encryption to protect your payment information.</text>
+<rect x="322" y="582" width="836" height="9" rx="4" fill="#d4d4d4" stroke="none" stroke-width="1.2" />
+<rect x="322" y="603" width="836" height="9" rx="4" fill="#d4d4d4" stroke="none" stroke-width="1.2" />
+<rect x="322" y="624" width="501.59999999999997" height="9" rx="4" fill="#d4d4d4" stroke="none" stroke-width="1.2" />
+<text x="1166" y="738" font-size="12" fill="#777" font-weight="400" text-anchor="end" font-style="normal">42 sentences · 3,104 characters</text>
+<rect x="300" y="726" width="70" height="32" rx="6" fill="#fff" stroke="#666" stroke-width="1.4" />
+<text x="335.0" y="747" font-size="12.5" fill="#222" font-weight="600" text-anchor="middle" font-style="normal">Clear</text>
+</svg>

@@ -1,0 +1,13 @@
+task = "classification"
+title = "EmbeddingGemma 2 instruction prefixes, with privacy-model for reference"
+# The first run is the classification-instruction run in pilot-models-embeddinggemma2.toml.
+runs = [
+    "classification/embeddinggemma2-bf16-definitions/20261011-230210Z",
+    "classification/embeddinggemma2-bf16-definitions-sentence-similarity/20261011-235615Z",
+    "classification/embeddinggemma2-bf16-definitions-search-sentence-query/20261011-235539Z",
+    "classification/embeddinggemma2-bf16-definitions-search-category-query/20261011-235557Z",
+    "classification/privacy-model-fp32/20261011-225026Z",
+]
+
+[scoring]
+gold = "pilot-200-10cat-reviewed"

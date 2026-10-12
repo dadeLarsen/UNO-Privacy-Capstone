@@ -1,16 +1,8 @@
-# Privacy-policy reader: model research
+# Privacy Policy Reader: model research
 
-Experiments and measurements for an offline privacy-policy reading app. The app itself will live in a separate repository; this one decides which models it should use and keeps the evidence.
+Experiments and measurements that decide which models the [Privacy Policy Reader](../README.md) should use, and the evidence behind each choice. The app needs two: a classifier that puts each sentence of a policy into one of ten categories, and a rewriter for its three actions (**Paraphrase**, **Simplify for Kids**, and **Simplify for Adults**). Both must run offline on a computer with **8–12 GB of total memory**. This work answers analysis requirements AR-01 to AR-03 in the [requirements](../docs/Requirements-Document.md#6-analysis-requirements).
 
-## The app being researched
-
-A desktop reader that helps people understand privacy policies, **without any internet connection** for installation, first launch, or use:
-
-1. The user pastes a policy (later: imports a file).
-2. Each sentence is classified into one of ten categories, and the app can highlight them.
-3. Three rewrite actions explain a passage: **Paraphrase**, **Simplify for Kids**, and **Simplify for Adults**. The original text stays visible, and each rewrite links back to its source sentences.
-
-The provisional hardware target is a desktop or laptop with **8–12 GB of total system memory**. All measurements so far used one Windows PC with an **RTX 4090 (24 GiB) and 64 GB RAM**. The design notes are in [references/](references/); they predate this repository, and their links to an ideas index, the thesis chapters, and `airllm-tests/` point outside it.
+All measurements so far used one Windows PC with an **RTX 4090 (24 GiB) and 64 GB RAM**.
 
 ## Current direction
 
@@ -125,14 +117,14 @@ src/privacy_bench/
   report/     task-agnostic summaries and plots
   cli.py      the pbench command
 tools/        one-time code that imported runs and froze data files
-references/   design notes for the app
+docs/         each task in detail; classification.md today
 ```
 
 A **model backend** loads a pinned checkpoint and runs one input without knowing what the output means. A **task** owns its items, reference answers, evaluation, and how its runs appear in comparisons. A **strategy** is one way to perform a task with one backend. `tests/test_architecture.py` enforces the layering: `core`, `models`, and `report` never import a task, and a task never imports another task.
 
 ## Setup
 
-[uv](https://docs.astral.sh/uv/) manages the environment; every package, including transitive ones, is pinned in `pyproject.toml` and `uv.lock`.
+[uv](https://docs.astral.sh/uv/) manages the environment; every package, including transitive ones, is pinned in `pyproject.toml` and `uv.lock`. Run every command below from this folder.
 
 ```powershell
 uv sync

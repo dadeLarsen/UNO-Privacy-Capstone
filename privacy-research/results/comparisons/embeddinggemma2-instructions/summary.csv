@@ -1,0 +1,21 @@
+run,condition,strategy,condition_label,legend_label,model,revision,precision,timing_scope,cohort_sha256,sample,gold,n,scoring_mode,accuracy,macro_accuracy,macro_accuracy_groups,macro_f1,original_accuracy,valid_output_rate,mean_seconds,max_peak_allocated_bytes,max_peak_reserved_bytes,mean_input_tokens,mean_output_tokens,load_seconds,transformers,condition_sha256,input_spec_sha256
+classification/embeddinggemma2-bf16-definitions/20261011-230210Z,embeddinggemma2-bf16-definitions,embedding-similarity,"Embedding
+similarity
+definitions
+classification",,google/embeddinggemma-2,914f7f89142e33e77833254d9c9b90c3cef7303b,bf16,embedding_forward,7443456bbb2d3c727992fb3502f544a43b10c82c074d03a7666b7a35ab531d79,pilot-200-10cat,pilot-200-10cat-reviewed,200,any_accepted_gold_label,0.575,0.575,sample strata,0.5018982502847458,0.52,1.0,0.040843849499506174,577283072,601882624,37.02,,1.7434739000163972,5.19.0,e4d4a7f1005fef37b67689e61ed576f1c5d64e60342d8991b0526897d4e524e3,ed8581dd2c0078a2f468652988c40d14d3797e3db55177810ebb7c08ab6a10d8
+classification/embeddinggemma2-bf16-definitions-sentence-similarity/20261011-235615Z,embeddinggemma2-bf16-definitions-sentence-similarity,embedding-similarity,"Embedding
+similarity
+definitions
+sentence similarity",,google/embeddinggemma-2,914f7f89142e33e77833254d9c9b90c3cef7303b,bf16,embedding_forward,7443456bbb2d3c727992fb3502f544a43b10c82c074d03a7666b7a35ab531d79,pilot-200-10cat,pilot-200-10cat-reviewed,200,any_accepted_gold_label,0.61,0.61,sample strata,0.5431165742001638,0.565,1.0,0.04099680599989369,577647104,601882624,38.02,,1.7129796000081114,5.19.0,ea464003a4f9a8dc2f2302d0ab219b7abcb5c7c46a25040e86705c1f0e20d7b3,2462462453449b6a5ae694f4568debefadddc904bc47bb1e6cddc741cb25433d
+classification/embeddinggemma2-bf16-definitions-search-sentence-query/20261011-235539Z,embeddinggemma2-bf16-definitions-search-sentence-query,embedding-similarity,"Embedding
+similarity
+definitions
+sentence: search result
+categories: document",,google/embeddinggemma-2,914f7f89142e33e77833254d9c9b90c3cef7303b,bf16,embedding_forward,7443456bbb2d3c727992fb3502f544a43b10c82c074d03a7666b7a35ab531d79,pilot-200-10cat,pilot-200-10cat-reviewed,200,any_accepted_gold_label,0.605,0.605,sample strata,0.5457236548943134,0.555,1.0,0.04162370600039139,577647104,601882624,38.02,,1.868963699991582,5.19.0,4a55d0600963e5839fc835ba7add94aeaf5464bb52cd1e3d876deeace1ef21bf,62ec4251000f43958497887a8312b68f9858e0245def0b7ee4bedf62608a85d5
+classification/embeddinggemma2-bf16-definitions-search-category-query/20261011-235557Z,embeddinggemma2-bf16-definitions-search-category-query,embedding-similarity,"Embedding
+similarity
+definitions
+sentence: document
+categories: search result",,google/embeddinggemma-2,914f7f89142e33e77833254d9c9b90c3cef7303b,bf16,embedding_forward,7443456bbb2d3c727992fb3502f544a43b10c82c074d03a7666b7a35ab531d79,pilot-200-10cat,pilot-200-10cat-reviewed,200,any_accepted_gold_label,0.655,0.655,sample strata,0.5750582469802066,0.59,1.0,0.04177933250161004,577283072,601882624,37.02,,1.7417023000016343,5.19.0,9c68564edcc379d06fec01fc25408519aaf156fc195e68a69f7699426764f638,2fcf2ba8406e51b44183b610b899dbaefec3a3c6960cc9f029fac4de76db9deb
+classification/privacy-model-fp32/20261011-225026Z,privacy-model-fp32,classifier-head,"Raw sentence
+(classifier)",,skythrone/privacy-model,7b478b5606f2f27cc4c8222449886dea4da36b0b,fp32,model_forward,7443456bbb2d3c727992fb3502f544a43b10c82c074d03a7666b7a35ab531d79,pilot-200-10cat,pilot-200-10cat-reviewed,200,any_accepted_gold_label,0.77,0.77,sample strata,0.640328758026385,0.63,1.0,0.00271352299983846,282998272,310378496,31.635,,0.19843379998928867,5.19.0,94c2f6e35ce742d5e87a7f3d9646990ac0e2aa710840a5b60b7425ec511cf8a6,7be639d8a9ad9c81ff479ffab8f93f9669d5f959833f1d33f0a376175692ac77
