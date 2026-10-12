@@ -37,6 +37,7 @@ APPSI-139 annotates sentences from app privacy policies, a different corpus from
 - `data/classification/samples/appsi139-all.json`: every sentence.
 - `data/classification/samples/appsi139-random-1000.json`: 1,000 sentences drawn with seed 42, in the corpus's own category mix.
 - `data/classification/samples/appsi139-balanced-50.json`: up to 50 sentences per category, drawn with seed 42 among sentences whose accepted labels include that category. The scarcest category draws first and each sentence is drawn for one category, its stratum. Only 10 sentences carry Do Not Track, so the sample has 460 sentences.
+- `data/classification/samples/appsi139-tuning-half.json` and `appsi139-test-half.json`: APPSI-139 in two halves, for fits that tune on it. Its rows fall into 71 runs of rising source IDs. At every run boundary checked, a new policy starts, so each run appears to hold whole policies. The runs alternate between the halves in file order, starting with the tuning half: 7,233 tuning sentences in 36 runs and 6,058 test sentences in 35. A fit may tune only on a sample whose purpose is tuning, and its results are reported on the test half. `tools/split_appsi139.py` froze both, and a test redraws them exactly.
 
 APPSI-139 has no policy IDs either, and 47 of its sentences repeat an OPP-115 sentence word for word.
 
