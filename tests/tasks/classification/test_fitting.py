@@ -1,6 +1,7 @@
 """Embedding heads fitted on a tiny CPU sentence embedder and synthetic example sentences."""
 
 import csv
+import functools
 
 import numpy as np
 import pytest
@@ -8,11 +9,13 @@ from sklearn.linear_model import LogisticRegression
 import torch
 
 from privacy_bench.core.files import digest_bytes, write_json
-from privacy_bench.core.fits import execute_fit, load_fit, parse_fit_spec
+from privacy_bench.core.fits import execute_fit, load_fit, parse_fit_spec, resolve_fit
 from privacy_bench.models.sentence_embedder import SentenceEmbedder
 from privacy_bench.tasks.classification import fitting
 from privacy_bench.tasks.classification.data import make_example_manifest, read_dataset
 from privacy_bench.tasks.classification.fitting import EmbeddingHeadsFit, centroid_weights
+from privacy_bench.tasks.classification.strategies import embedding_head
+from privacy_bench.tasks.classification.strategies.embedding_head import EmbeddingHeadStrategy
 from privacy_bench.tasks.classification.task import ClassificationTask
 from privacy_bench.tasks.classification.taxonomy import HEADER, LABELS
 
@@ -45,7 +48,9 @@ class_weight = "none"
 
 
 def sentence(label, example):
-    return " ".join(WORDS[(label + step) % len(WORDS)] for step in range(example + 2 + label % 3))
+    """Thirty distinct sentences; a repeat across categories would tie their centroids exactly."""
+    stride = 1 + label // len(WORDS)
+    return " ".join(WORDS[(label + stride * step) % len(WORDS)] for step in range(example + 2 + label % 3))
 
 
 @pytest.fixture
@@ -110,6 +115,32 @@ def test_the_task_fits_through_the_shared_fit_record(toy_examples, tmp_path):
     execute_fit(ClassificationTask(), parse_fit_spec("toy-heads", SPEC), output)
     fit = load_fit(output)
     assert fit.record["kind"] == "embedding-heads" and fit.tensors["linear-balanced.weight"].shape == (10, 16)
+
+
+def test_the_strategy_reproduces_each_fitted_head_on_its_examples(toy_examples, tiny_embedder, tmp_path,
+                                                                 make_condition, monkeypatch):
+    dataset = toy_examples()
+    reference = "classification/toy-heads/20261012-000000Z"
+    execute_fit(ClassificationTask(), parse_fit_spec("toy-heads", SPEC), tmp_path.joinpath("fits", *reference.split("/")))
+    monkeypatch.setattr(embedding_head, "resolve_fit", functools.partial(resolve_fit, root=tmp_path / "fits"))
+    monkeypatch.setattr(embedding_head, "resolve_snapshot", lambda model_id, revision: tiny_embedder)
+    monkeypatch.setattr(embedding_head, "snapshot_identity",
+                        lambda model_id, revision, snapshot: {"model": model_id, "revision": revision})
+    embeddings = reference_embeddings(tiny_embedder, dataset.rows)
+    labels = np.array([row.label_id for row in dataset.rows])
+    chosen_c = load_fit(tmp_path.joinpath("fits", *reference.split("/"))).record["report"]["heads"]
+    expected = {
+        "centroid": (embeddings @ centroid_weights(embeddings, labels).T).argmax(axis=1),
+        "linear-balanced": LogisticRegression(C=chosen_c["linear-balanced"]["c"], class_weight="balanced",
+                                              max_iter=5000).fit(embeddings, labels).predict(embeddings),
+    }
+    model = {"id": "o/m", "revision": "a" * 40, "precision": "fp32", "device": "cpu"}
+    for head, predictions in expected.items():
+        strategy = EmbeddingHeadStrategy(make_condition("embedding-head", model,
+                                                        {"fit": reference, "head": head, "max_input_tokens": 32}))
+        strategy.load()
+        assert [strategy.predict(strategy.prepare(row))["model_label_id"] for row in dataset.rows] == \
+            predictions.tolist(), head
 
 
 def test_examples_over_the_input_limit_stop_the_fit_before_embedding(toy_examples):
