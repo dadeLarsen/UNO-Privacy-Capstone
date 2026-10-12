@@ -1,0 +1,20 @@
+task = "classification"
+strategy = "embedding-similarity"
+warmup = 1
+
+[items]
+dataset = "opp115-sentences"
+sample = "pilot-200-10cat"
+gold = "pilot-200-10cat-reviewed"
+
+[model]
+id = "google/embeddinggemma-2"
+revision = "914f7f89142e33e77833254d9c9b90c3cef7303b"
+precision = "bf16"
+device = "cuda"
+text_only = true
+
+[options]
+prompt = "definitions"
+task_prefix = "task: classification | query: "
+max_input_tokens = 8192

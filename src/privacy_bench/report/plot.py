@@ -134,7 +134,8 @@ def draw_matrix(rows, panels, output_dir, *, title, context, footnotes, legend_g
     })
     columns = 3
     panel_rows = math.ceil(len(panels) / columns)
-    width = max(16, len(groups) * len(series) * 1.25)
+    # Each panel draws one bar per run plus a gap per group; three panels share the width.
+    width = max(16, 2.0 * len(rows) + 1.0 * len(groups))
     legend_rows = math.ceil(len(series) / 2)
     height = 4.7 * panel_rows + 0.3 * (legend_rows - 1) + 0.25 * len(footnotes)
     fig = Figure(figsize=(width, height))
