@@ -1,0 +1,19 @@
+task = "classification"
+strategy = "jev-choice"
+warmup = 1
+
+[items]
+dataset = "opp115-sentences"
+sample = "pilot-200-10cat"
+gold = "pilot-200-10cat-reviewed"
+
+[model]
+id = "autotrust/JEV-9B"
+revision = "4ab5dfb9331c4eb3a212742e1a1aa5446c1fda35"
+precision = "nf4"
+device = "cuda"
+min_free_vram_gib = 2.0
+
+[options]
+prompt = "definitions"
+max_input_tokens = 1024
