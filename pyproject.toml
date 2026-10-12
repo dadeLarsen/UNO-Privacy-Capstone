@@ -82,5 +82,5 @@ explicit = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = ["--strict-markers", "-ra", "-m", "not gpu"]
+addopts = ["--strict-markers", "--import-mode=importlib", "-ra", "-m", "not gpu"]
 markers = ["gpu: needs CUDA and cached model weights; run with `-m gpu`"]
