@@ -1,0 +1,378 @@
+{
+  "schema_version": 1,
+  "task": "classification",
+  "kind": "embedding-heads",
+  "fit": {
+    "name": "embeddinggemma2-opp115-heads",
+    "task": "classification",
+    "kind": "embedding-heads",
+    "examples": {
+      "dataset": "opp115-sentences",
+      "examples": "opp115-examples"
+    },
+    "model": {
+      "id": "google/embeddinggemma-2",
+      "revision": "914f7f89142e33e77833254d9c9b90c3cef7303b",
+      "precision": "bf16",
+      "device": "cuda",
+      "text_only": true
+    },
+    "options": {
+      "prefix": "task: classification | query: ",
+      "max_input_tokens": 8192,
+      "folds": 5,
+      "seed": 0,
+      "c_values": [
+        0.01,
+        0.03,
+        0.1,
+        0.3,
+        1.0,
+        3.0,
+        10.0,
+        30.0,
+        100.0,
+        300.0,
+        1000.0
+      ]
+    },
+    "heads": {
+      "centroid": {
+        "method": "centroid"
+      },
+      "linear-balanced": {
+        "method": "logistic",
+        "class_weight": "balanced"
+      },
+      "linear-frequencies": {
+        "method": "logistic",
+        "class_weight": "none"
+      }
+    }
+  },
+  "fit_sha256": "b071a2da68b6a958869ff3064fa09303b059617759c164e9ffffd6999f7a8f99",
+  "environment": {
+    "python": "3.12.3",
+    "python_executable": "C:\\Projects\\privacy-research\\.venv\\Scripts\\python.exe",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "accelerate": "1.15.0",
+      "annotated-doc": "0.0.5",
+      "anyio": "4.15.1",
+      "bitsandbytes": "0.50.2",
+      "certifi": "2026.7.22",
+      "click": "8.5.0",
+      "cloudpickle": "3.1.2",
+      "colorama": "0.4.6",
+      "contourpy": "1.4.0",
+      "cycler": "0.12.1",
+      "filelock": "3.32.3",
+      "fonttools": "4.65.0",
+      "fsspec": "2026.7.0",
+      "h11": "0.16.0",
+      "hf-xet": "1.6.0",
+      "httpcore": "1.0.9",
+      "httpx": "0.28.1",
+      "huggingface_hub": "1.33.0",
+      "idna": "3.19",
+      "iniconfig": "2.3.1",
+      "Jinja2": "3.1.6",
+      "joblib": "1.6.0",
+      "kiwisolver": "1.5.1",
+      "markdown-it-py": "4.2.0",
+      "MarkupSafe": "3.0.3",
+      "matplotlib": "3.11.2",
+      "mdurl": "0.1.2",
+      "mpmath": "1.3.0",
+      "narwhals": "2.27.1",
+      "networkx": "3.6.1",
+      "numpy": "2.5.3",
+      "packaging": "26.3",
+      "peft": "0.21.0",
+      "pillow": "12.3.0",
+      "pluggy": "1.6.0",
+      "privacy-bench": "0.1.0",
+      "psutil": "7.2.2",
+      "Pygments": "2.21.0",
+      "pyparsing": "3.3.2",
+      "pytest": "9.1.1",
+      "python-dateutil": "2.9.0.post0",
+      "PyYAML": "6.0.3",
+      "regex": "2026.9.10",
+      "rich": "15.0.0",
+      "safetensors": "0.8.0",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1",
+      "sentence-transformers": "6.1.0",
+      "setuptools": "84.0.0",
+      "shellingham": "1.5.4",
+      "six": "1.17.0",
+      "sympy": "1.14.0",
+      "threadpoolctl": "3.7.0",
+      "tokenizers": "0.23.2",
+      "torch": "2.8.0+cu128",
+      "torchvision": "0.23.0+cu128",
+      "tqdm": "4.70.1",
+      "transformers": "5.19.0",
+      "typer": "0.27.2",
+      "typing_extensions": "4.16.0"
+    },
+    "code": {
+      "commit": "d928e00f8a3fe794d1f5527d3cd937a44c5d8dd9",
+      "dirty": false,
+      "uncommitted_paths": [],
+      "uncommitted_diff_sha256": null
+    }
+  },
+  "status": "complete",
+  "started_utc": "2026-10-12T01:19:02.667276+00:00",
+  "report": {
+    "model": {
+      "model": "google/embeddinggemma-2",
+      "revision": "914f7f89142e33e77833254d9c9b90c3cef7303b",
+      "resolved_revision": "914f7f89142e33e77833254d9c9b90c3cef7303b",
+      "local_snapshot": "C:\\Users\\timpi\\.cache\\huggingface\\hub\\models--google--embeddinggemma-2\\snapshots\\914f7f89142e33e77833254d9c9b90c3cef7303b",
+      "backend": "sentence-transformers-embedding",
+      "load_seconds": 1.7854655999690294,
+      "pipeline": [
+        "Transformer",
+        "Pooling",
+        "Normalize"
+      ],
+      "model_class": "EmbeddingGemma2Model",
+      "loaded_submodules": [
+        "language_model"
+      ],
+      "parameter_count": 271002624,
+      "text_only": true,
+      "config_overrides": [
+        "audio_config",
+        "vision_config"
+      ],
+      "pooling": {
+        "embedding_dimension": 768,
+        "pooling_mode": "mean",
+        "include_prompt": true
+      },
+      "embedding_dimension": 768,
+      "similarity_fn_name": "cosine",
+      "precision": "bf16",
+      "dtype": "torch.bfloat16",
+      "device": "cuda:0",
+      "device_map": {
+        "": "cuda:0"
+      },
+      "context_limit": 8192,
+      "model_context_limit": 262144,
+      "context_limit_candidates": {
+        "model.max_position_embeddings": 262144
+      },
+      "model_config_sha256": "b8f1e9931b57fbc054acdb445c41765d55b0074c58d145fa82839941ad1b5bb3",
+      "tokenizer_settings": {
+        "processing": "sentence-transformers preprocess",
+        "truncation": false
+      },
+      "batch_size": 1,
+      "timing_scope": "synchronized embedding forward pass, including pooling and normalization; excludes tokenization, input transfer, similarity and model load",
+      "memory_scope": "PyTorch CUDA device 0 peak allocated/reserved bytes including resident weights",
+      "cuda_version": "12.8",
+      "gpu": "NVIDIA GeForce RTX 4090",
+      "gpu_compute_capability": [
+        8,
+        9
+      ],
+      "gpu_total_bytes": 25756696576
+    },
+    "prefix": "task: classification | query: ",
+    "max_input_tokens": 8192,
+    "examples": {
+      "dataset": {
+        "name": "opp115-sentences",
+        "sha256": "34dc5a59736e66caa570572f9cde340a1e3b1dcf02bedec726db9487b5542c8e"
+      },
+      "examples": {
+        "name": "opp115-examples",
+        "manifest_sha256": "e8adda0c69ed07f155ae2ae5ead8438637fe4787b22e1031c67ac2a2f5a50fcd",
+        "n": 10417
+      },
+      "label_counts": {
+        "Policy Change": 334,
+        "Third Party Sharing/Collection": 2269,
+        "User Choice/Control": 1242,
+        "Data Retention": 83,
+        "User Access Edit and Deletion": 283,
+        "International and Specific Audiences": 763,
+        "Data Security": 562,
+        "Do Not Track": 39,
+        "First Party Collection/Use": 2880,
+        "Other": 1962
+      }
+    },
+    "embeddings": {
+      "n": 10417,
+      "dimension": 768,
+      "sha256": "17e8208437dfaa35705f1642940c746042a0b4a12f400ed4ba15767a36d09dec",
+      "seconds": 416.9281168981106,
+      "min_input_tokens": 10,
+      "max_input_tokens": 229
+    },
+    "cross_validation": {
+      "folds": 5,
+      "seed": 0,
+      "shuffle": true,
+      "stratified": true,
+      "scoring": "balanced_accuracy",
+      "c_values": [
+        0.01,
+        0.03,
+        0.1,
+        0.3,
+        1.0,
+        3.0,
+        10.0,
+        30.0,
+        100.0,
+        300.0,
+        1000.0
+      ]
+    },
+    "heads": {
+      "centroid": {
+        "method": "centroid",
+        "cv_balanced_accuracy": 0.7249060662190534
+      },
+      "linear-balanced": {
+        "method": "logistic",
+        "class_weight": "balanced",
+        "c": 3.0,
+        "iterations": 106,
+        "cv_balanced_accuracy": 0.7950516070047395,
+        "cv_by_c": [
+          {
+            "c": 0.01,
+            "balanced_accuracy": 0.703400965933645
+          },
+          {
+            "c": 0.03,
+            "balanced_accuracy": 0.7251293002816237
+          },
+          {
+            "c": 0.1,
+            "balanced_accuracy": 0.7580312679242471
+          },
+          {
+            "c": 0.3,
+            "balanced_accuracy": 0.77363164369172
+          },
+          {
+            "c": 1.0,
+            "balanced_accuracy": 0.7869157145558517
+          },
+          {
+            "c": 3.0,
+            "balanced_accuracy": 0.7950516070047395
+          },
+          {
+            "c": 10.0,
+            "balanced_accuracy": 0.7917781444396578
+          },
+          {
+            "c": 30.0,
+            "balanced_accuracy": 0.7880086048170034
+          },
+          {
+            "c": 100.0,
+            "balanced_accuracy": 0.7698119435774877
+          },
+          {
+            "c": 300.0,
+            "balanced_accuracy": 0.7545924627579519
+          },
+          {
+            "c": 1000.0,
+            "balanced_accuracy": 0.7356826412700943
+          }
+        ]
+      },
+      "linear-frequencies": {
+        "method": "logistic",
+        "class_weight": "none",
+        "c": 30.0,
+        "iterations": 329,
+        "cv_balanced_accuracy": 0.7282973363701574,
+        "cv_by_c": [
+          {
+            "c": 0.01,
+            "balanced_accuracy": 0.1484812180203782
+          },
+          {
+            "c": 0.03,
+            "balanced_accuracy": 0.23794979351989257
+          },
+          {
+            "c": 0.1,
+            "balanced_accuracy": 0.34345030703014545
+          },
+          {
+            "c": 0.3,
+            "balanced_accuracy": 0.4856251115147788
+          },
+          {
+            "c": 1.0,
+            "balanced_accuracy": 0.5817618214751796
+          },
+          {
+            "c": 3.0,
+            "balanced_accuracy": 0.6724594603801439
+          },
+          {
+            "c": 10.0,
+            "balanced_accuracy": 0.7177672211679202
+          },
+          {
+            "c": 30.0,
+            "balanced_accuracy": 0.7282973363701574
+          },
+          {
+            "c": 100.0,
+            "balanced_accuracy": 0.722843691297326
+          },
+          {
+            "c": 300.0,
+            "balanced_accuracy": 0.713331117151989
+          },
+          {
+            "c": 1000.0,
+            "balanced_accuracy": 0.7013086998624719
+          }
+        ]
+      }
+    },
+    "scoring": "Category scores are weight @ normalized embedding + bias; the highest score wins."
+  },
+  "tensors": {
+    "centroid.bias": [
+      10
+    ],
+    "centroid.weight": [
+      10,
+      768
+    ],
+    "linear-balanced.bias": [
+      10
+    ],
+    "linear-balanced.weight": [
+      10,
+      768
+    ],
+    "linear-frequencies.bias": [
+      10
+    ],
+    "linear-frequencies.weight": [
+      10,
+      768
+    ]
+  },
+  "weights_sha256": "81a33fb1f16f90c337860a3f6f757ba3fcb806770c0f8fb1f7e8dc71516224f7",
+  "finished_utc": "2026-10-12T01:27:06.349803+00:00"
+}

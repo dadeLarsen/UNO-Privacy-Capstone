@@ -1,0 +1,38 @@
+{
+  "name": "embedding-head",
+  "labels": [
+    "Policy Change",
+    "Third Party Sharing/Collection",
+    "User Choice/Control",
+    "Data Retention",
+    "User Access Edit and Deletion",
+    "International and Specific Audiences",
+    "Data Security",
+    "Do Not Track",
+    "First Party Collection/Use",
+    "Other"
+  ],
+  "fit": {
+    "reference": "classification/embeddinggemma2-opp115-heads/20261012-011902Z",
+    "fit_sha256": "b071a2da68b6a958869ff3064fa09303b059617759c164e9ffffd6999f7a8f99",
+    "weights_sha256": "81a33fb1f16f90c337860a3f6f757ba3fcb806770c0f8fb1f7e8dc71516224f7",
+    "examples": {
+      "name": "opp115-examples",
+      "manifest_sha256": "e8adda0c69ed07f155ae2ae5ead8438637fe4787b22e1031c67ac2a2f5a50fcd",
+      "n": 10417
+    }
+  },
+  "head": {
+    "name": "linear-balanced",
+    "method": "logistic",
+    "class_weight": "balanced",
+    "c": 3.0,
+    "weight_sha256": "db4d48edfb1892fc14b77b6a559000f2971b141a98e6e2bc4b5a75cb846e68ce",
+    "bias_sha256": "05fc473b3a6dd21e69c9914a184ab6daef9cda7e09fe650c9075ac7f7a869d49"
+  },
+  "prefix": "task: classification | query: ",
+  "scores": "weight @ normalized float32 embedding + bias",
+  "max_input_tokens": 8192,
+  "truncation": false,
+  "batch_size": 1
+}

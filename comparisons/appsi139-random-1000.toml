@@ -1,0 +1,18 @@
+task = "classification"
+title = "APPSI-139: 1,000 random sentences in the corpus's own category mix"
+# Accepted labels are the original mapped labels plus every label ChatGPT Astra marked.
+runs = [
+    "classification/qwen3-14b-int8-definitions-appsi139-random-1000/20261012-023858Z",
+    "classification/qwen3-14b-nf4-definitions-appsi139-random-1000/20261012-022015Z",
+    "classification/privacy-model-fp32-appsi139-random-1000/20261012-013138Z",
+    "classification/jev-9b-bf16-definitions-appsi139-random-1000/20261012-013147Z",
+    "classification/jev-9b-int8-definitions-appsi139-random-1000/20261012-013357Z",
+    "classification/jev-9b-nf4-definitions-appsi139-random-1000/20261012-013807Z",
+    "classification/embeddinggemma2-bf16-definitions-search-category-query-appsi139-random-1000/20261012-013047Z",
+    "classification/embeddinggemma2-bf16-head-centroid-appsi139-random-1000/20261012-012817Z",
+    "classification/embeddinggemma2-bf16-head-linear-balanced-appsi139-random-1000/20261012-012907Z",
+    "classification/embeddinggemma2-bf16-head-linear-frequencies-appsi139-random-1000/20261012-012957Z",
+]
+
+[scoring]
+gold = "appsi139-astra"
