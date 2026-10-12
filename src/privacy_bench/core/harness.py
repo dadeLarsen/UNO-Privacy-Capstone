@@ -4,11 +4,11 @@ from collections import Counter
 import json
 from pathlib import Path
 
-from .conditions import Condition
+from .conditions import Condition, parse_condition
 from .files import digest_json, write_json
 from .protocols import Task
 from .provenance import environment, utc_now
-from .runs import SCHEMA_VERSION, cost_summary
+from .runs import SCHEMA_VERSION, cost_summary, load_run
 
 
 def _preflight(strategy, items, output: Path):
@@ -44,7 +44,7 @@ def execute(task: Task, condition: Condition, output: Path) -> dict:
     if output.exists():
         raise ValueError(f"Output already exists; choose a new run directory: {output}")
     selection = task.select_items(condition)
-    strategy = task.build_strategy(condition, selection)
+    strategy = task.build_strategy(condition)
     spec = strategy.input_spec
     item_ids = [item.id for item in selection.items]
     if len(set(item_ids)) != len(item_ids):
@@ -111,3 +111,20 @@ def execute(task: Task, condition: Condition, output: Path) -> dict:
         summary = task.evaluate(selection, responses, evaluation)
         print(f"Saved: {output.resolve()}", flush=True)
     return summary
+
+
+def evaluate_run(task: Task, path: Path) -> dict:
+    """Score a saved run again with the current scorer, rewriting its evaluation/ folder."""
+    run = load_run(path, require_complete=False)
+    condition = parse_condition(run.record["condition"]["name"],
+                                (run.path / "condition.toml").read_text(encoding="utf-8"))
+    if condition.sha256 != run.record["condition_sha256"]:
+        raise ValueError(f"condition.toml differs from the condition recorded in run.json: {path}")
+    if condition.task != task.name:
+        raise ValueError(f"Run {path} belongs to task {condition.task!r}, not {task.name!r}")
+    selection = task.select_items(condition)
+    if selection.identity != run.record["items"]:
+        raise ValueError(f"The data named by this run no longer matches its recorded identity: {path}")
+    evaluation = run.path / "evaluation"
+    evaluation.mkdir(exist_ok=True)
+    return task.evaluate(selection, run.responses, evaluation)

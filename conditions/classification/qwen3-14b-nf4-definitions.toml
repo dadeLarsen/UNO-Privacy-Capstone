@@ -1,0 +1,18 @@
+task = "classification"
+strategy = "prompted"
+warmup = 1
+
+[items]
+dataset = "opp115-sentences"
+sample = "pilot-200-10cat"
+gold = "pilot-200-10cat-reviewed"
+
+[model]
+id = "Qwen/Qwen3-14B"
+revision = "40c069824f4251a91eefaf281ebe4c544efd3e18"
+precision = "nf4"
+
+[options]
+prompt = "definitions"
+max_new_tokens = 32
+seed = 42

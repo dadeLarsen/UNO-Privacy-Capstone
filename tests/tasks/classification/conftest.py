@@ -1,9 +1,32 @@
 import csv
+import json
 
 import pytest
 
-from privacy_bench.tasks.classification.data import Row, read_dataset
+from privacy_bench.core.conditions import parse_condition
+from privacy_bench.core.files import read_json
+from privacy_bench.core.paths import data_file
+from privacy_bench.tasks.classification.data import Row, read_dataset, select_rows
 from privacy_bench.tasks.classification.taxonomy import LABELS, SOURCE_HEADER, SOURCE_LABELS, SOURCE_TO_TARGET
+
+
+@pytest.fixture
+def make_condition():
+    """Return a function that builds a pilot classification condition from model and option tables."""
+    def build(strategy, model, options):
+        def table(values):
+            return "".join(f"{key} = {json.dumps(value)}\n" for key, value in values.items())
+        return parse_condition("test", f'task = "classification"\nstrategy = "{strategy}"\n'
+                                       '[items]\ndataset = "opp115-sentences"\nsample = "pilot-200-10cat"\n'
+                                       f"[model]\n{table(model)}[options]\n{table(options)}")
+    return build
+
+
+@pytest.fixture(scope="session")
+def pilot_rows():
+    dataset = read_dataset(data_file("datasets", "opp115-sentences", suffix=".csv"))
+    rows = select_rows(dataset, read_json(data_file("classification", "samples", "pilot-200-10cat", suffix=".json")))
+    return {row.id: row for row in rows}
 
 
 @pytest.fixture
