@@ -153,22 +153,32 @@ def test_matrix_plot_writes_png_and_svg_with_legend_overrides(tmp_path):
     assert "Custom label" in svg and "Toy footnote." in svg and "Accuracy · higher is better" in svg
 
 
-def test_group_labels_wrap_each_line_without_splitting_words():
+def test_group_labels_wrap_each_line_splitting_words_only_at_hyphens():
     assert group_label("Embedding\nsimilarity\ncategories: search result") == (
         "Embedding\nsimilarity\ncategories:\nsearch result")
     assert group_label("Definitions + guidance") == "Definitions +\nguidance"
     assert group_label("an_unbreakable_identifier\n\nx") == "an_unbreakable_identifier\n\nx"
+    assert group_label("linear-frequencies") == "linear-\nfrequencies"
+
+
+def figure_pixels(tmp_path, flavours, folder):
+    runs = [make_run(tmp_path / folder, f"m{i}", "bf16", flavour) for i, flavour in enumerate(flavours)]
+    rows = summarize(ToyTask(), comparison(runs), runs_root=tmp_path / folder)
+    paths = draw_matrix(rows, [*ToyTask().quality_panels({}), *COST_PANELS], tmp_path / folder / "plots",
+                        title="Toy comparison", context="toy runs", footnotes=["Toy footnote."])
+    return imread(paths[0]).shape[:2]
 
 
 def test_matrix_plot_grows_to_fit_long_group_labels(tmp_path):
-    def figure_pixels(flavours, folder):
-        runs = [make_run(tmp_path / folder, f"m{i}", "bf16", flavour) for i, flavour in enumerate(flavours)]
-        rows = summarize(ToyTask(), comparison(runs), runs_root=tmp_path / folder)
-        paths = draw_matrix(rows, [*ToyTask().quality_panels({}), *COST_PANELS], tmp_path / folder / "plots",
-                            title="Toy comparison", context="5 toy runs", footnotes=["Toy footnote."])
-        return imread(paths[0]).shape[:2]
-
-    short = figure_pixels("abcde", "short")
-    long = figure_pixels([f"a very long flavour name with many words {i}" for i in range(5)], "long")
+    short = figure_pixels(tmp_path, "abcde", "short")
+    long = figure_pixels(tmp_path, [f"a very long flavour name with many words {i}" for i in range(5)], "long")
     assert short[1] == 16 * 180
     assert long[0] > short[0] and long[1] > short[1]
+
+
+def test_many_groups_move_the_panels_into_fewer_columns_instead_of_widening_past_the_cap(tmp_path):
+    three_columns = figure_pixels(tmp_path, "abcde", "few")
+    fewer_columns = figure_pixels(tmp_path, [f"long flavour name {i}" for i in range(12)], "many")
+    # Twelve groups would need a figure far wider than 24 inches in one row of three panels.
+    assert fewer_columns[1] <= 24 * 180
+    assert fewer_columns[0] > three_columns[0] * 1.4

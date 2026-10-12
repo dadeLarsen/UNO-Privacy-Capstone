@@ -1,0 +1,9 @@
+{
+  "name": "raw-text",
+  "format": "sentence_text",
+  "add_special_tokens": true,
+  "truncation": false,
+  "padding": false,
+  "batch_size": 1,
+  "max_input_tokens": 512
+}

@@ -1,0 +1,36 @@
+{
+  "name": "embedding-head",
+  "labels": [
+    "Policy Change",
+    "Third Party Sharing/Collection",
+    "User Choice/Control",
+    "Data Retention",
+    "User Access Edit and Deletion",
+    "International and Specific Audiences",
+    "Data Security",
+    "Do Not Track",
+    "First Party Collection/Use",
+    "Other"
+  ],
+  "fit": {
+    "reference": "classification/embeddinggemma2-opp115-heads/20261012-011902Z",
+    "fit_sha256": "b071a2da68b6a958869ff3064fa09303b059617759c164e9ffffd6999f7a8f99",
+    "weights_sha256": "81a33fb1f16f90c337860a3f6f757ba3fcb806770c0f8fb1f7e8dc71516224f7",
+    "examples": {
+      "name": "opp115-examples",
+      "manifest_sha256": "e8adda0c69ed07f155ae2ae5ead8438637fe4787b22e1031c67ac2a2f5a50fcd",
+      "n": 10417
+    }
+  },
+  "head": {
+    "name": "centroid",
+    "method": "centroid",
+    "weight_sha256": "a889a761d721d08daa72c74ad89a267aadf9a19330620f62d08dad54828d7779",
+    "bias_sha256": "2c34ce1df23b838c5abf2a7f6437cca3d3067ed509ff25f11df6b11b582b51eb"
+  },
+  "prefix": "task: classification | query: ",
+  "scores": "weight @ normalized float32 embedding + bias",
+  "max_input_tokens": 8192,
+  "truncation": false,
+  "batch_size": 1
+}

@@ -1,0 +1,19 @@
+task = "classification"
+title = "APPSI-139: up to 50 sentences per category"
+# Accepted labels are the original mapped labels plus every label ChatGPT Astra marked.
+# Only 10 sentences carry Do Not Track, so the sample has 460 sentences.
+runs = [
+    "classification/qwen3-14b-int8-definitions-appsi139-balanced-50/20261012-022855Z",
+    "classification/qwen3-14b-nf4-definitions-appsi139-balanced-50/20261012-021554Z",
+    "classification/privacy-model-fp32-appsi139-balanced-50/20261012-014228Z",
+    "classification/jev-9b-bf16-definitions-appsi139-balanced-50/20261012-014237Z",
+    "classification/jev-9b-int8-definitions-appsi139-balanced-50/20261012-014345Z",
+    "classification/jev-9b-nf4-definitions-appsi139-balanced-50/20261012-014553Z",
+    "classification/embeddinggemma2-bf16-definitions-search-category-query-appsi139-balanced-50/20261012-014159Z",
+    "classification/embeddinggemma2-bf16-head-centroid-appsi139-balanced-50/20261012-014033Z",
+    "classification/embeddinggemma2-bf16-head-linear-balanced-appsi139-balanced-50/20261012-014101Z",
+    "classification/embeddinggemma2-bf16-head-linear-frequencies-appsi139-balanced-50/20261012-014130Z",
+]
+
+[scoring]
+gold = "appsi139-astra"

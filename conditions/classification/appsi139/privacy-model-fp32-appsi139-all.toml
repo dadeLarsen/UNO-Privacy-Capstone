@@ -1,0 +1,17 @@
+task = "classification"
+strategy = "classifier-head"
+warmup = 1
+
+[items]
+dataset = "appsi139-sentences"
+sample = "appsi139-all"
+gold = "appsi139-astra"
+
+[model]
+id = "skythrone/privacy-model"
+revision = "7b478b5606f2f27cc4c8222449886dea4da36b0b"
+precision = "fp32"
+device = "cuda"
+
+[options]
+max_input_tokens = 512

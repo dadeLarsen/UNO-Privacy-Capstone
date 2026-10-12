@@ -1,0 +1,12 @@
+task = "classification"
+title = "APPSI-139: all 13,291 sentences, fast models only"
+# Accepted labels are the original mapped labels plus every label ChatGPT Astra marked.
+runs = [
+    "classification/privacy-model-fp32-appsi139-all/20261012-014711Z",
+    "classification/embeddinggemma2-bf16-head-centroid-appsi139-all/20261012-014758Z",
+    "classification/embeddinggemma2-bf16-head-linear-balanced-appsi139-all/20261012-015713Z",
+    "classification/embeddinggemma2-bf16-head-linear-frequencies-appsi139-all/20261012-020634Z",
+]
+
+[scoring]
+gold = "appsi139-astra"
