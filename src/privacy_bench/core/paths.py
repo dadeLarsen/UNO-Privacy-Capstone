@@ -6,6 +6,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 DATA_DIR = REPO_ROOT / "data"
 RESULTS_DIR = REPO_ROOT / "results"
 RUNS_DIR = RESULTS_DIR / "runs"
+FITS_DIR = RESULTS_DIR / "fits"
 COMPARISONS_DIR = RESULTS_DIR / "comparisons"
 
 

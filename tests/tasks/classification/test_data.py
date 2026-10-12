@@ -9,9 +9,9 @@ import pytest
 from privacy_bench.core.files import digest_json, read_json
 from privacy_bench.core.paths import data_file
 from privacy_bench.tasks.classification.data import (
-    MANIFEST_SCHEMA_VERSION, MARKED_TASK, SAMPLE_TASK, Row, accepted_gold_digest, load_accepted_gold,
-    make_full_manifest, make_manifest, make_random_manifest, make_stratified_manifest, read_dataset,
-    sample_strata, select_rows,
+    EXAMPLES_TASK, MANIFEST_SCHEMA_VERSION, MARKED_TASK, SAMPLE_TASK, Row, accepted_gold_digest, load_accepted_gold,
+    make_example_manifest, make_full_manifest, make_manifest, make_random_manifest, make_stratified_manifest,
+    normalized_text, read_dataset, sample_strata, select_examples, select_rows,
 )
 from privacy_bench.tasks.classification.taxonomy import (
     HEADER, LABELS, SOURCE_HEADER, SOURCE_LABELS, taxonomy_metadata,
@@ -255,6 +255,47 @@ def test_marked_samples_reject_bad_selections_unlabeled_sentences_and_missing_st
     manifest[key] = change(manifest[key])
     with pytest.raises(ValueError, match=message):
         select_rows(marked_dataset, resigned(manifest))
+
+
+def test_example_lists_leave_out_held_out_sentences_and_their_repeats(write_dataset, tmp_path):
+    rows = [Row("held", "Held-out sentence", (0,)), Row("repeat", "  shared   TEXT ", (1,)),
+            Row("keep-a", "Kept sentence", (2,)), Row("keep-b", "Another kept sentence", (2,)),
+            Row("multi", "Two labels", (3, 4))]
+    dataset = read_dataset(write_dataset(rows))
+    other = read_dataset(write_target_csv(tmp_path / "other.csv", [("x", "Shared text", (5,))]), allow_target=True)
+    held_out = [{"name": "own", "manifest": {"dataset_sha256": dataset.sha256, "manifest_sha256": "a" * 64},
+                 "rows": [dataset.rows[0]]},
+                {"name": "other", "manifest": {"dataset_sha256": other.sha256, "manifest_sha256": "b" * 64},
+                 "rows": other.rows}]
+    manifest = make_example_manifest(dataset, held_out)
+    assert manifest == make_example_manifest(dataset, held_out) and manifest["task"] == EXAMPLES_TASK
+    assert [row.id for row in select_examples(dataset, manifest)] == ["keep-a", "keep-b"]
+    assert manifest["excluded_held_out_rows"] == 1 and manifest["excluded_repeated_text_ids"] == ["repeat"]
+    assert manifest["label_counts"][LABELS[2]] == 2 and manifest["held_out"][1]["n"] == 1
+    assert normalized_text("  shared   TEXT ") == normalized_text("Shared text")
+    with pytest.raises(ValueError, match="single-label"):
+        select_examples(dataset, resigned({**manifest, "ids": ["keep-a", "multi"]}))
+    with pytest.raises(ValueError, match="task must be"):
+        select_examples(dataset, resigned({**manifest, "task": SAMPLE_TASK}))
+    with pytest.raises(ValueError, match="task must be"):
+        select_rows(dataset, manifest)
+
+
+class TestRealExamples:
+    def test_the_example_list_redraws_exactly_and_shares_no_sentence_with_a_test_set(self):
+        dataset = read_dataset(data_file("datasets", "opp115-sentences", suffix=".csv"))
+        held_out, texts = [], set()
+        for dataset_name, sample in (("opp115-sentences", "pilot-200-10cat"), ("appsi139-sentences", "appsi139-all")):
+            source = read_dataset(data_file("datasets", dataset_name, suffix=".csv"), allow_target=True)
+            manifest = read_json(data_file("classification", "samples", sample, suffix=".json"))
+            held_out.append({"name": sample, "manifest": manifest, "rows": select_rows(source, manifest)})
+            texts |= {normalized_text(row.text) for row in held_out[-1]["rows"]}
+        saved = read_json(data_file("classification", "examples", "opp115-examples", suffix=".json"))
+        assert json.loads(json.dumps(make_example_manifest(dataset, held_out))) == saved
+        rows = select_examples(dataset, saved)
+        assert len(rows) == 10417 and len(saved["excluded_repeated_text_ids"]) == 73
+        pilot_ids = {row.id for row in held_out[0]["rows"]}
+        assert not any(row.id in pilot_ids or normalized_text(row.text) in texts for row in rows)
 
 
 class TestRealAPPSI:

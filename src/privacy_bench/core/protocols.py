@@ -94,3 +94,9 @@ class Task(Protocol):
 
     def describe_comparison(self, rows: list, scoring: dict) -> dict:
         """{"context": one line under the title, "footnotes": notes on timing, validity, and scoring}."""
+
+    def fit(self, spec) -> dict:
+        """Fit what a fit file describes: {"report": JSON-safe details, "tensors": name -> float32 array}.
+
+        A task with nothing to fit raises ValueError.
+        """
