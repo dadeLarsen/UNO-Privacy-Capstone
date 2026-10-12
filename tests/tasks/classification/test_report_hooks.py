@@ -49,10 +49,19 @@ def test_panels_follow_the_gold_choice(task):
 
 
 def test_notes_explain_timing_validity_and_scoring_for_the_strategies_present(task):
-    rows = [{"strategy": "prompted", "n": 200, "sample": "pilot-200-10cat", "gold": "pilot-200-10cat-reviewed"},
-            {"strategy": "classifier-head", "n": 200, "sample": "pilot-200-10cat", "gold": "pilot-200-10cat-reviewed"}]
+    row = {"n": 200, "sample": "pilot-200-10cat", "gold": "pilot-200-10cat-reviewed",
+           "macro_accuracy_groups": "sample strata"}
+    rows = [{**row, "strategy": "prompted"}, {**row, "strategy": "classifier-head"}]
     described = task.describe_comparison(rows, {"gold": "pilot-200-10cat-reviewed"})
-    assert "200 sentences" in described["context"] and "pilot-200-10cat-reviewed" in described["context"]
+    assert "200 sentences" in described["context"]
+    assert "accepted labels pilot-200-10cat-reviewed" in described["context"]
     notes = " ".join(described["footnotes"])
     assert "prompt processing + generation" in notes and "classifier forward pass" in notes
-    assert "JEV" not in notes and "always valid" in notes and "reviewed gold" in notes
+    assert "JEV" not in notes and "always valid" in notes
+    assert "marked in pilot-200-10cat-reviewed" in notes and "the category the sample drew them for" in notes
+    unstratified = task.describe_comparison([{**rows[0], "macro_accuracy_groups": "original labels"}],
+                                            {"gold": "pilot-200-10cat-reviewed"})
+    assert "grouping sentences by their original labels" in " ".join(unstratified["footnotes"])
+    without_gold = task.describe_comparison([{**rows[0], "gold": "", "macro_accuracy_groups": None}], {})
+    assert "original labels" in without_gold["context"]
+    assert "macro-F1 uses the sentences with one original label" in " ".join(without_gold["footnotes"])

@@ -125,8 +125,12 @@ def import_run(old: Path, condition_path: Path, root: Path) -> Path:
     evaluation.mkdir()
     metrics = task.evaluate(selection, run.responses, evaluation)
     original = read_json(old / "metrics.json")
-    differing = sorted(key for key in set(metrics) - DESCRIPTION_FIELDS
+    differing = sorted(key for key in set(metrics) - DESCRIPTION_FIELDS - {"per_category"}
                        if key in original and original[key] != metrics[key])
+    # Per-category entries may gain fields; every field the old run recorded must still match.
+    if [{key: new[key] for key in old_entry} for new, old_entry in
+            zip(metrics["per_category"], original["per_category"], strict=True)] != original["per_category"]:
+        differing.append("per_category")
     if differing or original.get("scoring_mode") != metrics["scoring_mode"]:
         raise ValueError(f"Rescored metrics differ from {old / 'metrics.json'}: {differing}")
     for key, value in record["costs"].items():

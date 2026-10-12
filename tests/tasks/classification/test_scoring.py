@@ -91,7 +91,7 @@ def test_metrics_include_invalid_missing_and_all_ten_classes():
         {"id": "a", "raw_output": '{"label_id":0}'},
     ]
     metrics, details, confusion = evaluate(rows, responses)
-    assert metrics["scoring_mode"] == "original_single_label"
+    assert metrics["scoring_mode"] == "original_labels" and metrics["single_label_rows"] == 5
     assert (metrics["n"], metrics["recorded_responses"], metrics["correct"]) == (5, 4, 2)
     assert metrics["accuracy"] == pytest.approx(2 / 5)
     assert metrics["micro_precision"] == pytest.approx(2 / 3)
@@ -202,3 +202,48 @@ def test_accepted_labels_allow_one_through_all_categories(count):
 def test_accepted_labels_reject_mismatched_ids_invalid_labels_and_removed_originals(accepted, message):
     with pytest.raises(ValueError, match=message):
         evaluate([Row("001", "Sentence", (0,))], [], accepted)
+
+
+MULTI_ROWS = [Row("a", "A", (0,)), Row("b", "B", (0, 1)), Row("c", "C", (1, 2)), Row("d", "D", (3,))]
+
+
+def answers(**labels):
+    return [{"id": row_id, "raw_output": json.dumps({"label_id": label})} for row_id, label in labels.items()]
+
+
+def test_a_prediction_matching_any_original_label_is_correct_and_f1_uses_single_label_sentences():
+    metrics, details, confusion = evaluate(MULTI_ROWS, answers(a=0, b=1, c=0, d=3))
+    assert (metrics["correct"], metrics["accuracy"], metrics["single_label_rows"]) == (3, 0.75, 2)
+    assert [detail["correct"] for detail in details] == [1, 1, 0, 1]
+    assert details[1]["gold_label_ids"] == "[0, 1]"
+    assert details[1]["gold_labels"] == f"{LABELS[0]}; {LABELS[1]}"
+    # Only the single-label sentences a and d enter the confusion matrix and the per-category scores.
+    assert sum(map(sum, confusion)) == 2 and confusion[0][0] == confusion[3][3] == 1
+    assert metrics["macro_f1"] == pytest.approx(2 / 10)
+
+
+def test_macro_accuracy_groups_by_sample_strata_when_given_and_by_original_labels_otherwise():
+    accepted = {"a": [0], "b": [0, 1], "c": [1, 2, 9], "d": [3]}
+    responses = answers(a=0, b=9, c=9, d=3)
+    by_labels, _, _ = evaluate(MULTI_ROWS, responses, accepted)
+    # Original-label groups: 0 holds a and b, 1 holds b and c, 2 holds c, 3 holds d.
+    assert by_labels["macro_accuracy"] == pytest.approx((1 / 2 + 1 / 2 + 1 + 1) / 4)
+    assert by_labels["macro_accuracy_groups"] == "original labels"
+    assert by_labels["accepted_accuracy"] == 0.75
+    by_strata, details, _ = evaluate(MULTI_ROWS, responses, accepted, {"a": 0, "b": 0, "c": 2, "d": 3})
+    assert by_strata["macro_accuracy"] == pytest.approx((1 / 2 + 1 + 1) / 3)
+    assert by_strata["macro_accuracy_groups"] == "sample strata"
+    assert [category["accepted_rows"] for category in by_strata["per_category"]][:4] == [2, 0, 1, 1]
+    assert [detail["stratum"] for detail in details] == [LABELS[0], LABELS[0], LABELS[2], LABELS[3]]
+
+
+@pytest.mark.parametrize("rows, accepted, strata, message", [
+    ([Row("a", "A", ())], None, None, "at least one original label"),
+    (MULTI_ROWS, {"a": [0], "b": [0], "c": [1, 2], "d": [3]}, None, "Original gold label was removed"),
+    (MULTI_ROWS, None, {"a": 0, "b": 0, "c": 2}, "one valid category for every"),
+    (MULTI_ROWS, None, {"a": 0, "b": 0, "c": 2, "d": 10}, "one valid category for every"),
+    (MULTI_ROWS, None, {"a": 0, "b": 0, "c": 2, "d": True}, "one valid category for every"),
+])
+def test_unlabeled_sentences_dropped_originals_and_bad_strata_are_rejected(rows, accepted, strata, message):
+    with pytest.raises(ValueError, match=message):
+        evaluate(rows, [], accepted, strata)

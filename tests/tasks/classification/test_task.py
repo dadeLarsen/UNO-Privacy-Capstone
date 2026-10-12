@@ -31,16 +31,33 @@ def test_selection_records_dataset_sample_and_gold_identity():
     assert identity["gold"] == {"name": "pilot-200-10cat-reviewed",
                                 "accepted_gold_sha256": "2b5d2860f9af75f144daf1517c4c18747a123d01695dfc22abf287b75fc6a03d"}
     assert identity["taxonomy_id"] == "opp115-10-other" and len(identity["labels"]) == 10
-    assert set(selection.references) == {row.id for row in selection.items}
+    references = selection.references
+    assert set(references.accepted) == {row.id for row in selection.items}
+    # The pilot was drawn per original label, so each sentence's stratum is that label.
+    assert references.strata == {row.id: row.label_id for row in selection.items}
+
+
+def test_appsi_balanced_selection_carries_its_strata_and_accepted_labels(tmp_path):
+    condition = parse_condition("appsi", PILOT.replace("opp115-sentences", "appsi139-sentences")
+                                .replace('"pilot-200-10cat"', '"appsi139-balanced-50"')
+                                .replace("pilot-200-10cat-reviewed", "appsi139-astra"))
+    task = ClassificationTask()
+    selection = task.select_items(condition)
+    assert len(selection.items) == 460 and selection.identity["sample"]["name"] == "appsi139-balanced-50"
+    references = selection.references
+    assert all(set(row.labels) <= references.accepted[row.id] for row in selection.items)
+    assert all(references.strata[row.id] in references.accepted[row.id] for row in selection.items)
+    metrics = task.evaluate(selection, [], tmp_path)
+    assert metrics["macro_accuracy_groups"] == "sample strata" and metrics["status_counts"]["missing"] == 460
 
 
 def test_selection_without_gold_scores_original_labels(tmp_path):
     condition = parse_condition("pilot", PILOT.replace('gold = "pilot-200-10cat-reviewed"\n', ""))
     task = ClassificationTask()
     selection = task.select_items(condition)
-    assert selection.identity["gold"] is None and selection.references is None
+    assert selection.identity["gold"] is None and selection.references.accepted is None
     metrics = task.evaluate(selection, [], tmp_path)
-    assert metrics["scoring_mode"] == "original_single_label"
+    assert metrics["scoring_mode"] == "original_labels"
     assert metrics["status_counts"]["missing"] == 200
     assert "accepted accuracy" not in task.summary_line(metrics)
 

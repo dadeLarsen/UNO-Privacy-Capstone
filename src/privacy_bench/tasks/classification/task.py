@@ -5,7 +5,7 @@ from ...core.paths import data_file
 from ...core.files import read_json
 from ...core.protocols import Selection
 from . import report
-from .data import accepted_gold_digest, load_accepted_gold, read_dataset, select_rows
+from .data import References, accepted_gold_digest, load_accepted_gold, read_dataset, sample_strata, select_rows
 from .scoring import write_evaluation
 from .strategies import STRATEGIES
 from .taxonomy import LABELS, taxonomy_metadata
@@ -18,7 +18,8 @@ class ClassificationTask:
         """Load the sample and, when named, the reviewed gold before any model is loaded."""
         settings = take_settings(condition.items, f"Condition {condition.name!r} [items]",
                                  required=("dataset", "sample"), optional={"gold": None})
-        dataset = read_dataset(data_file("datasets", settings["dataset"], suffix=".csv"))
+        # A dataset is either OPP-115's twelve-label export or a CSV already in the ten target categories.
+        dataset = read_dataset(data_file("datasets", settings["dataset"], suffix=".csv"), allow_target=True)
         manifest = read_json(data_file("classification", "samples", settings["sample"], suffix=".json"))
         rows = select_rows(dataset, manifest)
         accepted, gold = None, None
@@ -30,7 +31,8 @@ class ClassificationTask:
             "sample": {"name": settings["sample"], "manifest_sha256": manifest["manifest_sha256"], "n": len(rows)},
             "gold": gold, "labels": list(LABELS), **taxonomy_metadata(),
         }
-        return Selection(items=rows, identity=identity, references=accepted)
+        return Selection(items=rows, identity=identity,
+                         references=References(accepted=accepted, strata=sample_strata(manifest, rows)))
 
     def build_strategy(self, condition: Condition):
         try:
@@ -41,7 +43,8 @@ class ClassificationTask:
         return factory(condition)
 
     def evaluate(self, selection: Selection, responses: list, output) -> dict:
-        return write_evaluation(output, selection.items, responses, selection.references)
+        references = selection.references
+        return write_evaluation(output, selection.items, responses, references.accepted, references.strata)
 
     @staticmethod
     def summary_line(metrics: dict) -> str:
