@@ -17,6 +17,8 @@ DIRECTIONS = {"higher": "higher is better", "lower": "lower is better", "neutral
 LEFT, RIGHT, WSPACE, PANEL_HEIGHT = 0.06, 0.975, 0.28, 2.45
 # Group labels wrap at this many characters a line; the figure then grows to fit the largest label.
 GROUP_LABEL_CHARACTERS = 14
+# A figure that would grow wider than this, in inches, lays its panels out in two columns, then one.
+MAX_WIDTH = 24
 
 
 def common_footnotes(rows) -> list:
@@ -58,12 +60,16 @@ def series_labels(series, rows):
 
 
 def group_label(label: str) -> str:
-    """Wrap each line of a group label so neighbouring labels stay narrow; words are never split."""
+    """Wrap each line of a group label so neighbouring labels stay narrow; words split only at hyphens."""
     lines = []
     for line in label.split("\n"):
-        lines.extend(textwrap.wrap(line, GROUP_LABEL_CHARACTERS, break_long_words=False,
-                                   break_on_hyphens=False) or [""])
+        lines.extend(textwrap.wrap(line, GROUP_LABEL_CHARACTERS, break_long_words=False) or [""])
     return "\n".join(lines)
+
+
+def panel_share(columns: int) -> float:
+    """The fraction of the figure width that one panel takes in a row of this many panels."""
+    return (RIGHT - LEFT) / (columns + (columns - 1) * WSPACE)
 
 
 def label_extent(labels) -> tuple:
@@ -155,13 +161,14 @@ def draw_matrix(rows, panels, output_dir, *, title, context, footnotes, legend_g
         "text.color": "#172b42", "xtick.color": "#425166", "ytick.color": "#425166", "svg.fonttype": "none",
         "figure.facecolor": "white",
     })
-    columns = 3
-    panel_rows = math.ceil(len(panels) / columns)
     label_width, label_height = label_extent([group_label(group) for group in groups])
-    # Each panel draws one bar per run plus a gap per group, and each group needs room for its label;
-    # three panels share the width.
-    panel_share = (RIGHT - LEFT) / (columns + (columns - 1) * WSPACE)
-    width = max(16, 2.0 * len(rows) + 1.0 * len(groups), (label_width + 0.15) * (len(groups) + 0.1) / panel_share)
+    # A panel needs room for one bar per run plus a gap per group, and for each group's label. Three
+    # panels share a row unless the figure would grow past MAX_WIDTH; then two do, or one.
+    axis_width = max((16 * panel_share(3)), (2.0 * len(rows) + 1.0 * len(groups)) * panel_share(3),
+                     (label_width + 0.15) * (len(groups) + 0.1))
+    columns = next((count for count in (3, 2) if axis_width / panel_share(count) <= MAX_WIDTH), 1)
+    width = max(16, axis_width / panel_share(columns))
+    panel_rows = math.ceil(len(panels) / columns)
     # Lay out the height in inches: the header, the panel rows, and the footnotes. Group labels sit
     # between rows and above the footnotes, so taller labels make a taller figure.
     legend_rows = math.ceil(len(series) / 2)
