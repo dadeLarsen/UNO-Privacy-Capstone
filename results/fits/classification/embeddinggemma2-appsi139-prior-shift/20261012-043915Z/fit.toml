@@ -1,0 +1,31 @@
+task = "classification"
+kind = "prior-shift"
+
+[base]
+fit = "classification/embeddinggemma2-opp115-heads/20261012-011902Z"
+
+# Only the tuning half sets the category mix and the strength; results come from the test half.
+[tuning]
+dataset = "appsi139-sentences"
+sample = "appsi139-tuning-half"
+gold = "appsi139-astra"
+
+[options]
+strengths = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+
+[heads.linear-balanced-tuned]
+base = "linear-balanced"
+strength = "tuned"
+
+[heads.linear-frequencies-tuned]
+base = "linear-frequencies"
+strength = "tuned"
+
+# The full tuning mix, for reference whatever strength tuning picks.
+[heads.linear-balanced-full]
+base = "linear-balanced"
+strength = 1.0
+
+[heads.linear-frequencies-full]
+base = "linear-frequencies"
+strength = 1.0

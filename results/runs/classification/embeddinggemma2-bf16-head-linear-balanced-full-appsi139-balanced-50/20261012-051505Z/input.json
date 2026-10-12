@@ -1,0 +1,60 @@
+{
+  "name": "embedding-head",
+  "labels": [
+    "Policy Change",
+    "Third Party Sharing/Collection",
+    "User Choice/Control",
+    "Data Retention",
+    "User Access Edit and Deletion",
+    "International and Specific Audiences",
+    "Data Security",
+    "Do Not Track",
+    "First Party Collection/Use",
+    "Other"
+  ],
+  "fit": {
+    "reference": "classification/embeddinggemma2-appsi139-prior-shift/20261012-043915Z",
+    "fit_sha256": "97b3fe0635c1aa0e86e5704decd3ae77a1005fd79ee130f973ce0c3bfc179254",
+    "weights_sha256": "891fcc9fe62dee8b53e959e06206fd152eeaad7176c8b0dc80c0218127537aba",
+    "examples": {
+      "name": "opp115-examples",
+      "manifest_sha256": "e8adda0c69ed07f155ae2ae5ead8438637fe4787b22e1031c67ac2a2f5a50fcd",
+      "n": 10417
+    },
+    "base": {
+      "reference": "classification/embeddinggemma2-opp115-heads/20261012-011902Z",
+      "fit_sha256": "b071a2da68b6a958869ff3064fa09303b059617759c164e9ffffd6999f7a8f99",
+      "weights_sha256": "81a33fb1f16f90c337860a3f6f757ba3fcb806770c0f8fb1f7e8dc71516224f7"
+    },
+    "tuning": {
+      "dataset": {
+        "name": "appsi139-sentences",
+        "sha256": "f1e74c1b1d21037b11b83e624789b027fb75c37fb577f55b9a93a66501862c84"
+      },
+      "sample": {
+        "name": "appsi139-tuning-half",
+        "manifest_sha256": "c4522068cb72c2b02376e53aef993010778b37ec91f065fb0abd6a92afc23624",
+        "n": 7233
+      },
+      "gold": {
+        "name": "appsi139-astra",
+        "accepted_gold_sha256": "a31311677adf2c6efb548516f08a7821878f4e8f1f7641fedaad362572264d6c"
+      }
+    }
+  },
+  "head": {
+    "name": "linear-balanced-full",
+    "method": "logistic",
+    "class_weight": "balanced",
+    "c": 3.0,
+    "base_head": "linear-balanced",
+    "strength": 1.0,
+    "weight_sha256": "db4d48edfb1892fc14b77b6a559000f2971b141a98e6e2bc4b5a75cb846e68ce",
+    "bias_sha256": "380bb2eb0a0e531ec94e4aa186d6bec6d3006738b78355b7e352a592944b2c63"
+  },
+  "prefix": "task: classification | query: ",
+  "scores": "weight @ normalized float32 embedding + bias",
+  "max_input_tokens": 8192,
+  "truncation": false,
+  "batch_size": 1
+}

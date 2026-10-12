@@ -1,0 +1,17 @@
+task = "classification"
+title = "APPSI-139 test half: heads shifted toward the tuning half's category mix"
+# Accepted labels are the original mapped labels plus every label ChatGPT Astra marked.
+# The shifted heads tuned on the other half. privacy-model's run covers all of APPSI-139 and is scored on
+# the test half alone.
+runs = [
+    "classification/privacy-model-fp32-appsi139-all/20261012-014711Z",
+    "classification/embeddinggemma2-bf16-head-linear-balanced-appsi139-test-half/20261012-051953Z",
+    "classification/embeddinggemma2-bf16-head-linear-frequencies-appsi139-test-half/20261012-052412Z",
+    "classification/embeddinggemma2-bf16-head-linear-balanced-tuned-appsi139-test-half/20261012-050604Z",
+    "classification/embeddinggemma2-bf16-head-linear-balanced-full-appsi139-test-half/20261012-051533Z",
+    "classification/embeddinggemma2-bf16-head-linear-frequencies-tuned-appsi139-test-half/20261012-051050Z",
+]
+
+[scoring]
+gold = "appsi139-astra"
+sample = "appsi139-test-half"
