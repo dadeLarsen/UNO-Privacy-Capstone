@@ -109,7 +109,9 @@ class SentenceEmbedder:
 
     def embed(self, encoded: dict) -> dict:
         """Return the normalized sentence embedding (float32 on the CPU) and its measurements."""
-        features = batch_to_device(encoded["features"], self._device)
+        # batch_to_device and the model both write into the dict they receive. A copy keeps the caller's
+        # encoded input on the CPU, so the model's outputs are freed after this call.
+        features = batch_to_device(dict(encoded["features"]), self._device)
         embedding, measurements = measured(lambda: self._model(features)["sentence_embedding"][0], cuda=self._cuda)
         ids = encoded["input_ids"]
         return {"embedding": embedding.float().cpu(), "input_tokens": len(ids), "input_token_ids": list(ids),

@@ -56,6 +56,17 @@ def test_forward_embedding_equals_the_library_encode_with_the_same_prompt(tiny_e
     assert result["seconds"] >= 0 and "peak_allocated_bytes" not in result
 
 
+def test_embedding_leaves_the_encoded_input_as_it_was(tiny_embedder):
+    # The harness keeps every encoded input for a whole run, so outputs added to one stay allocated.
+    embedder, _ = loaded(tiny_embedder)
+    encoded = embedder.encode("we keep data for years .", PROMPT)
+    before = dict(encoded["features"])
+    first = embedder.embed(encoded)
+    assert encoded["features"].keys() == before.keys()
+    assert all(encoded["features"][key] is value for key, value in before.items())
+    assert torch.equal(embedder.embed(encoded)["embedding"], first["embedding"])
+
+
 def test_inputs_over_the_limit_are_rejected_instead_of_truncated(tiny_embedder):
     embedder, _ = loaded(tiny_embedder, limit=12)
     assert len(embedder.encode("we keep data", PROMPT)["input_ids"]) == 11
