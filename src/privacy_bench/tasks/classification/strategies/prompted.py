@@ -3,13 +3,19 @@
 from ....core.conditions import Condition
 from ....models.chat_model import CHAT_TEMPLATE_KWARGS, ChatModel
 from ....models.hub import download_snapshot, resolve_snapshot, snapshot_identity
-from ..prompts import build_prompt, load_prompt
+from ..prompts import build_prompt, display_name, load_prompt
 from .settings import model_settings, option_settings, text_sha256
 
 
 class PromptedStrategy:
     name = "prompted"
     timing_scope = "prompt_processing_and_generation"
+    timing_description = "prompt processing + generation"
+    generates_text = True
+
+    @staticmethod
+    def condition_label(spec: dict) -> str:
+        return display_name(spec["prompt_spec"]["name"])
 
     def __init__(self, condition: Condition):
         self.model = model_settings(condition)

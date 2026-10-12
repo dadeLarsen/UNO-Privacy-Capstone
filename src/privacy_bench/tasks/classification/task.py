@@ -4,6 +4,7 @@ from ...core.conditions import Condition, take_settings
 from ...core.paths import data_file
 from ...core.files import read_json
 from ...core.protocols import Selection
+from . import report
 from .data import accepted_gold_digest, load_accepted_gold, read_dataset, select_rows
 from .scoring import write_evaluation
 from .strategies import STRATEGIES
@@ -50,3 +51,18 @@ class ClassificationTask:
             line += (f"; accepted accuracy: {metrics['accepted_accuracy']:.3%}; "
                      f"macro accuracy: {metrics['macro_accuracy']:.3%}")
         return line
+
+    def score_for_comparison(self, run, scoring: dict) -> dict:
+        return report.score_for_comparison(self, run, scoring)
+
+    @staticmethod
+    def quality_panels(scoring: dict) -> list:
+        return report.quality_panels(scoring)
+
+    @staticmethod
+    def condition_label(run) -> str:
+        return report.condition_label(run)
+
+    @staticmethod
+    def describe_comparison(rows: list, scoring: dict) -> dict:
+        return report.describe_comparison(rows, scoring)

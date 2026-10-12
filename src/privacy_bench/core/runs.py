@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .conditions import Condition, parse_condition
 from .files import digest_json, read_json, read_jsonl
 from .paths import RUNS_DIR
 
@@ -36,6 +37,15 @@ class Run:
     @property
     def name(self) -> str:
         return f"{self.record['condition']['name']}/{self.path.name}"
+
+
+def run_condition(run: Run) -> Condition:
+    """The condition a run was made with, checked against the hash in its record."""
+    condition = parse_condition(run.record["condition"]["name"],
+                                (run.path / "condition.toml").read_text(encoding="utf-8"))
+    if condition.sha256 != run.record["condition_sha256"]:
+        raise ValueError(f"condition.toml differs from the condition recorded in run.json: {run.path}")
+    return condition
 
 
 def load_run(path, *, require_complete=True) -> Run:

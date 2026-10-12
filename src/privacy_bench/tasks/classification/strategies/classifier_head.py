@@ -42,6 +42,12 @@ def label_mapping(config) -> list:
 class ClassifierHeadStrategy:
     name = "classifier-head"
     timing_scope = "model_forward"
+    timing_description = "classifier forward pass"
+    generates_text = False
+
+    @staticmethod
+    def condition_label(spec: dict) -> str:
+        return "Raw sentence\n(classifier)"
 
     def __init__(self, condition: Condition):
         self.model = model_settings(condition, optional={"device": "cuda"})
