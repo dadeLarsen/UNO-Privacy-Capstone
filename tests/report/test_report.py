@@ -3,13 +3,14 @@
 from dataclasses import dataclass
 import json
 
+from matplotlib.image import imread
 import pytest
 
 from privacy_bench.core.conditions import parse_condition
 from privacy_bench.core.harness import execute
 from privacy_bench.core.protocols import Panel, Selection
 from privacy_bench.report.comparisons import parse_comparison
-from privacy_bench.report.plot import draw_matrix
+from privacy_bench.report.plot import draw_matrix, group_label
 from privacy_bench.report.summary import COST_PANELS, summarize, write_summary
 
 
@@ -150,3 +151,24 @@ def test_matrix_plot_writes_png_and_svg_with_legend_overrides(tmp_path):
     assert [path.name for path in paths] == ["matrix-overview.png", "matrix-overview.svg"]
     svg = paths[1].read_text(encoding="utf-8")
     assert "Custom label" in svg and "Toy footnote." in svg and "Accuracy · higher is better" in svg
+
+
+def test_group_labels_wrap_each_line_without_splitting_words():
+    assert group_label("Embedding\nsimilarity\ncategories: search result") == (
+        "Embedding\nsimilarity\ncategories:\nsearch result")
+    assert group_label("Definitions + guidance") == "Definitions +\nguidance"
+    assert group_label("an_unbreakable_identifier\n\nx") == "an_unbreakable_identifier\n\nx"
+
+
+def test_matrix_plot_grows_to_fit_long_group_labels(tmp_path):
+    def figure_pixels(flavours, folder):
+        runs = [make_run(tmp_path / folder, f"m{i}", "bf16", flavour) for i, flavour in enumerate(flavours)]
+        rows = summarize(ToyTask(), comparison(runs), runs_root=tmp_path / folder)
+        paths = draw_matrix(rows, [*ToyTask().quality_panels({}), *COST_PANELS], tmp_path / folder / "plots",
+                            title="Toy comparison", context="5 toy runs", footnotes=["Toy footnote."])
+        return imread(paths[0]).shape[:2]
+
+    short = figure_pixels("abcde", "short")
+    long = figure_pixels([f"a very long flavour name with many words {i}" for i in range(5)], "long")
+    assert short[1] == 16 * 180
+    assert long[0] > short[0] and long[1] > short[1]
