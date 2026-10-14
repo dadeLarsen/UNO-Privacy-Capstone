@@ -1,11 +1,13 @@
 """Pinned Hugging Face checkpoints: explicit download, then offline resolution only."""
 
 import json
-import os
 from pathlib import Path
 import re
 
-from huggingface_hub import HfApi, hf_hub_download, snapshot_download
+from huggingface_hub import HfApi, constants, hf_hub_download, snapshot_download
+
+# The library reads HF_HUB_DISABLE_TELEMETRY once at import, so set the constant it checks per request.
+constants.HF_HUB_DISABLE_TELEMETRY = True
 
 COMMIT_PATTERN = re.compile(r"[0-9a-f]{40}")
 WEIGHT_FILES = (("model.safetensors.index.json", "model.safetensors"),
@@ -57,7 +59,6 @@ def resolve_snapshot(repo_id: str, revision: str) -> Path:
 def download_snapshot(repo_id: str, revision: str, patterns=None) -> Path:
     """Download one pinned commit; by default standard config, tokenizer, and weight files."""
     require_commit(repo_id, revision)
-    os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
     info = HfApi().model_info(repo_id, revision=revision)
     if info.sha != revision:
         raise ValueError(f"Hugging Face resolved {repo_id} {revision} to a different commit: {info.sha}")

@@ -2,7 +2,6 @@
 
 import argparse
 import json
-import os
 from pathlib import Path
 import sys
 
@@ -87,7 +86,6 @@ def main(argv=None):
     command.add_argument("--output-dir", type=Path, help="Default: results/comparisons/<comparison name>/")
     command.set_defaults(handler=compare)
     args = parser.parse_args(argv)
-    os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
     try:
         args.handler(args)
     except (ValueError, OSError, RuntimeError) as exc:
