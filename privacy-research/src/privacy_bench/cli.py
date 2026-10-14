@@ -12,7 +12,7 @@ from .core.files import read_json
 from .core.paths import COMPARISONS_DIR, REPO_ROOT
 from .core.runs import run_directory
 from .report.comparisons import load_comparison
-from .report.plot import common_footnotes, draw_matrix
+from .report.plot import bar_label, common_footnotes, draw_matrix
 from .report.summary import COST_PANELS, summarize, write_summary
 from .tasks import get_task
 
@@ -55,11 +55,15 @@ def compare(args):
     described = task.describe_comparison(rows, comparison.scoring)
     source = summary.relative_to(REPO_ROOT) if summary.is_relative_to(REPO_ROOT) else summary
     footnotes = [*common_footnotes(rows), *described["footnotes"], f"Source: {source.as_posix()}"]
-    paths = draw_matrix(rows, [*task.quality_panels(comparison.scoring), *COST_PANELS], output,
+    quality = task.quality_panels(comparison.scoring)
+    paths = draw_matrix(rows, [*quality, *COST_PANELS], output,
                         title=comparison.title or comparison.name,
                         context=f"{described['context']}  |  {len(rows)} runs", footnotes=footnotes)
+    headline = quality[0]
     for row in rows:
-        print(f"{row['run']}: accuracy={row['accuracy']:.3%} mean_seconds={row['mean_seconds']:.4f}")
+        value = row[headline.field]
+        shown = "N/A" if value is None else bar_label(value * headline.scale, headline.style)
+        print(f"{row['run']}: {headline.field}={shown} mean_seconds={row['mean_seconds']:.4f}")
     for path in (summary, *paths):
         print(f"Saved: {path}")
 
