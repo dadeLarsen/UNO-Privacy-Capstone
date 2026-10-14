@@ -13,6 +13,8 @@ COMMIT_PATTERN = re.compile(r"[0-9a-f]{40}")
 WEIGHT_FILES = (("model.safetensors.index.json", "model.safetensors"),
                 ("pytorch_model.bin.index.json", "pytorch_model.bin"))
 STANDARD_PATTERNS = ("*.json", "*.model", "*.txt", "*.jinja", "*.tiktoken", "tokenizer*", "vocab*")
+# The output_loading_info fields that must all be empty for a checkpoint to have loaded exactly.
+LOADING_CHECKS = ("missing_keys", "unexpected_keys", "mismatched_keys", "error_msgs")
 
 
 def require_commit(repo_id, revision) -> str:

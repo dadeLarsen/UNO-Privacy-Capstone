@@ -7,11 +7,10 @@ import torch
 from transformers import AutoConfig, AutoModelForSequenceClassification, AutoTokenizer
 
 from ..core.files import digest_json, digest_text
-from .hub import context_limit, reject_prequantized, validate_weights
+from .hub import LOADING_CHECKS, context_limit, reject_prequantized, validate_weights
 from .measure import gpu_metadata, measured, require_cuda, timed_load, use_exact_fp32_matmul
 
 LOCAL = {"local_files_only": True, "trust_remote_code": False}
-LOADING_CHECKS = ("missing_keys", "unexpected_keys", "mismatched_keys", "error_msgs")
 
 
 def validate_encoding(encoded, limit: int) -> list:
