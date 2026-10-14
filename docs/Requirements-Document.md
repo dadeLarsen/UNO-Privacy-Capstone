@@ -1,12 +1,10 @@
 # Requirements
 
-Draft of Chapter 2, following the [requirements outline](Requirements-Outline.md). *Privacy Policy Reader* is a working name for the app. Model results cited here come from the [model research README](../privacy-research/README.md).
-
 ## 1. Goals
 
 ### 1.1 Goal model
 
-Figure 1 is the SR model for the four actors: the user, the app, the client, and the development team. Dependencies between actors run through dependums D1–D8. The same model, with the same layout and each element's description, is in [goal-model-pistar.txt](requirements-figures/goal-model-pistar.txt); open it in piStar with **File → Load Model**.
+Figure 1 is the SR model for the four actors: the user, the app, the client, and the development team. Dependencies between actors run through dependums D1–D8.
 
 ![Figure 1: SR goal model](requirements-figures/goal-model.svg)
 

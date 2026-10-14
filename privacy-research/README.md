@@ -109,7 +109,7 @@ comparisons/*.toml           which saved runs to put side by side, and how to sc
 data/                        source datasets, plus each task's samples, gold labels, examples, and prompts
 results/runs/<task>/<condition>/<UTC start>/   tracked run records
 results/fits/<task>/<fit>/<UTC start>/         tracked fit records, with the fitted weights
-results/comparisons/<name>/  summaries and plots, regenerated and not tracked
+results/comparisons/<name>/  summaries and plots from pbench compare; five are committed for reading
 src/privacy_bench/
   core/       condition and fit files, run and fit records, the run loop, provenance
   models/     backends: chat generation, sequence classifiers, JEV judges, sentence embeddings

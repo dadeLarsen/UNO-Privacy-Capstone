@@ -1,16 +1,20 @@
 """Pinned Hugging Face checkpoints: explicit download, then offline resolution only."""
 
 import json
-import os
 from pathlib import Path
 import re
 
-from huggingface_hub import HfApi, hf_hub_download, snapshot_download
+from huggingface_hub import HfApi, constants, hf_hub_download, snapshot_download
+
+# The library reads HF_HUB_DISABLE_TELEMETRY once at import, so set the constant it checks per request.
+constants.HF_HUB_DISABLE_TELEMETRY = True
 
 COMMIT_PATTERN = re.compile(r"[0-9a-f]{40}")
 WEIGHT_FILES = (("model.safetensors.index.json", "model.safetensors"),
                 ("pytorch_model.bin.index.json", "pytorch_model.bin"))
 STANDARD_PATTERNS = ("*.json", "*.model", "*.txt", "*.jinja", "*.tiktoken", "tokenizer*", "vocab*")
+# The output_loading_info fields that must all be empty for a checkpoint to have loaded exactly.
+LOADING_CHECKS = ("missing_keys", "unexpected_keys", "mismatched_keys", "error_msgs")
 
 
 def require_commit(repo_id, revision) -> str:
@@ -54,19 +58,17 @@ def resolve_snapshot(repo_id: str, revision: str) -> Path:
     return Path(config).parent.resolve()
 
 
-def download_snapshot(repo_id: str, revision: str, patterns=None) -> Path:
-    """Download one pinned commit; by default standard config, tokenizer, and weight files."""
+def download_snapshot(repo_id: str, revision: str) -> Path:
+    """Download one pinned commit's standard config, tokenizer, and weight files."""
     require_commit(repo_id, revision)
-    os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
     info = HfApi().model_info(repo_id, revision=revision)
     if info.sha != revision:
         raise ValueError(f"Hugging Face resolved {repo_id} {revision} to a different commit: {info.sha}")
-    if patterns is None:
-        names = {item.rfilename for item in info.siblings}
-        safetensors = "model.safetensors" in names or "model.safetensors.index.json" in names
-        # Prefer safetensors so repositories that also publish .bin files are not cached twice.
-        patterns = [*STANDARD_PATTERNS, "*.safetensors" if safetensors else "pytorch_model*.bin"]
-    return Path(snapshot_download(repo_id, revision=revision, allow_patterns=list(patterns))).resolve()
+    names = {item.rfilename for item in info.siblings}
+    safetensors = "model.safetensors" in names or "model.safetensors.index.json" in names
+    # Prefer safetensors so repositories that also publish .bin files are not cached twice.
+    patterns = [*STANDARD_PATTERNS, "*.safetensors" if safetensors else "pytorch_model*.bin"]
+    return Path(snapshot_download(repo_id, revision=revision, allow_patterns=patterns)).resolve()
 
 
 def snapshot_identity(repo_id: str, revision: str, snapshot: Path) -> dict:

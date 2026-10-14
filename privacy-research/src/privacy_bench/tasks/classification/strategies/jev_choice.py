@@ -4,12 +4,13 @@ from copy import deepcopy
 import json
 
 from ....core.conditions import Condition
+from ....core.files import digest_text
 from ....models.jev.bundle import download_bundle, resolve_bundle
 from ....models.jev.judge import CHOICE_LETTERS, JEVJudge, choice_prompt
 from ....models.hub import snapshot_identity
 from ..prompts import display_name, load_prompt, validate_prompt_spec
 from ..taxonomy import LABELS
-from .settings import first_argmax, model_settings, option_settings, text_sha256
+from .settings import first_argmax, model_settings, option_settings
 
 QUESTION = (
     "Classify the privacy-policy sentence into exactly one of the supplied categories. "
@@ -71,7 +72,7 @@ class JEVChoiceStrategy:
 
     def prepare(self, row) -> dict:
         prompt = choice_prompt(row.text, self._spec["question"], self._spec["options"])
-        return {"text_sha256": text_sha256(row.text), "encoded": self._judge.encode(prompt)}
+        return {"text_sha256": digest_text(row.text), "encoded": self._judge.encode(prompt)}
 
     def describe(self, prepared) -> dict:
         return {"input_tokens": len(prepared["encoded"]["input_ids"])}

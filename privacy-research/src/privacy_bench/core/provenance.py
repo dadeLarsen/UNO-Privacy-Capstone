@@ -9,6 +9,8 @@ import sys
 from .files import digest_bytes
 from .paths import REPO_ROOT
 
+CODE_PATHS = ("src", "pyproject.toml", "uv.lock")
+
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -24,8 +26,12 @@ def _git(*arguments) -> bytes:
 
 def code_revision() -> dict:
     """Record the commit and any uncommitted changes, so a dirty run stays traceable."""
-    status = _git("status", "--porcelain", "--untracked-files=all", "--", "src", "pyproject.toml", "uv.lock")
-    diff = _git("diff", "HEAD", "--binary", "--", "src", "pyproject.toml", "uv.lock")
+    status = _git("status", "--porcelain", "--untracked-files=all", "--", *CODE_PATHS)
+    diff = _git("diff", "HEAD", "--binary", "--", *CODE_PATHS)
+    # git diff leaves out untracked files, so append each one's path and content hash.
+    for path in _git("ls-files", "--others", "--exclude-standard", "-z", "--", *CODE_PATHS).split(b"\0"):
+        if path:
+            diff += b"\0" + path + b"\0" + digest_bytes((REPO_ROOT / path.decode("utf-8")).read_bytes()).encode("ascii")
     return {
         "commit": _git("rev-parse", "HEAD").decode("ascii").strip(),
         "dirty": bool(status.strip()),

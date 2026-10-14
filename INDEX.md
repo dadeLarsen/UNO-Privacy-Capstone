@@ -7,7 +7,7 @@ Data, configuration, and results entries have a status:
 - **Current**: in use and reflects present thinking.
 - **Frozen**: pinned by SHA-256 in samples, conditions, or run records. Never edit or resave it (opening a CSV in Excel and saving it breaks the hash); freeze a new file instead.
 - **Historical**: kept for provenance. Don't mix its results with current runs.
-- **Generated**: written by a command and not tracked; regenerate it rather than edit it.
+- **Generated**: written by a command and not tracked unless its row says so; regenerate it rather than edit it.
 
 ## Start here
 
@@ -130,7 +130,7 @@ One-time scripts that froze data files or imported runs. Each refuses to overwri
 | Runs started `20260918-*` and `20261002-*` | Historical | The six runs imported from the AirLLM workspace, each with its original `legacy-run.json`. Reruns under transformers 5.19.0 sit beside them. |
 | [fits/classification/](privacy-research/results/fits/classification/)`<fit>/<UTC start>/` | Frozen | `fit.toml`, `fit.json` (provenance, cross-validation results, and the weights' hash), and `weights.safetensors`. |
 | `runs/**/evaluation/` | Generated | Scores from `pbench run` or `pbench evaluate`. |
-| `comparisons/<name>/` | Generated | `summary.csv` and `matrix-overview.png`/`.svg` from `pbench compare`. |
+| `comparisons/<name>/` | Generated | `summary.csv` and `matrix-overview.png`/`.svg` from `pbench compare`. Five are committed so readers can see results without running it: `appsi139-test-half`, `embeddinggemma2-instructions`, `pilot-embeddinggemma2-heads`, `pilot-models-embeddinggemma2`, and `qwen-privacy-jev`. |
 
 ### Project files
 

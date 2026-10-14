@@ -3,10 +3,11 @@
 import json
 
 from ....core.conditions import Condition
+from ....core.files import digest_text
 from ....models.hub import download_snapshot, resolve_snapshot, snapshot_identity
 from ....models.sequence_classifier import SequenceClassifier
 from ..taxonomy import LABELS
-from .settings import first_argmax, model_settings, option_settings, text_sha256
+from .settings import first_argmax, model_settings, option_settings
 
 # Checkpoint label names that differ from the benchmark's only in punctuation.
 LABEL_ALIASES = {"User Access, Edit and Deletion": "User Access Edit and Deletion"}
@@ -78,7 +79,7 @@ class ClassifierHeadStrategy:
                 "label_mapping": self._mapping, "selection": "argmax logits; first model index wins exact ties"}
 
     def prepare(self, row) -> dict:
-        return {"text_sha256": text_sha256(row.text), "encoded": self._backend.encode(row.text)}
+        return {"text_sha256": digest_text(row.text), "encoded": self._backend.encode(row.text)}
 
     def describe(self, prepared) -> dict:
         return {"input_tokens": len(prepared["encoded"]["input_ids"])}

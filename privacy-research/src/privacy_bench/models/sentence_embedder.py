@@ -1,6 +1,5 @@
 """Sentence embeddings from a local sentence-transformers checkpoint, one text at a time, never truncating."""
 
-import hashlib
 import json
 from pathlib import Path
 
@@ -8,6 +7,7 @@ from sentence_transformers import SentenceTransformer
 from sentence_transformers.util import batch_to_device
 import torch
 
+from ..core.files import digest_json, digest_text
 from .hub import context_limit, reject_prequantized, validate_weights
 from .measure import gpu_metadata, measured, require_cuda, timed_load, use_exact_fp32_matmul
 
@@ -16,10 +16,6 @@ DTYPES = {"bf16": torch.bfloat16, "fp32": torch.float32}
 # A normalized, pooled sentence embedding needs exactly these three modules, in this order.
 PIPELINE = ("Transformer", "Pooling", "Normalize")
 NON_TEXT_CONFIGS = ("vision_config", "audio_config")
-
-
-def _sha256(text: str) -> str:
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 class SentenceEmbedder:
@@ -84,7 +80,7 @@ class SentenceEmbedder:
             "precision": self.precision, "dtype": str(dtype), "device": self._device, "device_map": {"": self._device},
             "context_limit": self.max_input_tokens, "model_context_limit": model_limit,
             "context_limit_candidates": candidates, **precision_settings,
-            "model_config_sha256": _sha256((self.snapshot / "config.json").read_text(encoding="utf-8")),
+            "model_config_sha256": digest_text((self.snapshot / "config.json").read_text(encoding="utf-8")),
             "tokenizer_settings": {"processing": "sentence-transformers preprocess", "truncation": False},
             "batch_size": 1,
             "timing_scope": "synchronized embedding forward pass, including pooling and normalization; excludes "
@@ -115,4 +111,4 @@ class SentenceEmbedder:
         embedding, measurements = measured(lambda: self._model(features)["sentence_embedding"][0], cuda=self._cuda)
         ids = encoded["input_ids"]
         return {"embedding": embedding.float().cpu(), "input_tokens": len(ids), "input_token_ids": list(ids),
-                "input_token_sha256": _sha256(json.dumps(ids, separators=(",", ":"))), **measurements}
+                "input_token_sha256": digest_json(ids), **measurements}

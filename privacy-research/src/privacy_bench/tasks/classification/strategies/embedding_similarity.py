@@ -6,12 +6,12 @@ import re
 import torch
 
 from ....core.conditions import Condition
-from ....core.files import digest_json
+from ....core.files import digest_json, digest_text
 from ....models.hub import download_snapshot, resolve_snapshot, snapshot_identity
 from ....models.sentence_embedder import SentenceEmbedder
 from ..prompts import display_name, load_prompt
 from ..taxonomy import LABELS
-from .settings import first_argmax, model_settings, option_settings, text_sha256
+from .settings import first_argmax, model_settings, option_settings
 
 
 def category_texts(prompt_spec: dict) -> list:
@@ -85,7 +85,7 @@ class EmbeddingSimilarityStrategy:
                 "selection": "argmax cosine similarity; first category wins exact ties"}
 
     def prepare(self, row) -> dict:
-        return {"text_sha256": text_sha256(row.text),
+        return {"text_sha256": digest_text(row.text),
                 "encoded": self._backend.encode(row.text, self.options["sentence_prefix"])}
 
     def describe(self, prepared) -> dict:

@@ -1,13 +1,13 @@
 """Greedy generation from a local chat model on one GPU, one prompt at a time, never truncating."""
 
 from copy import deepcopy
-import hashlib
 import json
 from pathlib import Path
 
 import torch
 from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer, GenerationConfig, set_seed
 
+from ..core.files import digest_json, digest_text
 from .hub import context_limit, reject_prequantized, validate_weights
 from .measure import gpu_metadata, measured, require_cuda, timed_load
 from .quantization import bitsandbytes_config, install_int8_cast_log_filter
@@ -15,10 +15,6 @@ from .quantization import bitsandbytes_config, install_int8_cast_log_filter
 PRECISIONS = ("bf16", "int8", "nf4")
 CHAT_TEMPLATE_KWARGS = {"tokenize": False, "add_generation_prompt": True, "enable_thinking": False}
 LOCAL = {"local_files_only": True, "trust_remote_code": False}
-
-
-def _sha256(text: str) -> str:
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def greedy_config(original, defaults, max_new_tokens):
@@ -116,8 +112,8 @@ class ChatModel:
             "precision": self.precision, "nonquantized_dtype": str(dtype),
             "quantization_config": quantization.to_dict() if quantization else None,
             "device_map": device_map, "model_class": type(model).__name__, "model_type": model_config.model_type,
-            "model_config_sha256": _sha256((self.snapshot / "config.json").read_text(encoding="utf-8")),
-            "chat_template_sha256": _sha256(chat_template), "chat_template_kwargs": CHAT_TEMPLATE_KWARGS,
+            "model_config_sha256": digest_text((self.snapshot / "config.json").read_text(encoding="utf-8")),
+            "chat_template_sha256": digest_text(chat_template), "chat_template_kwargs": CHAT_TEMPLATE_KWARGS,
             "context_limit": limit, "context_limit_candidates": candidates,
             "attention_implementation": getattr(model.config, "_attn_implementation", None),
             "generation_config": self._generation.to_dict(),
@@ -157,8 +153,8 @@ class ChatModel:
             "raw_output": self._tokenizer.decode(visible_token_ids(ids, self._generation), **decode),
             "raw_output_with_special_tokens": self._tokenizer.decode(ids, **decode),
             "input_tokens": len(input_ids), "output_tokens": len(ids), "output_token_ids": ids,
-            "input_token_sha256": _sha256(json.dumps(input_ids, separators=(",", ":"))),
-            "rendered_prompt_sha256": _sha256(chat_input["rendered"]),
+            "input_token_sha256": digest_json(input_ids),
+            "rendered_prompt_sha256": digest_text(chat_input["rendered"]),
             **measurements,
             "reached_output_token_limit": len(ids) >= self._generation.max_new_tokens,
         }

@@ -1,21 +1,16 @@
 """FP32 sequence classification of one raw text at a time, never truncating."""
 
-import hashlib
 import json
 from pathlib import Path
 
 import torch
 from transformers import AutoConfig, AutoModelForSequenceClassification, AutoTokenizer
 
-from .hub import context_limit, reject_prequantized, validate_weights
+from ..core.files import digest_json, digest_text
+from .hub import LOADING_CHECKS, context_limit, reject_prequantized, validate_weights
 from .measure import gpu_metadata, measured, require_cuda, timed_load, use_exact_fp32_matmul
 
 LOCAL = {"local_files_only": True, "trust_remote_code": False}
-LOADING_CHECKS = ("missing_keys", "unexpected_keys", "mismatched_keys", "error_msgs")
-
-
-def _sha256(text: str) -> str:
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def validate_encoding(encoded, limit: int) -> list:
@@ -88,7 +83,7 @@ class SequenceClassifier:
             "precision": "fp32", "dtype": "torch.float32", "device": self._device, "device_map": {"": self._device},
             "context_limit": self.max_input_tokens, "model_context_limit": model_limit,
             "context_limit_candidates": candidates,
-            "model_config_sha256": _sha256((self.snapshot / "config.json").read_text(encoding="utf-8")),
+            "model_config_sha256": digest_text((self.snapshot / "config.json").read_text(encoding="utf-8")),
             "tokenizer_class": type(tokenizer).__name__,
             "tokenizer_settings": {"add_special_tokens": True, "truncation": False, "padding": False},
             "attention_implementation": model.config._attn_implementation,
@@ -130,6 +125,6 @@ class SequenceClassifier:
         return {
             "logits": values.tolist(), "probabilities": torch.softmax(values, dim=0).tolist(),
             "input_tokens": len(ids), "input_token_ids": list(ids),
-            "input_token_sha256": _sha256(json.dumps(ids, separators=(",", ":"))),
+            "input_token_sha256": digest_json(ids),
             **measurements,
         }

@@ -10,8 +10,8 @@ import torch
 from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 
 from ...core.files import digest_bytes, digest_json
-from ..hub import context_limit
-from ..measure import GIB, measured, require_cuda, timed_load, use_exact_fp32_matmul
+from ..hub import LOADING_CHECKS, context_limit, reject_prequantized
+from ..measure import GIB, gpu_metadata, measured, require_cuda, timed_load, use_exact_fp32_matmul
 from ..quantization import install_int8_cast_log_filter
 from .bundle import validate_bundle
 from .quantization import plan_quantization, validate_quantization
@@ -133,10 +133,9 @@ class JEVJudge:
             require_cuda(bf16=True)
         precision_settings = use_exact_fp32_matmul()
         snapshot = validate_bundle(self.snapshot)
-        raw = json.loads((snapshot / "config.json").read_text(encoding="utf-8"))
-        if raw.get("model_type") != "qwen3_5_text" or any(raw.get(key) for key in (
-                "quantization_config", "compression_config", "load_in_4bit", "load_in_8bit")):
-            raise ValueError("Expected the unquantized qwen3_5_text JEV checkpoint")
+        raw = reject_prequantized(snapshot)
+        if raw.get("model_type") != "qwen3_5_text":
+            raise ValueError("Expected the qwen3_5_text JEV checkpoint")
         judge = json.loads((snapshot / "judge_config.json").read_text(encoding="utf-8"))
         calibration = json.loads((snapshot / "calibration.json").read_text(encoding="utf-8"))
         adapter = json.loads((snapshot / "adapter/adapter_config.json").read_text(encoding="utf-8"))
@@ -163,9 +162,9 @@ class JEVJudge:
         estimated_weights = (estimated_base + (snapshot / "adapter/adapter_model.safetensors").stat().st_size
                              + sum(tensor.numel() * tensor.element_size() for tensor in head.values()))
         headroom = self._reserve_bytes + staging
-        free_before = total_gpu = None
+        free_before = None
         if self._cuda:
-            free_before, total_gpu = torch.cuda.mem_get_info(0)
+            free_before, _ = torch.cuda.mem_get_info(0)
             if free_before < estimated_weights + headroom:
                 raise RuntimeError(f"Insufficient free VRAM before loading: {free_before / GIB:.2f} GiB free; "
                                    f"estimated weights {estimated_weights / GIB:.2f} GiB plus "
@@ -180,8 +179,7 @@ class JEVJudge:
                 str(snapshot), **LOCAL, dtype=self._dtype, device_map={"": self._device},
                 attn_implementation="sdpa", output_loading_info=True,
                 **({"quantization_config": quantization} if quantized else {}))
-            checks = ("missing_keys", "unexpected_keys", "mismatched_keys", "error_msgs")
-            if not isinstance(loading, dict) or any(key not in loading or loading[key] for key in checks):
+            if not isinstance(loading, dict) or any(key not in loading or loading[key] for key in LOADING_CHECKS):
                 raise RuntimeError("Base checkpoint did not load exactly: "
                                    + json.dumps(loading, ensure_ascii=False, default=str))
             if quantized:
@@ -232,8 +230,7 @@ class JEVJudge:
             "gpu_free_before_load_bytes": free_before, "min_free_vram_bytes": self._reserve_bytes,
         }
         if self._cuda:
-            metadata.update(gpu=torch.cuda.get_device_name(0), gpu_total_bytes=total_gpu,
-                            cuda_version=torch.version.cuda)
+            metadata.update(gpu_metadata())
         return json.loads(json.dumps(metadata, default=str))
 
     def encode(self, prompt: str) -> dict:
