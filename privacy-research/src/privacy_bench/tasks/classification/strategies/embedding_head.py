@@ -17,12 +17,12 @@ import json
 import torch
 
 from ....core.conditions import Condition
-from ....core.files import digest_bytes
+from ....core.files import digest_bytes, digest_text
 from ....core.fits import load_fit, resolve_fit
 from ....models.hub import download_snapshot, resolve_snapshot, snapshot_identity
 from ....models.sentence_embedder import SentenceEmbedder
 from ..taxonomy import LABELS
-from .settings import first_argmax, model_settings, option_settings, text_sha256
+from .settings import first_argmax, model_settings, option_settings
 
 EMBEDDING_FIT_KIND = "embedding-heads"
 PRIOR_SHIFT_KIND = "prior-shift"
@@ -120,7 +120,7 @@ class EmbeddingHeadStrategy:
                 "selection": "argmax of head scores; first category wins exact ties"}
 
     def prepare(self, row) -> dict:
-        return {"text_sha256": text_sha256(row.text),
+        return {"text_sha256": digest_text(row.text),
                 "encoded": self._backend.encode(row.text, self.prefix)}
 
     def describe(self, prepared) -> dict:

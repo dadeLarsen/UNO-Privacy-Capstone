@@ -1,12 +1,12 @@
 """Validate and explicitly cache a complete JEV checkpoint bundle."""
 
-import json
 import os
 from pathlib import Path, PurePosixPath, PureWindowsPath
 import re
 
 from huggingface_hub import HfApi, hf_hub_download, snapshot_download
 
+from ...core.files import read_json
 from ..hub import require_commit
 
 INDEX_NAME = "model.safetensors.index.json"
@@ -18,17 +18,8 @@ REQUIRED_FILES = (
 SHARD_PATTERN = re.compile(r"model-(\d{5})-of-(\d{5})\.safetensors")
 
 
-def _unique_json_object(pairs):
-    result = {}
-    for key, value in pairs:
-        if key in result:
-            raise ValueError(f"Duplicate JSON object key: {key!r}")
-        result[key] = value
-    return result
-
-
 def read_object(path: Path) -> dict:
-    value = json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=_unique_json_object)
+    value = read_json(path)
     if not isinstance(value, dict):
         raise ValueError(f"JEV metadata must be a JSON object: {path}")
     return value

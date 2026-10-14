@@ -1,7 +1,6 @@
 """Condition parsing and small helpers shared by the classification strategies."""
 
 from ....core.conditions import Condition, take_settings
-from ....core.files import digest_bytes
 from ....models.hub import require_commit
 
 
@@ -15,10 +14,6 @@ def model_settings(condition: Condition, *, required=(), optional=None) -> dict:
 def option_settings(condition: Condition, *, required=(), optional=None) -> dict:
     return take_settings(condition.options, f"Condition {condition.name!r} [options]",
                          required=required, optional=optional)
-
-
-def text_sha256(text: str) -> str:
-    return digest_bytes(text.encode("utf-8"))
 
 
 def first_argmax(values) -> int:

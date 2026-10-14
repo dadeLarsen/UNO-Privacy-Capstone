@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import re
 
-from ...core.files import write_json
+from ...core.files import unique_keys, write_json
 from .data import accepted_gold_digest, normalize_accepted_labels
 from .taxonomy import HEADER, LABELS
 
@@ -16,13 +16,6 @@ DETAIL_COST_FIELDS = ("input_tokens", "output_tokens", "seconds", "peak_allocate
 
 def parse_response(raw) -> int:
     """Validate one category object, optionally wrapped in one whole-response code fence."""
-    def unique_keys(pairs):
-        result = {}
-        for key, value in pairs:
-            if key in result:
-                raise ValueError(f"Duplicate JSON key: {key}")
-            result[key] = value
-        return result
     if not isinstance(raw, str):
         raise ValueError("Response must be text")
     # Permit presentation-only fences, without extracting JSON from prose or

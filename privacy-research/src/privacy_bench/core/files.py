@@ -9,6 +9,10 @@ def digest_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def digest_text(text: str) -> str:
+    return digest_bytes(text.encode("utf-8"))
+
+
 def digest_json(value) -> str:
     """Hash JSON content independently of key order and whitespace."""
     return digest_bytes(json.dumps(value, ensure_ascii=False, sort_keys=True,
@@ -20,7 +24,7 @@ def write_json(path, value):
                           encoding="utf-8")
 
 
-def _unique_keys(pairs):
+def unique_keys(pairs):
     result = {}
     for key, value in pairs:
         if key in result:
@@ -31,7 +35,7 @@ def _unique_keys(pairs):
 
 def read_json(path):
     """Read UTF-8 JSON, rejecting duplicate keys instead of keeping the last one."""
-    return json.loads(Path(path).read_text(encoding="utf-8-sig"), object_pairs_hook=_unique_keys)
+    return json.loads(Path(path).read_text(encoding="utf-8-sig"), object_pairs_hook=unique_keys)
 
 
 def read_jsonl(path) -> list:
@@ -40,7 +44,7 @@ def read_jsonl(path) -> list:
         if not line.strip():
             continue
         try:
-            records.append(json.loads(line, object_pairs_hook=_unique_keys))
+            records.append(json.loads(line, object_pairs_hook=unique_keys))
         except ValueError as exc:
             raise ValueError(f"Invalid JSON on line {line_number} of {path}: {exc}") from exc
     return records
