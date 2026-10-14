@@ -32,7 +32,6 @@ def test_run_directory_names_task_condition_and_utc_start(tmp_path):
 def test_complete_run_loads(tmp_path):
     run = load_run(write_run(tmp_path / "run", responses=GOOD))
     assert run.responses == GOOD
-    assert run.name == "cond/run"
 
 
 @pytest.mark.parametrize("responses, changes, message", [

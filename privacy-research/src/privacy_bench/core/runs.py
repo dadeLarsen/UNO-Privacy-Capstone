@@ -34,10 +34,6 @@ class Run:
     record: dict
     responses: list
 
-    @property
-    def name(self) -> str:
-        return f"{self.record['condition']['name']}/{self.path.name}"
-
 
 def run_condition(run: Run) -> Condition:
     """The condition a run was made with, checked against the hash in its record."""

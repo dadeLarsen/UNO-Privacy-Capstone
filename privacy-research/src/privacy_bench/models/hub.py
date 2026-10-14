@@ -58,18 +58,17 @@ def resolve_snapshot(repo_id: str, revision: str) -> Path:
     return Path(config).parent.resolve()
 
 
-def download_snapshot(repo_id: str, revision: str, patterns=None) -> Path:
-    """Download one pinned commit; by default standard config, tokenizer, and weight files."""
+def download_snapshot(repo_id: str, revision: str) -> Path:
+    """Download one pinned commit's standard config, tokenizer, and weight files."""
     require_commit(repo_id, revision)
     info = HfApi().model_info(repo_id, revision=revision)
     if info.sha != revision:
         raise ValueError(f"Hugging Face resolved {repo_id} {revision} to a different commit: {info.sha}")
-    if patterns is None:
-        names = {item.rfilename for item in info.siblings}
-        safetensors = "model.safetensors" in names or "model.safetensors.index.json" in names
-        # Prefer safetensors so repositories that also publish .bin files are not cached twice.
-        patterns = [*STANDARD_PATTERNS, "*.safetensors" if safetensors else "pytorch_model*.bin"]
-    return Path(snapshot_download(repo_id, revision=revision, allow_patterns=list(patterns))).resolve()
+    names = {item.rfilename for item in info.siblings}
+    safetensors = "model.safetensors" in names or "model.safetensors.index.json" in names
+    # Prefer safetensors so repositories that also publish .bin files are not cached twice.
+    patterns = [*STANDARD_PATTERNS, "*.safetensors" if safetensors else "pytorch_model*.bin"]
+    return Path(snapshot_download(repo_id, revision=revision, allow_patterns=patterns)).resolve()
 
 
 def snapshot_identity(repo_id: str, revision: str, snapshot: Path) -> dict:

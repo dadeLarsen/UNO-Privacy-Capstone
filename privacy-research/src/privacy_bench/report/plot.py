@@ -19,6 +19,8 @@ LEFT, RIGHT, WSPACE, PANEL_HEIGHT = 0.06, 0.975, 0.28, 2.45
 GROUP_LABEL_CHARACTERS = 14
 # A figure that would grow wider than this, in inches, lays its panels out in two columns, then one.
 MAX_WIDTH = 24
+# Space between the legend and the top panel titles, in points.
+LEGEND_GAP = 18
 
 
 def common_footnotes(rows) -> list:
@@ -148,10 +150,8 @@ def draw_panel(ax, panel, rows, groups, series, colors):
                         ha="center", fontsize=9)
 
 
-def draw_matrix(rows, panels, output_dir, *, title, context, footnotes, legend_gap=18) -> list:
+def draw_matrix(rows, panels, output_dir, *, title, context, footnotes) -> list:
     """Write matrix-overview.png and .svg; returns their paths."""
-    if not math.isfinite(legend_gap) or legend_gap < 0:
-        raise ValueError("legend_gap must be a finite, nonnegative number of points")
     groups = ordered(row["condition_label"] for row in rows)
     series = ordered(series_key(row) for row in rows)
     labels = series_labels(series, rows)
@@ -198,11 +198,11 @@ def draw_matrix(rows, panels, output_dir, *, title, context, footnotes, legend_g
     renderer = fig.canvas.get_renderer()
     legend_bottom = legend.get_window_extent(renderer).y0
     panels_top = max(ax.get_tightbbox(renderer).y1 for ax in axes[0] if ax.get_visible())
-    shift = max(0, panels_top + legend_gap * fig.dpi / 72 - legend_bottom)
+    shift = max(0, panels_top + LEGEND_GAP * fig.dpi / 72 - legend_bottom)
     if shift:
         top = fig.subplotpars.top - shift / fig.bbox.height
         if top <= fig.subplotpars.bottom:
-            raise ValueError("The legend leaves no room for the panels; shorten legend labels or reduce legend_gap")
+            raise ValueError("The legend leaves no room for the panels; shorten legend labels")
         fig.subplots_adjust(top=top)
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
