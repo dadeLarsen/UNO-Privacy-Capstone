@@ -214,12 +214,12 @@
         },
         {
           "id": "54a6a178-e28d-553c-a497-9a9a11b45236",
-          "text": "R2 Local model bundle",
+          "text": "R2 Local model files",
           "type": "istar.Resource",
           "x": 1340,
           "y": 346,
           "customProperties": {
-            "Description": "Model weights, tokenizers, and runtime files shipped with the app."
+            "Description": "Model weights and tokenizers, pinned by commit and downloaded once during setup."
           }
         },
         {
@@ -309,7 +309,7 @@
           "x": 1110,
           "y": 662,
           "customProperties": {
-            "Description": "No internet connection is needed to install, start, or use any feature."
+            "Description": "After a one-time setup, no internet connection is needed to start the app or use any feature."
           }
         },
         {
@@ -443,7 +443,7 @@
           "x": 1790,
           "y": 1111,
           "customProperties": {
-            "Description": "Measure speed and memory on each hardware tier (AR-03)."
+            "Description": "Measure speed and memory on each hardware tier (NFR-03, NFR-04)."
           }
         },
         {
@@ -468,22 +468,22 @@
         },
         {
           "id": "5d952a1c-1d78-529b-8026-73b6c1b58a54",
-          "text": "G10 Offline package built",
+          "text": "G10 Local setup works",
           "type": "istar.Goal",
           "x": 1110,
           "y": 1291,
           "customProperties": {
-            "Description": "One installer or bundle per platform with everything the app needs."
+            "Description": "The app runs from the repository on the user's computer after one setup."
           }
         },
         {
           "id": "8ff706e3-e158-5278-8e5a-38843e06526a",
-          "text": "T14 Bundle app, runtime, and models",
+          "text": "T14 Script setup and launch",
           "type": "istar.Task",
           "x": 1610,
           "y": 1291,
           "customProperties": {
-            "Description": "Package the UI, Python runtime, and model files for offline installation."
+            "Description": "One setup step installs the dependencies and downloads the pinned models; one command starts the app."
           }
         }
       ]
@@ -541,7 +541,7 @@
     },
     {
       "id": "f4fa34d9-2bf5-5a72-8f37-2f080ed024af",
-      "text": "D5 Tested model bundle",
+      "text": "D5 Tested model profiles",
       "type": "istar.Resource",
       "x": 1828,
       "y": 816,
@@ -565,7 +565,7 @@
     },
     {
       "id": "4c496232-5f9a-5f9d-956b-35b2ace43b41",
-      "text": "D6 Offline app delivered",
+      "text": "D6 Local app delivered",
       "type": "istar.Goal",
       "x": 850,
       "y": 1111,

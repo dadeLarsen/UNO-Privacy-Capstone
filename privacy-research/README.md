@@ -1,6 +1,6 @@
 # Privacy Policy Reader: model research
 
-Experiments and measurements that decide which models the [Privacy Policy Reader](../README.md) should use, and the evidence behind each choice. The app needs two: a classifier that puts each sentence of a policy into one of ten categories, and a rewriter for its three actions (**Paraphrase**, **Simplify for Kids**, and **Simplify for Adults**). Both must run offline on a computer with **8–12 GB of total memory**. This work answers analysis requirements AR-01 to AR-03 in the [requirements](../docs/Requirements-Document.md#6-analysis-requirements).
+Experiments and measurements that decide which models the [Privacy Policy Reader](../README.md) should use, and the evidence behind each choice. The app needs two: a classifier that puts each sentence of a policy into one of ten categories, and a rewriter for its three actions (**Paraphrase**, **Simplify for Kids**, and **Simplify for Adults**). Both must run offline on a computer with **8–12 GB of total memory**. This work answers analysis requirements AR-01 and AR-02 in the [requirements](../docs/Requirements-Document.md#6-analysis-requirements).
 
 All measurements so far used one Windows PC with an **RTX 4090 (24 GiB) and 64 GB RAM**.
 

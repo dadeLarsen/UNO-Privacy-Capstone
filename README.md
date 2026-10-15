@@ -1,6 +1,6 @@
 # Privacy Policy Reader
 
-*Working name.* A desktop app that helps people understand privacy policies. It runs entirely on the user's computer: installing it, launching it, and using every feature need no internet connection, and the policy text never leaves the machine.
+*Working name.* A local web app that helps people understand privacy policies. It runs entirely on the user's computer: after a one-time setup, launching it and using every feature need no internet connection, and the policy text never leaves the machine.
 
 The app rebuilds the parent thesis's classify-and-rewrite tool so that it runs locally. It is a capstone project for Dr. Alfredo J. Perez, built by Ethan McGee, Dade Larsen, Tim Pippin, and Nathan Johnson.
 
@@ -17,7 +17,7 @@ Not planned for the first version: chat about a policy, PDF or DOCX import, lang
 ## Targets
 
 - **Hardware:** every core feature on a desktop or laptop with 8–12 GB of total memory and no dedicated GPU. Lighter and heavier tiers (2–4 GB, 16 GB or more) may get different models. All targets are provisional until tested.
-- **Platform:** Windows 10/11 (x64), shipped as one offline installer or bundle with the UI, Python runtime, and model files. macOS (Apple Silicon) and Linux are optional.
+- **Platform:** Windows 10/11 (x64), run from this repository: a JavaScript/TypeScript interface in the browser and a Python process for the models, both on localhost. Setup installs the dependencies and downloads the pinned models once; there is no installer. macOS (Apple Silicon) and Linux are optional.
 
 ## Status
 

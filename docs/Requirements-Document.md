@@ -12,6 +12,8 @@ Figure 1 is the SR model for the four actors: the user, the app, the client, and
 
 The tradeoffs that drive the design sit inside the app. A small embedding model with a fitted head (T6a) is fast and small, while a prompted large LLM (T6b) is at most a few points more accurate at many times the time and memory. For rewriting, AirLLM streaming (T7b) fits in little memory but breaks responsiveness (Section 8), so a small model kept in memory (T7a) is the working assumption.
 
+The client has asked the team to put its effort into choosing models that work (G9) rather than into packaging. The app therefore runs from the repository as a local web app after a one-time setup (G10, NFR-08), and no installer is built (Section 8).
+
 ### 1.2 Goal descriptions
 
 IDs: A actor, G goal, Q quality, T task, R resource, D dependum.
@@ -23,7 +25,7 @@ IDs: A actor, G goal, Q quality, T task, R resource, D dependum.
 | A1 | User | Someone trying to understand a privacy policy. No legal or technical background is assumed. |
 | A2 | Client | Dr. Alfredo J. Perez. Directs the functional requirements and judges whether the output is accurate and useful. |
 | A3 | Development Team | Ethan McGee, Dade Larsen, Tim Pippin, and Nathan Johnson. |
-| A4 | Privacy Policy Reader | The desktop app. Runs entirely on the user's computer. |
+| A4 | Privacy Policy Reader | The app: a local web app that runs entirely on the user's computer. |
 
 **A1 User**
 
@@ -58,12 +60,12 @@ IDs: A actor, G goal, Q quality, T task, R resource, D dependum.
 | T8 | Link rewrite to source sentences | Each rewritten block records the sentences it came from, so the reader can check it. |
 | T9 | Pick models that fit the hardware | Detect memory and GPU, then choose model profiles tested for that hardware. |
 | R1 | Category taxonomy | The ten thesis categories, each with a one-sentence definition (FR-04). |
-| R2 | Local model bundle | Model weights, tokenizers, and runtime files shipped with the app. |
+| R2 | Local model files | Model weights and tokenizers, pinned by commit and downloaded once during setup. |
 | Q3 | Accurate categories | Labels match what a careful reviewer would accept. |
 | Q4 | Faithful rewrites | Rewrites keep the source's facts, conditions, numbers, and hedges (*may*, *except*) and add nothing. |
 | Q5 | Responsive | Results arrive quickly and the interface never freezes. |
 | Q6 | Fits 8–12 GB memory | Runs on an ordinary laptop or desktop alongside other apps. |
-| Q7 | Works offline | No internet connection is needed to install, start, or use any feature. |
+| Q7 | Works offline | After a one-time setup, no internet connection is needed to start the app or use any feature. |
 
 **A2 Client**
 
@@ -81,11 +83,11 @@ IDs: A actor, G goal, Q quality, T task, R resource, D dependum.
 | --- | --- | --- |
 | G8 | App delivered | The app is built, tested, and handed to the client. |
 | G9 | Models chosen for target hardware | Classifier and rewriter chosen on evidence for each hardware tier. |
-| G10 | Offline package built | One installer or bundle per platform with everything the app needs. |
+| G10 | Local setup works | The app runs from the repository on the user's computer after one setup. |
 | T11 | Benchmark classifiers | Compare candidate classifiers on accuracy, speed, and memory (AR-01). |
 | T12 | Evaluate rewriters | Review candidate rewriters for faithfulness and readability (AR-02). |
-| T13 | Test on varied hardware | Measure speed and memory on each hardware tier (AR-03). |
-| T14 | Bundle app, runtime, and models | Package the UI, Python runtime, and model files for offline installation. |
+| T13 | Test on varied hardware | Measure speed and memory on each hardware tier (NFR-03, NFR-04). |
+| T14 | Script setup and launch | One setup step installs the dependencies and downloads the pinned models; one command starts the app. |
 | T15 | Agree requirements with client | Settle open scope questions with the client. |
 | R3 | Labeled datasets | OPP-115 and APPSI-139 sentences with category labels. |
 
@@ -97,8 +99,8 @@ IDs: A actor, G goal, Q quality, T task, R resource, D dependum.
 | D2 | Categories shown | User → App | The user relies on the app to label and highlight sentences. |
 | D3 | Rewrite | User → App | The user relies on the app for rewrites. |
 | D4 | Text stays on the computer | User → App | The user relies on the app not to send the policy anywhere. |
-| D5 | Tested model bundle | App → Team | The app needs models tested for its hardware tier. |
-| D6 | Offline app delivered | Client → Team | The client relies on the team to deliver the app. |
+| D5 | Tested model profiles | App → Team | The app needs models tested for its hardware tier. |
+| D6 | Local app delivered | Client → Team | The client relies on the team to deliver the app. |
 | D7 | Evaluation results | Client → Team | The client relies on the team for evidence that the output is accurate and useful. |
 | D8 | Requirement decisions | Team → Client | The team needs the client's decisions on open scope questions (FR-07, FR-11, FR-26). |
 
@@ -114,7 +116,7 @@ The app keeps the pasted text exactly as entered, paragraph breaks included, and
 
 **FR-02 [Could]** As a user, so that I don't have to copy and paste, I want to open a `.txt` file. *(G1, T1)*
 
-**FR-03 [Could]** As a user, so that I can try the app before I have a policy at hand, I want to load a bundled example policy. *(G1)*
+**FR-03 [Could]** As a user, so that I can try the app before I have a policy at hand, I want to load an example policy that comes with the app. *(G1)*
 
 ### 2.2 Categories
 
@@ -229,17 +231,17 @@ Labeling is fast enough not to need either (NFR-04).
 | Rewrite requested | Show the current stage, such as "Loading rewriter" or "Rewriting section 2 of 5", until it finishes. |
 | Cancel pressed | Stop starting new sections, keep finished ones, and say what was cancelled. |
 | Model runs out of memory or fails | Keep finished results, say what failed, and suggest a shorter selection or a smaller model. |
-| Model files missing or damaged | Name the files. Never fall back to a download (NFR-01). |
+| Model files missing or damaged | Name the files and point to the setup step. Never fall back to a download (NFR-01). |
 
 ### 2.5 Models and settings
 
 **FR-19 [Should]** As a user, so that the app runs well on my computer without my knowing about models, I want it to pick models that fit my hardware. *(T9, Q6, D5)*
 
-At launch the app checks memory, GPU, and free disk without running a test generation, then picks from the bundled model profiles tested for that tier (NFR-03). Settings shows what it found and why a model is unavailable (W5).
+At launch the app checks memory, GPU, and free disk without running a test generation, then picks from the model profiles tested for that tier (NFR-03). Settings shows what it found and why a model is unavailable (W5).
 
-**FR-20 [Could]** As a user, so that I can trade speed for quality, I want to choose among the bundled models. *(Q3, Q4, Q5)*
+**FR-20 [Could]** As a user, so that I can trade speed for quality, I want to choose among the supported models. *(Q3, Q4, Q5)*
 
-The thesis interface had a **Choose an LLM** menu. Only bundled, tested models are offered (FR-26).
+The thesis interface had a **Choose an LLM** menu. Only models with a tested profile are offered (NFR-09, FR-26).
 
 **FR-21 [Could]** As a user, so that the text is comfortable to read, I want to change the text size and turn on high contrast. *(Q2)*
 
@@ -320,7 +322,7 @@ classDiagram
 - **CategoryLabel**: a category a model gave a sentence. One per sentence for now; several if FR-07 is adopted. Zero until the policy is analyzed.
 - **Rewrite**: the output of one rewrite action, tied to its source sentences.
 - **RewriteStyle**: Paraphrase, Simplify for Kids, or Simplify for Adults.
-- **ModelProfile**: a bundled model and the hardware it was tested on. Records which model produced each label and rewrite.
+- **ModelProfile**: a supported model and the hardware it was tested on. Records which model produced each label and rewrite.
 
 **Optional**
 
@@ -334,15 +336,15 @@ The practices themselves (data collected, recipients, retention periods, user ch
 
 Measurable product qualities use GQM; the rest are narrative.
 
-**NFR-01 [Must] Works with no internet connection.** *(Q7, D4, G7)*
+**NFR-01 [Must] Works with no internet connection after setup.** *(Q7, D4, G7)*
 
-Installation, first launch, and every feature work with no network. The app, Python runtime, model files, and UI assets ship together (NFR-08). There are no accounts, downloads, update checks, or telemetry. Model libraries run in offline mode and load only from local folders, so a missing file is an error, never a download.
+Setup (NFR-08) needs the internet once, to install the dependencies and download the pinned model files. After that, starting the app and every feature work with no network. The app itself never downloads, and has no accounts, update checks, or telemetry. Model libraries run in offline mode and load only from local folders, so a missing file is an error, never a download.
 
-Verified on a clean machine with networking blocked before installation and no existing model caches: install, first launch, Analyze Categories, all three rewrites, and a restart.
+Verified with networking blocked after setup: start, Analyze Categories, all three rewrites, and a restart.
 
 **NFR-02 [Must] Policy text stays on the computer.** *(Q1, Q9, D4)*
 
-Policies and results are processed on the user's computer. Nothing is saved unless the user turns on history (FR-22). Logs record timings and error codes, never policy text or prompts. If the UI talks to the Python process over local HTTP, the server listens on localhost only.
+Policies and results are processed on the user's computer. Nothing is saved unless the user turns on history (FR-22). Logs record timings and error codes, never policy text or prompts. The web interface and the Python process that runs the models listen on localhost only.
 
 **NFR-03 [Must] Fits in an ordinary computer's memory.** *(Q6, T9)*
 
@@ -368,7 +370,7 @@ Policies and results are processed on the user's computer. Nothing is saved unle
 
 **NFR-05 [Must] Accurate categories.** *(Q3, Q8)*
 
-- **Goal:** Analyze the shipped classifier to accept or reject it, with respect to label accuracy, from the client's and user's point of view, on policies it was not tuned on.
+- **Goal:** Analyze the app's classifier to accept or reject it, with respect to label accuracy, from the client's and user's point of view, on policies it was not tuned on.
 - **Questions:** How often does its label match one a reviewer accepts? How does it do on each category, including rare ones? Is it at least as good as the best small baseline?
 - **Metrics:** accuracy against accepted labels on the APPSI-139 test half (natural category mix) and the 460-sentence balanced sample; macro accuracy, weighting each category equally; per-category accuracy; share of valid outputs.
 - **Target:** not significantly less accurate than skythrone/privacy-model on either sample (exact McNemar test, p < 0.05), with every output valid. The prior-shifted EmbeddingGemma 2 head meets this, tying privacy-model on both; no head yet beats it on both (AR-01).
@@ -384,13 +386,13 @@ Policies and results are processed on the user's computer. Nothing is saved unle
 
 Category colors always appear with the category name, so nothing depends on color alone. Text and highlights meet WCAG 2.2 AA contrast, and every action works from the keyboard. Reading settings (FR-21) apply to every rewrite style; the Kids and Adults labels don't change font size.
 
-**NFR-08 [Must] Installs as one offline package.** *(G10, Q7)*
+**NFR-08 [Must] Sets up and runs from the repository.** *(G10, T14, Q7)*
 
-Users install one installer or portable bundle, with no separate Python, driver, or package installs. Windows 10/11 (x64) is required; macOS (Apple Silicon) and Linux are Could. Large model files may sit in a folder next to the installer on the same media.
+The app is a local web app: a JavaScript/TypeScript interface opened in the browser, and a Python process that runs the models. A documented setup step installs the dependencies and downloads the pinned model files, and one command then starts the app. No installer or executable is built (Section 8). Windows 10/11 (x64) is required; macOS (Apple Silicon) and Linux are Could.
 
 **NFR-09 [Should] Models can be swapped.** *(G9, T9)*
 
-Each bundled model has a profile file: model and tokenizer revision, runtime versions, memory needed, and tested tiers. The taxonomy and rewrite prompts are versioned files. Swapping a model changes these files, not the UI. Results are cached by text, model, prompt, and taxonomy version, so switching views never reruns a model.
+Each supported model has a profile file: model and tokenizer revision, runtime versions, memory needed, and tested tiers. The taxonomy and rewrite prompts are versioned files. Swapping a model changes these files, not the UI. Results are cached by text, model, prompt, and taxonomy version, so switching views never reruns a model.
 
 ## 6. Analysis requirements
 
@@ -409,13 +411,6 @@ These are the evaluations the team runs to choose models and settings. Each uses
 - **Questions:** Which candidates keep the meaning (NFR-06)? Is the output readable for each audience? Does it run in the 8–12 GB tier at an acceptable speed? Can JEV-9B's base model, with its adapter off, rewrite well enough to serve both tasks?
 - **Metrics:** the NFR-06 metrics on a fixed review set of passages; time to first token and total time; peak memory.
 - **Status:** Not started.
-
-**AR-03 [Should] Compare runtimes and memory strategies.** *(G9, T13, Q5, Q6)*
-
-- **Goal:** Analyze inference runtimes (Transformers with quantization, llama.cpp, and AirLLM layer streaming) to choose how models run on each tier, with respect to speed and memory, from the team's point of view, on the team's machines and a target-tier laptop.
-- **Questions:** How fast does each generate on each tier? How much RAM and VRAM does each need at peak? Does quantization change accuracy?
-- **Metrics:** tokens per second; cold load time; peak RAM and VRAM; accuracy change against BF16.
-- **Status:** Partly done. Stock AirLLM took about 394 s for 32 tokens with Qwen3-14B on an RTX 4090, against about 1.7 s fully on the GPU in 4-bit. On the pilot, INT8 and NF4 stayed within 1.5 points of BF16 (Qwen3-14B 0.900, 0.890, 0.885; JEV-9B 0.860, 0.860, 0.855), and NF4 roughly halves memory. Every measurement so far comes from one PC with an RTX 4090 and 64 GB of RAM.
 
 **AR-04 [Could] Check that readers understand more.** *(G1, G6)*
 
@@ -453,7 +448,7 @@ Models use the Hugging Face snapshot layout (`config.json`, tokenizer files, `*.
 | autotrust/JEV-9B | Qwen3.5-9B base with a LoRA judge adapter (one-model option) | `4ab5dfb` |
 | Rewriter | To be chosen (AR-02) | — |
 
-Each bundled model's license must allow redistribution; EmbeddingGemma 2, for example, is under the Gemma Terms of Use.
+Setup downloads each model from Hugging Face rather than the team redistributing it, but each license must still allow this use; EmbeddingGemma 2, for example, is under the Gemma Terms of Use.
 
 ### 7.3 Data formats
 
@@ -462,7 +457,7 @@ Each bundled model's license must allow redistribution; EmbeddingGemma 2, for ex
 - **Classifier output:** one JSON object per sentence, `{"label_id": 0–9}`. A generative model must write exactly this; anything else is rejected and counts as wrong. Classifiers that don't generate text write the same format.
 - **Rewrite output:** plain text blocks, each with its source sentence IDs. Copied as plain text.
 - **Saved history (FR-22):** a local SQLite file.
-- **Development datasets (not shipped):** OPP-115 as a CSV of 10,717 sentences with twelve annotation columns, mapped to the ten categories; APPSI-139 as 13,291 app-policy sentences mapped to the ten categories, with a CSV of accepted labels (the originals plus a relabeling).
+- **Development datasets (not used by the app):** OPP-115 as a CSV of 10,717 sentences with twelve annotation columns, mapped to the ten categories; APPSI-139 as 13,291 app-policy sentences mapped to the ten categories, with a CSV of accepted labels (the originals plus a relabeling).
 
 ### 7.4 AirLLM (tentative)
 
@@ -471,3 +466,7 @@ Each bundled model's license must allow redistribution; EmbeddingGemma 2, for ex
 ## 8. Requirements not implemented
 
 **AirLLM as the inference runtime** *(T7b)*. The September 17 design ran every model through AirLLM's layer streaming on every supported platform, with an extension that kept some layers in VRAM or RAM to cut reload time. Not implemented: stock AirLLM took about 394 s to generate 32 tokens with Qwen3-14B on an RTX 4090, against about 1.7 s fully on the GPU in 4-bit, and the residency extension was never built. The leading classifier needs about 0.6 GiB, so labeling doesn't need streaming. AirLLM stays a tentative option for running a larger rewriter on low-memory computers if AR-02 finds small models aren't faithful enough.
+
+**One offline installer per platform** *(G10, T14, NFR-08)*. The first design shipped the UI, Python runtime, and model files as one installer or portable bundle per platform, so that installing the app needed no network and no separate Python install. Not implemented: the client asked the team to put its effort into choosing models (AR-01, AR-02) rather than packaging, and doesn't need an executable. The app runs from the repository after a one-time setup instead (NFR-08), so setup needs the internet once (NFR-01).
+
+**AR-03: Compare runtimes and memory strategies** *(T13)*. This analysis compared inference runtimes (Transformers with quantization, llama.cpp, and AirLLM layer streaming) for speed, memory, and accuracy on each hardware tier. Dropped so that the analyses focus on choosing the models (AR-01, AR-02). Models run with Transformers and bitsandbytes (Section 7.1), and speed and memory on each tier are measured against NFR-03 and NFR-04. Its findings before it was dropped: AirLLM was far too slow (above), and on the pilot, INT8 and NF4 stayed within 1.5 points of BF16 (Qwen3-14B 0.900, 0.890, 0.885; JEV-9B 0.860, 0.860, 0.855), with NF4 roughly halving memory. Every measurement came from one PC with an RTX 4090 and 64 GB of RAM.

@@ -32,7 +32,7 @@ The app has no code yet. When it does, its folder gets a section here.
 
 | File | Status | Contents |
 | --- | --- | --- |
-| [Requirements-Document.md](docs/Requirements-Document.md) | Current | Draft of Chapter 2 of the final report. Goal model, functional requirements FR-01 to FR-27 with MoSCoW priorities, wireframes, object model, nonfunctional requirements NFR-01 to NFR-09, the analyses that choose the models (AR-01 to AR-04), external interfaces, and requirements not implemented. |
+| [Requirements-Document.md](docs/Requirements-Document.md) | Current | Draft of Chapter 2 of the final report. Goal model, functional requirements FR-01 to FR-27 with MoSCoW priorities, wireframes, object model, nonfunctional requirements NFR-01 to NFR-09, analysis requirements AR-01, AR-02, and AR-04, external interfaces, and requirements not implemented. |
 | [Requirements-Outline.md](docs/Requirements-Outline.md) | Current | The course's outline for that chapter. |
 | [requirements-figures/](docs/requirements-figures/) | Current | The goal model ([goal-model.svg](docs/requirements-figures/goal-model.svg), and [goal-model-pistar.txt](docs/requirements-figures/goal-model-pistar.txt) to open in piStar with **File → Load Model**), the thesis interface screenshot (W1), and wireframes W2–W5 as SVG. |
 
