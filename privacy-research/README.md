@@ -124,12 +124,26 @@ A **model backend** loads a pinned checkpoint and runs one input without knowing
 
 ## Setup
 
-[uv](https://docs.astral.sh/uv/) manages the environment; every package, including transitive ones, is pinned in `pyproject.toml` and `uv.lock`. Run every command below from this folder.
+[uv](https://docs.astral.sh/uv/) manages the environment; every package, including transitive ones, is pinned in `pyproject.toml` and `uv.lock`. Run every command below from this folder. The tests run offline and build tiny models on the CPU.
+
+Choose one of the two setups.
+
+**With an NVIDIA GPU.** This installs the CUDA 12.8 build of torch, which every run in `results/` used:
 
 ```powershell
 uv sync
-uv run pytest            # offline; some tests build tiny models on the CPU
+uv run pytest
 ```
+
+**Without an NVIDIA GPU.** This installs the much smaller CPU build of torch. The tests pass on it, but runs with `device = "cuda"` will not start:
+
+```powershell
+$env:UV_NO_SYNC = "1"    # keep `uv run` from installing the CUDA build; set it in your profile
+uv sync --no-group cu128 --group cpu
+uv run pytest
+```
+
+Set `UV_NO_SYNC` before any other `uv` command. After pulling a change to `uv.lock`, rerun the `uv sync` line.
 
 Models resolve from the standard Hugging Face cache (`~/.cache/huggingface/hub`), and every condition pins a full commit. Runs never download, so fetch a condition's model once while online:
 
