@@ -106,14 +106,15 @@ conditions/<task>/*.toml     one file per run condition: task, strategy, items, 
 conditions/<task>/<corpus>/  conditions for another test corpus, such as appsi139/
 fits/<task>/*.toml           one file per fit: what to learn from, the model, and the heads to fit
 comparisons/*.toml           which saved runs to put side by side, and how to score them
-data/                        source datasets, plus each task's samples, gold labels, examples, and prompts
+prompts/<task>/*.toml        editable prompt files; each run copies the text it used into its input.json
+data/                        source datasets, plus each task's samples, passages, gold labels, examples, and prompts
 results/runs/<task>/<condition>/<UTC start>/   tracked run records
 results/fits/<task>/<fit>/<UTC start>/         tracked fit records, with the fitted weights
 results/comparisons/<name>/  summaries and plots from pbench compare; five are committed for reading
 src/privacy_bench/
   core/       condition and fit files, run and fit records, the run loop, provenance
   models/     backends: chat generation, sequence classifiers, JEV judges, sentence embeddings
-  tasks/      one package per task; classification today
+  tasks/      one package per task: classification and rewrite
   report/     task-agnostic summaries and plots
   cli.py      the pbench command
 tools/        one-time code that imported runs and froze data files
@@ -163,6 +164,12 @@ uv run pbench evaluate results/runs/classification/<condition>/<UTC start>
 - `compare` rescores each listed run with the current code, optionally on a smaller sample that every run covers, refuses runs scored on different items or reference answers, and writes `summary.csv`, `matrix-overview.png`, and `matrix-overview.svg` under `results/comparisons/<name>/`.
 - `evaluate` rewrites a run's `evaluation/` folder from its saved responses.
 
+The rewrite task runs the same way, on 20 frozen APPSI-139 policy sections ([tools/make_appsi139_sections.py](tools/make_appsi139_sections.py) says how they were drawn). The condition names a prompt file under `prompts/rewrite/`: an optional `system` message and a `user` template with one `{passage}` placeholder. No reference rewrite exists, so its scores only flag outputs to check: whether a rewrite is valid (finished, nonempty, no reasoning tags), and how many of the source's numbers and qualifiers (*may*, *unless*, *not*, …) it still contains. Each run writes `evaluation/review.md`, and `compare` adds `side-by-side.md`, which shows every compared model's rewrite under each passage.
+
+```powershell
+uv run pbench run conditions/rewrite/qwen3.5-4b-bf16-summary-baseline.toml
+```
+
 Some strategies apply weights fitted to labeled examples, such as a small classification head on frozen embeddings. Fit them once, before the runs that use them:
 
 ```powershell
@@ -174,9 +181,10 @@ uv run pbench fit fits/classification/embeddinggemma2-opp115-heads.toml
 ## Extending
 
 - **Another model for an existing strategy:** add a condition file with the model's pinned commit, then `pbench download` and `pbench run`.
+- **Another rewrite prompt:** add a file under `prompts/rewrite/` and conditions that name it. Editing a prompt in place is fine while iterating; copy it under a new name once a variant is worth comparing, because comparisons label runs by prompt name.
 - **A new strategy:** add a class under `tasks/<task>/strategies/` and register it in that package's `STRATEGIES`. Reuse a backend from `models/`, or add one there that knows nothing about the task.
 - **A new kind of fit:** add a fitter to the task's `FITTERS` that turns a fit file into a report and named float32 tensors. The shared fit record stores and checks them.
-- **A new task**, such as simplification: add `tasks/<name>/` with a task object that selects items, builds strategies, evaluates responses, and supplies its comparison panels and notes, then register it in `tasks/__init__.py`. The run loop, run records, model backends, and cost panels apply unchanged.
+- **A new task:** add `tasks/<name>/` with a task object that selects items, builds strategies, evaluates responses, and supplies its comparison panels, notes, and any extra comparison files, then register it in `tasks/__init__.py`. The run loop, run records, model backends, and cost panels apply unchanged.
 
 The classification task is described in [docs/classification.md](docs/classification.md).
 

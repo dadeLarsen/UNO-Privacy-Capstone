@@ -4,8 +4,9 @@ A task may import ``privacy_bench.core`` and ``privacy_bench.models``, never ano
 """
 
 from .classification.task import ClassificationTask
+from .rewrite.task import RewriteTask
 
-TASKS = {task.name: task for task in (ClassificationTask(),)}
+TASKS = {task.name: task for task in (ClassificationTask(), RewriteTask())}
 
 
 def get_task(name: str):
