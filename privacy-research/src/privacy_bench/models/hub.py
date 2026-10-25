@@ -77,9 +77,11 @@ def download_snapshot(repo_id: str, revision: str) -> Path:
         raise ValueError(f"Hugging Face resolved {repo_id} {revision} to a different commit: {info.sha}")
     names = {item.rfilename for item in info.siblings}
     safetensors = "model.safetensors" in names or "model.safetensors.index.json" in names
-    # Prefer safetensors so repositories that also publish .bin files are not cached twice.
+    # Prefer safetensors so repositories that also publish .bin files are not cached twice, and skip
+    # Mistral's consolidated.safetensors, a second copy of the sharded weights in Mistral's own format.
     patterns = [*STANDARD_PATTERNS, "*.safetensors" if safetensors else "pytorch_model*.bin"]
-    return Path(snapshot_download(repo_id, revision=revision, allow_patterns=patterns)).resolve()
+    return Path(snapshot_download(repo_id, revision=revision, allow_patterns=patterns,
+                                  ignore_patterns=["consolidated*.safetensors"])).resolve()
 
 
 def snapshot_identity(repo_id: str, revision: str, snapshot: Path) -> dict:

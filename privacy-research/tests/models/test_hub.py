@@ -77,6 +77,7 @@ def test_download_prefers_safetensors_and_refuses_a_moved_commit():
         hub.download_snapshot("o/m", COMMIT)
     patterns = download.call_args.kwargs["allow_patterns"]
     assert "*.safetensors" in patterns and "pytorch_model*.bin" not in patterns
+    assert download.call_args.kwargs["ignore_patterns"] == ["consolidated*.safetensors"]
     assert download.call_args.kwargs["revision"] == COMMIT
     with patch.object(hub, "HfApi") as api, patch.object(hub, "snapshot_download") as download:
         api.return_value.model_info.return_value = SimpleNamespace(sha="b" * 40, siblings=[])
