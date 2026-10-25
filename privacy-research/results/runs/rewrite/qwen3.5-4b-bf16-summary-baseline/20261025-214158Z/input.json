@@ -1,0 +1,16 @@
+{
+  "name": "prompted-rewrite",
+  "prompt": {
+    "name": "summary-baseline",
+    "system": "You help people understand privacy policies. You write accurately and plainly.",
+    "user": "Summarize the privacy policy passage below for an ordinary reader. Keep every condition, exception, number, and party that changes what the passage means, and add nothing it does not say. Reply with the summary only.\n\nPassage:\n{passage}"
+  },
+  "chat_template_kwargs": {
+    "tokenize": false,
+    "add_generation_prompt": true,
+    "enable_thinking": false
+  },
+  "max_new_tokens": 1024,
+  "seed": 42,
+  "batch_size": 1
+}
