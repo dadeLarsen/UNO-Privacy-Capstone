@@ -154,29 +154,56 @@ uv run pbench download conditions/classification/embeddinggemma2-bf16-definition
 
 ## Running and comparing
 
+Every task uses the same three commands. A condition file under `conditions/<task>/` describes one run, and a comparison file under `comparisons/` lists saved runs to put side by side:
+
 ```powershell
-uv run pbench run conditions/classification/embeddinggemma2-bf16-definitions.toml
-uv run pbench compare comparisons/pilot-models-embeddinggemma2.toml
-uv run pbench evaluate results/runs/classification/<condition>/<UTC start>
+uv run pbench run conditions/<task>/<condition>.toml
+uv run pbench compare comparisons/<name>.toml
+uv run pbench evaluate results/runs/<task>/<condition>/<UTC start>
 ```
 
 - `run` checks every input before the first model call and never truncates one. It refuses an existing output folder, keeps every completed response if the run fails or is interrupted, and records the git commit and any uncommitted diff, the full package list, the resolved model commit, and the exact input specification.
-- `compare` rescores each listed run with the current code, optionally on a smaller sample that every run covers, refuses runs scored on different items or reference answers, and writes `summary.csv`, `matrix-overview.png`, and `matrix-overview.svg` under `results/comparisons/<name>/`.
+- `compare` rescores each listed run with the current code, refuses runs scored on different items or reference answers, and writes `summary.csv`, `matrix-overview.png`, and `matrix-overview.svg` under `results/comparisons/<name>/`.
 - `evaluate` rewrites a run's `evaluation/` folder from its saved responses.
 
-The rewrite task runs the same way, on 20 frozen APPSI-139 policy sections ([tools/make_appsi139_sections.py](tools/make_appsi139_sections.py) says how they were drawn). The condition names a prompt file under `prompts/rewrite/`: an optional `system` message and a `user` template with one `{passage}` placeholder. No reference rewrite exists, so its scores only flag outputs to check: whether a rewrite is valid (finished, nonempty, no reasoning tags), and how many of the source's numbers and qualifiers (*may*, *unless*, *not*, …) it still contains. Each run writes `evaluation/review.md`, and `compare` adds `side-by-side.md`, which shows every compared model's rewrite under each passage.
+A comparison file names its `task` and its `runs`, as paths under `results/runs/`. An optional `[labels]` table replaces legend entries, and `[scoring]` holds settings that belong to the task.
+
+### Classification
 
 ```powershell
-uv run pbench run conditions/rewrite/qwen3.5-4b-bf16-summary-baseline.toml
+uv run pbench run conditions/classification/embeddinggemma2-bf16-definitions.toml
+uv run pbench compare comparisons/pilot-models-embeddinggemma2.toml
 ```
 
-Some strategies apply weights fitted to labeled examples, such as a small classification head on frozen embeddings. Fit them once, before the runs that use them:
+A classification comparison's `[scoring]` names the `gold` labels to score against and, optionally, a smaller `sample` that every run covers.
+
+Some classification strategies apply weights fitted to labeled examples, such as a small classification head on frozen embeddings. Fit them once, before the runs that use them:
 
 ```powershell
 uv run pbench fit fits/classification/embeddinggemma2-opp115-heads.toml
 ```
 
 `fit` checks every example against the input limit before embedding any, refuses an existing output folder, and writes `fit.toml`, `fit.json`, and `weights.safetensors` under `results/fits/<task>/<fit>/<UTC start>/`. `fit.json` records the same provenance as a run, the cross-validation results, and the hash of the weights, which a run checks before it loads them.
+
+[docs/classification.md](docs/classification.md) describes the task's data, scoring, and fits in detail.
+
+### Rewrite
+
+The rewrite task runs on 20 frozen APPSI-139 policy sections ([tools/make_appsi139_sections.py](tools/make_appsi139_sections.py) says how they were drawn). Each condition names a prompt file under `prompts/rewrite/`: an optional `system` message and a `user` template with one `{passage}` placeholder. Nothing is fitted.
+
+```powershell
+uv run pbench run conditions/rewrite/qwen3.5-4b-bf16-summary-baseline.toml
+```
+
+No reference rewrite exists, so the scores only flag outputs to check: whether a rewrite is valid (finished, nonempty, no reasoning tags), and how many of the source's numbers and qualifiers (*may*, *unless*, *not*, …) it still contains. Each run writes `evaluation/review.md`, which shows each passage above its rewrite. A rewrite comparison takes no `[scoring]`, and `compare` adds `side-by-side.md`, which shows every compared model's rewrite under each passage:
+
+```toml
+task = "rewrite"
+runs = [
+    "rewrite/qwen3.5-4b-bf16-summary-baseline/<UTC start>",
+    "rewrite/gemma-4-e4b-int8-summary-baseline/<UTC start>",
+]
+```
 
 ## Extending
 
@@ -185,8 +212,6 @@ uv run pbench fit fits/classification/embeddinggemma2-opp115-heads.toml
 - **A new strategy:** add a class under `tasks/<task>/strategies/` and register it in that package's `STRATEGIES`. Reuse a backend from `models/`, or add one there that knows nothing about the task.
 - **A new kind of fit:** add a fitter to the task's `FITTERS` that turns a fit file into a report and named float32 tensors. The shared fit record stores and checks them.
 - **A new task:** add `tasks/<name>/` with a task object that selects items, builds strategies, evaluates responses, and supplies its comparison panels, notes, and any extra comparison files, then register it in `tasks/__init__.py`. The run loop, run records, model backends, and cost panels apply unchanged.
-
-The classification task is described in [docs/classification.md](docs/classification.md).
 
 ## History
 
