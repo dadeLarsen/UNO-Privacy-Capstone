@@ -67,7 +67,7 @@ Layers depend only downward: `core`, `models`, and `report` never import a task,
 | [provenance.py](privacy-research/src/privacy_bench/core/provenance.py) | Records git commit and diff, interpreter, platform, and installed packages. |
 | [paths.py](privacy-research/src/privacy_bench/core/paths.py), [files.py](privacy-research/src/privacy_bench/core/files.py) | Repository locations, hashing, and strict JSON reading (duplicate keys rejected). |
 | **[models/](privacy-research/src/privacy_bench/models/)** | **Model backends: load a pinned checkpoint, run one input, measure it; know nothing about tasks** |
-| [chat_model.py](privacy-research/src/privacy_bench/models/chat_model.py) | Greedy generation from a chat model (Qwen3-14B). |
+| [chat_model.py](privacy-research/src/privacy_bench/models/chat_model.py) | Greedy generation from a chat model, with an optional system message. Loads text-only and multimodal checkpoints (such as Ministral 3) and refuses one that does not load exactly. |
 | [sequence_classifier.py](privacy-research/src/privacy_bench/models/sequence_classifier.py) | FP32 sequence classifiers (skythrone/privacy-model). |
 | [sentence_embedder.py](privacy-research/src/privacy_bench/models/sentence_embedder.py) | sentence-transformers embeddings (EmbeddingGemma 2). |
 | [jev/](privacy-research/src/privacy_bench/models/jev/) | JEV-9B: bundle validation and download (`bundle.py`), the LoRA adapter and decision head (`judge.py`), and quantization planning (`quantization.py`). |

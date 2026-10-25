@@ -5,8 +5,9 @@ from unittest.mock import Mock
 
 import pytest
 import torch
+from transformers import AutoModelForCausalLM, AutoModelForImageTextToText
 
-from privacy_bench.models.chat_model import ChatModel, greedy_config, visible_token_ids
+from privacy_bench.models.chat_model import ChatModel, greedy_config, model_class, visible_token_ids
 
 
 class FakeGeneration(SimpleNamespace):
@@ -89,6 +90,20 @@ def test_encode_renders_one_user_turn_with_thinking_disabled():
     assert messages == [{"role": "user", "content": "Classify this"}]
     assert kwargs == {"tokenize": False, "add_generation_prompt": True, "enable_thinking": False}
     assert encoded == {"rendered": "rendered prompt", "encoded": {"input_ids": [1, 2, 3], "attention_mask": [1, 1, 1]}}
+
+
+def test_encode_puts_an_optional_system_turn_first():
+    tokenizer = FakeTokenizer([1, 2, 3])
+    cpu_model(tokenizer).encode("Summarize this", system="You summarize policies.")
+    assert tokenizer.calls[0][0] == [{"role": "system", "content": "You summarize policies."},
+                                     {"role": "user", "content": "Summarize this"}]
+    with pytest.raises(ValueError, match="system"):
+        cpu_model(tokenizer).encode("Summarize this", system="  ")
+
+
+def test_multimodal_chat_models_load_through_the_image_text_class():
+    assert model_class("qwen3") is AutoModelForCausalLM
+    assert model_class("mistral3") is AutoModelForImageTextToText
 
 
 def test_generate_keeps_reasoning_text_and_reports_token_accounting():
