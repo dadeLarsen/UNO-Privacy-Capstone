@@ -1,0 +1,358 @@
+{
+  "name": "appsi139-sections-20",
+  "source": {
+    "file": "annotation.jsonl (AirLLM workspace)",
+    "sha256": "c38dbe2f470c241f835cc28ba9ba2c678b4f79041ea096ac9a850e994a1083e8",
+    "corpus": "APPSI-139",
+    "policies": 141
+  },
+  "selection": {
+    "section_lines": [
+      3,
+      12
+    ],
+    "section_words": [
+      80,
+      350
+    ],
+    "bands": [
+      [
+        80,
+        159,
+        7
+      ],
+      [
+        160,
+        239,
+        7
+      ],
+      [
+        240,
+        350,
+        6
+      ]
+    ],
+    "one_per_policy": true,
+    "seed": 42,
+    "sections": 3146,
+    "eligible": 788
+  },
+  "passages": [
+    {
+      "id": "128683-128686",
+      "policy_first_id": 128641,
+      "heading": "How can you opt-out, remove or modify information you have provided to us?",
+      "sentence_ids": [
+        128683,
+        128684,
+        128685,
+        128686
+      ],
+      "words": 86,
+      "text": "To modify your e-mail subscriptions, please let us know by modifying your preferences in the “My Account” section. Please note that due to email production schedules you may receive any emails already in production. To delete all of your online account information from our database, sign into the “My Account” section of our site and remove your shipping addresses, billing addresses & payment information. Please note that we may maintain information about an individual sales transaction in order to service that transaction and for record keeping."
+    },
+    {
+      "id": "150511-150514",
+      "policy_first_id": 150503,
+      "heading": "Your use of the Services is subject to the Terms of Use,[Copyright Policy](/legal/copyright) and this Privacy Policy and indicates your consent to them.",
+      "sentence_ids": [
+        150511,
+        150512,
+        150513,
+        150514
+      ],
+      "words": 102,
+      "text": "To use our Services you must be 16 years of age or older. If you are under 16, you may not download or use the Services. In this Privacy Policy, the term “personal information” means information which you provide to us which personally identifies you, such as your name, email address or billing information, and, in certain circumstances, your location and route information or other data which can be reasonably linked to such information by Waze. You can adjust your Privacy Settings in the Waze app and choose which personal information we may collect about you and how your information is used."
+    },
+    {
+      "id": "171794-171797",
+      "policy_first_id": 171679,
+      "heading": "Changes to this Privacy Statement",
+      "sentence_ids": [
+        171794,
+        171795,
+        171796,
+        171797
+      ],
+      "words": 103,
+      "text": "We may modify or update this Privacy Statement from time to time so you should review this page periodically. If we change the policy in a material manner, for example if we seek to collect or use personal information in a materially different way than we had previously, we will provide at least 30 days' notice to the Library so that you have sufficient time to evaluate the change in practice. Your continued use of Axis 360 after a change will signify your acceptance of the new terms. This Privacy Statement was last modified as of January 1, 2017, effective January 1, 2017."
+    },
+    {
+      "id": "127798-127802",
+      "policy_first_id": 127761,
+      "heading": "INFORMATION WE COLLECT AUTOMATICALLY",
+      "sentence_ids": [
+        127798,
+        127799,
+        127800,
+        127801,
+        127802
+      ],
+      "words": 119,
+      "text": "When using our services, including on third-party platforms, we may automatically collect or receive certain information associated with you or your devices, such as your computer, mobile device, gaming system, smart TVs, or other streaming devices. The types of information we may collect automatically include your use of our services, your preferences, and how you interact with our content. It may also include device identifiers such as IP address (including approximate location information), advertising ID, cookie ID, media access control (MAC) address, and other unique identifiers. We may automatically collect this information using device-based tracking technologies such as cookies, pixels, tags, beacons, scripts, and similar technologies. For more information about tracking technologies, please see “Cookies and other tracking technologies“."
+    },
+    {
+      "id": "141380-141384",
+      "policy_first_id": 141379,
+      "heading": "Privacy Policy",
+      "sentence_ids": [
+        141380,
+        141381,
+        141382,
+        141383,
+        141384
+      ],
+      "words": 121,
+      "text": "Last updated: 29 February 2020 This Privacy Policy explains how your personal data is collected and processed by SayGames Ltd (\"SayGames\") when you use the our mobile applications (the \"App\"). The App is a free to play game (with optional in-game-purchases), and in order to maintain the high quality and a great game experience we process information from and about you in particular to improve the entire experience in the App and to support internal operations. We update this Privacy Policy from time to time. If we make changes, we will notify you by revising the date at the top of the policy and, depending on the specific changes, we will provide you with additional notice or require a renewed consent."
+    },
+    {
+      "id": "135095-135100",
+      "policy_first_id": 135026,
+      "heading": "4.Personal Data Deletion and Closure of Accounts",
+      "sentence_ids": [
+        135095,
+        135096,
+        135097,
+        135098,
+        135099,
+        135100
+      ],
+      "words": 137,
+      "text": "In addition to any other rights set out in this Privacy Policy (except as set out in the Candidate Privacy Addendum), you at any time may direct that Moon Active delete your Personal Data by accessing the “Account Deletion” button in the applicable Game and following the instructions. Selection of this option will result in closure of your Account and deletion of all of your playing history, purchase information, social media log-in and other information associated with you in connection with the Game. Deletion is irreversible. If you maintain Accounts with multiple Games, you should request closure of each. Upon receipt of your request, we will comply promptly but please allow some time for processing. We also reserve the right to retain a copy of any Personal Data that we are required by applicable law to retain."
+    },
+    {
+      "id": "142032-142038",
+      "policy_first_id": 141868,
+      "heading": "11.Our Policy Regarding Children",
+      "sentence_ids": [
+        142032,
+        142033,
+        142034,
+        142035,
+        142036,
+        142037,
+        142038
+      ],
+      "words": 157,
+      "text": "The Service is not directed to children under the age of 13. We do not knowingly collect or solicit personally identifiable information from children under 13. If you are under 13, please do not attempt to register for an Account on the Service or send any information about yourself to Super Free Games. If we become aware that a child under 13 has provided us with personal information (as defined by the United States Children’s Online Privacy Protection Act), we will delete such information from our files as required by applicable law. We do not knowingly process data of EU residents under the age of 16 without parental consent. If we become aware that we have collected data from an EU resident under the age of 16 without parental consent, we will take reasonable steps to delete it as soon as possible. We also comply with other age restrictions and requirements in accordance with applicable local laws."
+    },
+    {
+      "id": "182196-182200",
+      "policy_first_id": 181981,
+      "heading": "9.INTERNATIONAL TRANSFER",
+      "sentence_ids": [
+        182196,
+        182197,
+        182198,
+        182199,
+        182200
+      ],
+      "words": 162,
+      "text": "Insider is based in the U.S. and the personal information we collect is governed by U.S. law. Insider processes personal information on our servers in the U.S. and other jurisdictions. Your personal information may be transferred to, and used, in locations outside of your state, province, country or other governmental jurisdiction where the privacy laws may be different than those in your jurisdiction. Your use of the Service or provision of any personal information constitutes your consent to the transfer to and from, processing, usage, sharing, and storage of your information in the U.S. and other jurisdictions as set forth in this Privacy Policy. To the extent that the Company offers products and services to individuals located in the European Economic Area or United Kingdom, or to the extent the Service is intentionally available to such individuals, please review the section titled “Additional Disclosures for Data Subjects in Europe” below for more information about disclosures and privacy rights associated with that activity."
+    },
+    {
+      "id": "175061-175066",
+      "policy_first_id": 174701,
+      "heading": "6.Right to data portability",
+      "sentence_ids": [
+        175061,
+        175062,
+        175063,
+        175064,
+        175065,
+        175066
+      ],
+      "words": 167,
+      "text": "You have the right to receive the personal data concerning you which you have provided to the Controller in a structured, commonly used and machine-readable format. In addition, you have the right to transmit that data to another controller without hindrance by the Controller to which the personal data has been provided, where the processing is based on consent pursuant * Art.6 (1)(a) GDPR or Art.9 (2)(a) GDPR or on a contract pursuant to Art.6 (1)(b) GDPR; and * to the processing is carried out by automated means. When exercising this right, you also have the right to have the personal data concerning you transmitted directly from one controller to another, where this is technically feasible. This right must not adversely affect the rights and freedoms of others. The right to data portability does not apply to processing of personal data that is necessary for the performance of a task carried out in the public interest or in the exercise of official authority vested in the Controller."
+    },
+    {
+      "id": "126736-126743",
+      "policy_first_id": 126734,
+      "heading": "1.Introduction",
+      "sentence_ids": [
+        126736,
+        126737,
+        126738,
+        126739,
+        126740,
+        126741,
+        126742,
+        126743
+      ],
+      "words": 176,
+      "text": "1.1 We are committed to safeguarding the privacy of our service users. 1.2 This policy applies where we are acting as a data controller with respect to the personal data of our service users; in other words, where we determine the purposes and means of the processing of that personal data. 1.3 We collect data during the usage of our apps. Insofar as this data is not strictly necessary for the provision of our services, we will ask you to consent to our use of data collection when you first use our apps. 1.4 Our apps incorporate privacy controls which affect how we will process your personal data. By using the privacy controls, you can specify whether you would like to receive targeted advertisements and provide user data which may be used to improve future delivery of our services. You can access the privacy controls from inside the app. 1.5 In this policy, \"we\", \"us\" and \"our\" refer to Five Aces Publishing Ltd. and New Star Games Ltd. [For more information about us, see Section 10.]"
+    },
+    {
+      "id": "176631-176636",
+      "policy_first_id": 176460,
+      "heading": "8 Security of User Information",
+      "sentence_ids": [
+        176631,
+        176632,
+        176633,
+        176634,
+        176635,
+        176636
+      ],
+      "words": 176,
+      "text": "8.1 We use appropriate organizational, technical, and physical safeguards to protect user information. We have adopted protective measures at multiple levels (e.g., industry-standard technical security measures, supporting organizational structures and management systems) to prevent, to the maximum extent technically practical, user information from leakage, destruction, misuse, unauthorized access, unauthorized disclosure or modification. 8.2 _THE SECURITY OF USER INFORMATION IS VERY IMPORTANT TO US, BUT PLEASE BE REMINDED THAT NO METHOD OF TRANSMISSION OVER THE INTERNET OR METHOD OF ELECTRONIC STORAGE IS 100% SECURE. WHILE WE STRIVE TO USE COMMERCIALLY VIABLE MEANS TO PROTECT USER PERSONAL INFORMATION, WE CANNOT GUARANTEE ITS ABSOLUTE SECURITY._ 8.3 In the event of a data breach, we will carry out an assessment expeditiously. If the breach results in, or is likely to result in, significant harm to affected individuals, or is, or is likely to be, of a significant scale, we will notify the relevant authorities and our users as soon as it is practicable to do so, and in any event, no later than the mandatory time limit under applicable laws."
+    },
+    {
+      "id": "168902-168910",
+      "policy_first_id": 168624,
+      "heading": "9.Supplemental Information for Pandora Services Users",
+      "sentence_ids": [
+        168902,
+        168903,
+        168904,
+        168905,
+        168906,
+        168907,
+        168908,
+        168909,
+        168910
+      ],
+      "words": 215,
+      "text": "If you access and use the Pandora digital streaming audio service, please know that in addition to the collection, use, and sharing of personal data set forth in this Policy, the following apply: A._Your Choices Related to Your Pandora Profile_ a._Profile Visibility_ - Your profile and listening activity are public. When the visibility of your profile is set to public, your listening activity is automatically published to your profile. For example, if you create a new station or thumb up a song, that activity will be posted in your profile and publicly visible. You may adjust your profile visibility settings by visiting help.pandora.com. Please note that changes to the visibility of your profile do not have any impact on the advertising you may see if you use the ad- supported version of the service. b._Cached Profiles on Search Engines_ - Even upon deactivating your account or making your profile private, Internet search engines such as Google and Bing cache publicly available webpages for a period of time beyond our control and may make your deactivated or formerly public profile available to users of their services on their platforms until such time as they refresh their webpage cache. Please consult with the applicable search engine to determine how you may remove webpages from their webpage cache."
+    },
+    {
+      "id": "181685-181690",
+      "policy_first_id": 181447,
+      "heading": "10.About Cookies and Similar Technologies",
+      "sentence_ids": [
+        181685,
+        181686,
+        181687,
+        181688,
+        181689,
+        181690
+      ],
+      "words": 218,
+      "text": "Nike, our service providers and third parties collect information, which may include personal information, from your browser, devices, or apps when you use our Platform using a variety of methods, such as cookies, pixel tags, identifiers for mobile devices, and other similar technologies. The information collected by these cookies and similar technologies may include your: IP address; unique cookie identifier and information obtained through cookies; unique device identifier and device type; domain, browser type and language, operating system, and system settings; country and time zone; previously visited websites; information about your interaction with our Platform such as click behavior, purchases and indicated preferences; and access times and referring URLs. We use cookies and similar technologies to analyze and understand how you access, use, and interact with our Platform and our consumer’s preferences (such as country and language choices), as well as to assess, secure, protect, optimize, and improve the performance of our Platform. This enables us to provide services to our consumers and improve their online experience. We also use cookies and pixel tags to obtain aggregate data about Platform traffic and interaction, to conduct analytics, identify trends and obtain statistics so that we can improve our Platform. We also use cookies and similar technologies to target advertising and content across our Platform and third-party sites and services."
+    },
+    {
+      "id": "135531-135539",
+      "policy_first_id": 135440,
+      "heading": "6.How Long We Store Your Information",
+      "sentence_ids": [
+        135531,
+        135532,
+        135533,
+        135534,
+        135535,
+        135536,
+        135537,
+        135538,
+        135539
+      ],
+      "words": 232,
+      "text": "Etsy will retain your information only for as long as is necessary for the purposes set out in this Policy, for as long as your account is active, or as needed to comply with our legal obligations under national applicable law. We decide how long we need information on a case-by-case basis and depending on the retention laws applicable. The following factors typically affect the retention period: Necessity for the provision of our Services We keep your information as long as is necessary to provide the Services to you. This includes things like maintaining and improving the performance of our Sites and Apps, keeping our Services secure, and maintaining appropriate business and financial records. Most of our retention periods are determined on the basis of this general rule. Consent-based processing of personal data If we process personal data on the basis of consent (including consent to the extended storage), we store the data for as long as necessary in order to process it according to your consent or until you withdraw your consent. Statutory, contractual or other similar obligations Etsy will retain and use your information to the extent necessary to comply with our legal obligations, for example, if we are required to retain your information to comply with applicable tax/revenue laws or our Know Your Customer (“KYC”) obligations. Here's what we consider when we deciding how long to keep your information:"
+    },
+    {
+      "id": "134810-134817",
+      "policy_first_id": 134783,
+      "heading": "Introduction",
+      "sentence_ids": [
+        134810,
+        134811,
+        134812,
+        134813,
+        134814,
+        134815,
+        134816,
+        134817
+      ],
+      "words": 247,
+      "text": "This privacy policy (“ Policy ”) informs you of your choices and our practices in relation to your Information (as defined below). In this Policy, (“ Miniclip ”), “we” or “us” refers to Miniclip SA, a company registered in Switzerland with its office located at Rue des Beaux-Arts 8, 2000 Neuchatel, Switzerland. We choose why we need to use your Information and how it is used, which means we are considered the data controller in certain countries. For the purpose of this Policy, “ Information ” means any information relating to an identified or identifiable individual. This includes Information relating to your use of: (a) our mobile games (“ Mobile Games ”); (b) the games that you can play on any Miniclip website (agar.io or the website version of 8 Ball Pool) containing a link to this Policy (“ Website ”); and (c) our games which can be accessed through Facebook (“ Facebook Games ”). When you use the Mobile Games, the Website or Facebook Games (the “ Games ”), you accept our rules and policies which set out how we handle your Information, and you understand we collect, process, use and store your Information as described in this Policy. If you do not agree with this Policy, you must not play any of the Games. If you change your mind in the future, you must stop playing the Games and you may exercise your rights in relation to your Information as set out in this Policy."
+    },
+    {
+      "id": "138072-138082",
+      "policy_first_id": 138071,
+      "heading": "Categories of Information Collected",
+      "sentence_ids": [
+        138072,
+        138073,
+        138074,
+        138075,
+        138076,
+        138077,
+        138078,
+        138079,
+        138080,
+        138081,
+        138082
+      ],
+      "words": 261,
+      "text": "The type of information we collect depends on how you use the Services. Generally, we collect the following information: * Identifiers / Contact Information : Name, user name, gamertag, postal and email address, phone number, unique IDs, mobile device ID, platform ID, gaming service ID, advertising ID (IDFA, Android ID) and IP address * Protected Characteristics : Age and gender * Commercial Information : Purchase and usage history and preferences, including gameplay information * Billing Information : Payment information (credit / debit card information) and shipping address * Internet / Electronic Activity : Web / app browsing and gameplay information related to the Services; information about your online interaction(s) with the Services or our advertising; and details about the games and platforms you use and other information related to installed applications * Device and Usage Data : Device type, software and hardware details, language settings, browser type and version, operating system, and information about how users use and interact with the Services (e.g., content viewed, pages visited, clicks, scrolls) * Profile Inferences : Inferences made from your information and web activity to help create a personalized profile so we can identify goods and services that may be of interest * Audio / Visual Information : Account photos, images, and avatars, audio information via chat features and functionality, and gameplay recordings and video footage (such as when you participate in playtesting) * Sensitive Information : Precise location information (if you allow the Services to collect your location), account credentials (user name and password), and contents of communications via chat features and functionality."
+    },
+    {
+      "id": "162746-162749",
+      "policy_first_id": 162405,
+      "heading": "XII.HUMAN RESOURCE INFORMATION",
+      "sentence_ids": [
+        162746,
+        162747,
+        162748,
+        162749
+      ],
+      "words": 274,
+      "text": "We collect information from current, prospective, and former Employees, their contact points in case of a medical emergency, and beneficiaries under any insurance policy (“Human Resources Data”). The Human Resources Data we collect may include title, name, address, phone number, email address, date of birth, passport number, driver’s license number, Social Security number or other government-issued identification number, financial information related to credit checks, bank details for payroll, information that may be recorded on a Curriculum Vitae (CV) or application form, language abilities, contact information of third parties in case of an emergency and beneficiaries under any insurance policy. We may also collect Sensitive Human Resources Data such as details of health and disability, including mental health, medical leave, and maternity leave; information about national origin, veteran or immigration status; and optional demographic information such as race, which helps us achieve our diversity goals. We acquire, hold, use and Process Human Resources Data for a variety of business purposes including: workflow management, including assigning, managing and administering projects; Human Resources administration and communication; payroll and the provision of benefits; compensation, including bonuses and long-term incentive administration, stock plan administration, compensation analysis, including monitoring overtime and compliance with labor laws, and company recognition programs; job grading activities; performance and employee development management; organizational development and succession planning; benefits and personnel administration; absence management; helpdesk and IT support services; regulatory compliance; internal and/or external or governmental compliance investigations; internal or external audits; litigation evaluation, prosecution, and defense; diversity and inclusion initiatives; restructuring and relocation; emergency contacts and services; employee safety; compliance with statutory requirements; processing of employee expenses and travel charges; and acquisitions, divestitures, and integrations."
+    },
+    {
+      "id": "181306-181317",
+      "policy_first_id": 181081,
+      "heading": "Collection and Use of Non-Personal Information",
+      "sentence_ids": [
+        181306,
+        181307,
+        181308,
+        181309,
+        181310,
+        181311,
+        181312,
+        181313,
+        181314,
+        181315,
+        181316,
+        181317
+      ],
+      "words": 278,
+      "text": "We also collect data in a form that does not, on its own, permit direct association with any specific individual. We may collect, use, transfer, and disclose non-personal information for any purpose. The following are some examples of non-personal information that we collect and how we may use it: * We may collect information such as occupation, language, zip code, area code, unique device identifier, referrer URL, location, and the time zone where an Apple product is used so that we can better understand customer behavior and improve our products, services, and advertising. * We may collect information regarding customer activities on our website, iCloud services, our iTunes Store, App Store, Mac App Store, App Store for Apple TV and iBooks Stores and from our other products and services. This information is aggregated and used to help us provide more useful information to our customers and to understand which parts of our website, products, and services are of most interest. Aggregated data is considered non‑personal information for the purposes of this Privacy Policy. * We may collect and store details of how you use our services, including search queries. This information may be used to improve the relevancy of results provided by our services. Except in limited instances to ensure quality of our services over the Internet, such information will not be associated with your IP address. * With your explicit consent, we may collect data about how you use your device and applications in order to help app developers improve their apps. If we do combine non-personal information with personal information the combined information will be treated as personal information for as long as it remains combined."
+    },
+    {
+      "id": "133334-133338",
+      "policy_first_id": 133244,
+      "heading": "4.1.i Business information of travelers on corporate accounts and of representatives of suppliers, customers, and other businesses (including for cargo) we deal with, including:",
+      "sentence_ids": [
+        133334,
+        133335,
+        133336,
+        133337,
+        133338
+      ],
+      "words": 280,
+      "text": "* name, role and personal contact details at the company and personal information in communications with you; * corporate contact, and employer or affiliation (e.g., employer name, title, contact details, and contract information); * user ID, password and log-in credentials when using our corporate travel online tool(s). We use this information to: * conduct our business dealings with our suppliers, customers, partners, and other businesses including for sales and purchases, and enabling use of our corporate travel online tool(s); * tailor our products and services for you based on this information alone and in combination with other information we have about you; * administer your company’s SkyMiles for Business program and other corporate travel benefits; * send you or your company marketing communications, offers, and invitations to events, which may be based on segmentation and modelling of your personal information; * recognize your role when administering our corporate traveler program to generate appropriate training, support and promotional content within the tool or by email; * maintain the operational availability and reliability of our IT systems with infrastructure backups and testing (which may use a copy of live data where test data is not practical). We use this information because: * it is necessary to enter into or to perform a contract with you to provide flights or other products or services; * you have given consent, for example, to us using information to send you marketing communications; * the information is publicly available; or * we have a legitimate business interest, for example, in performing our contracts with our corporate customers, suppliers and other business, developing our business with our corporate customers, and ensuring that our technical systems operate properly."
+    },
+    {
+      "id": "144382-144393",
+      "policy_first_id": 144345,
+      "heading": "Information We Collect About You From Third Parties (Facebook, Apple).",
+      "sentence_ids": [
+        144382,
+        144383,
+        144384,
+        144385,
+        144386,
+        144387,
+        144388,
+        144389,
+        144390,
+        144391,
+        144392,
+        144393
+      ],
+      "words": 340,
+      "text": "One of the main ways in which we collect information from third parties is when you sign in with a Third-Party Service like Facebook or Apple. When you log into our mobile application through your Facebook account, you will be asked to enter your Facebook email address and password. Facebook controls the information collected from you during the log-in process; PLAYSTUDIOS does not control the information that Facebook collects from you. When you use any of our Applications through Facebook or on a mobile Application that you have connected to Facebook, we will have access to, and may collect and store, the following information: your public profile, profile picture, gaming profile (your player name and avatar), gender, list of friends who play the same apps that you play, date of birth, email address, and IP address. We may use this information to (i) send you email; (ii) facilitate your log in for apps; (iii) render pronouns and personal your experience based on gender; (iv) display your first name or player name and your player avatar in-game. If you make a purchase in our Facebook game, we will also collect your IP address and country, and you submit a dispute through Facebook, your dispute email address and any comment you submit. For information about how Facebook may disclose your information, including any information you make public, please consult the Facebook Privacy Policy. We store the information that we receive from Facebook along with other information that we collect from you or receive about you. When you use Sign in with Apple you will be asked to enter your Apple ID and the email address you use with your Apple ID. When you first sign in using Sign in with Apple, you can elect to hide your email address. For information about how Facebook may disclose your information, including any information you make public, please consult the Facebook Privacy Policy. We store the information that we receive from Facebook along with other information that we collect from you or receive about you."
+    }
+  ]
+}

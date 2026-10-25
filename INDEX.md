@@ -103,6 +103,7 @@ One-time scripts that froze data files or imported runs. Each refuses to overwri
 ### Inputs: [data/](privacy-research/data/)
 
 | Path | Status | Contents |
+| [make_appsi139_sections.py](privacy-research/tools/make_appsi139_sections.py) | Historical | `appsi139-sections-20.json`, the rewrite passages, from the AirLLM workspace's `annotation.jsonl`. |
 | --- | --- | --- |
 | [datasets/opp115-sentences.csv](privacy-research/data/datasets/opp115-sentences.csv) | Frozen | 10,717 OPP-115 website-policy sentences with OPP-115's twelve label columns. |
 | [datasets/appsi139-sentences.csv](privacy-research/data/datasets/appsi139-sentences.csv) | Frozen | 13,291 APPSI-139 app-policy sentences, already in the ten categories. |
@@ -114,6 +115,7 @@ One-time scripts that froze data files or imported runs. Each refuses to overwri
 ### Configuration
 
 | Path | Status | Contents |
+| [rewrite/passages/appsi139-sections-20.json](privacy-research/data/rewrite/passages/appsi139-sections-20.json) | Frozen | 20 APPSI-139 policy sections (86–340 words, one per policy, across three length bands) for rewriting, with each section's heading and sentence IDs. |
 | --- | --- | --- |
 | [conditions/classification/](privacy-research/conditions/classification/) | Current | One run condition per file, on the OPP-115 pilot. Names read `<model>-<precision>-<method>`: `definitions` is the definitions prompt (or, for EmbeddingGemma 2, similarity to the definitions, with a suffix naming its instruction prefix), and `head-<name>` is a fitted head. `privacy-model-fp32` has no method: it classifies the raw sentence. |
 | [conditions/classification/appsi139/](privacy-research/conditions/classification/appsi139/) | Current | The same conditions on APPSI-139 samples, named `…-appsi139-<sample>`. `-tuned` and `-full` heads are prior-shifted at the tuned strength and at strength 1. |
