@@ -37,13 +37,19 @@ def chat_messages(prompt: str, system: str | None) -> list:
     return turns if system is None else [{"role": "system", "content": system}, *turns]
 
 
-def greedy_config(original, defaults, max_new_tokens):
+def greedy_config(original, defaults, max_new_tokens, end_of_turn=None):
     """Keep the checkpoint's special token IDs, but reset its decoding policy to library defaults."""
     generation = deepcopy(original)
     preserved = {"bos_token_id", "eos_token_id", "pad_token_id", "decoder_start_token_id"}
     for name, value in defaults.to_dict().items():
         if name not in preserved and not name.startswith("_") and name != "transformers_version":
             setattr(generation, name, deepcopy(value))
+    # Qwen3.5 ships no generation_config.json, so its config stops only on <|endoftext|>, not on the
+    # <|im_end|> that its chat template and tokenizer end each turn with.
+    eos = generation.eos_token_id
+    eos = list(eos) if isinstance(eos, (list, tuple)) else [] if eos is None else [eos]
+    if end_of_turn is not None and end_of_turn not in eos:
+        generation.eos_token_id = [*eos, end_of_turn]
     generation.do_sample = False
     generation.num_beams = 1
     generation.num_beam_groups = 1
@@ -120,7 +126,8 @@ class ChatModel:
         device_map = getattr(model, "hf_device_map", kwargs["device_map"])
         if any(str(device) not in ("0", "cuda", "cuda:0") for device in device_map.values()):
             raise RuntimeError(f"Expected the whole model on CUDA device 0, got {device_map!r}")
-        self._generation = greedy_config(model.generation_config, GenerationConfig(), self.max_new_tokens)
+        self._generation = greedy_config(model.generation_config, GenerationConfig(), self.max_new_tokens,
+                                         tokenizer.eos_token_id)
         # generate() fills every unset field from model.generation_config before the library defaults.
         # Making the greedy config the model's own keeps checkpoint sampling settings out entirely.
         model.generation_config = self._generation

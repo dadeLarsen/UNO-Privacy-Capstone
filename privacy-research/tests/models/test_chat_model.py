@@ -32,6 +32,13 @@ def test_greedy_resets_checkpoint_sampling_policy_without_mutating_the_original(
     assert original.do_sample
 
 
+def test_generation_also_stops_at_the_tokenizer_end_of_turn_token():
+    defaults = FakeGeneration(eos_token_id=None, pad_token_id=None)
+    assert greedy_config(FakeGeneration(eos_token_id=99, pad_token_id=None), defaults, 32, 7).eos_token_id == [99, 7]
+    assert greedy_config(FakeGeneration(eos_token_id=99, pad_token_id=None), defaults, 32, 99).eos_token_id == 99
+    assert greedy_config(FakeGeneration(eos_token_id=[99, 7], pad_token_id=0), defaults, 32, 7).eos_token_id == [99, 7]
+
+
 def test_only_terminal_eos_and_padding_are_removed():
     generation = SimpleNamespace(eos_token_id=[99, 98], pad_token_id=0)
     assert visible_token_ids([17, 99, 22, 98, 0], generation) == [17, 99, 22]
