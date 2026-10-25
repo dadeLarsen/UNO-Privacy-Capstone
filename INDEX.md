@@ -71,7 +71,7 @@ Layers depend only downward: `core`, `models`, and `report` never import a task,
 | [sequence_classifier.py](privacy-research/src/privacy_bench/models/sequence_classifier.py) | FP32 sequence classifiers (skythrone/privacy-model). |
 | [sentence_embedder.py](privacy-research/src/privacy_bench/models/sentence_embedder.py) | sentence-transformers embeddings (EmbeddingGemma 2). |
 | [jev/](privacy-research/src/privacy_bench/models/jev/) | JEV-9B: bundle validation and download (`bundle.py`), the LoRA adapter and decision head (`judge.py`), and quantization planning (`quantization.py`). |
-| [hub.py](privacy-research/src/privacy_bench/models/hub.py) | Pinned Hugging Face snapshots: explicit download, then offline resolution only. |
+| [hub.py](privacy-research/src/privacy_bench/models/hub.py) | Pinned Hugging Face snapshots: explicit download, then offline resolution only. Also the exact-load check every backend runs after loading weights. |
 | [quantization.py](privacy-research/src/privacy_bench/models/quantization.py), [measure.py](privacy-research/src/privacy_bench/models/measure.py) | bitsandbytes INT8/NF4 settings; CUDA setup, timing, and peak memory. |
 | **[report/](privacy-research/src/privacy_bench/report/)** | **Comparisons across saved runs** |
 | [comparisons.py](privacy-research/src/privacy_bench/report/comparisons.py), [summary.py](privacy-research/src/privacy_bench/report/summary.py), [plot.py](privacy-research/src/privacy_bench/report/plot.py) | Parses comparison files, rescores each run through its task into `summary.csv`, and draws the bar matrix. |

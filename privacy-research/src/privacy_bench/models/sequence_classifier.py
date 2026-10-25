@@ -7,7 +7,7 @@ import torch
 from transformers import AutoConfig, AutoModelForSequenceClassification, AutoTokenizer
 
 from ..core.files import digest_json, digest_text
-from .hub import LOADING_CHECKS, context_limit, reject_prequantized, validate_weights
+from .hub import context_limit, reject_prequantized, require_exact_load, validate_weights
 from .measure import gpu_metadata, measured, require_cuda, timed_load, use_exact_fp32_matmul
 
 LOCAL = {"local_files_only": True, "trust_remote_code": False}
@@ -61,12 +61,7 @@ class SequenceClassifier:
         def load():
             model, loading = AutoModelForSequenceClassification.from_pretrained(
                 str(self.snapshot), **LOCAL, dtype=torch.float32, output_loading_info=True)
-            if not isinstance(loading, dict) or any(key not in loading for key in LOADING_CHECKS):
-                raise RuntimeError(f"Checkpoint loading diagnostics are incomplete: {loading!r}")
-            loading = {name: sorted(values) if isinstance(values, set) else values for name, values in loading.items()}
-            if any(loading[key] for key in LOADING_CHECKS):
-                raise RuntimeError("Checkpoint did not load exactly; refusing potentially uninitialized "
-                                   f"classification weights: {json.dumps(loading, ensure_ascii=False, default=str)}")
+            loading = require_exact_load(loading)
             model.to(self._device)
             model.eval()
             return model, loading

@@ -46,6 +46,17 @@ def validate_weights(snapshot: Path):
     raise ValueError(f"No standard Transformers weights found in {snapshot}")
 
 
+def require_exact_load(loading) -> dict:
+    """Refuse a load whose output_loading_info lists missing, unused, or mismatched weights."""
+    if not isinstance(loading, dict) or any(key not in loading for key in LOADING_CHECKS):
+        raise RuntimeError(f"Checkpoint loading diagnostics are incomplete: {loading!r}")
+    loading = {name: sorted(values) if isinstance(values, set) else values for name, values in loading.items()}
+    if any(loading[key] for key in LOADING_CHECKS):
+        raise RuntimeError("Checkpoint did not load exactly; refusing missing or unused weights: "
+                           f"{json.dumps(loading, ensure_ascii=False, default=str)}")
+    return loading
+
+
 def resolve_snapshot(repo_id: str, revision: str) -> Path:
     """Find a cached snapshot without touching the network."""
     require_commit(repo_id, revision)
