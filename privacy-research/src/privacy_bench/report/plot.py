@@ -12,7 +12,7 @@ from matplotlib.ticker import MaxNLocator, PercentFormatter
 
 COLORS = ("#3568b0", "#168174", "#bc6724", "#8857a5", "#bd4863", "#626c78", "#9a7b1f", "#2f8fb3")
 PRECISION_COLORS = {"fp32": "#bd4863", "bf16": "#8857a5", "fp16": "#bc6724", "int8": "#3568b0", "nf4": "#168174"}
-DIRECTIONS = {"higher": "higher is better", "lower": "lower is better", "neutral": "token cost"}
+DIRECTIONS = {"higher": "higher is better", "lower": "lower is better", "neutral": "not ranked"}
 # Panel geometry: margins and gaps as figure fractions, the panel height in inches.
 LEFT, RIGHT, WSPACE, PANEL_HEIGHT = 0.06, 0.975, 0.28, 2.45
 # Group labels wrap at this many characters a line; the figure then grows to fit the largest label.
