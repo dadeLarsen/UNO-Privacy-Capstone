@@ -37,11 +37,12 @@ class RewriteTask:
     def summary_line(metrics: dict) -> str:
         def percent(value):
             return "N/A" if value is None else f"{value:.1%}"
-        words = metrics["mean_output_words"]
+        words, grade = metrics["mean_output_words"], metrics["reading_grade"]
         return (f"Passages: {metrics['n']}; valid: {percent(metrics['valid_output_rate'])}; "
                 f"numbers kept: {percent(metrics['numbers_kept_rate'])}; "
                 f"qualifiers kept: {percent(metrics['qualifiers_kept_rate'])}; "
-                f"mean words: {'N/A' if words is None else f'{words:.0f}'}")
+                f"mean words: {'N/A' if words is None else f'{words:.0f}'}; "
+                f"reading grade: {'N/A' if grade is None else f'{grade:.1f}'}")
 
     def _selection(self, run) -> Selection:
         selection = self.select_items(run_condition(run))
@@ -54,7 +55,7 @@ class RewriteTask:
         selection = self._selection(run)
         metrics, _ = evaluate(selection.items, run.responses)
         flat = {key: value for key, value in metrics.items()
-                if key not in ("status_counts", "qualifiers", "checks_scope")}
+                if key not in ("status_counts", "qualifiers", "checks_scope", "style_scope")}
         return {"item_ids": [passage.id for passage in selection.items], "metrics": flat,
                 "cohort": selection.identity}
 
@@ -68,6 +69,9 @@ class RewriteTask:
             Panel("qualifiers_kept_rate", "Qualifiers kept", "Source hedges and negations still present (%)",
                   100, "percent", "higher"),
             Panel("mean_output_words", "Rewrite length", "Mean words / valid rewrite", 1, "tokens", "neutral"),
+            Panel("reading_grade", "Reading grade", "Flesch-Kincaid grade, pooled", 1, "tokens", "lower"),
+            Panel("mean_copy_density", "Copying", "Mean copied run (words)", 1, "tokens", "neutral"),
+            Panel("format_break_rate", "Format breaks", "Introduction or Markdown (%)", 100, "percent", "lower"),
         ]
 
     @staticmethod
@@ -84,6 +88,10 @@ class RewriteTask:
             "Numbers and qualifiers kept pool every passage's distinct numbers (section labels such as 8.2 "
             "excluded) and words such as may, unless, only, and not; a drop flags a rewrite to check, and "
             "keeping them proves nothing.",
+            f"Reading grade: Flesch-Kincaid, pooled over valid rewrites; the passages themselves score "
+            f"{rows[0]['source_reading_grade']:.1f}. Copying: the copied-run length an average rewrite word "
+            "sits in (Grusky et al., 2018); 1-2 means the model's own words. Format breaks: an opening such "
+            "as \"Here's the summary:\", or any Markdown.",
         ]
         return {"context": f"{rows[0]['n']} passages  |  prompts: {prompts}", "footnotes": notes}
 
