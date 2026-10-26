@@ -166,7 +166,7 @@ uv run pbench evaluate results/runs/<task>/<condition>/<UTC start>
 - `compare` rescores each listed run with the current code, refuses runs scored on different items or reference answers, and writes `summary.csv`, `matrix-overview.png`, and `matrix-overview.svg` under `results/comparisons/<name>/`.
 - `evaluate` rewrites a run's `evaluation/` folder from its saved responses.
 
-A comparison file names its `task` and its `runs`, as paths under `results/runs/`. An optional `[labels]` table replaces legend entries, and `[scoring]` holds settings that belong to the task.
+A comparison file names its `task` and its `runs`, as paths under `results/runs/`. An optional `[labels]` table replaces legend entries, and `[scoring]` holds settings that belong to the task. `group_by = "model"` groups the plot by model, with one bar per precision, to compare precisions under one condition.
 
 ### Classification
 

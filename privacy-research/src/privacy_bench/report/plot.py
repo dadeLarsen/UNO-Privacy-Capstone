@@ -1,4 +1,4 @@
-"""Bar matrix of quality and cost panels: one bar per run, grouped by condition."""
+"""Bar matrix of quality and cost panels: one bar per run, grouped by condition or by model."""
 
 import math
 from pathlib import Path
@@ -40,6 +40,23 @@ def series_key(row):
 
 def ordered(values):
     return list(dict.fromkeys(values))
+
+
+def layout(rows, group_by):
+    """The rows to draw, their axis groups, and their bar series.
+
+    Bars group by condition_label and take their colour from series_key, so grouping by model makes each
+    model a group and leaves only the precision, widest first, as the series."""
+    if group_by == "model":
+        cells = [(row["model"], row["precision"]) for row in rows]
+        if len({row["condition_label"] for row in rows}) > 1 or len(set(cells)) != len(cells):
+            raise ValueError("Grouping by model needs one condition and one run per model and precision")
+        rows = [{**row, "condition_label": row["model"], "model": "", "revision": "", "legend_label": ""}
+                for row in rows]
+        series = sorted(ordered(series_key(row) for row in rows), key=lambda key: list(PRECISION_COLORS).index(key[2]))
+    else:
+        series = ordered(series_key(row) for row in rows)
+    return rows, ordered(row["condition_label"] for row in rows), series
 
 
 def series_labels(series, rows):
@@ -150,10 +167,9 @@ def draw_panel(ax, panel, rows, groups, series, colors):
                         ha="center", fontsize=9)
 
 
-def draw_matrix(rows, panels, output_dir, *, title, context, footnotes) -> list:
+def draw_matrix(rows, panels, output_dir, *, title, context, footnotes, group_by="condition") -> list:
     """Write matrix-overview.png and .svg; returns their paths."""
-    groups = ordered(row["condition_label"] for row in rows)
-    series = ordered(series_key(row) for row in rows)
+    rows, groups, series = layout(rows, group_by)
     labels = series_labels(series, rows)
     colors = series_colors(series)
     matplotlib.rcParams.update({

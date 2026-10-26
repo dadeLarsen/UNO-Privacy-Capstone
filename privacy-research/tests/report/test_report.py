@@ -82,8 +82,8 @@ class ToyTask:
         return {"context": f"{rows[0]['n']} toy items", "footnotes": ["Toy footnote."]}
 
 
-def make_run(root, name, precision, flavour, task=None):
-    condition = parse_condition(name, f'task = "toy"\nstrategy = "echo"\n[model]\nid = "o/{name}"\n'
+def make_run(root, name, precision, flavour, task=None, model=None):
+    condition = parse_condition(name, f'task = "toy"\nstrategy = "echo"\n[model]\nid = "{model or f"o/{name}"}"\n'
                                       f'revision = "{"a" * 40}"\nprecision = "{precision}"\n'
                                       f'[options]\nflavour = "{flavour}"\n')
     execute(task or ToyTask(), condition, root / "toy" / name / "run")
@@ -148,6 +148,7 @@ def test_comparison_task_must_match(tmp_path):
     ('task = "toy"\nruns = ["a/b"]\nextra = 1\n', "unknown keys: extra"),
     ('task = "toy"\nruns = ["a/b"]\n[labels]\n"c/d" = "x"\n', "must name a listed run"),
     ('task = "toy"\nruns = ["a/b"]\ntitle = ""\n', "title"),
+    ('task = "toy"\nruns = ["a/b"]\ngroup_by = "prompt"\n', "group_by must be one of"),
 ])
 def test_invalid_comparison_files_are_rejected(text, message):
     with pytest.raises(ValueError, match=message):
@@ -165,6 +166,29 @@ def test_matrix_plot_writes_png_and_svg_with_legend_overrides(tmp_path):
     assert [path.name for path in paths] == ["matrix-overview.png", "matrix-overview.svg"]
     svg = paths[1].read_text(encoding="utf-8")
     assert "Custom label" in svg and "Toy footnote." in svg and "Accuracy · higher is better" in svg
+
+
+def test_grouping_by_model_draws_one_bar_per_precision_widest_first(tmp_path):
+    runs = [make_run(tmp_path, "m1-nf4", "nf4", "plain", model="o/m1"),
+            make_run(tmp_path, "m1-bf16", "bf16", "plain", model="o/m1"),
+            make_run(tmp_path, "m2-int8", "int8", "plain", model="o/m2")]
+    parsed = parse_comparison("toy", f'task = "toy"\ngroup_by = "model"\nruns = {json.dumps(runs)}\n'
+                                     f'[labels]\n"{runs[0]}" = "Custom label"\n')
+    assert parsed.group_by == "model"
+    paths = draw_matrix(summarize(ToyTask(), parsed, runs_root=tmp_path), [*ToyTask().quality_panels({}),
+                        *COST_PANELS], tmp_path / "plots", title="Toy", context="toy", footnotes=[],
+                        group_by=parsed.group_by)
+    svg = paths[1].read_text(encoding="utf-8")
+    assert svg.index("BF16") < svg.index("INT8") < svg.index("NF4")
+    assert "o/m1" in svg and "o/m2" in svg and "Custom label" not in svg and "o/m1 ·" not in svg
+
+
+def test_grouping_by_model_refuses_runs_from_different_conditions(tmp_path):
+    runs = [make_run(tmp_path, "m1", "bf16", "plain"), make_run(tmp_path, "m2", "nf4", "spicy")]
+    rows = summarize(ToyTask(), comparison(runs), runs_root=tmp_path)
+    with pytest.raises(ValueError, match="one condition and one run per model and precision"):
+        draw_matrix(rows, ToyTask().quality_panels({}), tmp_path / "plots", title="Toy", context="toy",
+                    footnotes=[], group_by="model")
 
 
 def test_group_labels_wrap_each_line_splitting_words_only_at_hyphens():

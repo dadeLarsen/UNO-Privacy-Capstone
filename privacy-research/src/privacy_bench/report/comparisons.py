@@ -16,7 +16,9 @@ Example::
     "classification/privacy-model-fp32/20261002-213049Z" = "privacy-model"
 
 Run paths are relative to results/runs/. ``[scoring]`` belongs to the task; ``[labels]``
-optionally overrides legend entries.
+optionally overrides legend entries. ``group_by = "model"`` groups the plot's bars by model, one bar
+per precision, instead of by condition; its legend then names precisions, so ``[labels]`` only renames
+runs elsewhere, such as in side-by-side.md.
 """
 
 from dataclasses import dataclass
@@ -25,7 +27,8 @@ import tomllib
 
 from ..core.conditions import NAME_PATTERN
 
-TOP_LEVEL_KEYS = {"task", "title", "runs", "scoring", "labels"}
+TOP_LEVEL_KEYS = {"task", "title", "runs", "scoring", "labels", "group_by"}
+GROUPINGS = ("condition", "model")
 
 
 @dataclass(frozen=True)
@@ -36,6 +39,7 @@ class Comparison:
     runs: tuple
     scoring: dict
     labels: dict
+    group_by: str
     source_text: str
 
 
@@ -69,8 +73,11 @@ def parse_comparison(name: str, text: str) -> Comparison:
     for run, label in labels.items():
         if run not in runs or not isinstance(label, str) or not label.strip():
             raise ValueError(f"Comparison {name!r}: label for {run!r} must name a listed run and be nonempty")
+    group_by = values.get("group_by", "condition")
+    if group_by not in GROUPINGS:
+        raise ValueError(f"Comparison {name!r}: group_by must be one of {', '.join(GROUPINGS)}")
     return Comparison(name=name, task=values["task"], title=title, runs=tuple(runs), scoring=scoring,
-                      labels=labels, source_text=text)
+                      labels=labels, group_by=group_by, source_text=text)
 
 
 def load_comparison(path) -> Comparison:

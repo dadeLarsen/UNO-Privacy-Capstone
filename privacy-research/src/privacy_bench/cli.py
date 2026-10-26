@@ -58,7 +58,8 @@ def compare(args):
     quality = task.quality_panels(comparison.scoring)
     paths = draw_matrix(rows, [*quality, *COST_PANELS], output,
                         title=comparison.title or comparison.name,
-                        context=f"{described['context']}  |  {len(rows)} runs", footnotes=footnotes)
+                        context=f"{described['context']}  |  {len(rows)} runs", footnotes=footnotes,
+                        group_by=comparison.group_by)
     paths = [*paths, *task.write_comparison_files(rows, comparison.scoring, output)]
     headline = quality[0]
     for row in rows:
