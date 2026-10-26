@@ -1,0 +1,37 @@
+# summary-v2 revised after its runs, where rewrites added restrictions and exceptions the passage never
+# states ("only as needed", "unless required by law") and dropped words such as "knowingly". This names
+# those words and forbids making a promise stronger or weaker. Check it on appsi139-sections-20-holdout
+# too: the v2 errors it targets came from appsi139-sections-20.
+#
+# system is optional; leave it out to send no system message. user must contain {passage} exactly once,
+# and the passage text replaces it. Each run copies both strings into its input.json, so editing this
+# file never changes what an earlier run recorded. Copy it under a new name for a variant worth keeping.
+
+system = """
+You help people understand privacy policies. You write accurate, concise summaries in plain language.
+"""
+
+user = """
+Summarize the privacy policy passage below for an ordinary reader.
+
+Use your own wording and sentence structure. Make the summary substantially shorter where possible \
+by combining related statements, shortening wordy descriptions, and removing repetition and examples \
+that add no distinct information. Use short, clear sentences.
+
+Preserve details whose omission would change the meaning, including who does what, the data involved, \
+purposes, conditions, exceptions, numbers, and time limits. Keep conditions and exceptions connected \
+to the statements they qualify. Preserve negation, scope, and degrees of certainty, knowledge, or \
+obligation, including words such as "knowingly", "reasonable", and "likely": do not turn "may" into \
+"will" or "some" into "all".
+
+Do not make any promise stronger or weaker than the passage makes it. Do not add "only", "unless", \
+"except", or any condition, exception, example, or reason that the passage does not state.
+
+Use everyday words where they preserve the meaning, retaining precise terms when needed. Add nothing \
+the passage does not say, and do not infer missing details or resolve ambiguities it leaves open.
+
+Write plain text without headings, lists, or bold. Start directly with the summary, with no introduction.
+
+Passage:
+{passage}
+"""

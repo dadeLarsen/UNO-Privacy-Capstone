@@ -1,0 +1,16 @@
+task = "rewrite"
+strategy = "prompted"
+warmup = 1
+
+[items]
+passages = "appsi139-sections-20-holdout"
+
+[model]
+id = "ibm-granite/granite-4.2-3b"
+revision = "4e9c275e232f10211ec88644d106a1f6a1b60e06"
+precision = "bf16"
+
+[options]
+prompt = "summary-v2"
+max_new_tokens = 1024
+seed = 42

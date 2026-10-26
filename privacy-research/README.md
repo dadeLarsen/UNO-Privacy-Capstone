@@ -189,7 +189,7 @@ uv run pbench fit fits/classification/embeddinggemma2-opp115-heads.toml
 
 ### Rewrite
 
-The rewrite task runs on 20 frozen APPSI-139 policy sections ([tools/make_appsi139_sections.py](tools/make_appsi139_sections.py) says how they were drawn). Each condition names a prompt file under `prompts/rewrite/`: an optional `system` message and a `user` template with one `{passage}` placeholder. Nothing is fitted.
+The rewrite task runs on 20 frozen APPSI-139 policy sections ([tools/make_appsi139_sections.py](tools/make_appsi139_sections.py) says how they were drawn). A second, held-out 20 from other policies checks prompts that were tuned by reading rewrites of the first 20; their conditions are in `conditions/rewrite/holdout/`. Each condition names a prompt file under `prompts/rewrite/`: an optional `system` message and a `user` template with one `{passage}` placeholder. Nothing is fitted.
 
 ```powershell
 uv run pbench run conditions/rewrite/qwen3.5-4b-bf16-summary-baseline.toml

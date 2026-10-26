@@ -1,0 +1,16 @@
+task = "rewrite"
+strategy = "prompted"
+warmup = 1
+
+[items]
+passages = "appsi139-sections-20-holdout"
+
+[model]
+id = "Qwen/Qwen3.5-0.8B"
+revision = "2fc06364715b967f1860aea9cf38778875588b17"
+precision = "bf16"
+
+[options]
+prompt = "summary-v3"
+max_new_tokens = 1024
+seed = 42
