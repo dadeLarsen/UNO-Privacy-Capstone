@@ -1,0 +1,62 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+If you access and use the Pandora digital streaming audio service, please know that in addition to the collection, use, and sharing of personal data set forth in this Policy, the following apply: A._Your Choices Related to Your Pandora Profile_ a._Profile Visibility_ - Your profile and listening activity are public. When the visibility of your profile is set to public, your listening activity is automatically published to your profile. For example, if you create a new station or thumb up a song, that activity will be posted in your profile and publicly visible. You may adjust your profile visibility settings by visiting help.pandora.com. Please note that changes to the visibility of your profile do not have any impact on the advertising you may see if you use the ad- supported version of the service. b._Cached Profiles on Search Engines_ - Even upon deactivating your account or making your profile private, Internet search engines such as Google and Bing cache publicly available webpages for a period of time beyond our control and may make your deactivated or formerly public profile available to users of their services on their platforms until such time as they refresh their webpage cache. Please consult with the applicable search engine to determine how you may remove webpages from their webpage cache.
+
+Key points:
+1. These terms apply if you use the Pandora streaming service, in addition to the rest of the Policy.
+2. (critical) Your profile and listening activity are public; while your profile is public, activity such as new stations or thumbs-up is posted to it automatically.
+3. (critical) You can change your profile visibility settings at help.pandora.com.
+4. Changing your profile visibility does not affect the ads you see on the ad-supported service.
+5. (critical) Even after you deactivate your account or make your profile private, search engines such as Google and Bing may keep showing cached copies of your profile for a time beyond Pandora's control.
+6. To have cached pages removed, you need to contact the search engine.
+
+Rewrite A:
+Accessing the Pandora digital streaming audio service involves collecting, using, and sharing personal data. Your profile and listening activity are public by default. When your profile visibility is set to public, your listening activity is automatically published to your profile. For example, if you create a new station or thumb up a song, that activity will be posted publicly. You can adjust your profile visibility settings by visiting help.pandora.com. Changes to profile visibility do not affect the advertising you see if you use the ad-supported version of the service. Even if you deactivate your account or make your profile private, search engines like Google and Bing may cache publicly available webpages for a period of time. These cached pages may make your deactivated or formerly public profile available to users of their services on their platforms until they refresh their webpage cache. Please consult with the applicable search engine to determine how you may remove webpages from their cache.
+
+Rewrite B:
+By using the Pandora digital streaming audio service, you acknowledge that your profile and listening activity are public. When your profile is public, your listening activity is automatically published to your profile. You can change your profile visibility settings at help.pandora.com, but these changes do not affect the advertising you see if you use the ad-supported version of the service. Even if you deactivate your account or make your profile private, search engines may still show your deactivated or formerly public profile until they refresh their webpage cache. You must contact the search engine to determine how to remove webpages from their cache.
+
+Rewrite C:
+If you use Pandora, your profile and what you listen to are public by default. Any activity like creating a new station or liking a song will appear on your public profile. You can change your profile's visibility through help.pandora.com, but this won’t affect the ads you see. Even if you deactivate your account or make your profile private, search engines like Google and Bing may still show old versions of your profile for some time because they store website pages. You’ll need to contact the search engines directly to request removal of cached pages.
+
+Rewrite D:
+If you use Pandora’s streaming audio service, we collect and share your personal information. Your profile is public, and your listening activity is automatically shared. You can control your profile visibility through the help page at pandora.com.  Internet search engines may also cache webpages, potentially making your inactive or public profile available to others.
+
+Rewrite E:
+When you use Pandora, your listening habits become visible to others. If you make your profile public, your activity is shared automatically. You can change this setting through the help center. Search engines also store your profile information temporarily, which may remain accessible until they update their databases. These rules apply regardless of account status or privacy settings.
+
+Rewrite F:
+Your Pandora profile and listening activity are public when you choose that setting. If your profile is public, your activity, like creating a station or liking a song, will appear on your profile and be visible to others. You can change your profile visibility settings at help.pandora.com. Changing your profile visibility does not affect the ads you see if you use the ad-supported service. Even if you deactivate your account or make your profile private, search engines like Google and Bing may keep publicly available pages cached for a time beyond Pandora's control. These search engines might show your deactivated or formerly public profile to their users until they refresh their cache. Check with the search engine to find out how to remove pages from their cache.
+
+Rewrite G:
+If you use Pandora's digital streaming audio service, your profile and listening activity are public when visibility is set that way, meaning actions like creating stations or liking songs are posted and visible to others. You can change these settings at help.pandora.com, but doing so does not affect the ads you see in the ad-supported version. Even if you deactivate your account or make your profile private, search engines like Google and Bing may still show your profile on their platforms because they cache webpages for a period beyond your control, and you must contact the search engine to request removal from their cache.
+
+Rewrite H:
+When you use Pandora, your profile and listening activity (like creating stations or liking songs) are public by default. This means others can see these actions on your profile. You can change your profile to private by adjusting settings at help.pandora.com, but this won’t affect ads if you use the free version.
+
+Even if you delete your account or make your profile private, search engines like Google or Bing may still show cached versions of your old public profile for some time. You’d need to contact the search engine directly to try removing those cached pages.
+
+Rewrite I:
+If you use the Pandora digital streaming audio service, your profile and listening activity are public. When your profile visibility is set to public, any new station you create or a song you thumbs up will be automatically added to your public profile and visible to others. You can change your profile visibility settings at help.pandora.com, but this does not affect the ads you see on the ad‑supported version of the service. Even if you deactivate or make your profile private, search engines may still cache publicly available webpages and make your deactivated or formerly public profile visible on their platforms until they refresh their caches. You may remove cached pages from the search engine’s cache by contacting them directly.

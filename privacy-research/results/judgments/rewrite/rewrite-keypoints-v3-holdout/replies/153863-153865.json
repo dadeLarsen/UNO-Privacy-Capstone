@@ -1,0 +1,11 @@
+{"rewrites": [
+{"label": "A", "verdicts": {"1": "kept", "2": "kept", "3": "kept"}, "evidence": {}, "unsupported": [{"quote": "but we can’t guarantee absolute security", "claim": "Adds a disclaimer that weakens the passage's security commitment.", "severity": "minor"}]},
+{"label": "B", "verdicts": {"1": "kept", "2": "kept", "3": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "C", "verdicts": {"1": "kept", "2": "kept", "3": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "D", "verdicts": {"1": "kept", "2": "kept", "3": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "E", "verdicts": {"1": "partial", "2": "kept", "3": "kept"}, "evidence": {"1": "Other users of our Services who choose to communicate with you and share certain information"}, "unsupported": []},
+{"label": "F", "verdicts": {"1": "partial", "2": "contradicted", "3": "partial"}, "evidence": {"1": "When you use our services and talk to other users outside the EEA, your personal information will be shared with them.", "2": "You agree to send your data on our behalf", "3": "we handle it with reasonable security measures"}, "unsupported": []},
+{"label": "G", "verdicts": {"1": "kept", "2": "kept", "3": "partial"}, "evidence": {"3": "We use strong security measures, including encryption, to protect your data."}, "unsupported": [{"quote": "strong security measures", "claim": "Describes the security as strong rather than appropriate to the risk, a stronger promise than the passage makes.", "severity": "minor"}]},
+{"label": "H", "verdicts": {"1": "partial", "2": "partial", "3": "partial"}, "evidence": {"1": "Telegram allows you to share information with others outside the European Economic Area.", "2": "When you do this, we transfer your personal data to those users.", "3": "We use security measures to protect your data"}, "unsupported": []},
+{"label": "I", "verdicts": {"1": "partial", "2": "kept", "3": "kept"}, "evidence": {"1": "If you communicate with other users outside the EEA"}, "unsupported": []}
+]}

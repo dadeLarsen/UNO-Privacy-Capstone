@@ -106,14 +106,15 @@ conditions/<task>/*.toml     one file per run condition: task, strategy, items, 
 conditions/<task>/<corpus>/  conditions for another test corpus, such as appsi139/
 fits/<task>/*.toml           one file per fit: what to learn from, the model, and the heads to fit
 comparisons/*.toml           which saved runs to put side by side, and how to score them
-data/                        source datasets, plus each task's samples, gold labels, examples, and prompts
+prompts/<task>/*.toml        editable prompt files; each run copies the text it used into its input.json
+data/                        source datasets, plus each task's samples, passages, gold labels, examples, and prompts
 results/runs/<task>/<condition>/<UTC start>/   tracked run records
 results/fits/<task>/<fit>/<UTC start>/         tracked fit records, with the fitted weights
 results/comparisons/<name>/  summaries and plots from pbench compare; five are committed for reading
 src/privacy_bench/
   core/       condition and fit files, run and fit records, the run loop, provenance
   models/     backends: chat generation, sequence classifiers, JEV judges, sentence embeddings
-  tasks/      one package per task; classification today
+  tasks/      one package per task: classification and rewrite
   report/     task-agnostic summaries and plots
   cli.py      the pbench command
 tools/        one-time code that imported runs and froze data files
@@ -153,17 +154,30 @@ uv run pbench download conditions/classification/embeddinggemma2-bf16-definition
 
 ## Running and comparing
 
+Every task uses the same three commands. A condition file under `conditions/<task>/` describes one run, and a comparison file under `comparisons/` lists saved runs to put side by side:
+
 ```powershell
-uv run pbench run conditions/classification/embeddinggemma2-bf16-definitions.toml
-uv run pbench compare comparisons/pilot-models-embeddinggemma2.toml
-uv run pbench evaluate results/runs/classification/<condition>/<UTC start>
+uv run pbench run conditions/<task>/<condition>.toml
+uv run pbench compare comparisons/<name>.toml
+uv run pbench evaluate results/runs/<task>/<condition>/<UTC start>
 ```
 
 - `run` checks every input before the first model call and never truncates one. It refuses an existing output folder, keeps every completed response if the run fails or is interrupted, and records the git commit and any uncommitted diff, the full package list, the resolved model commit, and the exact input specification.
-- `compare` rescores each listed run with the current code, optionally on a smaller sample that every run covers, refuses runs scored on different items or reference answers, and writes `summary.csv`, `matrix-overview.png`, and `matrix-overview.svg` under `results/comparisons/<name>/`.
+- `compare` rescores each listed run with the current code, refuses runs scored on different items or reference answers, and writes `summary.csv`, `matrix-overview.png`, and `matrix-overview.svg` under `results/comparisons/<name>/`.
 - `evaluate` rewrites a run's `evaluation/` folder from its saved responses.
 
-Some strategies apply weights fitted to labeled examples, such as a small classification head on frozen embeddings. Fit them once, before the runs that use them:
+A comparison file names its `task` and its `runs`, as paths under `results/runs/`. An optional `[labels]` table replaces legend entries, and `[scoring]` holds settings that belong to the task. `group_by = "model"` groups the plot by model, with one bar per precision, to compare precisions under one condition.
+
+### Classification
+
+```powershell
+uv run pbench run conditions/classification/embeddinggemma2-bf16-definitions.toml
+uv run pbench compare comparisons/pilot-models-embeddinggemma2.toml
+```
+
+A classification comparison's `[scoring]` names the `gold` labels to score against and, optionally, a smaller `sample` that every run covers.
+
+Some classification strategies apply weights fitted to labeled examples, such as a small classification head on frozen embeddings. Fit them once, before the runs that use them:
 
 ```powershell
 uv run pbench fit fits/classification/embeddinggemma2-opp115-heads.toml
@@ -171,14 +185,46 @@ uv run pbench fit fits/classification/embeddinggemma2-opp115-heads.toml
 
 `fit` checks every example against the input limit before embedding any, refuses an existing output folder, and writes `fit.toml`, `fit.json`, and `weights.safetensors` under `results/fits/<task>/<fit>/<UTC start>/`. `fit.json` records the same provenance as a run, the cross-validation results, and the hash of the weights, which a run checks before it loads them.
 
+[docs/classification.md](docs/classification.md) describes the task's data, scoring, and fits in detail.
+
+### Rewrite
+
+The rewrite task runs on 20 frozen APPSI-139 policy sections ([tools/make_appsi139_sections.py](tools/make_appsi139_sections.py) says how they were drawn). A second, held-out 20 from other policies checks prompts that were tuned by reading rewrites of the first 20; their conditions are in `conditions/rewrite/holdout/`. Each condition names a prompt file under `prompts/rewrite/`: an optional `system` message and a `user` template with one `{passage}` placeholder. Nothing is fitted.
+
+```powershell
+uv run pbench run conditions/rewrite/qwen3.5-4b-bf16-summary-baseline.toml
+```
+
+No reference rewrite exists, so the scores only flag outputs to check: whether a rewrite is valid (finished, nonempty, no reasoning tags), how many of the source's numbers and qualifiers (*may*, *unless*, *not*, …) it still contains, and whether it adds an exception, *only*, or a negation that the passage lacks. Three more describe how a rewrite is written: how much it copies from the passage (the copied-run length of Grusky et al., 2018), its Flesch–Kincaid reading grade beside the passages' own, and how often it opens with an introduction such as "Here's the summary:" or uses Markdown. Each run writes `evaluation/review.md`, which shows each passage above its rewrite. A rewrite comparison needs no `[scoring]`, and `compare` adds `side-by-side.md`, which shows every compared model's rewrite under each passage:
+
+```toml
+task = "rewrite"
+runs = [
+    "rewrite/qwen3.5-4b-bf16-summary-baseline/<UTC start>",
+    "rewrite/gemma-4-e4b-int8-summary-baseline/<UTC start>",
+]
+```
+
+The flags cannot tell whether a rewrite keeps the passage's meaning, so a judge grades rewrites against key-point checklists, one per passage set under `data/rewrite/keypoints/`. `pbench judge prepare` writes one prompt per passage under `results/judgments/rewrite/<comparison>/`: the judge instructions from `prompts/rewrite/judge/`, the passage, its key points, and every valid rewrite under a letter shuffled per passage, so the judge cannot tell which model wrote which. The judge marks each key point kept, partial, missing, or contradicted, and lists claims the passage does not support, quoting the rewrite for each. `pbench judge record` refuses a reply that skips a point or quotes words its rewrite does not contain, then freezes the record. A comparison that names the judgment adds key-point panels and `keypoints.png`:
+
+```powershell
+uv run pbench judge prepare comparisons/rewrite-keypoints-v3.toml --judge "<the model, and how it ran>"
+# The judge answers each prompt in replies/<passage>.json, then:
+uv run pbench judge record results/judgments/rewrite/rewrite-keypoints-v3
+```
+
+```toml
+[scoring]
+judgments = "rewrite-keypoints-v3"
+```
+
 ## Extending
 
 - **Another model for an existing strategy:** add a condition file with the model's pinned commit, then `pbench download` and `pbench run`.
+- **Another rewrite prompt:** add a file under `prompts/rewrite/` and conditions that name it. Editing a prompt in place is fine while iterating; copy it under a new name once a variant is worth comparing, because comparisons label runs by prompt name.
 - **A new strategy:** add a class under `tasks/<task>/strategies/` and register it in that package's `STRATEGIES`. Reuse a backend from `models/`, or add one there that knows nothing about the task.
 - **A new kind of fit:** add a fitter to the task's `FITTERS` that turns a fit file into a report and named float32 tensors. The shared fit record stores and checks them.
-- **A new task**, such as simplification: add `tasks/<name>/` with a task object that selects items, builds strategies, evaluates responses, and supplies its comparison panels and notes, then register it in `tasks/__init__.py`. The run loop, run records, model backends, and cost panels apply unchanged.
-
-The classification task is described in [docs/classification.md](docs/classification.md).
+- **A new task:** add `tasks/<name>/` with a task object that selects items, builds strategies, evaluates responses, and supplies its comparison panels, notes, and any extra comparison files, then register it in `tasks/__init__.py`. The run loop, run records, model backends, and cost panels apply unchanged.
 
 ## History
 

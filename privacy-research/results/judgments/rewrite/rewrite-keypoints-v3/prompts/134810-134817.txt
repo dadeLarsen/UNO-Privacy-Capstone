@@ -1,0 +1,67 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+This privacy policy (“ Policy ”) informs you of your choices and our practices in relation to your Information (as defined below). In this Policy, (“ Miniclip ”), “we” or “us” refers to Miniclip SA, a company registered in Switzerland with its office located at Rue des Beaux-Arts 8, 2000 Neuchatel, Switzerland. We choose why we need to use your Information and how it is used, which means we are considered the data controller in certain countries. For the purpose of this Policy, “ Information ” means any information relating to an identified or identifiable individual. This includes Information relating to your use of: (a) our mobile games (“ Mobile Games ”); (b) the games that you can play on any Miniclip website (agar.io or the website version of 8 Ball Pool) containing a link to this Policy (“ Website ”); and (c) our games which can be accessed through Facebook (“ Facebook Games ”). When you use the Mobile Games, the Website or Facebook Games (the “ Games ”), you accept our rules and policies which set out how we handle your Information, and you understand we collect, process, use and store your Information as described in this Policy. If you do not agree with this Policy, you must not play any of the Games. If you change your mind in the future, you must stop playing the Games and you may exercise your rights in relation to your Information as set out in this Policy.
+
+Key points:
+1. "Miniclip", "we", or "us" means Miniclip SA, a company registered in Switzerland.
+2. Miniclip decides why and how your information is used, so it is the data controller in certain countries.
+3. "Information" means any information about an identified or identifiable person.
+4. The Policy covers Miniclip's mobile games, its website games (such as agar.io and the web version of 8 Ball Pool), and its Facebook games.
+5. (critical) By using the games, you accept Miniclip's rules and understand that it collects, processes, uses, and stores your information as the Policy describes.
+6. (critical) If you do not agree with the Policy, you must not play the games.
+7. (critical) If you change your mind later, you must stop playing, and you can exercise your rights over your information as the Policy sets out.
+
+Rewrite A:
+This policy explains how Miniclip handles your information. Miniclip is a company in Switzerland that collects information about your use of their games, like Mobile Games, the games on the website, and Facebook Games. They use this information to provide services and protect your privacy. They collect information about you, including your gameplay, and store it for a certain period. You agree to their rules and policies regarding how they use your data. If you don’t agree, you can’t play the games. You can exercise your rights regarding your information.
+
+Rewrite B:
+Miniclip SA, a Swiss company, is the data controller for your information when you use their mobile games, website games like agar.io or 8 Ball Pool, or games accessed through Facebook. Information includes any data relating to you or your use of these games. By playing any of these games, you agree to their rules and policies regarding how they collect, process, use, and store your information. If you do not agree with this policy, you must not play the games. If you change your mind later, you must stop playing the games and can exercise your rights regarding your information as described in this policy.
+
+Rewrite C:
+This privacy policy explains how Miniclip SA, a Swiss company, collects, uses, and stores your personal information when you play their mobile games, website games like agar.io or 8 Ball Pool, or Facebook games. The policy defines "Information" as any data related to an identified or identifiable person. By using these games, you agree to their rules and policies, which describe how your information is handled. If you don't agree with the policy, you shouldn't play the games. If you later change your mind, you must stop playing and can then exercise your rights regarding your information as outlined in the policy.
+
+Rewrite D:
+Miniclip, a Swiss company based in Neuchâtel, explains how it handles your personal data in this privacy policy. "Information" here means any details that can identify you, like data from:
+
+- Their mobile games,
+- Games on their website (like agar.io or 8 Ball Pool), or
+- Games you access through Facebook.
+
+When you play any of these games, you agree to let Miniclip collect, use, and store your data as described here. If you don’t agree, don’t play. If you later change your mind, stop playing and you can request control over your data as explained in this policy.
+
+Rewrite E:
+This policy explains how Miniclip SA handles your information. Miniclip SA is the data controller in certain countries. Information includes any data about you that relates to your use of our mobile games, games on Miniclip websites, or games accessed through Facebook. By using these games, you accept how we collect, process, use, and store your information. If you do not agree with this policy, you must not play the games. If you change your mind later, you must stop playing the games, and you can exercise your rights regarding your information as described here.
+
+Rewrite F:
+This policy explains how Miniclip SA, a company based in Switzerland, handles your information. It covers the games you play on Miniclip, on websites like agar.io or 8 Ball Pool, and on Facebook games. Your information includes details about your use of these games. We collect, use, and store this information as described in the policy. If you do not agree with the policy, you must not play any of the games. If you later change your mind, you must stop playing and can exercise your rights regarding your information as stated in the policy.
+
+Rewrite G:
+This policy explains how Miniclip SA, a Swiss company, handles your information. Miniclip acts as the data controller in some countries because it decides why and how to use your information. Information includes any data relating to an identified or identifiable person. This includes information about your use of Miniclip mobile games, games on the agar.io or 8 Ball Pool websites, and games accessed through Facebook. By using these games, you agree to the rules and policies for how Miniclip collects, processes, uses, and stores your information. If you do not agree, you must not play the games. If you change your mind later, you must stop playing the games and may exercise your information rights as described in this policy.
+
+Rewrite H:
+The policy explains how Miniclip collects and uses your information. They identify what data they gather and why, such as from their games and website. You agree to their rules when using their services. You can change your mind and stop using their games at any time. The terms apply to the specific services you access.
+
+Rewrite I:
+Miniclip SA collects, processes, uses, and stores your personal information to help you play our mobile games, games on our websites, and games on Facebook. We are the data controller in Switzerland. You must not play our games if you do not agree with this policy. If you change your mind, you must stop playing the games and may exercise your rights regarding your information.

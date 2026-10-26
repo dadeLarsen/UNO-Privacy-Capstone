@@ -1,0 +1,19 @@
+task = "rewrite"
+title = "Six rewriters at NF4 against their earlier precisions, summary-v3"
+# Qwen3.5-4B and Granite first ran at BF16, the larger three at INT8, and Gemma 4 E4B at both.
+group_by = "model"
+runs = [
+    "rewrite/qwen3.5-4b-bf16-summary-v3/20261026-043005Z",
+    "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+    "rewrite/granite-4.2-3b-bf16-summary-v3/20261026-041028Z",
+    "rewrite/granite-4.2-3b-nf4-summary-v3/20261026-161250Z",
+    "rewrite/gemma-4-e4b-bf16-summary-v3/20261026-040639Z",
+    "rewrite/gemma-4-e4b-int8-summary-v3/20261026-150006Z",
+    "rewrite/gemma-4-e4b-nf4-summary-v3/20261026-161516Z",
+    "rewrite/gemma-4-12b-int8-summary-v3/20261026-035536Z",
+    "rewrite/gemma-4-12b-nf4-summary-v3/20261026-161939Z",
+    "rewrite/ministral-3-14b-int8-summary-v3/20261026-041251Z",
+    "rewrite/ministral-3-14b-nf4-summary-v3/20261026-162424Z",
+    "rewrite/qwen3-14b-int8-summary-v3/20261026-042111Z",
+    "rewrite/qwen3-14b-nf4-summary-v3/20261026-162710Z",
+]

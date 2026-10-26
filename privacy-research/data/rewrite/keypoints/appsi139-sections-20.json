@@ -1,0 +1,725 @@
+{
+  "name": "appsi139-sections-20",
+  "passages": {
+    "name": "appsi139-sections-20",
+    "sha256": "30aa156eed4775719fa80e4eb902bf7398bf40ecd0cbc1f1f96f84545cf8b51d",
+    "n": 20
+  },
+  "drafted_by": "Claude Code (claude-opus-5-5), from each passage's text alone",
+  "reviewed_by": null,
+  "rules": "One fact per point, with its conditions, exceptions, and scope words kept inside it. Critical points are those whose loss or distortion would mislead a reader about their data, rights, or risks. Citations, addresses, cross-references, and examples that add no distinct information are left out.",
+  "checklists": [
+    {
+      "passage": "128683-128686",
+      "heading": "How can you opt-out, remove or modify information you have provided to us?",
+      "points": [
+        {
+          "id": "1",
+          "point": "You can change your email subscriptions by updating your preferences in the \"My Account\" section.",
+          "critical": true
+        },
+        {
+          "id": "2",
+          "point": "Emails already in production may still arrive after you change your preferences.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "To delete your online account information, you sign into \"My Account\" and remove your shipping addresses, billing addresses, and payment information.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "The company may keep information about an individual sales transaction to service it and for record keeping.",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "150511-150514",
+      "heading": "Your use of the Services is subject to the Terms of Use,[Copyright Policy](/legal/copyright) and this Privacy Policy and indicates your consent to them.",
+      "points": [
+        {
+          "id": "1",
+          "point": "You must be 16 or older to use the Services; if you are under 16, you may not download or use them.",
+          "critical": true
+        },
+        {
+          "id": "2",
+          "point": "\"Personal information\" means information you provide that personally identifies you, such as your name, email address, or billing information.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "In certain circumstances it also includes your location and route information, or other data Waze can reasonably link to such information.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "You can use the Privacy Settings in the Waze app to choose which personal information Waze may collect and how it is used.",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "171794-171797",
+      "heading": "Changes to this Privacy Statement",
+      "points": [
+        {
+          "id": "1",
+          "point": "The company may modify or update this Privacy Statement from time to time, so you should review it periodically.",
+          "critical": false
+        },
+        {
+          "id": "2",
+          "point": "For a material change, such as collecting or using personal information in a materially different way, the company will give the Library at least 30 days' notice.",
+          "critical": true,
+          "note": "The notice goes to the Library, not to the user."
+        },
+        {
+          "id": "3",
+          "point": "Continuing to use Axis 360 after a change means you accept the new terms.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "The Privacy Statement was last modified, and took effect, on January 1, 2017.",
+          "critical": false
+        }
+      ]
+    },
+    {
+      "passage": "127798-127802",
+      "heading": "INFORMATION WE COLLECT AUTOMATICALLY",
+      "points": [
+        {
+          "id": "1",
+          "point": "When you use the services, including on third-party platforms, the company may automatically collect or receive information associated with you or your devices, such as computers, phones, gaming systems, smart TVs, or streaming devices.",
+          "critical": true
+        },
+        {
+          "id": "2",
+          "point": "This may include how you use the services, your preferences, and how you interact with content.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "It may include device identifiers such as your IP address (including approximate location), advertising ID, cookie ID, MAC address, and other unique identifiers.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "The company may collect this with tracking technologies such as cookies, pixels, tags, beacons, and scripts.",
+          "critical": false
+        }
+      ]
+    },
+    {
+      "passage": "141380-141384",
+      "heading": "Privacy Policy",
+      "points": [
+        {
+          "id": "1",
+          "point": "The policy explains how SayGames Ltd collects and processes your personal data when you use its mobile apps.",
+          "critical": false
+        },
+        {
+          "id": "2",
+          "point": "The App is free to play, with optional in-game purchases.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "SayGames processes information from and about you, in particular to improve the App experience and to support internal operations.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "SayGames updates the policy from time to time and notifies you of changes by revising the date at the top.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "Depending on the change, SayGames may also give you additional notice or ask for your consent again.",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "135095-135100",
+      "heading": "4.Personal Data Deletion and Closure of Accounts",
+      "points": [
+        {
+          "id": "1",
+          "point": "You may ask Moon Active to delete your personal data at any time, using the \"Account Deletion\" button in the game and following its instructions.",
+          "critical": true
+        },
+        {
+          "id": "2",
+          "point": "This is in addition to the policy's other rights, except as set out in the Candidate Privacy Addendum.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "Deletion closes your account and deletes your playing history, purchase information, social media log-in, and other information connected with the game.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "Deletion is irreversible.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "If you have accounts in several games, you should request closure of each one.",
+          "critical": true
+        },
+        {
+          "id": "6",
+          "point": "Moon Active will act promptly, but processing may take some time.",
+          "critical": false
+        },
+        {
+          "id": "7",
+          "point": "Moon Active may keep a copy of any personal data the law requires it to keep.",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "142032-142038",
+      "heading": "11.Our Policy Regarding Children",
+      "points": [
+        {
+          "id": "1",
+          "point": "The Service is not directed to children under 13.",
+          "critical": true
+        },
+        {
+          "id": "2",
+          "point": "The company does not knowingly collect or solicit personal information from children under 13.",
+          "critical": true
+        },
+        {
+          "id": "3",
+          "point": "Children under 13 should not register for an account or send any information about themselves.",
+          "critical": false
+        },
+        {
+          "id": "4",
+          "point": "If the company learns that a child under 13 gave it personal information, it will delete it as required by law.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "The company does not knowingly process data of EU residents under 16 without parental consent.",
+          "critical": true
+        },
+        {
+          "id": "6",
+          "point": "If it learns it collected such data without parental consent, it will take reasonable steps to delete it as soon as possible.",
+          "critical": true
+        },
+        {
+          "id": "7",
+          "point": "The company also follows other age restrictions under local laws.",
+          "critical": false
+        }
+      ]
+    },
+    {
+      "passage": "182196-182200",
+      "heading": "9.INTERNATIONAL TRANSFER",
+      "points": [
+        {
+          "id": "1",
+          "point": "Insider is based in the U.S., and the personal information it collects is governed by U.S. law.",
+          "critical": true
+        },
+        {
+          "id": "2",
+          "point": "Insider processes personal information on servers in the U.S. and other jurisdictions.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "Your information may be transferred to and used in places whose privacy laws differ from yours.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "Using the Service or providing personal information counts as consent to its transfer, processing, use, sharing, and storage in the U.S. and elsewhere.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "People in the European Economic Area or the United Kingdom should see a separate section for the disclosures and rights that apply to them.",
+          "critical": false
+        }
+      ]
+    },
+    {
+      "passage": "175061-175066",
+      "heading": "6.Right to data portability",
+      "points": [
+        {
+          "id": "1",
+          "point": "You have the right to receive the personal data you provided to the Controller in a structured, commonly used, machine-readable format.",
+          "critical": true
+        },
+        {
+          "id": "2",
+          "point": "You have the right to pass that data to another controller without the Controller hindering you.",
+          "critical": true
+        },
+        {
+          "id": "3",
+          "point": "These rights apply where the processing is based on your consent or on a contract, and is carried out by automated means.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "Where technically feasible, you can have the data sent directly from one controller to another.",
+          "critical": false
+        },
+        {
+          "id": "5",
+          "point": "The right must not adversely affect the rights and freedoms of others.",
+          "critical": false
+        },
+        {
+          "id": "6",
+          "point": "The right does not apply to processing needed for a task in the public interest or in the exercise of official authority.",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "126736-126743",
+      "heading": "1.Introduction",
+      "points": [
+        {
+          "id": "1",
+          "point": "The company is committed to protecting its users' privacy.",
+          "critical": false
+        },
+        {
+          "id": "2",
+          "point": "The policy applies where the company is the data controller, deciding why and how users' personal data is processed.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "The company collects data while you use its apps.",
+          "critical": false
+        },
+        {
+          "id": "4",
+          "point": "Where that data is not strictly necessary to provide the services, the company will ask for your consent when you first use the apps.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "Privacy controls in the apps let you choose whether to receive targeted advertising and whether to provide user data used to improve future services.",
+          "critical": true
+        },
+        {
+          "id": "6",
+          "point": "You can reach the privacy controls from inside the app.",
+          "critical": false
+        },
+        {
+          "id": "7",
+          "point": "\"We\" means Five Aces Publishing Ltd. and New Star Games Ltd.",
+          "critical": false
+        }
+      ]
+    },
+    {
+      "passage": "176631-176636",
+      "heading": "8 Security of User Information",
+      "points": [
+        {
+          "id": "1",
+          "point": "The company uses appropriate organizational, technical, and physical safeguards to protect user information.",
+          "critical": false
+        },
+        {
+          "id": "2",
+          "point": "Its measures aim to prevent, as far as technically practical, leakage, destruction, misuse, unauthorized access, disclosure, or modification.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "No method of internet transmission or electronic storage is 100% secure, and the company cannot guarantee absolute security.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "After any data breach, the company will assess it quickly.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "If a breach causes or is likely to cause significant harm, or is or is likely to be of significant scale, the company will notify the relevant authorities and its users.",
+          "critical": true
+        },
+        {
+          "id": "6",
+          "point": "It will notify them as soon as practicable, and no later than the legal deadline.",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "168902-168910",
+      "heading": "9.Supplemental Information for Pandora Services Users",
+      "points": [
+        {
+          "id": "1",
+          "point": "These terms apply if you use the Pandora streaming service, in addition to the rest of the Policy.",
+          "critical": false
+        },
+        {
+          "id": "2",
+          "point": "Your profile and listening activity are public; while your profile is public, activity such as new stations or thumbs-up is posted to it automatically.",
+          "critical": true
+        },
+        {
+          "id": "3",
+          "point": "You can change your profile visibility settings at help.pandora.com.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "Changing your profile visibility does not affect the ads you see on the ad-supported service.",
+          "critical": false
+        },
+        {
+          "id": "5",
+          "point": "Even after you deactivate your account or make your profile private, search engines such as Google and Bing may keep showing cached copies of your profile for a time beyond Pandora's control.",
+          "critical": true
+        },
+        {
+          "id": "6",
+          "point": "To have cached pages removed, you need to contact the search engine.",
+          "critical": false
+        }
+      ]
+    },
+    {
+      "passage": "181685-181690",
+      "heading": "10.About Cookies and Similar Technologies",
+      "points": [
+        {
+          "id": "1",
+          "point": "Nike, its service providers, and third parties collect information, which may include personal information, from your browser, devices, or apps through cookies, pixel tags, mobile device identifiers, and similar technologies.",
+          "critical": true
+        },
+        {
+          "id": "2",
+          "point": "This may include your IP address, cookie and device identifiers, device and browser details, country and time zone, websites you visited before, how you interact with the Platform (such as clicks, purchases, and preferences), and access times.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "Nike uses these technologies to understand how you use the Platform and your preferences, and to secure and improve the Platform.",
+          "critical": false
+        },
+        {
+          "id": "4",
+          "point": "Nike uses cookies and pixel tags to gather aggregate traffic data for analytics and statistics.",
+          "critical": false
+        },
+        {
+          "id": "5",
+          "point": "Nike uses cookies and similar technologies to target advertising and content on its Platform and on third-party sites and services.",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "135531-135539",
+      "heading": "6.How Long We Store Your Information",
+      "points": [
+        {
+          "id": "1",
+          "point": "Etsy keeps your information only as long as needed for the purposes in the Policy, while your account is active, or as needed to meet its legal obligations.",
+          "critical": true
+        },
+        {
+          "id": "2",
+          "point": "Etsy decides how long to keep information case by case, depending on the applicable retention laws.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "Most information is kept as long as needed to provide the Services, including keeping them secure and keeping business and financial records.",
+          "critical": false
+        },
+        {
+          "id": "4",
+          "point": "Data processed on the basis of consent is kept as long as needed to process it under that consent, or until you withdraw your consent.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "Etsy keeps and uses information as needed to meet legal obligations, such as tax laws or Know Your Customer rules.",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "134810-134817",
+      "heading": "Introduction",
+      "points": [
+        {
+          "id": "1",
+          "point": "\"Miniclip\", \"we\", or \"us\" means Miniclip SA, a company registered in Switzerland.",
+          "critical": false
+        },
+        {
+          "id": "2",
+          "point": "Miniclip decides why and how your information is used, so it is the data controller in certain countries.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "\"Information\" means any information about an identified or identifiable person.",
+          "critical": false
+        },
+        {
+          "id": "4",
+          "point": "The Policy covers Miniclip's mobile games, its website games (such as agar.io and the web version of 8 Ball Pool), and its Facebook games.",
+          "critical": false
+        },
+        {
+          "id": "5",
+          "point": "By using the games, you accept Miniclip's rules and understand that it collects, processes, uses, and stores your information as the Policy describes.",
+          "critical": true
+        },
+        {
+          "id": "6",
+          "point": "If you do not agree with the Policy, you must not play the games.",
+          "critical": true
+        },
+        {
+          "id": "7",
+          "point": "If you change your mind later, you must stop playing, and you can exercise your rights over your information as the Policy sets out.",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "138072-138082",
+      "heading": "Categories of Information Collected",
+      "points": [
+        {
+          "id": "1",
+          "point": "The information collected depends on how you use the Services.",
+          "critical": false
+        },
+        {
+          "id": "2",
+          "point": "It includes identifiers and contact information, such as your name, user name, postal and email address, phone number, device and advertising IDs, and IP address.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "It includes your age and gender.",
+          "critical": false
+        },
+        {
+          "id": "4",
+          "point": "It includes your purchase, usage, and gameplay history, and your payment and shipping details.",
+          "critical": false
+        },
+        {
+          "id": "5",
+          "point": "It includes browsing, app, and device activity, and details about the games, platforms, and other applications you have installed.",
+          "critical": false
+        },
+        {
+          "id": "6",
+          "point": "It includes inferences drawn from your information and web activity to build a personalized profile of goods and services that may interest you.",
+          "critical": true
+        },
+        {
+          "id": "7",
+          "point": "It includes account photos and avatars, chat audio, and gameplay recordings or video, such as from playtesting.",
+          "critical": false
+        },
+        {
+          "id": "8",
+          "point": "It includes sensitive information: your precise location (if you allow it), your account credentials, and the contents of your chat communications.",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "162746-162749",
+      "heading": "XII.HUMAN RESOURCE INFORMATION",
+      "points": [
+        {
+          "id": "1",
+          "point": "The company collects Human Resources Data about current, prospective, and former employees, their emergency contacts, and beneficiaries under insurance policies.",
+          "critical": true
+        },
+        {
+          "id": "2",
+          "point": "This may include identity and contact details, date of birth, government ID numbers (such as passport, driver's license, or Social Security number), credit-check and payroll bank details, CV or application information, and language abilities.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "It may also include sensitive data such as health and disability details (including mental health, medical leave, and maternity leave), national origin, and veteran or immigration status.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "Demographic information such as race is optional and helps the company meet its diversity goals.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "The data is used for many business purposes, including HR administration, payroll and benefits, compensation, performance management, IT support, compliance, investigations, audits, litigation, employee safety, expenses, and corporate transactions such as acquisitions.",
+          "critical": false
+        }
+      ]
+    },
+    {
+      "passage": "181306-181317",
+      "heading": "Collection and Use of Non-Personal Information",
+      "points": [
+        {
+          "id": "1",
+          "point": "Apple collects data that cannot, on its own, be directly linked to a specific person (non-personal information).",
+          "critical": false
+        },
+        {
+          "id": "2",
+          "point": "Apple may collect, use, transfer, and disclose non-personal information for any purpose.",
+          "critical": true
+        },
+        {
+          "id": "3",
+          "point": "Examples include occupation, language, zip code, area code, device identifier, referrer URL, location, and time zone, used to understand customer behavior and improve products, services, and advertising.",
+          "critical": false
+        },
+        {
+          "id": "4",
+          "point": "Activity on Apple's websites and services, such as iCloud and its stores, is aggregated, and aggregated data counts as non-personal information.",
+          "critical": false
+        },
+        {
+          "id": "5",
+          "point": "Apple may store how you use its services, including search queries; except in limited cases to ensure service quality, this is not linked to your IP address.",
+          "critical": true
+        },
+        {
+          "id": "6",
+          "point": "With your explicit consent, Apple may collect data about how you use your device and apps, to help app developers improve their apps.",
+          "critical": true
+        },
+        {
+          "id": "7",
+          "point": "If Apple combines non-personal information with personal information, the combined information is treated as personal information for as long as it stays combined.",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "133334-133338",
+      "heading": "4.1.i Business information of travelers on corporate accounts and of representatives of suppliers, customers, and other businesses (including for cargo) we deal with, including:",
+      "points": [
+        {
+          "id": "1",
+          "point": "For business travelers and representatives of companies it deals with, the company collects name, role, contact details, employer or affiliation, contract information, and communications.",
+          "critical": false,
+          "note": "The passage does not name the company."
+        },
+        {
+          "id": "2",
+          "point": "It also collects user IDs, passwords, and log-in credentials for its corporate travel tools.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "It uses this information for its business dealings, including sales, purchases, and its travel tools.",
+          "critical": false
+        },
+        {
+          "id": "4",
+          "point": "It tailors its products and services using this information alone and combined with other information it has about you.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "It sends you or your company marketing, offers, and event invitations, which may be based on segmentation and modelling of your personal information.",
+          "critical": true
+        },
+        {
+          "id": "6",
+          "point": "It uses the information to run SkyMiles for Business and other corporate travel benefits, and for training, support, and promotional content in its tool or by email.",
+          "critical": false
+        },
+        {
+          "id": "7",
+          "point": "IT backups and testing may use a copy of live data where test data is not practical.",
+          "critical": false
+        },
+        {
+          "id": "8",
+          "point": "Its legal bases are a contract with you, your consent (for example, to marketing), the information being publicly available, or its legitimate business interests.",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "144382-144393",
+      "heading": "Information We Collect About You From Third Parties (Facebook, Apple).",
+      "points": [
+        {
+          "id": "1",
+          "point": "Signing in with a third-party service such as Facebook or Apple is a main way the company gets information from third parties.",
+          "critical": false
+        },
+        {
+          "id": "2",
+          "point": "Facebook controls the information it collects during Facebook log-in; PLAYSTUDIOS does not control it.",
+          "critical": true
+        },
+        {
+          "id": "3",
+          "point": "Through Facebook, PLAYSTUDIOS may collect and store your public profile, profile picture, gaming profile, gender, friends who play the same apps, date of birth, email address, and IP address.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "It may use this to email you, ease log-in, personalize your experience by gender (such as pronouns), and show your name and avatar in the game.",
+          "critical": false
+        },
+        {
+          "id": "5",
+          "point": "For purchases in its Facebook game it also collects your IP address and country, and for disputes, your dispute email address and comments.",
+          "critical": false
+        },
+        {
+          "id": "6",
+          "point": "It stores information received from Facebook together with other information it collects or receives about you.",
+          "critical": true
+        },
+        {
+          "id": "7",
+          "point": "With Sign in with Apple, you can choose to hide your email address when you first sign in.",
+          "critical": true
+        },
+        {
+          "id": "8",
+          "point": "Facebook's Privacy Policy explains how Facebook may disclose your information.",
+          "critical": false
+        }
+      ]
+    }
+  ]
+}

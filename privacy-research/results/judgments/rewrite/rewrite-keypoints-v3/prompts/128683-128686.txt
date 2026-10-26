@@ -1,0 +1,60 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+To modify your e-mail subscriptions, please let us know by modifying your preferences in the “My Account” section. Please note that due to email production schedules you may receive any emails already in production. To delete all of your online account information from our database, sign into the “My Account” section of our site and remove your shipping addresses, billing addresses & payment information. Please note that we may maintain information about an individual sales transaction in order to service that transaction and for record keeping.
+
+Key points:
+1. (critical) You can change your email subscriptions by updating your preferences in the "My Account" section.
+2. Emails already in production may still arrive after you change your preferences.
+3. (critical) To delete your online account information, you sign into "My Account" and remove your shipping addresses, billing addresses, and payment information.
+4. (critical) The company may keep information about an individual sales transaction to service it and for record keeping.
+
+Rewrite A:
+You can change your email subscriptions by updating your preferences in the “My Account” section. We may send you emails that are already being produced. If you want to remove all your account information from our database, sign in to the “My Account” section and delete your shipping, billing, and payment details. We keep records of individual sales transactions to service them and for record keeping.
+
+Rewrite B:
+To manage your email subscriptions, you can change your preferences in the “My Account” section. You might receive emails that are already sent. To delete all your online account information, you’ll need to sign in to the “My Account” and remove your shipping and billing details. We may keep information about past sales transactions for that purpose.
+
+Rewrite C:
+You can change your email subscriptions in the "My Account" section. You might receive emails that are already in production. To delete all your account information, sign into "My Account" and remove your shipping addresses, billing addresses, and payment information. We may keep records of a sales transaction to service it and for our records.
+
+Rewrite D:
+You can change your email subscriptions in the My Account section. You may still receive emails that are already being processed. To delete your online account information, sign into the My Account section and remove your shipping, billing, and payment information. We may keep information about individual sales transactions to service those transactions and for record keeping.
+
+Rewrite E:
+You can change your email subscriptions by updating your settings in the "My Account" section. You might still get emails that were already sent before you made changes.
+
+To delete your account, log in to "My Account" and remove your shipping, billing, and payment details. We’ll keep records of past purchases to complete those transactions and for our own records.
+
+Rewrite F:
+To change your email subscriptions, update your preferences in the "My Account" section, though you might still receive emails already in production. To delete all your online account information, sign into "My Account" and remove your shipping, billing, and payment details. We may keep records of individual sales transactions to service those transactions and for record-keeping purposes.
+
+Rewrite G:
+The policy explains how you can change your email preferences through the account settings. You might get emails while they're being produced. To fully remove your account details, you need to delete your shipping and billing info. We keep some transaction data for service and records, but only if required.
+
+Rewrite H:
+To change your email subscriptions, update your preferences in the "My Account" section. You might still get emails that were already being sent. To remove your account information, log into "My Account" and delete your shipping, billing, and payment details. We may keep some information about a specific sale to help with that transaction and for record-keeping.
+
+Rewrite I:
+You can change your email subscription preferences in your "My Account" section. You may receive emails that are already in production. To delete your online account information, sign into your account and remove your shipping, billing, and payment addresses. We may keep information about sales transactions for record keeping.

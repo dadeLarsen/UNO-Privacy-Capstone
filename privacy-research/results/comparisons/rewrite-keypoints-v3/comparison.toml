@@ -1,0 +1,28 @@
+task = "rewrite"
+title = "Nine rewriters judged against key points, summary-v3"
+# Each model at the precision its tier would use: BF16 for the three smallest, NF4 for the rest.
+runs = [
+    "rewrite/qwen3.5-0.8b-bf16-summary-v3/20261026-042833Z",
+    "rewrite/gemma-3-1b-bf16-summary-v3/20261026-035415Z",
+    "rewrite/lfm2.5-1.2b-bf16-summary-v3/20261026-041223Z",
+    "rewrite/granite-4.2-3b-nf4-summary-v3/20261026-161250Z",
+    "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+    "rewrite/gemma-4-e4b-nf4-summary-v3/20261026-161516Z",
+    "rewrite/gemma-4-12b-nf4-summary-v3/20261026-161939Z",
+    "rewrite/ministral-3-14b-nf4-summary-v3/20261026-162424Z",
+    "rewrite/qwen3-14b-nf4-summary-v3/20261026-162710Z",
+]
+
+[scoring]
+judgments = "rewrite-keypoints-v3"
+
+[labels]
+"rewrite/qwen3.5-0.8b-bf16-summary-v3/20261026-042833Z" = "Qwen3.5-0.8B · BF16"
+"rewrite/gemma-3-1b-bf16-summary-v3/20261026-035415Z" = "Gemma 3 1B · BF16"
+"rewrite/lfm2.5-1.2b-bf16-summary-v3/20261026-041223Z" = "LFM2.5-1.2B · BF16"
+"rewrite/granite-4.2-3b-nf4-summary-v3/20261026-161250Z" = "Granite 4.2 3B · NF4"
+"rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z" = "Qwen3.5-4B · NF4"
+"rewrite/gemma-4-e4b-nf4-summary-v3/20261026-161516Z" = "Gemma 4 E4B · NF4"
+"rewrite/gemma-4-12b-nf4-summary-v3/20261026-161939Z" = "Gemma 4 12B · NF4"
+"rewrite/ministral-3-14b-nf4-summary-v3/20261026-162424Z" = "Ministral 3 14B · NF4"
+"rewrite/qwen3-14b-nf4-summary-v3/20261026-162710Z" = "Qwen3-14B · NF4"

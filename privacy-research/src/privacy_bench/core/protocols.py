@@ -99,6 +99,9 @@ class Task(Protocol):
     def describe_comparison(self, rows: list, scoring: dict) -> dict:
         """{"context": one line under the title, "footnotes": notes on timing, validity, and scoring}."""
 
+    def write_comparison_files(self, rows: list, scoring: dict, output: Path) -> list:
+        """Write any task-specific comparison files, such as rewrites side by side; returns their paths."""
+
     def fit(self, spec) -> dict:
         """Fit what a fit file describes: {"report": JSON-safe details, "tensors": name -> float32 array}.
 

@@ -1,0 +1,13 @@
+task = "rewrite"
+title = "Nine rewriters on the v2 summary prompt"
+runs = [
+    "rewrite/qwen3.5-0.8b-bf16-summary-v2/20261025-232700Z",
+    "rewrite/gemma-3-1b-bf16-summary-v2/20261025-225253Z",
+    "rewrite/lfm2.5-1.2b-bf16-summary-v2/20261025-231028Z",
+    "rewrite/granite-4.2-3b-bf16-summary-v2/20261025-230831Z",
+    "rewrite/qwen3.5-4b-bf16-summary-v2/20261025-232830Z",
+    "rewrite/gemma-4-e4b-int8-summary-v2/20261026-152215Z",
+    "rewrite/gemma-4-12b-int8-summary-v2/20261025-225420Z",
+    "rewrite/ministral-3-14b-int8-summary-v2/20261025-231059Z",
+    "rewrite/qwen3-14b-int8-summary-v2/20261025-231945Z",
+]

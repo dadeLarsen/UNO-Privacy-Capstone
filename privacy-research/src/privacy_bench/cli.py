@@ -1,4 +1,4 @@
-"""pbench: run conditions, fit heads, cache models, rescore saved runs, and compare them."""
+"""pbench: run conditions, fit heads, cache models, rescore saved runs, compare them, and judge rewrites."""
 
 import argparse
 import json
@@ -58,7 +58,9 @@ def compare(args):
     quality = task.quality_panels(comparison.scoring)
     paths = draw_matrix(rows, [*quality, *COST_PANELS], output,
                         title=comparison.title or comparison.name,
-                        context=f"{described['context']}  |  {len(rows)} runs", footnotes=footnotes)
+                        context=f"{described['context']}  |  {len(rows)} runs", footnotes=footnotes,
+                        group_by=comparison.group_by)
+    paths = [*paths, *task.write_comparison_files(rows, comparison.scoring, output)]
     headline = quality[0]
     for row in rows:
         value = row[headline.field]
@@ -66,6 +68,26 @@ def compare(args):
         print(f"{row['run']}: {headline.field}={shown} mean_seconds={row['mean_seconds']:.4f}")
     for path in (summary, *paths):
         print(f"Saved: {path}")
+
+
+def judging_task(name):
+    task = get_task(name)
+    if not hasattr(task, "prepare_judgment"):
+        raise ValueError(f"The {name} task has no judging")
+    return task
+
+
+def judge(args):
+    if args.action == "prepare":
+        comparison = load_comparison(args.comparison)
+        directory = judging_task(comparison.task).prepare_judgment(comparison, args.instructions, args.judge,
+                                                                   output=args.output)
+        print(f"Prompts: {directory / 'prompts'}\nWrite each reply to {directory / 'replies'}/<passage>.json, "
+              f"then run: pbench judge record {directory}")
+        return
+    record = judging_task(read_json(args.judgment / "judgment.json")["task"]).record_judgment(args.judgment)
+    judged = sum(len(entry["labels"]) for entry in record["passages"].values())
+    print(f"Recorded {judged} judged rewrites across {len(record['passages'])} passages: {args.judgment}")
 
 
 def main(argv=None):
@@ -89,6 +111,16 @@ def main(argv=None):
     command.add_argument("comparison", type=Path)
     command.add_argument("--output-dir", type=Path, help="Default: results/comparisons/<comparison name>/")
     command.set_defaults(handler=compare)
+    command = commands.add_parser("judge", help="Prepare blind prompts for a judge, or record its checked replies")
+    actions = command.add_subparsers(dest="action", required=True)
+    action = actions.add_parser("prepare", help="Write one prompt per passage for a comparison's runs")
+    action.add_argument("comparison", type=Path)
+    action.add_argument("--judge", required=True, help="Who judges, for the record: the model and how it ran")
+    action.add_argument("--instructions", default="keypoints", help="Judge instructions under prompts/<task>/judge/")
+    action.add_argument("--output", type=Path, help="New judgment directory (default: results/judgments/<task>/<comparison name>/)")
+    action = actions.add_parser("record", help="Check every reply and freeze the judgment")
+    action.add_argument("judgment", type=Path)
+    command.set_defaults(handler=judge)
     args = parser.parse_args(argv)
     try:
         args.handler(args)

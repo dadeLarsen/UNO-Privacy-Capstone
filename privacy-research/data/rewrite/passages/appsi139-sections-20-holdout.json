@@ -1,0 +1,360 @@
+{
+  "name": "appsi139-sections-20-holdout",
+  "source": {
+    "file": "annotation.jsonl (AirLLM workspace)",
+    "sha256": "c38dbe2f470c241f835cc28ba9ba2c678b4f79041ea096ac9a850e994a1083e8",
+    "corpus": "APPSI-139",
+    "policies": 141
+  },
+  "selection": {
+    "section_lines": [
+      3,
+      12
+    ],
+    "section_words": [
+      80,
+      350
+    ],
+    "bands": [
+      [
+        80,
+        159,
+        7
+      ],
+      [
+        160,
+        239,
+        7
+      ],
+      [
+        240,
+        350,
+        6
+      ]
+    ],
+    "one_per_policy": true,
+    "seed": 42,
+    "sections": 3146,
+    "eligible": 788,
+    "excludes_policies_of": "appsi139-sections-20"
+  },
+  "passages": [
+    {
+      "id": "153863-153865",
+      "policy_first_id": 153683,
+      "heading": "8.1.Other Telegram Users",
+      "sentence_ids": [
+        153863,
+        153864,
+        153865
+      ],
+      "words": 93,
+      "text": "Other users of our Services with whom you choose to communicate with and share certain information, who may be located outside the EEA. Note that by entering into the Terms of Service and choosing to communicate with such other users of Telegram, you are instructing us to transfer your personal data, on your behalf, to those users in accordance with this Privacy Policy. We employ all appropriate technical and organizational measures (including encryption of your personal data) to ensure a level of security for your personal data that is appropriate to the risk."
+    },
+    {
+      "id": "138537-138545",
+      "policy_first_id": 138505,
+      "heading": "Information you give us",
+      "sentence_ids": [
+        138537,
+        138538,
+        138539,
+        138540,
+        138541,
+        138542,
+        138543,
+        138544,
+        138545
+      ],
+      "words": 94,
+      "text": "Categories of information we collect from you include: Identifying information (such as name, phone number, e-mail address, mailing address, corporate or educational affiliations, photograph, contact information, and billing information). Protected classification characteristics under state or federal law (such as age and gender). Commercial information (such as products and services purchased from us and partners, as well as your consumer preferences). Biometric information (such as your physical characteristics or measurements). Workout and machine usage information. Account information such as username, password, unique user ID, and communication preferences. Credit card or banking information. Reviews and comments."
+    },
+    {
+      "id": "145918-145922",
+      "policy_first_id": 145857,
+      "heading": "Changes to this Privacy Statement",
+      "sentence_ids": [
+        145918,
+        145919,
+        145920,
+        145921,
+        145922
+      ],
+      "words": 102,
+      "text": "This Privacy Statement is expected to change over time. We reserve the right to update it at any time, for any reason. We will notify you of changes to our Privacy Statement by updating the “Last Updated” date and posting the updated Privacy Statement on this page. We may e-mail periodic reminders of our notices and terms and conditions, but you should check our Services frequently to see the current Privacy Statement and any changes made to it. If there are any differences between the English version of our Privacy Statement and a version translated in another language, the English version controls."
+    },
+    {
+      "id": "127522-127526",
+      "policy_first_id": 127359,
+      "heading": "Transfers of Your Personal Data to Other Countries",
+      "sentence_ids": [
+        127522,
+        127523,
+        127524,
+        127525,
+        127526
+      ],
+      "words": 113,
+      "text": "Our operations are supported by a network of computers, cloud-based servers, and other infrastructure and information technology, including, but not limited to, third-party service providers. We and our third-party service providers store and Process your Personal Data in the United States of America and elsewhere in the world. We will protect your information as described in this Privacy Statement if your Personal Data is transferred to other countries. By using our Sites and Services, you consent to your Personal Data being transferred to other countries, including countries that have different data protection rules than your country. We do not represent that our Sites and Services are appropriate or available in any particular jurisdiction."
+    },
+    {
+      "id": "175498-175504",
+      "policy_first_id": 175495,
+      "heading": "Last updated October 16, 2023",
+      "sentence_ids": [
+        175498,
+        175499,
+        175500,
+        175501,
+        175502,
+        175503,
+        175504
+      ],
+      "words": 128,
+      "text": "This privacy notice for Improvement Tech LLC (doing business as Umax) (“ we ,” “ us ,” or “ our “), describes how and why we might collect, store, use, and/or share (“ process “) your information when you use our services (“ Services “), such as when you: * Download and use our mobile application (Umax), or any other application of ours that links to this privacy notice * Engage with us in other related ways, including any sales, marketing, or events Questions or concerns? Reading this privacy notice will help you understand your privacy rights and choices. If you do not agree with our policies and practices, please do not use our Services. If you still have any questions or concerns, please contact us at contact@umaxapp.com."
+    },
+    {
+      "id": "183961-183964",
+      "policy_first_id": 183884,
+      "heading": "Transfer of Your Personal Data",
+      "sentence_ids": [
+        183961,
+        183962,
+        183963,
+        183964
+      ],
+      "words": 139,
+      "text": "Your information, including Personal Data, is processed at the Company’s operating offices and in any other places where the parties involved in the processing are located. It means that this information may be transferred to â€” and maintained on â€” computers located outside of Your state, province, country or other governmental jurisdiction where the data protection laws may differ than those from Your jurisdiction. Your consent to this Privacy Policy followed by Your submission of such information represents Your agreement to that transfer. The Company will take all steps reasonably necessary to ensure that Your data is treated securely and in accordance with this Privacy Policy and no transfer of Your Personal Data will take place to an organization or a country unless there are adequate controls in place including the security of Your data and other personal information."
+    },
+    {
+      "id": "130997-131003",
+      "policy_first_id": 130975,
+      "heading": "Communications",
+      "sentence_ids": [
+        130997,
+        130998,
+        130999,
+        131000,
+        131001,
+        131002,
+        131003
+      ],
+      "words": 150,
+      "text": "We collect information within any messages and feedback you send to us (such as feedback, surveys, and questions sent to customer support) or publicly post (such as in product reviews). You may also elect to receive emails or text messages from us. When you sign up to receive text or email messages, we will send you information about promotional offers and more. These messages may use information automatically collected based on your actions while on our sites and may prompt messaging such as cart abandon messages. To the extent you voluntarily opt to have text notifications sent directly to your mobile phone, we receive and store the information you provide, including your telephone number or when you read a text message. You may opt out of receiving text messages at any time by texting “STOP” to our text messages. For more information about text messages, see our Terms and Conditions."
+    },
+    {
+      "id": "174125-174130",
+      "policy_first_id": 173912,
+      "heading": "How GitHub secures your information",
+      "sentence_ids": [
+        174125,
+        174126,
+        174127,
+        174128,
+        174129,
+        174130
+      ],
+      "words": 176,
+      "text": "GitHub takes reasonable measures necessary to protect your personal data from unauthorized access, alteration, or destruction; maintain data accuracy; and help ensure the appropriate use of your personal data. To help us protect personal data, we request that you use a strong password and never share your password with anyone or use the same password with other sites or accounts. In addition, if your account has private repositories, you control the access to that Content. GitHub personnel does not access private repository content except for * security purposes, * automated scanning for known vulnerabilities, active malware, or other content known to violate our Terms of Service * to assist the repository owner with a support matter * to maintain the integrity of the Service * to comply with our legal obligations if we have reason to believe the contents are in violation of the law, * or with your consent. GitHub will provide notice regarding private repository access where not prohibited by law or if in response to a security threat or other risk to security."
+    },
+    {
+      "id": "126639-126641",
+      "policy_first_id": 126601,
+      "heading": "USE OF INFORMATION",
+      "sentence_ids": [
+        126639,
+        126640,
+        126641
+      ],
+      "words": 198,
+      "text": "We use the information we collect to provide, maintain, and improve our Services, which includes publishing and distributing user-generated content, personalizing the posts you see and operating our metered paywall. We also use the information we collect to: * Create and maintain your Medium account; * Process transactions and send related information, such as confirmations, receipts, and user experience surveys; * Send you technical notices, security alerts, and support and administrative messages; * Respond to your comments and questions and provide customer service; * Communicate with you about new content, products, services, and features offered by Medium and provide other news and information we think will interest you (see Your Choices below for information about how to opt out of these communications at any time); * Monitor and analyze trends, usage, and activities in connection with our Services; * Detect, investigate, and prevent security incidents and other malicious, deceptive, fraudulent, or illegal activity and protect the rights and property of Medium and others; * Debug to identify and repair errors in our Services; * Comply with our legal and financial obligations; and * Carry out any other purpose described to you at the time the information was collected."
+    },
+    {
+      "id": "133007-133016",
+      "policy_first_id": 132858,
+      "heading": "7.Third-party services and websites",
+      "sentence_ids": [
+        133007,
+        133008,
+        133009,
+        133010,
+        133011,
+        133012,
+        133013,
+        133014,
+        133015,
+        133016
+      ],
+      "words": 201,
+      "text": "When you access or engage with a third-party service, application, or website, even when doing so through GoodRx equipment or applications, you are entering that service, application, or website and governed by its policies. Many third parties have their own privacy policies that differ from ours. This privacy policy only covers our Services and does not cover any other third parties. GoodRx may also collect usage information related to those third-party products, services, applications, or websites if they are accessed through GoodRx equipment, websites, or applications. We may offer contests, sweepstakes, or promotions sponsored or co-sponsored by third parties. You may choose to participate in such contests, sweepstakes or promotions and provide information requested by such third parties. We have no control over such third parties’ use of such information. You may also choose, when available, to connect your account with third party accounts, including with third-party social networks. If you share information about your usage of or activities on our Services with such third-party accounts, then the collection, use, and disclosure of such information will be subject to that third party's privacy policies, which may differ from our own. We are not responsible for the practices of such third parties."
+    },
+    {
+      "id": "151754-151759",
+      "policy_first_id": 151603,
+      "heading": "4.How your Personal Data is transferred",
+      "sentence_ids": [
+        151754,
+        151755,
+        151756,
+        151757,
+        151758,
+        151759
+      ],
+      "words": 208,
+      "text": "Niantic operates its Services across the globe. Your Personal Data will likely be transferred and stored in a country outside of your home country, including in the USA, for the purposes outlined in this Privacy Policy to the extent permitted by applicable laws. The data protection laws in these countries may not be the same as in your home country. If we transfer your Personal Data from the UK or the EEA to other countries, including the USA, we ensure that a similar degree of protection is provided to your Personal Data as within the UK or the EEA, as applicable, by ensuring that at least one of the following safeguards is implemented: * The country that your Personal Data is transferred to is a country that the European Commission (or the UK Government, if you are based in the UK) has deemed to provide an adequate level of protection for Personal Data as the UK or the EEA, as applicable. * We use specific contracts approved by the European Commission (or the UK Information Commissioner’s Office, if you are based in the UK), which give Personal Data the same protection as it has in the UK or the EEA, as applicable, when we engage with service providers."
+    },
+    {
+      "id": "146092-146097",
+      "policy_first_id": 146026,
+      "heading": "RETENTION OF PERSONAL DATA",
+      "sentence_ids": [
+        146092,
+        146093,
+        146094,
+        146095,
+        146096,
+        146097
+      ],
+      "words": 219,
+      "text": "We will retain your Personal Data only for as long as is necessary for the purposes set out in this Privacy Policy. We will retain and use your Personal Data to the extent necessary to comply with our legal obligations (for example, if we are required to retain your data to comply with applicable laws), resolve disputes, provide our Services and enforce our legal agreements and policies. We will also retain Personal Data and Usage Information for internal analysis purposes and legitimate business interest to the extent necessary to improve the functionality of our Services, for business purposes or when we are legally obligated to retain this data for longer time periods. Your Personal Data collected through our Services will be retained for as long as permitted by applicable law or necessary depending on the respective purpose of collection and shall be deleted when they no longer serve one of the above-mentioned purposes or shall be anonymized and therefore will no longer constitute Personal Data. It is clarified that in no case the retention period should exceed the 5 years from the date of collection. Once we have deleted or anonymized your Personal Data, you will not be able to exercise the right to access, the right to erasure, the right to rectification or the right to data portability."
+    },
+    {
+      "id": "158575-158585",
+      "policy_first_id": 158551,
+      "heading": "1.Costco’s commitment to Privacy",
+      "sentence_ids": [
+        158575,
+        158576,
+        158577,
+        158578,
+        158579,
+        158580,
+        158581,
+        158582,
+        158583,
+        158584,
+        158585
+      ],
+      "words": 228,
+      "text": "Costco is committed to protecting the privacy of its customers. We have and will take measures that protect the privacy of personal information and personal health information held by us. This Privacy Policy provides you with details regarding: * why we collect personal information and personal health information; * what we do with that information; * what steps we take to ensure that the information is secure; * who you should contact if you have questions or concerns about our policies or practices. Since we regularly review our policies and practices, your comments are always welcome. We reserve the right to change this Privacy Policy at any time; however, any changes or additions to Section 5 regarding the reasons we use personal information will not apply to you unless you consent to them. We will alert you that changes have been made by indicating at the top of the Privacy Policy the date that it was last updated. We encourage you to review our Privacy Policy carefully to make sure that you understand how information that you provide will be used or disclosed. Children: We encourage parents to take an active interest in their children’s use of the Internet. We do not intend to collect information from children who are under 18 years of age. If you are under 18, please do not provide information on our Sites."
+    },
+    {
+      "id": "154033-154041",
+      "policy_first_id": 153924,
+      "heading": "Device ID, IP address and network access.",
+      "sentence_ids": [
+        154033,
+        154034,
+        154035,
+        154036,
+        154037,
+        154038,
+        154039,
+        154040,
+        154041
+      ],
+      "words": 231,
+      "text": "When you access or leave YouVersion websites, we receive the URL of both the site you came from and the one you go to next. We also get information about your proxy server, operating system, web browser and add-ons, device identifier and features, and/or your ISP or mobile carrier when you use YouVersion. We also receive data from your devices and networks, including your IP address. We use the IP addresses we collect from our users to process them with public latitude and longitude information related to your Internet Service Provider or mobile service provider in order to determine, and in some instances depict in an aggregate and de-identified manner, the approximate geographic region for each instance of YouVersion use. This latitude and longitude information is stored by us for approximately seven days for troubleshooting and diagnostic purposes, but is never associated with any information about you or that would identify you personally. We also collect and use the wireless (or “WiFi”) permissions of your mobile device to determine if you are connected to a WiFi or cellular network. This information is used to provide an optimized user experience by providing higher resolution media to a user who is on a high-speed WiFi connection rather than a cellular network. WiFi permissions are also used for casting content with Chromecast and similar devices. This information is not stored or shared by YouVersion."
+    },
+    {
+      "id": "124839-124848",
+      "policy_first_id": 124768,
+      "heading": "3.SHARING OF YOUR INFORMATION",
+      "sentence_ids": [
+        124839,
+        124840,
+        124841,
+        124842,
+        124843,
+        124844,
+        124845,
+        124846,
+        124847,
+        124848
+      ],
+      "words": 250,
+      "text": "We may share information we collect for the following purposes: * Service Providers. With service providers that perform services on our behalf or enhance our Services, including hosting services, customer service, analytics services and to assist us in our marketing efforts; * Payment Processors. With third-party payment processors that process payments you make; * Advertising Partners. Advertisers, ad exchanges and other ad technology companies that require the data to select and serve our relevant advertisements to you and others, and assist us in our marketing efforts, including as described in the Online Advertising section below; * Affiliates. With our parent company, subsidiaries and other affiliates; * Professional Advisors. With professional advisors, such as lawyers, auditors, bankers and insurers, where necessary in the course of the professional services that they render to us; * Authorities and others. With law enforcement and public authorities, as we believe in good faith to be necessary or appropriate for the compliance and protection purposes described above; * Business Transferees. With acquirers and other relevant participants (and their advisors) in business transactions (or negotiations of or due diligence for such transactions) involving a corporate divestiture, merger, consolidation, acquisition, reorganization, sale or other disposition of all or any portion of the business or assets of, or equity interests in, Studio or our affiliates (including, in connection with a bankruptcy or similar proceedings); and * Your specified recipients. We may disclose personal information about an individual to certain other third parties or publicly with their consent or direction."
+    },
+    {
+      "id": "134424-134431",
+      "policy_first_id": 134315,
+      "heading": "4.OUR LEGAL BASES FOR PROCESSING YOUR PERSONAL DATA",
+      "sentence_ids": [
+        134424,
+        134425,
+        134426,
+        134427,
+        134428,
+        134429,
+        134430,
+        134431
+      ],
+      "words": 252,
+      "text": "The laws in some jurisdictions require companies to tell you about the legal ground they rely on to use or disclose your “personal data” as such term is defined under applicable law. To the extent that those laws apply, our legal grounds are as follows: * To honor our contractual commitments to you: Much of our processing of personal data is to meet our contractual obligations to our customers, or to take steps at customers’ requests in anticipation of entering into a contract with them. For example, we handle personal data on this basis to provide you with tickets to events. * Consent: Where required by law, and in some other cases, we handle personal data on the basis of your implied or express consent. * Legitimate interests: In many cases, we handle personal data on the ground that it furthers our legitimate interests in ways that are not overridden by the interests or fundamental rights and freedoms of the affected individuals: * Customer service * Marketing * Protecting our customers, personnel, and property * Analyzing and improving our business * Managing legal issues * We may also process personal data for the legitimate interests of our business partners, such as to assist with marketing. * Legal compliance: We need to use and disclose personal data in certain ways to comply with our legal obligations. * To protect the vital interests of the individual or others: For example, we may collect or disclose personal data to help resolve an urgent medical situation."
+    },
+    {
+      "id": "166926-166932",
+      "policy_first_id": 166506,
+      "heading": "How We Use Cookies",
+      "sentence_ids": [
+        166926,
+        166927,
+        166928,
+        166929,
+        166930,
+        166931,
+        166932
+      ],
+      "words": 267,
+      "text": "We use cookies, web beacons, and other similar technologies, including from third-party partners such as Google and Facebook, for measurement services, better targeting advertisements, marketing purposes and to improve the performance of the Sites. This takes place from the Sites, when you download or install an Indeed App, and in some of our advertisements on third party websites. These cookies, web beacons, and other similar technologies allow us to display our promotional material to you on other sites you visit across the Internet and connect you with more Employers. We may also share information about your behavior on the Sites with third parties (including operators of third-party websites and/or social networking sites) in order to show you targeted advertisements and other content that has been customized for you. We also use these cookies, web beacons, and other similar technologies to facilitate the Indeed Targeted Ads Program and other advertisements to help us to determine which advertisements users have seen, how many times users have seen a particular advertisement, and on which sites a particular advertisement appeared. We may also allow Employers who participate in our Indeed Targeted Ads Program to place cookies, web beacons, and other similar technologies in advertisements we serve on our Site and on third party websites to help these Employers understand how individuals interact with our advertisements about their Job Listings. We may also use these cookies, web beacons, and other similar technologies on the Sites to understand and inform an Employer about which users saw a particular Job Listing, Company Page, Hiring Event, or other advertisement in which the Employer is identified."
+    },
+    {
+      "id": "134609-134616",
+      "policy_first_id": 134604,
+      "heading": "Types of Data collected",
+      "sentence_ids": [
+        134609,
+        134610,
+        134611,
+        134612,
+        134613,
+        134614,
+        134615,
+        134616
+      ],
+      "words": 280,
+      "text": "Among the types of Personal Data that this Application collects, by itself or through third parties, there are: Application opens; Tracker; Usage Data; unique device identifiers for advertising (Google Advertiser ID or IDFA, for example); email address; geographic position; language; Apple's speech recognition servers permission; movement activity; first name; last name; gender; date of birth; password; academic background; field of activity; various types of Data; User ID; country. Complete details on each type of Personal Data collected are provided in the dedicated sections of this privacy policy or by specific explanation texts displayed prior to the Data collection. Personal Data may be freely provided by the User, or, in case of Usage Data, collected automatically when using this Application. Unless specified otherwise, all Data requested by this Application is mandatory and failure to provide this Data may make it impossible for this Application to provide its services. In cases where this Application specifically states that some Data is not mandatory, Users are free not to communicate this Data without consequences to the availability or the functioning of the Service. Users who are uncertain about which Personal Data is mandatory are welcome to contact the Owner. Any use of Cookies – or of other tracking tools – by this Application or by the owners of third-party services used by this Application serves the purpose of providing the Service required by the User, in addition to any other purposes described in the present document and in the Cookie Policy, if available. Users are responsible for any third-party Personal Data obtained, published or shared through this Application and confirm that they have the third party's consent to provide the Data to the Owner."
+    },
+    {
+      "id": "130910-130918",
+      "policy_first_id": 130800,
+      "heading": "INTERNATIONAL DATA TRANSFERS",
+      "sentence_ids": [
+        130910,
+        130911,
+        130912,
+        130913,
+        130914,
+        130915,
+        130916,
+        130917,
+        130918
+      ],
+      "words": 286,
+      "text": "We work in the cross-border area and provide our App to our Users around the world. We and third-party organizations that provide automatic data processing technologies for the App or our third-party advertising partners may transfer the automatically processed information across borders and from your country or jurisdiction to other countries or jurisdictions around the world. If you are located in the European Union or other regions with laws governing data processing that may differ from U.S. law, please note that we may transfer information, including personal information, to a country and jurisdiction that does not have the same data protection laws as in your jurisdiction. This means that your personal information can be transferred to a third country, a territory or one or more specified sectors within that third country, or to the international organization where data protection and confidentiality regulations may not provide the same level of protection of a personal data as your country does. We try to make sure that the recipient of any personal data provides a proper protection of the personal data received, in accordance with the current legislation on the protection of such information. By using the App, you agree that we may transfer your personal data to any third country, a territory or one or more specified sectors within that third country, or to the international organization. For the purposes of data storage, we recourse to the services of the hosting organizations. We take your privacy seriously and, therefore, encrypt your personal data – if possible – before sending it to the hosting organizations for the purposes of its storage. Please note that we cooperate only with those hosting organizations that have passed our security and reliability check."
+    },
+    {
+      "id": "125707-125710",
+      "policy_first_id": 125573,
+      "heading": "B.Sharing With Service Providers to Provide the Lyft Platform, and Other Parties",
+      "sentence_ids": [
+        125707,
+        125708,
+        125709,
+        125710
+      ],
+      "words": 302,
+      "text": "Depending on whether you’re a Rider or a Driver, Lyft may share the following categories of your personal information to provide you with a variety of the Lyft Platform’s features and services: * Personal identifiers, such as your name, address, email address, phone number, date of birth, government identification number (such as social security number), driver’s license information, vehicle information, and car insurance information; * Financial information, such as bank routing numbers, tax information, and any other payment information you provide us; * Commercial information, such as ride information, Driver/Rider statistics and feedback, and Driver/Rider transaction history; * Internet or other electronic network activity information, such as your IP address, type of browser, version of operating system, carrier and/or manufacturer, device identifiers, and mobile advertising identifiers; * Location data; and * This and other information you may direct us to share with other parties, such as when you choose to link your Lyft account with a separate travel rewards program or when you choose to engage with an offering from another company through the Lyft Platform, such as a vehicle service. We disclose those categories of personal information to these other parties and service providers to fulfill the following purposes: * Maintaining and servicing your Lyft account; * Processing or fulfilling rides or other offerings of the Lyft Platform; * Providing you customer service; * Processing transactions and payments; * Processing Driver applications; * Verifying the identity of users; * Detecting and preventing fraud and unsafe activity; * Processing insurance claims; * Providing Driver loyalty and promotional programs; * Providing marketing and advertising services to Lyft, including to provide targeted and cross-contextual behavioral advertising personalized to you; * Providing financing; * Providing requested emergency services; * Providing analytics services to Lyft; and * Undertaking research to develop and improve the Lyft Platform."
+    }
+  ]
+}

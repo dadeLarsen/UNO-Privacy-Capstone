@@ -5,8 +5,9 @@ from unittest.mock import Mock
 
 import pytest
 import torch
+from transformers import AutoModelForCausalLM, AutoModelForImageTextToText
 
-from privacy_bench.models.chat_model import ChatModel, greedy_config, visible_token_ids
+from privacy_bench.models.chat_model import ChatModel, greedy_config, model_class, visible_token_ids
 
 
 class FakeGeneration(SimpleNamespace):
@@ -29,6 +30,13 @@ def test_greedy_resets_checkpoint_sampling_policy_without_mutating_the_original(
     assert (result.do_sample, result.num_beams, result.num_return_sequences) == (False, 1, 1)
     assert (result.eos_token_id, result.pad_token_id, result.max_new_tokens) == ([99, 98], 99, 32)
     assert original.do_sample
+
+
+def test_generation_also_stops_at_the_tokenizer_end_of_turn_token():
+    defaults = FakeGeneration(eos_token_id=None, pad_token_id=None)
+    assert greedy_config(FakeGeneration(eos_token_id=99, pad_token_id=None), defaults, 32, 7).eos_token_id == [99, 7]
+    assert greedy_config(FakeGeneration(eos_token_id=99, pad_token_id=None), defaults, 32, 99).eos_token_id == 99
+    assert greedy_config(FakeGeneration(eos_token_id=[99, 7], pad_token_id=0), defaults, 32, 7).eos_token_id == [99, 7]
 
 
 def test_only_terminal_eos_and_padding_are_removed():
@@ -89,6 +97,20 @@ def test_encode_renders_one_user_turn_with_thinking_disabled():
     assert messages == [{"role": "user", "content": "Classify this"}]
     assert kwargs == {"tokenize": False, "add_generation_prompt": True, "enable_thinking": False}
     assert encoded == {"rendered": "rendered prompt", "encoded": {"input_ids": [1, 2, 3], "attention_mask": [1, 1, 1]}}
+
+
+def test_encode_puts_an_optional_system_turn_first():
+    tokenizer = FakeTokenizer([1, 2, 3])
+    cpu_model(tokenizer).encode("Summarize this", system="You summarize policies.")
+    assert tokenizer.calls[0][0] == [{"role": "system", "content": "You summarize policies."},
+                                     {"role": "user", "content": "Summarize this"}]
+    with pytest.raises(ValueError, match="system"):
+        cpu_model(tokenizer).encode("Summarize this", system="  ")
+
+
+def test_multimodal_chat_models_load_through_the_image_text_class():
+    assert model_class("qwen3") is AutoModelForCausalLM
+    assert model_class("mistral3") is AutoModelForImageTextToText
 
 
 def test_generate_keeps_reasoning_text_and_reports_token_accounting():

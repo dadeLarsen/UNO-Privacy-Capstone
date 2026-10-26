@@ -5,25 +5,51 @@ import json
 from pathlib import Path
 
 import torch
-from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer, GenerationConfig, set_seed
+from transformers import (AutoConfig, AutoModelForCausalLM, AutoModelForImageTextToText, AutoTokenizer,
+                          GenerationConfig, set_seed)
+from transformers.models.auto.modeling_auto import MODEL_FOR_CAUSAL_LM_MAPPING_NAMES
 
 from ..core.files import digest_json, digest_text
-from .hub import context_limit, reject_prequantized, validate_weights
+from .hub import context_limit, reject_prequantized, require_exact_load, validate_weights
 from .measure import gpu_metadata, measured, require_cuda, timed_load
 from .quantization import bitsandbytes_config, install_int8_cast_log_filter
 
 PRECISIONS = ("bf16", "int8", "nf4")
 CHAT_TEMPLATE_KWARGS = {"tokenize": False, "add_generation_prompt": True, "enable_thinking": False}
 LOCAL = {"local_files_only": True, "trust_remote_code": False}
+# transformers flags these tokenizers' pre-tokenizer regex from the config's transformers_version alone.
+# Ministral 3 already ships the corrected regex (identical IDs on every OPP-115 sentence either way), so
+# the flag only applies the fix to checkpoints that still need it and silences the warning on the rest.
+MISTRAL_TOKENIZER_TYPES = ("mistral", "mistral3", "ministral", "ministral3", "pixtral", "voxtral")
 
 
-def greedy_config(original, defaults, max_new_tokens):
+def model_class(model_type: str):
+    """Text-only causal LMs and multimodal chat models such as Ministral 3 both generate from text alone."""
+    return AutoModelForCausalLM if model_type in MODEL_FOR_CAUSAL_LM_MAPPING_NAMES else AutoModelForImageTextToText
+
+
+def chat_messages(prompt: str, system: str | None) -> list:
+    if not isinstance(prompt, str) or not prompt.strip():
+        raise ValueError("prompt must be a nonempty string")
+    if system is not None and (not isinstance(system, str) or not system.strip()):
+        raise ValueError("system must be None or a nonempty string")
+    turns = [{"role": "user", "content": prompt}]
+    return turns if system is None else [{"role": "system", "content": system}, *turns]
+
+
+def greedy_config(original, defaults, max_new_tokens, end_of_turn=None):
     """Keep the checkpoint's special token IDs, but reset its decoding policy to library defaults."""
     generation = deepcopy(original)
     preserved = {"bos_token_id", "eos_token_id", "pad_token_id", "decoder_start_token_id"}
     for name, value in defaults.to_dict().items():
         if name not in preserved and not name.startswith("_") and name != "transformers_version":
             setattr(generation, name, deepcopy(value))
+    # Qwen3.5 ships no generation_config.json, so its config stops only on <|endoftext|>, not on the
+    # <|im_end|> that its chat template and tokenizer end each turn with.
+    eos = generation.eos_token_id
+    eos = list(eos) if isinstance(eos, (list, tuple)) else [] if eos is None else [eos]
+    if end_of_turn is not None and end_of_turn not in eos:
+        generation.eos_token_id = [*eos, end_of_turn]
     generation.do_sample = False
     generation.num_beams = 1
     generation.num_beam_groups = 1
@@ -72,7 +98,8 @@ class ChatModel:
         model_config = AutoConfig.from_pretrained(str(self.snapshot), **LOCAL)
         if getattr(model_config, "is_encoder_decoder", False):
             raise ValueError("This backend supports decoder-only causal language models")
-        tokenizer = AutoTokenizer.from_pretrained(str(self.snapshot), **LOCAL)
+        tokenizer_kwargs = {"fix_mistral_regex": True} if model_config.model_type in MISTRAL_TOKENIZER_TYPES else {}
+        tokenizer = AutoTokenizer.from_pretrained(str(self.snapshot), **LOCAL, **tokenizer_kwargs)
         try:
             chat_template = tokenizer.get_chat_template()
         except (ValueError, AttributeError) as exc:
@@ -88,15 +115,19 @@ class ChatModel:
             kwargs["quantization_config"] = quantization
         if self.precision == "int8":
             install_int8_cast_log_filter()
+        auto_class = model_class(model_config.model_type)
         try:
-            model, load_seconds = timed_load(
-                lambda: AutoModelForCausalLM.from_pretrained(str(self.snapshot), **kwargs).eval(), cuda=True)
+            (model, loading), load_seconds = timed_load(
+                lambda: auto_class.from_pretrained(str(self.snapshot), **kwargs, output_loading_info=True), cuda=True)
         except torch.cuda.OutOfMemoryError as exc:
             raise RuntimeError("The model does not fit on CUDA device 0; choose int8 or nf4, or a smaller model") from exc
+        model.eval()
+        require_exact_load(loading)
         device_map = getattr(model, "hf_device_map", kwargs["device_map"])
         if any(str(device) not in ("0", "cuda", "cuda:0") for device in device_map.values()):
             raise RuntimeError(f"Expected the whole model on CUDA device 0, got {device_map!r}")
-        self._generation = greedy_config(model.generation_config, GenerationConfig(), self.max_new_tokens)
+        self._generation = greedy_config(model.generation_config, GenerationConfig(), self.max_new_tokens,
+                                         tokenizer.eos_token_id)
         # generate() fills every unset field from model.generation_config before the library defaults.
         # Making the greedy config the model's own keeps checkpoint sampling settings out entirely.
         model.generation_config = self._generation
@@ -111,7 +142,8 @@ class ChatModel:
             "gpu_free_before_load_bytes": free_gpu, "load_seconds": load_seconds,
             "precision": self.precision, "nonquantized_dtype": str(dtype),
             "quantization_config": quantization.to_dict() if quantization else None,
-            "device_map": device_map, "model_class": type(model).__name__, "model_type": model_config.model_type,
+            "device_map": device_map, "auto_class": auto_class.__name__, "model_class": type(model).__name__,
+            "model_type": model_config.model_type, "tokenizer_kwargs": tokenizer_kwargs,
             "model_config_sha256": digest_text((self.snapshot / "config.json").read_text(encoding="utf-8")),
             "chat_template_sha256": digest_text(chat_template), "chat_template_kwargs": CHAT_TEMPLATE_KWARGS,
             "context_limit": limit, "context_limit_candidates": candidates,
@@ -128,11 +160,9 @@ class ChatModel:
         }
         return json.loads(json.dumps(metadata, default=str))
 
-    def encode(self, prompt: str) -> dict:
-        """Render one user turn with the chat template and tokenize it without truncation."""
-        if not isinstance(prompt, str) or not prompt.strip():
-            raise ValueError("prompt must be a nonempty string")
-        rendered = self._tokenizer.apply_chat_template([{"role": "user", "content": prompt}], **CHAT_TEMPLATE_KWARGS)
+    def encode(self, prompt: str, system: str | None = None) -> dict:
+        """Render one user turn, after an optional system turn, and tokenize it without truncation."""
+        rendered = self._tokenizer.apply_chat_template(chat_messages(prompt, system), **CHAT_TEMPLATE_KWARGS)
         encoded = dict(self._tokenizer(rendered, add_special_tokens=False, truncation=False,
                                        return_attention_mask=True))
         count = len(encoded["input_ids"])

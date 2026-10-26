@@ -1,0 +1,61 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+Last updated: 29 February 2020 This Privacy Policy explains how your personal data is collected and processed by SayGames Ltd ("SayGames") when you use the our mobile applications (the "App"). The App is a free to play game (with optional in-game-purchases), and in order to maintain the high quality and a great game experience we process information from and about you in particular to improve the entire experience in the App and to support internal operations. We update this Privacy Policy from time to time. If we make changes, we will notify you by revising the date at the top of the policy and, depending on the specific changes, we will provide you with additional notice or require a renewed consent.
+
+Key points:
+1. The policy explains how SayGames Ltd collects and processes your personal data when you use its mobile apps.
+2. The App is free to play, with optional in-game purchases.
+3. (critical) SayGames processes information from and about you, in particular to improve the App experience and to support internal operations.
+4. (critical) SayGames updates the policy from time to time and notifies you of changes by revising the date at the top.
+5. (critical) Depending on the change, SayGames may also give you additional notice or ask for your consent again.
+
+Rewrite A:
+SayGames Ltd collects and processes your personal data from the SayGames mobile app to improve the game experience and support internal operations. The app is free to play, with optional in‑game purchases. We update the privacy policy as needed and note the last update date. If we change the policy, we will revise the date at the top and may give additional notice or ask for renewed consent.
+
+Rewrite B:
+SayGames Ltd collects and processes your personal data when you use their mobile applications. They process this information to support internal operations and improve the game experience. The App is free to play but may include optional in-game purchases. SayGames may update this Privacy Policy periodically. They will notify you of changes by updating the date at the top of the policy and may provide additional notice or require new consent depending on the specific changes.
+
+Rewrite C:
+Last updated on 29 February 2020, this policy explains how SayGames Ltd collects and processes your personal data when you use their free mobile game, which includes optional in-game purchases. SayGames processes information about you to maintain high quality, improve the game experience, and support internal operations. They may update this policy from time to time. If changes are made, they will notify you by revising the date at the top of the policy and, depending on the specific changes, will provide additional notice or require renewed consent.
+
+Rewrite D:
+SayGames collects your personal data when you use their mobile games. This data helps improve the games and support their business. They process this information about you, such as your game play, to enhance the experience. There are some limitations to what they can do with this data, like sharing it with other companies.  They may not be able to use it for other purposes, and they will notify you of any changes to the privacy policy.
+
+Rewrite E:
+The policy details how SayGames collects and uses your personal information when you use their mobile app. They update the rules regularly and will let you know if changes happen. You should review the updated policy and agree to any new terms.
+
+Rewrite F:
+SayGames Ltd collects and processes your personal data when you use their free mobile app, which includes optional in-game purchases. They do this to improve the app experience and support their operations. The privacy policy is updated from time to time. When changes are made, the update date at the top of the policy will be changed, and in some cases, users will be given extra notice or asked to give consent again.
+
+Rewrite G:
+SayGames Ltd collects and processes your personal data when you use their mobile game application. The game is free to play but has optional in-game purchases. SayGames processes this information to improve the game experience and support internal operations. SayGames updates this policy periodically. Changes will be noted by updating the date at the top of the policy. Depending on the changes, SayGames may provide additional notice or require you to give renewed consent.
+
+Rewrite H:
+SayGames Ltd collects and processes your personal data when you use its mobile applications. The App is free to play with optional in-game purchases, and SayGames processes information from and about you to improve the game experience and support internal operations. This Privacy Policy is updated from time to time, and changes are notified by revising the date at the top of the policy. If changes are made, you may be notified by revising the date at the top of the policy or by providing additional notice or requiring renewed consent.
+
+Rewrite I:
+SayGames collects and uses your personal information when you play their free mobile game (with optional paid extras). They process this data to improve the game, keep it running smoothly, and handle their business.
+
+The company updates this privacy policy occasionally. If they change it, they’ll update the date at the top. Some changes might require them to tell you directly or ask for your permission again.

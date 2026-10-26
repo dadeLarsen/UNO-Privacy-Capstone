@@ -1,0 +1,10 @@
+{"rewrites": [
+{"label": "A", "verdicts": {"1": "kept", "2": "contradicted", "3": "kept", "4": "kept"}, "evidence": {"2": "they’ll give you at least 30 days’ notice before it happens"}, "unsupported": []},
+{"label": "B", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "C", "verdicts": {"1": "partial", "2": "contradicted", "3": "kept", "4": "partial"}, "evidence": {"1": "The company can update its privacy rules at any time.", "2": "They will give you at least 30 days' notice if they change how they collect or use your personal information", "4": "The policy was last changed on January 1, 2017."}, "unsupported": []},
+{"label": "D", "verdicts": {"1": "partial", "2": "contradicted", "3": "kept", "4": "partial"}, "evidence": {"1": "This Privacy Statement is subject to change. We may update it at any time.", "2": "If we change how we collect or use your information, we’ll give you 30 days’ notice.", "4": "This statement was last updated on January 1, 2017."}, "unsupported": []},
+{"label": "E", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {"1": "We may update this Privacy Statement from time to time."}, "unsupported": []},
+{"label": "F", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {"1": "We may update this Privacy Statement periodically."}, "unsupported": []},
+{"label": "G", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "H", "verdicts": {"1": "partial", "2": "contradicted", "3": "kept", "4": "kept"}, "evidence": {"1": "We may change this privacy statement", "2": "will give you at least 30 days’ notice if the change is material"}, "unsupported": []}
+]}

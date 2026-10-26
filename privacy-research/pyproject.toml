@@ -11,6 +11,7 @@ dependencies = [
     "matplotlib==3.11.2",
     "numpy==2.5.3",
     "peft==0.21.0",
+    "pyphen==0.18.1",
     "safetensors==0.8.0",
     "scikit-learn==1.9.1",
     "sentence-transformers==6.1.0",

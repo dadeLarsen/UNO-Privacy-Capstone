@@ -1,0 +1,55 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+We may modify or update this Privacy Statement from time to time so you should review this page periodically. If we change the policy in a material manner, for example if we seek to collect or use personal information in a materially different way than we had previously, we will provide at least 30 days' notice to the Library so that you have sufficient time to evaluate the change in practice. Your continued use of Axis 360 after a change will signify your acceptance of the new terms. This Privacy Statement was last modified as of January 1, 2017, effective January 1, 2017.
+
+Key points:
+1. The company may modify or update this Privacy Statement from time to time, so you should review it periodically.
+2. (critical) For a material change, such as collecting or using personal information in a materially different way, the company will give the Library at least 30 days' notice. Note: The notice goes to the Library, not to the user.
+3. (critical) Continuing to use Axis 360 after a change means you accept the new terms.
+4. The Privacy Statement was last modified, and took effect, on January 1, 2017.
+
+Rewrite A:
+This service may change its privacy rules over time, so check back often. If they make a big change—like collecting or using your personal info in a new way—they’ll give you at least 30 days’ notice before it happens. If you keep using the service after a change, that means you agree to the new rules. The last update to this policy was on January 1, 2017, and it took effect the same day.
+
+Rewrite B:
+We can change this Privacy Statement over time, so you should check this page regularly. If we make a major change, such as collecting or using personal information in a significantly different way, we will give the Library at least 30 days' notice. Your continued use of Axis 360 after a change means you accept the new terms. This statement was last updated on January 1, 2017, and was effective on that date.
+
+Rewrite C:
+The company can update its privacy rules at any time. They will give you at least 30 days' notice if they change how they collect or use your personal information. Using the service after the update means you agree to the new terms. The policy was last changed on January 1, 2017.
+
+Rewrite D:
+This Privacy Statement is subject to change. We may update it at any time. If we change how we collect or use your information, we’ll give you 30 days’ notice. If you continue using Axis 360 after the change, you agree to the new terms. This statement was last updated on January 1, 2017.
+
+Rewrite E:
+We may update this Privacy Statement from time to time. If we change the policy in a material manner, such as collecting or using personal information in a different way, we will provide at least 30 days' notice to the Library so you have time to evaluate the change. Your continued use of Axis 360 after a change will signify your acceptance of the new terms. This Privacy Statement was last modified as of January 1, 2017, effective January 1, 2017.
+
+Rewrite F:
+We may update this Privacy Statement periodically. If we make material changes, such as collecting or using personal information in a significantly different way, we will notify the Library at least 30 days in advance. Your continued use of Axis 360 after such changes indicates your acceptance of the new terms. This statement was last modified and is effective as of January 1, 2017.
+
+Rewrite G:
+We may update this Privacy Statement at any time, so you should check this page regularly. If we make a major change, like collecting or using personal information in a significantly different way, we will give the Library at least 30 days' notice. Continuing to use Axis 360 after a change means you accept the new terms. This Privacy Statement was last updated on January 1, 2017, and became effective the same day.
+
+Rewrite H:
+We may change this privacy statement and will give you at least 30 days’ notice if the change is material, such as collecting or using your information in a different way. If you keep using Axis 360 after the change, you accept the new terms. The statement was last updated on January 1, 2017, and has been in effect since then.

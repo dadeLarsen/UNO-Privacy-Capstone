@@ -1,0 +1,64 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+To use our Services you must be 16 years of age or older. If you are under 16, you may not download or use the Services. In this Privacy Policy, the term “personal information” means information which you provide to us which personally identifies you, such as your name, email address or billing information, and, in certain circumstances, your location and route information or other data which can be reasonably linked to such information by Waze. You can adjust your Privacy Settings in the Waze app and choose which personal information we may collect about you and how your information is used.
+
+Key points:
+1. (critical) You must be 16 or older to use the Services; if you are under 16, you may not download or use them.
+2. "Personal information" means information you provide that personally identifies you, such as your name, email address, or billing information.
+3. (critical) In certain circumstances it also includes your location and route information, or other data Waze can reasonably link to such information.
+4. (critical) You can use the Privacy Settings in the Waze app to choose which personal information Waze may collect and how it is used.
+
+Rewrite A:
+To use the Services, you must be 16 or older; those under 16 cannot download or use them. "Personal information" includes data you provide that identifies you, such as your name, email, or billing details, and in some cases, location or route data that Waze can reasonably link to you. You can change your Privacy Settings in the Waze app to decide which personal information we collect and how it is used.
+
+Rewrite B:
+To use our services, you must be 16 years or older. If you’re under 16, you can’t download or use our services.
+
+We collect personal information like your name, email, and billing details. This information can be linked to your location and route data, potentially through apps like Waze. You can control how we use your personal information in the Waze app.
+
+Rewrite C:
+To use our Services, you must be 16 years of age or older. If you are under 16, you may not download or use the Services. In this Privacy Policy, "personal information" refers to information you provide to us that personally identifies you, such as your name, email address, or billing information. In certain circumstances, your location and route information or other data that can be reasonably linked to such information by Waze may also be included. You can adjust your Privacy Settings in the Waze app and choose which personal information we may collect about you and how your information is used.
+
+Rewrite D:
+You must be at least 16 years old to use the Services. If you're younger than 16, you can't download or use them. Personal information includes details you provide that can identify you, like your name, email, or billing info. In some cases, your location and route data may also be considered personal information if it can be linked to your identity. You can change your privacy settings in the Waze app to control what information is collected and how it's used.
+
+Rewrite E:
+When you use our services, you need to be at least 16 years old. If you're under 16, you can't use them. We collect your personal details like name, email, or billing info. You can change your privacy settings in the app to control what we gather and how we use your data.
+
+Rewrite F:
+To use Waze, you must be at least 16 years old. If you’re under 16, you can’t download or use the app.
+
+"Personal information" here means details you give us that identify you, like your name, email, or payment info. It also includes things like your location or travel route if we can link them to you.
+
+You can change your privacy settings in the Waze app to control what personal info we collect and how we use it.
+
+Rewrite G:
+You must be at least 16 years old to download or use the Services. Personal information includes information you provide that identifies you, such as your name, email address, or billing information. It may also include your location, route information, or other data that Waze can reasonably link to that information. You can use the Privacy Settings in the Waze app to choose which personal information we may collect and how it is used.
+
+Rewrite H:
+You must be 16 or older to use our Services. If you are under 16, you cannot download or use the Services. Personal information includes anything that identifies you, like your name, email, billing details, location, or route data that Waze can link to you. You can change your Privacy Settings in the Waze app to decide what personal information we collect and how we use it.
+
+Rewrite I:
+You must be 16 or older to use our Services. If you are under 16, you may not download or use the Services. Personal information includes data you give us that identifies you, like your name, email, or billing details. It may also include your location or route information, or other data that Waze can reasonably link to that information. You can change what personal information we collect and how we use it in the Waze app's Privacy Settings.

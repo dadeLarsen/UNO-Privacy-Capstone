@@ -1,4 +1,4 @@
-"""Bar matrix of quality and cost panels: one bar per run, grouped by condition."""
+"""Bar matrix of quality and cost panels: one bar per run, grouped by condition or by model."""
 
 import math
 from pathlib import Path
@@ -10,9 +10,10 @@ from matplotlib.figure import Figure
 from matplotlib.patches import Patch
 from matplotlib.ticker import MaxNLocator, PercentFormatter
 
-COLORS = ("#3568b0", "#168174", "#bc6724", "#8857a5", "#bd4863", "#626c78", "#9a7b1f", "#2f8fb3")
+COLORS = ("#3568b0", "#168174", "#bc6724", "#8857a5", "#bd4863", "#626c78", "#9a7b1f", "#2f8fb3", "#6a9a3a",
+          "#d47fa6", "#7a5230", "#2b2b2b")
 PRECISION_COLORS = {"fp32": "#bd4863", "bf16": "#8857a5", "fp16": "#bc6724", "int8": "#3568b0", "nf4": "#168174"}
-DIRECTIONS = {"higher": "higher is better", "lower": "lower is better", "neutral": "token cost"}
+DIRECTIONS = {"higher": "higher is better", "lower": "lower is better", "neutral": "not ranked"}
 # Panel geometry: margins and gaps as figure fractions, the panel height in inches.
 LEFT, RIGHT, WSPACE, PANEL_HEIGHT = 0.06, 0.975, 0.28, 2.45
 # Group labels wrap at this many characters a line; the figure then grows to fit the largest label.
@@ -40,6 +41,23 @@ def series_key(row):
 
 def ordered(values):
     return list(dict.fromkeys(values))
+
+
+def layout(rows, group_by):
+    """The rows to draw, their axis groups, and their bar series.
+
+    Bars group by condition_label and take their colour from series_key, so grouping by model makes each
+    model a group and leaves only the precision, widest first, as the series."""
+    if group_by == "model":
+        cells = [(row["model"], row["precision"]) for row in rows]
+        if len({row["condition_label"] for row in rows}) > 1 or len(set(cells)) != len(cells):
+            raise ValueError("Grouping by model needs one condition and one run per model and precision")
+        rows = [{**row, "condition_label": row["model"], "model": "", "revision": "", "legend_label": ""}
+                for row in rows]
+        series = sorted(ordered(series_key(row) for row in rows), key=lambda key: list(PRECISION_COLORS).index(key[2]))
+    else:
+        series = ordered(series_key(row) for row in rows)
+    return rows, ordered(row["condition_label"] for row in rows), series
 
 
 def series_labels(series, rows):
@@ -150,10 +168,9 @@ def draw_panel(ax, panel, rows, groups, series, colors):
                         ha="center", fontsize=9)
 
 
-def draw_matrix(rows, panels, output_dir, *, title, context, footnotes) -> list:
+def draw_matrix(rows, panels, output_dir, *, title, context, footnotes, group_by="condition") -> list:
     """Write matrix-overview.png and .svg; returns their paths."""
-    groups = ordered(row["condition_label"] for row in rows)
-    series = ordered(series_key(row) for row in rows)
+    rows, groups, series = layout(rows, group_by)
     labels = series_labels(series, rows)
     colors = series_colors(series)
     matplotlib.rcParams.update({
@@ -174,7 +191,9 @@ def draw_matrix(rows, panels, output_dir, *, title, context, footnotes) -> list:
     legend_rows = math.ceil(len(series) / 2)
     header = 2.4 + 0.3 * (legend_rows - 1)
     row_gap = label_height + 0.78
-    footer = label_height + 0.52 + 0.216 * len(footnotes)
+    # About 12 characters of 9-point text fit in an inch of figure width.
+    notes = [line for note in footnotes for line in textwrap.wrap(note, int(width * 12))]
+    footer = label_height + 0.52 + 0.216 * len(notes)
     height = header + PANEL_HEIGHT * panel_rows + row_gap * (panel_rows - 1) + footer
     fig = Figure(figsize=(width, height))
     FigureCanvasAgg(fig)
@@ -190,8 +209,8 @@ def draw_matrix(rows, panels, output_dir, *, title, context, footnotes) -> list:
         draw_panel(ax, panel, rows, groups, series, colors)
     for ax in list(axes.flat)[len(panels):]:
         ax.set_visible(False)
-    for i, note in enumerate(footnotes):
-        fig.text(LEFT, (0.263 + (len(footnotes) - 1 - i) * 0.216) / height, note, fontsize=9, color="#526379")
+    for i, note in enumerate(notes):
+        fig.text(LEFT, (0.263 + (len(notes) - 1 - i) * 0.216) / height, note, fontsize=9, color="#526379")
     # Measure the rendered legend and panel titles; long legend labels need more room than
     # the row count suggests. A point-based gap stays consistent across resolutions.
     fig.canvas.draw()

@@ -1,0 +1,57 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+Other users of our Services with whom you choose to communicate with and share certain information, who may be located outside the EEA. Note that by entering into the Terms of Service and choosing to communicate with such other users of Telegram, you are instructing us to transfer your personal data, on your behalf, to those users in accordance with this Privacy Policy. We employ all appropriate technical and organizational measures (including encryption of your personal data) to ensure a level of security for your personal data that is appropriate to the risk.
+
+Key points:
+1. (critical) Other Telegram users you choose to communicate with receive certain information you share, and they may be located outside the EEA.
+2. (critical) By accepting the Terms of Service and communicating with other users, you instruct Telegram to transfer your personal data to them on your behalf.
+3. (critical) Telegram uses appropriate technical and organizational measures, including encryption of your personal data, for a level of security appropriate to the risk.
+
+Rewrite A:
+When you use our service to talk to or share info with other users—especially those outside the European Economic Area (EEA)—you’re telling us to pass your personal data to them. We take steps to protect your data, like encrypting it, but we can’t guarantee absolute security. The level of protection depends on the risks involved.
+
+Rewrite B:
+If you choose to communicate with other Telegram users who may be outside the EEA, you are instructing us to transfer your personal data to them in accordance with this Privacy Policy. We use appropriate technical and organizational measures, including encryption, to ensure a level of security for your personal data that is appropriate to the risk.
+
+Rewrite C:
+You instruct the company to transfer your personal data to other users of the Services with whom you choose to communicate and share information. These users may be located outside the EEA. The company uses appropriate technical and organizational measures, including encryption, to provide a level of security for your personal data that is appropriate to the risk.
+
+Rewrite D:
+If you communicate with other users of our Services and share information, those users may be outside the EEA. By using our service and choosing to communicate with them, you allow us to transfer your personal data to them as outlined in this Privacy Policy. We take proper steps, like encryption, to keep your data secure based on the level of risk involved.
+
+Rewrite E:
+Other users of our Services who choose to communicate with you and share certain information may be located outside the EEA. By entering into the Terms of Service and choosing to communicate with such users, you instruct us to transfer your personal data to them in accordance with this Privacy Policy. We employ all appropriate technical and organizational measures, including encryption of your personal data, to ensure a level of security appropriate to the risk.
+
+Rewrite F:
+When you use our services and talk to other users outside the EEA, your personal information will be shared with them. We take steps to protect your data, but we follow the rules set by this privacy policy. You agree to send your data on our behalf, and we handle it with reasonable security measures.
+
+Rewrite G:
+By agreeing to the Terms of Service and choosing to communicate with other users of Telegram, you allow us to send your personal data to those users, even if they are outside the EEA. We use strong security measures, including encryption, to protect your data.
+
+Rewrite H:
+Telegram allows you to share information with others outside the European Economic Area. When you do this, we transfer your personal data to those users. We use security measures to protect your data, but the level of security is based on the risk.
+
+Rewrite I:
+If you communicate with other users outside the EEA, you allow us to transfer your personal data to them according to this policy. We use appropriate technical and organizational security measures, including encryption, to protect your personal data.

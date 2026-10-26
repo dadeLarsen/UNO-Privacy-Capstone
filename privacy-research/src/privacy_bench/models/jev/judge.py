@@ -10,7 +10,7 @@ import torch
 from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 
 from ...core.files import digest_bytes, digest_json
-from ..hub import LOADING_CHECKS, context_limit, reject_prequantized
+from ..hub import context_limit, reject_prequantized, require_exact_load
 from ..measure import GIB, gpu_metadata, measured, require_cuda, timed_load, use_exact_fp32_matmul
 from ..quantization import install_int8_cast_log_filter
 from .bundle import validate_bundle
@@ -179,9 +179,7 @@ class JEVJudge:
                 str(snapshot), **LOCAL, dtype=self._dtype, device_map={"": self._device},
                 attn_implementation="sdpa", output_loading_info=True,
                 **({"quantization_config": quantization} if quantized else {}))
-            if not isinstance(loading, dict) or any(key not in loading or loading[key] for key in LOADING_CHECKS):
-                raise RuntimeError("Base checkpoint did not load exactly: "
-                                   + json.dumps(loading, ensure_ascii=False, default=str))
+            require_exact_load(loading)
             if quantized:
                 quantization_validation = validate_quantization(base, self.precision, plan)
             model = PeftModel.from_pretrained(base, str(snapshot / "adapter"), is_trainable=False,

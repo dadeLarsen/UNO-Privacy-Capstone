@@ -1,0 +1,16 @@
+task = "rewrite"
+strategy = "prompted"
+warmup = 1
+
+[items]
+passages = "appsi139-sections-20"
+
+[model]
+id = "Qwen/Qwen3-14B"
+revision = "40c069824f4251a91eefaf281ebe4c544efd3e18"
+precision = "nf4"
+
+[options]
+prompt = "summary-v3"
+max_new_tokens = 1024
+seed = 42

@@ -1,0 +1,61 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+1.1 We are committed to safeguarding the privacy of our service users. 1.2 This policy applies where we are acting as a data controller with respect to the personal data of our service users; in other words, where we determine the purposes and means of the processing of that personal data. 1.3 We collect data during the usage of our apps. Insofar as this data is not strictly necessary for the provision of our services, we will ask you to consent to our use of data collection when you first use our apps. 1.4 Our apps incorporate privacy controls which affect how we will process your personal data. By using the privacy controls, you can specify whether you would like to receive targeted advertisements and provide user data which may be used to improve future delivery of our services. You can access the privacy controls from inside the app. 1.5 In this policy, "we", "us" and "our" refer to Five Aces Publishing Ltd. and New Star Games Ltd. [For more information about us, see Section 10.]
+
+Key points:
+1. The company is committed to protecting its users' privacy.
+2. The policy applies where the company is the data controller, deciding why and how users' personal data is processed.
+3. The company collects data while you use its apps.
+4. (critical) Where that data is not strictly necessary to provide the services, the company will ask for your consent when you first use the apps.
+5. (critical) Privacy controls in the apps let you choose whether to receive targeted advertising and whether to provide user data used to improve future services.
+6. You can reach the privacy controls from inside the app.
+7. "We" means Five Aces Publishing Ltd. and New Star Games Ltd.
+
+Rewrite A:
+The company prioritizes protecting user privacy. They collect personal data when using their apps, especially if it's not essential for service. Users can choose to allow data collection and adjust settings for ads and data sharing. Privacy options are available within the app, and the policy applies to their data handling practices.
+
+Rewrite B:
+We are committed to protecting your privacy. This policy applies when we control how your personal data is processed. We collect data when you use our apps. If data collection is not necessary for our services, we will ask for your consent when you first use the apps. Our apps have privacy controls. These controls let you decide if you want targeted ads or if your data can be used to improve future services. You can find these controls inside the app. "We," "us," and "our" refer to Five Aces Publishing Ltd. and New Star Games Ltd.
+
+Rewrite C:
+We are responsible for protecting the personal data of people who use our apps. This policy applies when we decide how and why personal data is used. We collect data while you use our apps, and if that data isn't needed for our services, we will ask for your consent before collecting it. Our apps have privacy settings that let you choose whether you want targeted ads and whether your data can be used to improve our services. These settings can be found within the app. The words "we," "us," and "our" refer to Five Aces Publishing Ltd. and New Star Games Ltd.
+
+Rewrite D:
+Five Aces Publishing Ltd. and New Star Games Ltd. are committed to protecting your privacy. This policy covers how they use your data, especially when they are acting as a data controller. They collect data from your apps, and you’ll be asked to consent to data collection if it’s not needed for services. You can manage these settings within the app itself.  Using these controls lets you choose whether to receive targeted ads and share your data to improve your experience.  You can find the privacy controls inside the app.
+
+Rewrite E:
+Five Aces Publishing Ltd. and New Star Games Ltd. are data controllers for personal data collected when users of their apps. They collect data during app usage, asking for consent before using data that is not strictly necessary for providing services. The apps include privacy controls that let users specify whether they want targeted ads and provide user data to improve future service delivery. These controls can be accessed from inside the app.
+
+Rewrite F:
+This company (Five Aces Publishing Ltd. and New Star Games Ltd.) protects your privacy and explains how your personal data is used when you use their apps. They collect data while you use the apps. If the data isn’t needed just to run the service, they’ll ask for your consent the first time you use the app. You can adjust privacy settings inside the app to control whether you get targeted ads or help improve future services.
+
+Rewrite G:
+We protect your privacy by collecting data only when it is not strictly necessary for our services. We ask for your consent to collect data during app usage unless it is strictly necessary for our services. Our apps include privacy controls that let you choose whether to receive targeted ads and provide user data to improve future service delivery. You can access these controls directly from inside the app. This policy applies to us as a data controller, meaning we determine the purposes and means of processing your personal data. We are Five Aces Publishing Ltd and New Star Games Ltd.
+
+Rewrite H:
+We protect the privacy of our service users. This policy covers how we handle personal data when we are the data controller. We collect data while you use our apps. We only use data that is not strictly necessary for our services if you consent. You can control how we process your data through privacy controls in the app. You can choose whether to receive targeted ads and provide user data for service improvement. We are Five Aces Publishing Ltd and New Star Games Ltd.
+
+Rewrite I:
+Five Aces Publishing Ltd. and New Star Games Ltd. apply this policy when they act as data controllers by determining how to process your personal data. They collect data during app use. If the data is not strictly necessary for providing services, they will ask for your consent when you first use the apps. You can use privacy controls inside the app to specify if you want to receive targeted advertisements or provide data to improve future service delivery.

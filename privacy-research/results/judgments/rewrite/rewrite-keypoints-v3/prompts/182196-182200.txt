@@ -1,0 +1,58 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+Insider is based in the U.S. and the personal information we collect is governed by U.S. law. Insider processes personal information on our servers in the U.S. and other jurisdictions. Your personal information may be transferred to, and used, in locations outside of your state, province, country or other governmental jurisdiction where the privacy laws may be different than those in your jurisdiction. Your use of the Service or provision of any personal information constitutes your consent to the transfer to and from, processing, usage, sharing, and storage of your information in the U.S. and other jurisdictions as set forth in this Privacy Policy. To the extent that the Company offers products and services to individuals located in the European Economic Area or United Kingdom, or to the extent the Service is intentionally available to such individuals, please review the section titled “Additional Disclosures for Data Subjects in Europe” below for more information about disclosures and privacy rights associated with that activity.
+
+Key points:
+1. (critical) Insider is based in the U.S., and the personal information it collects is governed by U.S. law.
+2. Insider processes personal information on servers in the U.S. and other jurisdictions.
+3. (critical) Your information may be transferred to and used in places whose privacy laws differ from yours.
+4. (critical) Using the Service or providing personal information counts as consent to its transfer, processing, use, sharing, and storage in the U.S. and elsewhere.
+5. People in the European Economic Area or the United Kingdom should see a separate section for the disclosures and rights that apply to them.
+
+Rewrite A:
+Insider is a U.S. company, and U.S. law governs the personal information we collect. We process your information on our U.S. servers and in other locations. Your information might be moved to and used in locations outside your current jurisdiction where privacy laws differ. By using the Service or giving us your information, you agree to the transfer, processing, usage, sharing, and storage of your data in the U.S. and other locations as described here. If we offer services to individuals in the European Economic Area or the United Kingdom, please see the section on European disclosures for more details on your rights and disclosures.
+
+Rewrite B:
+The company collects personal data in the U.S. and may share it with other countries. Using the service means you agree to how your information is handled. If you're in Europe or the UK, check the specific rules there. The policy outlines what happens to your data and your rights, but it doesn't promise certain outcomes.
+
+Rewrite C:
+Insider is a U.S.-based company, so your personal information is handled under U.S. laws. Your data is stored on servers in the U.S. and other countries, which may have different privacy rules than where you live. By using our service or sharing your personal information, you agree to let us transfer, use, share, and store your data in the U.S. and other locations as described in our privacy policy.
+
+If you’re in the European Economic Area, the UK, or if you intentionally access our service from there, check the “Additional Disclosures for Data Subjects in Europe” section for extra details on how your data is handled and your privacy rights.
+
+Rewrite D:
+Insider is based in the U.S. and follows U.S. laws for handling personal information. Personal data is processed on servers in the U.S. and other countries. Your information may be sent to, used, or stored in places outside your state, province, country, or region, where privacy rules might differ. Using the Service or sharing personal information means you agree to this transfer, processing, use, sharing, and storage in the U.S. and other locations as described in the Privacy Policy. If the Company provides services to people in the European Economic Area or the United Kingdom, or if the Service is available to them, you should read the section titled “Additional Disclosures for Data Subjects in Europe” for more details about privacy rights and data handling in those regions.
+
+Rewrite E:
+Insider collects personal information in the U.S. and other countries. This information is processed here and may be transferred outside of your location. You agree to this when you use the service. Your information is used for specific purposes, and there are rules about how it’s shared and stored.  These rules are based on U.S. and European privacy laws.  For details about data transfers to certain regions, see the separate section.
+
+Rewrite F:
+Insider collects and processes your personal information using U.S. servers and may transfer it to other countries where privacy laws differ. Using the service or providing personal information means you agree to its transfer, processing, sharing, and storage in the U.S. and other places covered by this policy. If Insider offers products or services to people in the European Economic Area or the United Kingdom, or if the service is available to them, see the “Additional Disclosures for Data Subjects in Europe” section for more details on disclosures and rights.
+
+Rewrite G:
+Insider is based in the U.S. and processes personal information on servers in the U.S. and other jurisdictions. Your use of the Service or providing personal information means you consent to having your data transferred to and used in locations outside your jurisdiction, where privacy laws may differ. If the Company offers products to individuals in the European Economic Area or United Kingdom, or if the Service is available to them, please review the "Additional Disclosures for Data Subjects in Europe" section for more information about disclosures and privacy rights.
+
+Rewrite H:
+Insider processes personal information on our servers in the U.S. and other jurisdictions. Your personal information may be transferred to, and used, in locations outside your state, province, country, or other governmental jurisdiction where privacy laws may differ. Your use of the Service or provision of personal information constitutes your consent to the transfer to, processing, usage, sharing, and storage of your information in the U.S. and other jurisdictions as set forth in this Privacy Policy. If you are located in the European Economic Area or the United Kingdom, please review the section titled "Additional Disclosures for Data Subjects in Europe" below for more information about disclosures and privacy rights associated with that activity.

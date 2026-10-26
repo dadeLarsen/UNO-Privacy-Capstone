@@ -10,7 +10,7 @@ from privacy_bench.core.conditions import parse_condition
 from privacy_bench.core.harness import execute
 from privacy_bench.core.protocols import Panel, Selection
 from privacy_bench.report.comparisons import parse_comparison
-from privacy_bench.report.plot import draw_matrix, group_label
+from privacy_bench.report.plot import draw_matrix, group_label, series_colors
 from privacy_bench.report.summary import COST_PANELS, summarize, write_summary
 
 
@@ -82,8 +82,8 @@ class ToyTask:
         return {"context": f"{rows[0]['n']} toy items", "footnotes": ["Toy footnote."]}
 
 
-def make_run(root, name, precision, flavour, task=None):
-    condition = parse_condition(name, f'task = "toy"\nstrategy = "echo"\n[model]\nid = "o/{name}"\n'
+def make_run(root, name, precision, flavour, task=None, model=None):
+    condition = parse_condition(name, f'task = "toy"\nstrategy = "echo"\n[model]\nid = "{model or f"o/{name}"}"\n'
                                       f'revision = "{"a" * 40}"\nprecision = "{precision}"\n'
                                       f'[options]\nflavour = "{flavour}"\n')
     execute(task or ToyTask(), condition, root / "toy" / name / "run")
@@ -148,6 +148,7 @@ def test_comparison_task_must_match(tmp_path):
     ('task = "toy"\nruns = ["a/b"]\nextra = 1\n', "unknown keys: extra"),
     ('task = "toy"\nruns = ["a/b"]\n[labels]\n"c/d" = "x"\n', "must name a listed run"),
     ('task = "toy"\nruns = ["a/b"]\ntitle = ""\n', "title"),
+    ('task = "toy"\nruns = ["a/b"]\ngroup_by = "prompt"\n', "group_by must be one of"),
 ])
 def test_invalid_comparison_files_are_rejected(text, message):
     with pytest.raises(ValueError, match=message):
@@ -167,6 +168,29 @@ def test_matrix_plot_writes_png_and_svg_with_legend_overrides(tmp_path):
     assert "Custom label" in svg and "Toy footnote." in svg and "Accuracy · higher is better" in svg
 
 
+def test_grouping_by_model_draws_one_bar_per_precision_widest_first(tmp_path):
+    runs = [make_run(tmp_path, "m1-nf4", "nf4", "plain", model="o/m1"),
+            make_run(tmp_path, "m1-bf16", "bf16", "plain", model="o/m1"),
+            make_run(tmp_path, "m2-int8", "int8", "plain", model="o/m2")]
+    parsed = parse_comparison("toy", f'task = "toy"\ngroup_by = "model"\nruns = {json.dumps(runs)}\n'
+                                     f'[labels]\n"{runs[0]}" = "Custom label"\n')
+    assert parsed.group_by == "model"
+    paths = draw_matrix(summarize(ToyTask(), parsed, runs_root=tmp_path), [*ToyTask().quality_panels({}),
+                        *COST_PANELS], tmp_path / "plots", title="Toy", context="toy", footnotes=[],
+                        group_by=parsed.group_by)
+    svg = paths[1].read_text(encoding="utf-8")
+    assert svg.index("BF16") < svg.index("INT8") < svg.index("NF4")
+    assert "o/m1" in svg and "o/m2" in svg and "Custom label" not in svg and "o/m1 ·" not in svg
+
+
+def test_grouping_by_model_refuses_runs_from_different_conditions(tmp_path):
+    runs = [make_run(tmp_path, "m1", "bf16", "plain"), make_run(tmp_path, "m2", "nf4", "spicy")]
+    rows = summarize(ToyTask(), comparison(runs), runs_root=tmp_path)
+    with pytest.raises(ValueError, match="one condition and one run per model and precision"):
+        draw_matrix(rows, ToyTask().quality_panels({}), tmp_path / "plots", title="Toy", context="toy",
+                    footnotes=[], group_by="model")
+
+
 def test_group_labels_wrap_each_line_splitting_words_only_at_hyphens():
     assert group_label("Embedding\nsimilarity\ncategories: search result") == (
         "Embedding\nsimilarity\ncategories:\nsearch result")
@@ -175,12 +199,23 @@ def test_group_labels_wrap_each_line_splitting_words_only_at_hyphens():
     assert group_label("linear-frequencies") == "linear-\nfrequencies"
 
 
-def figure_pixels(tmp_path, flavours, folder):
+def figure_pixels(tmp_path, flavours, folder, footnotes=("Toy footnote.",)):
     runs = [make_run(tmp_path / folder, f"m{i}", "bf16", flavour) for i, flavour in enumerate(flavours)]
     rows = summarize(ToyTask(), comparison(runs), runs_root=tmp_path / folder)
     paths = draw_matrix(rows, [*ToyTask().quality_panels({}), *COST_PANELS], tmp_path / folder / "plots",
-                        title="Toy comparison", context="toy runs", footnotes=["Toy footnote."])
+                        title="Toy comparison", context="toy runs", footnotes=list(footnotes))
     return imread(paths[0]).shape[:2]
+
+
+def test_long_footnotes_wrap_onto_more_lines_instead_of_running_off_the_figure(tmp_path):
+    one_line = figure_pixels(tmp_path, "ab", "one-line")
+    wrapped = figure_pixels(tmp_path, "ab", "wrapped", footnotes=["word " * 120])
+    assert wrapped[1] == one_line[1] and wrapped[0] > one_line[0]
+
+
+def test_nine_series_get_nine_colours():
+    series = [(f"o/m{i}", "a" * 40, "bf16" if i < 3 else "nf4") for i in range(9)]
+    assert len(set(series_colors(series).values())) == 9
 
 
 def test_matrix_plot_grows_to_fit_long_group_labels(tmp_path):

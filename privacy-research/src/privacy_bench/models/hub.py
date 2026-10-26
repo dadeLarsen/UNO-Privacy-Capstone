@@ -46,6 +46,17 @@ def validate_weights(snapshot: Path):
     raise ValueError(f"No standard Transformers weights found in {snapshot}")
 
 
+def require_exact_load(loading) -> dict:
+    """Refuse a load whose output_loading_info lists missing, unused, or mismatched weights."""
+    if not isinstance(loading, dict) or any(key not in loading for key in LOADING_CHECKS):
+        raise RuntimeError(f"Checkpoint loading diagnostics are incomplete: {loading!r}")
+    loading = {name: sorted(values) if isinstance(values, set) else values for name, values in loading.items()}
+    if any(loading[key] for key in LOADING_CHECKS):
+        raise RuntimeError("Checkpoint did not load exactly; refusing missing or unused weights: "
+                           f"{json.dumps(loading, ensure_ascii=False, default=str)}")
+    return loading
+
+
 def resolve_snapshot(repo_id: str, revision: str) -> Path:
     """Find a cached snapshot without touching the network."""
     require_commit(repo_id, revision)
@@ -66,9 +77,11 @@ def download_snapshot(repo_id: str, revision: str) -> Path:
         raise ValueError(f"Hugging Face resolved {repo_id} {revision} to a different commit: {info.sha}")
     names = {item.rfilename for item in info.siblings}
     safetensors = "model.safetensors" in names or "model.safetensors.index.json" in names
-    # Prefer safetensors so repositories that also publish .bin files are not cached twice.
+    # Prefer safetensors so repositories that also publish .bin files are not cached twice, and skip
+    # Mistral's consolidated.safetensors, a second copy of the sharded weights in Mistral's own format.
     patterns = [*STANDARD_PATTERNS, "*.safetensors" if safetensors else "pytorch_model*.bin"]
-    return Path(snapshot_download(repo_id, revision=revision, allow_patterns=patterns)).resolve()
+    return Path(snapshot_download(repo_id, revision=revision, allow_patterns=patterns,
+                                  ignore_patterns=["consolidated*.safetensors"])).resolve()
 
 
 def snapshot_identity(repo_id: str, revision: str, snapshot: Path) -> dict:

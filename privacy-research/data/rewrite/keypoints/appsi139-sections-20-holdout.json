@@ -1,0 +1,700 @@
+{
+  "name": "appsi139-sections-20-holdout",
+  "passages": {
+    "name": "appsi139-sections-20-holdout",
+    "sha256": "c01a76aced12af91278f348ad32415b3015f9965027507faea25dea30bbf80c8",
+    "n": 20
+  },
+  "drafted_by": "Claude Code (claude-opus-5-5), from each passage's text alone",
+  "reviewed_by": null,
+  "rules": "One fact per point, with its conditions, exceptions, and scope words kept inside it. Critical points are those whose loss or distortion would mislead a reader about their data, rights, or risks. Citations, addresses, cross-references, and examples that add no distinct information are left out.",
+  "checklists": [
+    {
+      "passage": "153863-153865",
+      "heading": "8.1.Other Telegram Users",
+      "points": [
+        {
+          "id": "1",
+          "point": "Other Telegram users you choose to communicate with receive certain information you share, and they may be located outside the EEA.",
+          "critical": true
+        },
+        {
+          "id": "2",
+          "point": "By accepting the Terms of Service and communicating with other users, you instruct Telegram to transfer your personal data to them on your behalf.",
+          "critical": true
+        },
+        {
+          "id": "3",
+          "point": "Telegram uses appropriate technical and organizational measures, including encryption of your personal data, for a level of security appropriate to the risk.",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "138537-138545",
+      "heading": "Information you give us",
+      "points": [
+        {
+          "id": "1",
+          "point": "The company collects identifying information, such as your name, phone number, email and mailing address, corporate or educational affiliations, photograph, and billing information.",
+          "critical": false
+        },
+        {
+          "id": "2",
+          "point": "It collects protected characteristics such as age and gender.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "It collects commercial information, such as products and services you bought from it and its partners, and your consumer preferences.",
+          "critical": false
+        },
+        {
+          "id": "4",
+          "point": "It collects biometric information, such as your physical characteristics or measurements.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "It collects workout and machine usage information.",
+          "critical": false
+        },
+        {
+          "id": "6",
+          "point": "It collects account information (username, password, user ID, and communication preferences), credit card or banking information, and your reviews and comments.",
+          "critical": false
+        }
+      ]
+    },
+    {
+      "passage": "145918-145922",
+      "heading": "Changes to this Privacy Statement",
+      "points": [
+        {
+          "id": "1",
+          "point": "The Privacy Statement is expected to change, and the company may update it at any time, for any reason.",
+          "critical": true
+        },
+        {
+          "id": "2",
+          "point": "The company notifies you of changes by updating the \"Last Updated\" date and posting the new statement on the page.",
+          "critical": true
+        },
+        {
+          "id": "3",
+          "point": "The company may email periodic reminders, but you should check the Services often for the current statement.",
+          "critical": false
+        },
+        {
+          "id": "4",
+          "point": "If a translated version differs from the English version, the English version controls.",
+          "critical": false
+        }
+      ]
+    },
+    {
+      "passage": "127522-127526",
+      "heading": "Transfers of Your Personal Data to Other Countries",
+      "points": [
+        {
+          "id": "1",
+          "point": "The company's operations rely on computers, cloud servers, and other infrastructure, including third-party service providers.",
+          "critical": false
+        },
+        {
+          "id": "2",
+          "point": "The company and its service providers store and process your personal data in the United States and elsewhere in the world.",
+          "critical": true
+        },
+        {
+          "id": "3",
+          "point": "The company will protect your information as the Privacy Statement describes if it is transferred to other countries.",
+          "critical": false
+        },
+        {
+          "id": "4",
+          "point": "By using the Sites and Services, you consent to your data being transferred to other countries, including ones whose data protection rules differ from yours.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "The company does not claim its Sites and Services are appropriate or available in any particular jurisdiction.",
+          "critical": false
+        }
+      ]
+    },
+    {
+      "passage": "175498-175504",
+      "heading": "Last updated October 16, 2023",
+      "points": [
+        {
+          "id": "1",
+          "point": "This privacy notice is from Improvement Tech LLC, doing business as Umax.",
+          "critical": false
+        },
+        {
+          "id": "2",
+          "point": "It describes how and why Umax might collect, store, use, and share your information when you use its Services.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "The Services include using the Umax mobile app or other apps that link to this notice, and related contact such as sales, marketing, or events.",
+          "critical": false
+        },
+        {
+          "id": "4",
+          "point": "If you do not agree with its policies and practices, you should not use the Services.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "You can send questions or concerns to contact@umaxapp.com.",
+          "critical": false
+        }
+      ]
+    },
+    {
+      "passage": "183961-183964",
+      "heading": "Transfer of Your Personal Data",
+      "points": [
+        {
+          "id": "1",
+          "point": "Your information is processed at the Company's offices and wherever the parties involved in processing are located.",
+          "critical": false
+        },
+        {
+          "id": "2",
+          "point": "It may be transferred to and kept on computers outside your jurisdiction, where data protection laws may differ.",
+          "critical": true
+        },
+        {
+          "id": "3",
+          "point": "Agreeing to the Privacy Policy and then submitting information means you agree to that transfer.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "The Company will take all steps reasonably necessary to treat your data securely and in line with the Privacy Policy.",
+          "critical": false
+        },
+        {
+          "id": "5",
+          "point": "No transfer will take place to an organization or country unless adequate controls, including for the security of your data, are in place.",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "130997-131003",
+      "heading": "Communications",
+      "points": [
+        {
+          "id": "1",
+          "point": "The company collects information in messages and feedback you send it, such as surveys and customer support questions, and in what you post publicly, such as product reviews.",
+          "critical": false
+        },
+        {
+          "id": "2",
+          "point": "If you sign up for email or text messages, it sends you promotional offers and more.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "These messages may use information collected automatically from your actions on its sites, for example to send cart-abandonment messages.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "If you opt into text notifications, it receives and stores the information you provide, including your phone number and when you read a text.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "You can opt out of text messages at any time by texting \"STOP\".",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "174125-174130",
+      "heading": "How GitHub secures your information",
+      "points": [
+        {
+          "id": "1",
+          "point": "GitHub takes reasonable measures to protect your personal data from unauthorized access, alteration, or destruction, to keep it accurate, and to help ensure it is used appropriately.",
+          "critical": true
+        },
+        {
+          "id": "2",
+          "point": "GitHub asks you to use a strong password, never share it, and not reuse it on other sites or accounts.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "If your account has private repositories, you control who can access that content.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "GitHub staff do not access private repository content except for security purposes; automated scanning for known vulnerabilities, malware, or content that violates the Terms of Service; helping the owner with a support matter; keeping the Service's integrity; meeting legal obligations when there is reason to believe the content breaks the law; or with your consent.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "GitHub will give notice about private repository access where the law does not prohibit it, or if the access was in response to a security threat or other security risk.",
+          "critical": true,
+          "note": "The source's wording is ambiguous about when notice is given; accept any reading that keeps notice tied to legal limits and security threats without inventing a new condition."
+        }
+      ]
+    },
+    {
+      "passage": "126639-126641",
+      "heading": "USE OF INFORMATION",
+      "points": [
+        {
+          "id": "1",
+          "point": "Medium uses the information to provide, maintain, and improve its Services, including publishing user content, personalizing the posts you see, and running its metered paywall.",
+          "critical": false
+        },
+        {
+          "id": "2",
+          "point": "It uses information to create and maintain your account, process transactions, and send confirmations, receipts, and surveys.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "It sends technical notices, security alerts, and support and administrative messages, and responds to your questions.",
+          "critical": false
+        },
+        {
+          "id": "4",
+          "point": "It sends you news about its content, products, and features, and you can opt out of these at any time.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "It monitors and analyzes usage trends and activity.",
+          "critical": false
+        },
+        {
+          "id": "6",
+          "point": "It uses information to detect and prevent security incidents, fraud, and illegal activity, to protect rights and property, and to fix errors.",
+          "critical": false
+        },
+        {
+          "id": "7",
+          "point": "It uses information to meet legal and financial obligations, and for any other purpose described to you when the information was collected.",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "133007-133016",
+      "heading": "7.Third-party services and websites",
+      "points": [
+        {
+          "id": "1",
+          "point": "Third-party services, apps, or websites you use, even through GoodRx equipment or applications, are governed by their own policies, which may differ from GoodRx's.",
+          "critical": true
+        },
+        {
+          "id": "2",
+          "point": "GoodRx's privacy policy covers only GoodRx's Services, not third parties.",
+          "critical": true
+        },
+        {
+          "id": "3",
+          "point": "GoodRx may collect usage information about third-party products you access through GoodRx equipment, websites, or applications.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "GoodRx may offer contests or promotions sponsored by third parties, and it has no control over how those third parties use the information you give them.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "If you connect your account to third-party accounts such as social networks and share your activity there, that third party's privacy policy governs it.",
+          "critical": true
+        },
+        {
+          "id": "6",
+          "point": "GoodRx is not responsible for third parties' practices.",
+          "critical": false
+        }
+      ]
+    },
+    {
+      "passage": "151754-151759",
+      "heading": "4.How your Personal Data is transferred",
+      "points": [
+        {
+          "id": "1",
+          "point": "Niantic operates globally, so your personal data will likely be transferred to and stored outside your home country, including in the USA, to the extent applicable laws permit.",
+          "critical": true
+        },
+        {
+          "id": "2",
+          "point": "Data protection laws in those countries may differ from your home country's.",
+          "critical": true
+        },
+        {
+          "id": "3",
+          "point": "For transfers from the UK or the EEA, Niantic ensures a similar degree of protection through at least one safeguard.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "One safeguard: the destination country has been found by the European Commission (or the UK Government) to provide adequate protection.",
+          "critical": false
+        },
+        {
+          "id": "5",
+          "point": "The other: contracts approved by the European Commission (or the UK Information Commissioner's Office) when Niantic works with service providers.",
+          "critical": false
+        }
+      ]
+    },
+    {
+      "passage": "146092-146097",
+      "heading": "RETENTION OF PERSONAL DATA",
+      "points": [
+        {
+          "id": "1",
+          "point": "Personal data is kept only as long as necessary for the purposes in the Privacy Policy.",
+          "critical": true
+        },
+        {
+          "id": "2",
+          "point": "The company keeps and uses data as needed to meet legal obligations, resolve disputes, provide its Services, and enforce its agreements.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "It also keeps personal data and usage information for internal analysis and legitimate business interests, such as improving its Services.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "Data is deleted, or anonymized so it is no longer personal data, once it no longer serves those purposes.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "The retention period should in no case exceed 5 years from collection.",
+          "critical": true,
+          "note": "The passage also says data is kept longer when the law requires it, without reconciling that with the 5-year cap; a rewrite need not resolve this."
+        },
+        {
+          "id": "6",
+          "point": "After deletion or anonymization, you can no longer exercise your rights of access, erasure, rectification, or portability.",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "158575-158585",
+      "heading": "1.Costco’s commitment to Privacy",
+      "points": [
+        {
+          "id": "1",
+          "point": "Costco says it is committed to protecting its customers' privacy, including personal health information.",
+          "critical": false
+        },
+        {
+          "id": "2",
+          "point": "The policy explains why Costco collects personal and health information, what it does with it, how it secures it, and whom to contact with questions.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "Costco may change the Privacy Policy at any time.",
+          "critical": false
+        },
+        {
+          "id": "4",
+          "point": "Changes to Section 5, about the reasons Costco uses personal information, will not apply to you unless you consent to them.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "Costco signals changes by updating the \"last updated\" date at the top of the policy.",
+          "critical": false
+        },
+        {
+          "id": "6",
+          "point": "Costco does not intend to collect information from children under 18; if you are under 18, you should not provide information on its Sites.",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "154033-154041",
+      "heading": "Device ID, IP address and network access.",
+      "points": [
+        {
+          "id": "1",
+          "point": "YouVersion receives the URLs of the sites you come from and go to next.",
+          "critical": false
+        },
+        {
+          "id": "2",
+          "point": "It receives your proxy server, operating system, browser and add-ons, device identifier and features, ISP or mobile carrier, and IP address.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "It matches IP addresses with public latitude and longitude data for your ISP to find your approximate region, sometimes shown in aggregate, de-identified form.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "This latitude and longitude data is stored for about seven days for troubleshooting and diagnostics, and is never associated with information that identifies you.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "It uses your device's WiFi permissions to tell whether you are on WiFi or a cellular network, to send higher-resolution media on WiFi, and to cast content to Chromecast and similar devices.",
+          "critical": false
+        },
+        {
+          "id": "6",
+          "point": "This WiFi information is not stored or shared.",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "124839-124848",
+      "heading": "3.SHARING OF YOUR INFORMATION",
+      "points": [
+        {
+          "id": "1",
+          "point": "The company may share the information it collects with service providers working on its behalf, such as for hosting, customer service, analytics, and marketing.",
+          "critical": true
+        },
+        {
+          "id": "2",
+          "point": "It may share it with payment processors that handle your payments.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "It may share it with advertisers, ad exchanges, and ad technology companies that use it to select and serve its ads to you and others.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "It may share it with its parent company, subsidiaries, and affiliates, and with professional advisors such as lawyers, auditors, bankers, and insurers.",
+          "critical": false
+        },
+        {
+          "id": "5",
+          "point": "It may share it with law enforcement and public authorities when it believes in good faith this is necessary or appropriate for compliance and protection.",
+          "critical": true
+        },
+        {
+          "id": "6",
+          "point": "It may share it with buyers and other participants in business deals such as mergers, acquisitions, or bankruptcy proceedings.",
+          "critical": true
+        },
+        {
+          "id": "7",
+          "point": "With your consent or at your direction, it may disclose your personal information to other third parties or publicly.",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "134424-134431",
+      "heading": "4.OUR LEGAL BASES FOR PROCESSING YOUR PERSONAL DATA",
+      "points": [
+        {
+          "id": "1",
+          "point": "Some laws require the company to state its legal grounds for using your personal data; where those laws apply, its grounds are as follows.",
+          "critical": false
+        },
+        {
+          "id": "2",
+          "point": "Contract: much of its processing is to meet its contractual obligations to customers or to take steps toward a contract, such as providing event tickets.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "Consent: where the law requires it, and in some other cases, it relies on your implied or express consent.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "Legitimate interests: in many cases it relies on its legitimate interests where your interests or fundamental rights and freedoms do not override them, such as customer service, marketing, protecting people and property, improving its business, and managing legal issues.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "It may also process personal data for its business partners' legitimate interests, such as marketing.",
+          "critical": true
+        },
+        {
+          "id": "6",
+          "point": "It also processes data to comply with the law, and to protect someone's vital interests, such as in an urgent medical situation.",
+          "critical": false
+        }
+      ]
+    },
+    {
+      "passage": "166926-166932",
+      "heading": "How We Use Cookies",
+      "points": [
+        {
+          "id": "1",
+          "point": "Indeed uses cookies, web beacons, and similar technologies, including from partners such as Google and Facebook, for measurement, targeted advertising, marketing, and site performance.",
+          "critical": true
+        },
+        {
+          "id": "2",
+          "point": "This happens on its Sites, when you install an Indeed App, and in some of its ads on other websites.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "These technologies let Indeed show its promotional material on other sites you visit and connect you with more employers.",
+          "critical": false
+        },
+        {
+          "id": "4",
+          "point": "Indeed may share information about your behavior on its Sites with third parties, including other websites and social networks, to show you targeted ads and customized content.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "Indeed uses these technologies to track which ads users saw, how often, and where.",
+          "critical": false
+        },
+        {
+          "id": "6",
+          "point": "Indeed may let employers in its Targeted Ads Program place cookies and similar technologies in the ads it serves, on its Site and on other websites, to see how people interact with their job ads.",
+          "critical": true
+        },
+        {
+          "id": "7",
+          "point": "Indeed may tell an employer which users saw a particular job listing, company page, hiring event, or ad that identifies the employer.",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "134609-134616",
+      "heading": "Types of Data collected",
+      "points": [
+        {
+          "id": "1",
+          "point": "The app, by itself or through third parties, collects personal data including usage data, trackers, advertising IDs, email address, geographic position, movement activity, name, gender, date of birth, password, academic background, field of activity, and country.",
+          "critical": true
+        },
+        {
+          "id": "2",
+          "point": "You provide personal data yourself, except usage data, which is collected automatically.",
+          "critical": false
+        },
+        {
+          "id": "3",
+          "point": "Unless stated otherwise, all requested data is mandatory, and not providing it may make it impossible for the app to provide its services.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "Where the app says data is not mandatory, you can choose not to provide it without affecting the service.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "If you are unsure which data is mandatory, you can contact the Owner.",
+          "critical": false
+        },
+        {
+          "id": "6",
+          "point": "Cookies and other tracking tools serve to provide the service you asked for, as well as other purposes described in the document and the Cookie Policy.",
+          "critical": false
+        },
+        {
+          "id": "7",
+          "point": "You are responsible for any third-party personal data you obtain, publish, or share through the app, and you confirm you have that person's consent to provide it.",
+          "critical": true
+        }
+      ]
+    },
+    {
+      "passage": "130910-130918",
+      "heading": "INTERNATIONAL DATA TRANSFERS",
+      "points": [
+        {
+          "id": "1",
+          "point": "The company provides its App worldwide, and it, its data-processing technology providers, and its advertising partners may transfer automatically processed information across borders.",
+          "critical": true
+        },
+        {
+          "id": "2",
+          "point": "If you are in the EU or a region with different data laws, your personal information may go to countries or international organizations whose laws may not protect it as well as yours.",
+          "critical": true
+        },
+        {
+          "id": "3",
+          "point": "The company tries to make sure recipients protect the personal data properly, as current law requires.",
+          "critical": false
+        },
+        {
+          "id": "4",
+          "point": "By using the App, you agree to your personal data being transferred to any third country or international organization.",
+          "critical": true
+        },
+        {
+          "id": "5",
+          "point": "The company stores data with hosting organizations and encrypts personal data before sending it to them, where possible.",
+          "critical": true
+        },
+        {
+          "id": "6",
+          "point": "The company works only with hosting organizations that have passed its security and reliability check.",
+          "critical": false
+        }
+      ]
+    },
+    {
+      "passage": "125707-125710",
+      "heading": "B.Sharing With Service Providers to Provide the Lyft Platform, and Other Parties",
+      "points": [
+        {
+          "id": "1",
+          "point": "Depending on whether you are a Rider or a Driver, Lyft may share categories of your personal information to provide Lyft Platform features and services.",
+          "critical": false
+        },
+        {
+          "id": "2",
+          "point": "These include identifiers (name, address, contact details, date of birth, government ID such as a Social Security number, driver's license, vehicle, and insurance information) and financial information (bank routing numbers, tax and payment information).",
+          "critical": true
+        },
+        {
+          "id": "3",
+          "point": "They also include ride and transaction history, Driver and Rider statistics and feedback, device and network information such as IP address and advertising identifiers, and location data.",
+          "critical": true
+        },
+        {
+          "id": "4",
+          "point": "Lyft also shares information you direct it to share, such as when you link a travel rewards program or use another company's offering through Lyft.",
+          "critical": false
+        },
+        {
+          "id": "5",
+          "point": "The purposes include running your account and rides, customer service, payments, Driver applications, identity checks, fraud and safety, insurance claims, financing, emergency services, analytics, and research.",
+          "critical": false
+        },
+        {
+          "id": "6",
+          "point": "Lyft also shares it to provide marketing and advertising services to Lyft, including targeted and cross-context behavioral advertising personalized to you.",
+          "critical": true
+        }
+      ]
+    }
+  ]
+}

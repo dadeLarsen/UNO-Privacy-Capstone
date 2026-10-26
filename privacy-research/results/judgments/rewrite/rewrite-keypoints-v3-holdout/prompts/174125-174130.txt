@@ -1,0 +1,68 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+GitHub takes reasonable measures necessary to protect your personal data from unauthorized access, alteration, or destruction; maintain data accuracy; and help ensure the appropriate use of your personal data. To help us protect personal data, we request that you use a strong password and never share your password with anyone or use the same password with other sites or accounts. In addition, if your account has private repositories, you control the access to that Content. GitHub personnel does not access private repository content except for * security purposes, * automated scanning for known vulnerabilities, active malware, or other content known to violate our Terms of Service * to assist the repository owner with a support matter * to maintain the integrity of the Service * to comply with our legal obligations if we have reason to believe the contents are in violation of the law, * or with your consent. GitHub will provide notice regarding private repository access where not prohibited by law or if in response to a security threat or other risk to security.
+
+Key points:
+1. (critical) GitHub takes reasonable measures to protect your personal data from unauthorized access, alteration, or destruction, to keep it accurate, and to help ensure it is used appropriately.
+2. GitHub asks you to use a strong password, never share it, and not reuse it on other sites or accounts.
+3. (critical) If your account has private repositories, you control who can access that content.
+4. (critical) GitHub staff do not access private repository content except for security purposes; automated scanning for known vulnerabilities, malware, or content that violates the Terms of Service; helping the owner with a support matter; keeping the Service's integrity; meeting legal obligations when there is reason to believe the content breaks the law; or with your consent.
+5. (critical) GitHub will give notice about private repository access where the law does not prohibit it, or if the access was in response to a security threat or other security risk. Note: The source's wording is ambiguous about when notice is given; accept any reading that keeps notice tied to legal limits and security threats without inventing a new condition.
+
+Rewrite A:
+GitHub takes reasonable steps to protect your personal data from unauthorized access, changes, or loss, and to keep it accurate and used appropriately. You help protect this data by using a strong password, not sharing it, and not using it on other sites. If you have private repositories, you control who can access that content. GitHub staff will not access private repository content except for security purposes, automated scanning for known vulnerabilities or malware, to assist with support, to maintain service integrity, to comply with legal obligations if they believe the content violates the law, or with your consent. GitHub will notify you about private repository access unless the law prohibits it or if it is a response to a security threat.
+
+Rewrite B:
+GitHub protects your personal data by taking reasonable steps to prevent unauthorized access, changes, or loss, keep the data accurate, and ensure it is used appropriately.  
+You are asked to use a strong password and not share it or reuse it elsewhere. If your account has private repositories, you control who can view the content.  
+GitHub may look at private repository content only for security reasons, automated scanning for known problems, assisting with support issues, maintaining service integrity, complying with legal requirements when the content may violate the law, or with your consent.  
+GitHub will tell you when it accesses private repository content unless a law prohibits notice or the access is in response to a security threat.
+
+Rewrite C:
+GitHub works to keep your data safe and accurate. They ask you to use strong passwords and avoid sharing them. You also get control over private projects. Staff may access private content only for security, vulnerability checks, or legal reasons. If they suspect your data violates laws, they’ll notify you. They follow rules and may warn you about threats.
+
+Rewrite D:
+GitHub protects your personal data by preventing unauthorized access, alteration, or destruction, ensuring data accuracy, and helping users use their data appropriately. You must use a strong password and never share it with others or use the same password with other accounts. If you have private repositories, you control who can access them. GitHub personnel do not access private repository content for security purposes, automated vulnerability scanning, malware detection, or other reasons. They do not access private repository content for support matters, service integrity, legal compliance, or if you consent. GitHub will notify you about private repository access if it is not prohibited by law or if it is in response to a security threat or other risk to security.
+
+Rewrite E:
+GitHub uses reasonable steps to keep your personal data safe from unauthorized access, changes, or loss, and to make sure the data is accurate and used properly. We ask you to use a strong password and not share it or reuse it on other sites. If your account has private repositories, you control who can access them. GitHub staff only access private repository content for specific reasons: security, checking for known problems or malware, helping with support issues, keeping the service working properly, following legal requirements if there's a reason to believe the content breaks the law, or with your permission. GitHub will let you know when they access your private repositories, unless the law stops them or there's a security risk.
+
+Rewrite F:
+GitHub takes reasonable steps to protect your personal data from unauthorized access, changes, or loss, to keep the data accurate, and to help ensure it is used correctly. You should use a strong password and never share it or reuse it on other sites. You control access to your private repositories. GitHub staff will not access private repository content unless it is for security reasons, automated vulnerability or malware scanning, assisting the owner with support, maintaining service integrity, complying with legal obligations if there is a belief of law violation, or with your permission. GitHub will notify you about private repository access unless the law prohibits it or if there is a security threat or risk.
+
+Rewrite G:
+GitHub protects your personal information by using strong passwords and limiting access to private repositories. They also help maintain the security of your data. Access to private repositories is controlled by you, and GitHub only accesses them for security reasons, vulnerability scanning, or when required by law. They will notify you if they need to access private content.
+
+Rewrite H:
+GitHub tries to keep your personal information safe from unauthorized access, changes, or loss, and makes sure it’s used properly. They ask you to use a strong password and never share it or reuse it for other accounts.
+
+You control who can see your private repositories. GitHub employees only look at private repository content in specific cases:
+- Security issues
+- Checking for known problems like malware or violations of their rules
+- Helping you with support requests
+- Keeping the service running smoothly
+- Following legal requirements if they suspect illegal activity
+
+They’ll tell you if they access your private content, unless the law stops them or it’s needed to handle a security risk.

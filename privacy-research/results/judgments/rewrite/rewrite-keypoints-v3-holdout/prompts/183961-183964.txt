@@ -1,0 +1,61 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+Your information, including Personal Data, is processed at the Company’s operating offices and in any other places where the parties involved in the processing are located. It means that this information may be transferred to â€” and maintained on â€” computers located outside of Your state, province, country or other governmental jurisdiction where the data protection laws may differ than those from Your jurisdiction. Your consent to this Privacy Policy followed by Your submission of such information represents Your agreement to that transfer. The Company will take all steps reasonably necessary to ensure that Your data is treated securely and in accordance with this Privacy Policy and no transfer of Your Personal Data will take place to an organization or a country unless there are adequate controls in place including the security of Your data and other personal information.
+
+Key points:
+1. Your information is processed at the Company's offices and wherever the parties involved in processing are located.
+2. (critical) It may be transferred to and kept on computers outside your jurisdiction, where data protection laws may differ.
+3. (critical) Agreeing to the Privacy Policy and then submitting information means you agree to that transfer.
+4. The Company will take all steps reasonably necessary to treat your data securely and in line with the Privacy Policy.
+5. (critical) No transfer will take place to an organization or country unless adequate controls, including for the security of your data, are in place.
+
+Rewrite A:
+The company collects your data and may send it to locations outside your country. You agree to this by submitting your information. They will protect your data securely and only transfer it if proper safeguards are in place.
+
+Rewrite B:
+The company collects your personal information, including details like your location. This information is stored in computers outside your state, province, or country, where data protection laws differ. You agree to this privacy policy and submitting your information, which means you consent to this transfer. The company will protect your data securely and follow this policy. Data transfers will only occur if there are strong security measures in place, including protecting your data and other information.
+
+Rewrite C:
+Your information is processed at the Company's offices and in other locations where the parties involved are located. This means your data may be transferred to and stored on computers outside your state, province, country, or other jurisdiction where data protection laws may differ. By consenting to this Privacy Policy and submitting your information, you agree to that transfer. The Company will take all reasonable steps to ensure your data is treated securely and in accordance with this policy. No transfer of your Personal Data will occur to an organization or country unless adequate controls are in place, including the security of your data and other personal information.
+
+Rewrite D:
+Your information, including Personal Data, may be processed in the Company’s offices and in other locations where the involved parties are located. This means your data could be transferred to and stored on computers outside your state, province, country, or other jurisdiction. If the data protection laws there differ from yours, a transfer may still occur. You agree to this by giving consent and submitting your information. The Company will use reasonable steps to keep your data secure and in line with this Privacy Policy. No transfer will happen to another organization or country unless adequate controls—such as data security—are in place.
+
+Rewrite E:
+Your personal information is processed at the Company’s offices and wherever the people handling it are located. This means your data may be moved to and stored on computers outside your state, province, country, or region, where data protection laws might be different. By agreeing to the Privacy Policy and submitting your information, you accept this possibility. The Company will take reasonable steps to keep your data secure and follow this Privacy Policy. Your data will not be transferred to another organization or country unless proper safeguards are in place to protect your information.
+
+Rewrite F:
+The Company processes your information, including Personal Data, at its offices and wherever the involved parties are located. This means your data might be moved to and kept on computers outside your local laws. By agreeing to this policy and submitting your information, you consent to this transfer. The Company will take reasonable steps to keep your data secure and follow this policy. No Personal Data will be transferred to an organization or country without adequate controls in place to secure your data and other personal information.
+
+Rewrite G:
+Your personal information, including things like your name or contact details, may be stored and handled in different places around the world—including outside your country—where privacy laws might be different. By agreeing to this privacy policy and sharing your information, you’re accepting that this could happen.
+
+The company will do what’s reasonably possible to keep your data safe and follow this policy. They won’t send your personal information to another company or country unless they’re sure it will be protected properly, including keeping your data secure.
+
+Rewrite H:
+Your personal data is collected at the company's offices and anywhere the parties involved are located. This data may be stored on computers outside your state, province, country, or other jurisdiction where local laws differ. Your consent to this policy and submitting your information constitutes your agreement to this transfer. The Company will take all necessary steps to ensure your data is treated securely and in accordance with this policy. No transfer of your personal data will occur to an organization or country unless adequate security controls are in place.
+
+Rewrite I:
+The Company processes your information, including Personal Data, at its operating offices and at locations where the parties involved in processing are located. This means your information may be transferred to and kept on computers outside your state, province, country, or other governmental jurisdiction where data protection laws may differ from your jurisdiction. By submitting your information after consenting to this Privacy Policy, you agree to such transfers. The Company will take all steps reasonably necessary to ensure your data is treated securely and according to this Privacy Policy. The Company will not transfer your Personal Data to an organization or country unless there are adequate controls in place for the security of your data and other personal information.

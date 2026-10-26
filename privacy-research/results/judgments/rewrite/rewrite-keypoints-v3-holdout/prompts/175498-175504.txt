@@ -1,0 +1,58 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+This privacy notice for Improvement Tech LLC (doing business as Umax) (“ we ,” “ us ,” or “ our “), describes how and why we might collect, store, use, and/or share (“ process “) your information when you use our services (“ Services “), such as when you: * Download and use our mobile application (Umax), or any other application of ours that links to this privacy notice * Engage with us in other related ways, including any sales, marketing, or events Questions or concerns? Reading this privacy notice will help you understand your privacy rights and choices. If you do not agree with our policies and practices, please do not use our Services. If you still have any questions or concerns, please contact us at contact@umaxapp.com.
+
+Key points:
+1. This privacy notice is from Improvement Tech LLC, doing business as Umax.
+2. It describes how and why Umax might collect, store, use, and share your information when you use its Services.
+3. The Services include using the Umax mobile app or other apps that link to this notice, and related contact such as sales, marketing, or events.
+4. (critical) If you do not agree with its policies and practices, you should not use the Services.
+5. You can send questions or concerns to contact@umaxapp.com.
+
+Rewrite A:
+Improvement Tech LLC (Umax) collects, stores, uses, or shares your information when you use our services. This includes using our mobile application or any other linked application, or engaging with us in sales, marketing, or events. This notice explains your privacy rights. If you disagree with our policies, do not use our services. Contact us at contact@umaxapp.com with questions.
+
+Rewrite B:
+This privacy notice from Improvement Tech LLC (Umax) explains how and why we collect, store, use, and share your information when you use our services, such as downloading or using our mobile app or engaging with us through sales, marketing, or events. Reading this notice helps you understand your privacy rights and choices. If you do not agree with our policies and practices, you should not use our services. If you have questions or concerns, you can contact us at contact@umaxapp.com.
+
+Rewrite C:
+This notice explains how Improvement Tech LLC (Umax) uses your information. You might be asked to download apps, use our services, or engage with us. We collect information like your app usage, and may share it with partners for marketing or sales.  We have certain rules about what we do with your data, and you can choose not to use our services.  If you’re not happy with our privacy practices, you can contact us at contact@umaxapp.com.
+
+Rewrite D:
+Umax (owned by Improvement Tech LLC) explains how your personal information might be collected, stored, used, or shared when you use their services. This includes using their mobile app (like Umax) or other apps linked to this policy, as well as interacting with them for sales, marketing, or events.
+
+If you don’t agree with how they handle your data, you shouldn’t use their services. If you have questions, read this notice or email them at contact@umaxapp.com.
+
+Rewrite E:
+We, Improvement Tech LLC (doing business as Umax), collect, store, use, or share your information when you use our services, such as our mobile application. This includes when you download and use the app or any other app linked to this privacy notice, or engage in other related activities like sales, marketing, or events. We describe how and why we may collect, store, use, or share your information. If you do not agree with our policies, do not use our services. If you have more questions, contact us at contact@umaxapp.com.
+
+Rewrite F:
+We collect, store, use, and share your information when you use our services, such as downloading and using our mobile application or engaging with us through sales, marketing, or events. We do not sell your personal information to third parties. If you do not agree with our policies, please do not use our services. If you have questions or concerns, contact us at contact@umaxapp.com.
+
+Rewrite G:
+This privacy notice explains how Improvement Tech LLC, also known as Umax, collects, stores, uses, and shares your information when you use their services. This includes using their mobile app, Umax, or any other app that links to this notice, as well as engaging with them through sales, marketing, or events. The notice helps you understand your privacy rights and choices. If you disagree with their policies, you should not use their services. For any questions or concerns, you can contact them at contact@umaxapp.com.
+
+Rewrite H:
+The policy explains how Improvement Tech LLC collects and handles your data when you use their services or interact with them. It covers what information they gather, why they use it, and how they share it. You can review these terms to understand your rights and the conditions under which your data is processed. If you disagree, you should avoid using their services. For more details, reach out to their contact email.

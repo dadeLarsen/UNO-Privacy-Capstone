@@ -1,0 +1,15 @@
+{"rewrites": [
+{"label": "A", "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "kept"}, "evidence": {"3": "You should regularly check their services for the latest information"}, "unsupported": []},
+{"label": "B", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {"1": "This Privacy Statement is subject to change. We’ll update it whenever we do."}, "unsupported": []},
+{"label": "C", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "D", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {}, "unsupported": [
+  {"quote": "You might get an email reminder about these changes", "claim": "Says the email reminders are about the changes; the passage describes periodic reminders of its notices and terms, not emails announcing changes", "severity": "minor"}
+]},
+{"label": "E", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "F", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {}, "unsupported": [
+  {"quote": "We might also send you email reminders about updates", "claim": "Says the email reminders are about updates; the passage describes periodic reminders of its notices and terms, not emails announcing changes", "severity": "minor"}
+]},
+{"label": "G", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "H", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "I", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {}, "unsupported": []}
+]}

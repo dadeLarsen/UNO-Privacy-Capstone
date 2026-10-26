@@ -1,0 +1,20 @@
+{"rewrites": [
+{"label": "A", "verdicts": {"1": "partial", "2": "partial", "3": "kept", "4": "kept", "5": "partial", "6": "missing"}, "evidence": {"1": "using strong technical and organizational protections", "2": "They aim to prevent unauthorized access or misuse of your information", "5": "notify authorities or users if there’s a serious risk"}, "unsupported": [
+  {"quote": "strong technical and organizational protections", "claim": "Calls the protections strong; the passage calls them appropriate and does not rate their strength", "severity": "minor"}
+]},
+{"label": "B", "verdicts": {"1": "kept", "2": "partial", "3": "kept", "4": "kept", "5": "kept", "6": "kept"}, "evidence": {"2": "prevent leaks, damage, misuse, or unauthorized access as much as possible"}, "unsupported": []},
+{"label": "C", "verdicts": {"1": "partial", "2": "partial", "3": "kept", "4": "contradicted", "5": "partial", "6": "kept"}, "evidence": {"1": "using security measures like encryption, secure storage, and company policies", "2": "These efforts aim to prevent leaks, loss, or misuse of your data", "4": "If a security issue happens and affects many people or could seriously harm them, we’ll investigate quickly", "5": "If needed, we’ll notify you and the proper authorities"}, "unsupported": [
+  {"quote": "encryption, secure storage", "claim": "Names specific protections (encryption, secure storage) that the passage does not say the company uses", "severity": "major"},
+  {"quote": "especially when sending data over the internet", "claim": "Says transmission over the internet is riskier than other methods; the passage treats transmission and storage alike", "severity": "minor"}
+]},
+{"label": "D", "verdicts": {"1": "kept", "2": "partial", "3": "kept", "4": "kept", "5": "kept", "6": "kept"}, "evidence": {"2": "protect your information from leakage, misuse, unauthorized access, disclosure, or modification"}, "unsupported": []},
+{"label": "E", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept", "5": "partial", "6": "kept"}, "evidence": {"1": "using technical and organizational safeguards", "5": "If the breach causes significant harm to individuals or is of a significant scale"}, "unsupported": []},
+{"label": "F", "verdicts": {"1": "partial", "2": "missing", "3": "kept", "4": "kept", "5": "partial", "6": "missing"}, "evidence": {"1": "including industry-standard technology and organizational systems", "5": "notify authorities and users if necessary"}, "unsupported": [
+  {"quote": "We use strong security measures", "claim": "Calls the security measures strong; the passage calls them appropriate and does not rate their strength", "severity": "minor"}
+]},
+{"label": "G", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "kept", "6": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "H", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "kept", "6": "kept"}, "evidence": {}, "unsupported": [
+  {"quote": "While we use commercially viable means to protect personal information", "claim": "States that commercially viable means are used; the passage says only that the company strives to use them", "severity": "minor"}
+]},
+{"label": "I", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "missing", "5": "kept", "6": "kept"}, "evidence": {}, "unsupported": []}
+]}

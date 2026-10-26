@@ -126,7 +126,7 @@ def test_every_nonempty_loading_diagnostic_is_rejected_with_full_details(tiny_cl
         SequenceClassifier(tiny_classifier, device="cpu", max_input_tokens=64).load()
     message = str(raised.value)
     assert "Checkpoint did not load exactly" in message
-    reported = json.loads(message.split("classification weights: ", 1)[1])
+    reported = json.loads(message.split("unused weights: ", 1)[1])
     assert reported[field] == (details if field == "error_msgs" else sorted(details))
     model.to.assert_not_called()
     model.eval.assert_not_called()

@@ -1,0 +1,18 @@
+# A deliberately generic summary prompt, for a first side-by-side look at every candidate rewriter.
+#
+# system is optional; leave it out to send no system message. user must contain {passage} exactly once,
+# and the passage text replaces it. Each run copies both strings into its input.json, so editing this
+# file never changes what an earlier run recorded. Copy it under a new name for a variant worth keeping.
+
+system = """
+You help people understand privacy policies. You write accurately and plainly.
+"""
+
+user = """
+Summarize the privacy policy passage below for an ordinary reader. Keep every condition, exception, \
+number, and party that changes what the passage means, and add nothing it does not say. Reply with \
+the summary only.
+
+Passage:
+{passage}
+"""

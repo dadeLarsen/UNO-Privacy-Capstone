@@ -1,0 +1,16 @@
+task = "rewrite"
+strategy = "prompted"
+warmup = 1
+
+[items]
+passages = "appsi139-sections-20"
+
+[model]
+id = "mistralai/Ministral-3-14B-Instruct-2512-BF16"
+revision = "3cea74c1ebaf5ce5f5a2553de470e2ceab825142"
+precision = "int8"
+
+[options]
+prompt = "summary-baseline"
+max_new_tokens = 1024
+seed = 42

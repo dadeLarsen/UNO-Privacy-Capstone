@@ -71,6 +71,10 @@ class ClassificationTask:
     def describe_comparison(rows: list, scoring: dict) -> dict:
         return report.describe_comparison(rows, scoring)
 
+    @staticmethod
+    def write_comparison_files(rows: list, scoring: dict, output) -> list:
+        return []
+
     def fit(self, spec) -> dict:
         try:
             fitter = FITTERS[spec.kind]

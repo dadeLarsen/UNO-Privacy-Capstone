@@ -1,0 +1,63 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+Our operations are supported by a network of computers, cloud-based servers, and other infrastructure and information technology, including, but not limited to, third-party service providers. We and our third-party service providers store and Process your Personal Data in the United States of America and elsewhere in the world. We will protect your information as described in this Privacy Statement if your Personal Data is transferred to other countries. By using our Sites and Services, you consent to your Personal Data being transferred to other countries, including countries that have different data protection rules than your country. We do not represent that our Sites and Services are appropriate or available in any particular jurisdiction.
+
+Key points:
+1. The company's operations rely on computers, cloud servers, and other infrastructure, including third-party service providers.
+2. (critical) The company and its service providers store and process your personal data in the United States and elsewhere in the world.
+3. The company will protect your information as the Privacy Statement describes if it is transferred to other countries.
+4. (critical) By using the Sites and Services, you consent to your data being transferred to other countries, including ones whose data protection rules differ from yours.
+5. The company does not claim its Sites and Services are appropriate or available in any particular jurisdiction.
+
+Rewrite A:
+We use computers, cloud servers, and other technology to store and process your personal data in the United States and elsewhere. We protect your information if it is transferred to other countries. By using our sites and services, you consent to the transfer of your data to other countries. We do not guarantee that our sites are available in any specific country.
+
+Rewrite B:
+We and our third-party service providers store and process your Personal Data in the United States and other countries. By using our Sites and Services, you consent to your Personal Data being transferred to countries that may have different data protection rules than your country. We will protect your information as described in this Privacy Statement if it is transferred to other countries. We do not represent that our Sites and Services are appropriate or available in any specific jurisdiction.
+
+Rewrite C:
+We and our third-party service providers store and process your personal data in the United States and elsewhere. If your data is transferred to other countries, we will protect it as described in this Privacy Statement. By using our Sites and Services, you consent to your personal data being transferred to other countries, including those with different data protection rules. We do not represent that our Sites and Services are appropriate or available in any particular jurisdiction.
+
+Rewrite D:
+We and our third-party providers store and process your personal data using computers and cloud servers globally. If your data is moved to other countries, we will protect it as described in this policy. By using our services, you agree that your data may be transferred to other countries, some of which have different data protection rules than your own country. We do not guarantee that our services are suitable or available in any specific location.
+
+Rewrite E:
+We collect and store your personal information, including data from computers, servers, and other technology, in the United States and other locations. We share this data with third-party service providers. These providers protect your information, and we transfer it to other countries, including those with different data privacy rules. We do not guarantee our sites and services are available in all places.
+
+Rewrite F:
+We use computers, cloud servers, and other technology, including third‑party providers, to run our operations. We and those providers store and process your personal data in the United States and other countries. If your data moves to another country, we protect it as described in our privacy statement. By using our sites and services, you agree that your data may be transferred to other countries, even if those countries have different data protection rules. We do not claim our sites and services are appropriate or available in every jurisdiction.
+
+Rewrite G:
+We use computers, servers, and other technology, including third-party providers, to run our services. Your personal data may be stored and processed in the United States and other countries. We will protect your information as explained in our Privacy Statement when it is sent to other countries. You agree to this transfer when you use our sites and services. These countries may have different privacy rules than yours. We don’t guarantee our services are suitable or available in any specific location.
+
+Rewrite H:
+We use computers, servers, and other tech—including third-party companies—to store and handle your personal information. This happens in the U.S. and other countries around the world.
+
+We’ll protect your data even if it’s sent to countries with weaker privacy laws. By using our services, you agree to let your data be transferred internationally, even if those countries have different rules than yours.
+
+We don’t guarantee our services work or are allowed in every country.
+
+Rewrite I:
+The company uses various systems and partners to store and handle your personal information. They follow rules to protect your data when it moves to other countries. Your use of their services means you agree to this international transfer. They don’t guarantee their services work in every location.
