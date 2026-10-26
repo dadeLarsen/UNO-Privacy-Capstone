@@ -30,6 +30,36 @@ The app's Rewrite feature turns a privacy-policy passage into plain language. It
 
 ## How we scored the rewrites
 
+We scored every rewrite in two ways. Automatic word checks run instantly on any rewrite and need no judge. An AI judge then read every rewrite for meaning, because word checks cannot tell whether a promise survived.
+
+### Automatic word checks
+
+| Check | What it measures | Why it matters |
+| --- | --- | --- |
+| Valid | The answer finished, is not empty, and has no leftover "thinking" text | An unusable answer cannot be shown to anyone. |
+| Numbers kept | How many of the passage's numbers, such as ages, days, or years, are still in the rewrite | A lost "13" or "30 days" changes what a reader can expect. |
+| Limiting words kept | How many of the passage's limiting words are still there: *may*, *might*, *could*, *likely*, *if*, *only*, *unless*, *except*, *not*, *never*, *without*, and *knowingly* | These words limit a promise. Dropping *knowingly* or *not* turns a careful promise into a different one. |
+| Limiting words added | How many rewrites add *only*, *unless*, *except*, *not*, *never*, or *without* where the passage has none | An added exception or restriction makes a promise stronger or weaker than the policy does. |
+| Reading level | The US school grade a reader needs, from sentence and word length (Flesch–Kincaid) | The point of the feature is easier text. The original passages score about grade 16. |
+| Copying | The average length of the word-for-word stretches a rewrite takes from the passage; 1–2 means the model used its own words | A rewrite that copies whole sentences keeps the facts but makes nothing easier to read. |
+| Format breaks | An opening such as "Here's the summary:", or formatting such as bold text or lists | The app shows the rewrite as it comes, beside the policy. |
+| Length | The rewrite's words, against the passage's | Not ranked: it shows how much a model shortens the text. |
+
+**How the checks shaped the instructions.** The `summary-v3` prompt is our third version, and these checks drove each change:
+
+- With a first, generic prompt, Qwen3.5-0.8B mostly copied the passages back, with a copying score of 97 against 1–22 for the other models. Ministral 3 14B opened 12 of 20 rewrites with "Here's your summary:" and used formatting in 18. The second prompt asked for the model's own words, plain text, and no introduction. Qwen3.5-0.8B's copying fell to 6, and Ministral's introductions stopped.
+- Under the second prompt, rewrites added *only* and *unless* where the passage had neither, and dropped *knowingly*. We added the "limiting words added" check and put *knowingly* on the list. The third prompt names these words and forbids making any promise stronger or weaker.
+
+**Why the checks are not enough.** They count words, not meaning, and they count over a whole passage, not fact by fact:
+
+- Four models told readers they would get "30 days' notice" that the policy only promises to a library. The "30" survived, so the numbers check passed.
+- Ministral 3 14B said the company uses "encryption, secure storage", protections the passage never names. No limiting word changed, so no check noticed.
+- Qwen3-14B kept fewer limiting words than Granite 4.2 3B (72% against 82%), yet the judge found it far more faithful: 78% of key facts kept against 65%, and 2 rewrites that could mislead against 8. Word counts alone would rank these two the wrong way round.
+
+The checks still earn their place. They are the only measure of whether a rewrite is easier to read, they catch copying and format problems the judge ignores, and they are cheap enough to run inside the app, for example to warn when *may* or *knowingly* disappears.
+
+### Key facts and an AI judge
+
 **A checklist of key facts.** For each passage we wrote down the facts a reader needs, 231 in all, such as "The company does not knowingly collect personal information from children under 13." 125 of them are marked **critical**: getting one of these wrong would mislead a reader about their data, their rights, or their risks.
 
 **An AI judge.** Claude Opus 5.5 read each passage, its checklist, and all nine models' rewrites of it side by side. The model names were hidden and the order was shuffled for every passage, so the judge could not tell which model wrote which rewrite. For every fact in every rewrite, it chose one of four verdicts:
@@ -69,11 +99,31 @@ The charts show the same results for each passage set separately. Each bar split
 
 ![Judged key facts, 20 held-out passages](../results/comparisons/rewrite-keypoints-v3-holdout/keypoints.png)
 
+### What the word checks found
+
+Both passage sets combined. The 40 passages hold 20 numbers between them; limiting words are counted over every passage.
+
+| Model | Numbers kept | Limiting words kept | Rewrites adding a limiting word | Copying | Format breaks |
+| --- | --- | --- | --- | --- | --- |
+| Qwen3.5-0.8B | 10 of 20 | 81% | 1 of 40 | 6.2 | 0 of 40 |
+| Gemma 3 1B | 8 of 20 | 48% | 6 of 40 | 1.8 | 0 of 40 |
+| LFM2.5-1.2B | 7 of 20 | 46% | 8 of 40 | 0.9 | 0 of 40 |
+| Granite 4.2 3B | 16 of 20 | 82% | 6 of 40 | 3.2 | 2 of 40 |
+| **Qwen3.5-4B** | **17 of 20** | 83% | **0 of 40** | 9.1 | 0 of 40 |
+| Gemma 4 E4B | 13 of 20 | 86% | 2 of 40 | 3.1 | 0 of 40 |
+| Gemma 4 12B | 12 of 20 | 83% | 2 of 36 | 4.7 | 0 of 36 |
+| Ministral 3 14B | 8 of 20 | 78% | 7 of 40 | 1.3 | 9 of 40 |
+| Qwen3-14B | 11 of 20 | 72% | 5 of 40 | 2.2 | 0 of 40 |
+
+- **The checks agree with the judge about the small models.** Gemma 3 1B and LFM2.5 kept under half of the limiting words and added one to 6–8 rewrites. Qwen3.5-0.8B kept more, partly because it copies more.
+- **Qwen3.5-4B never added a limiting word and kept the most numbers**, but it also copies the most. Its rewrites are the hardest to read of the medium models (grade 13).
+- **Ministral 3 14B still uses formatting** such as bold text or lists in 9 of 40 rewrites, although the instructions ask for plain text. No model opened with an introduction.
+
 ### Every measure, one plot per passage set
 
 These plots put every measure we took side by side, one panel per measure and one bar per model, in the legend's colours. The panels fall into three groups:
 
-- **Automatic word checks** (the first eight panels). These cover whether the answer was usable at all ("valid"), and how many of the passage's numbers and limiting words, such as *may*, *unless*, *not* and *knowingly*, survived. They also cover whether the rewrite added a limiting word such as *only* or *unless*, its length, its reading grade, and how much it copies the passage word for word, where 1–2 means the model used its own words. The last panel, format breaks, counts openings such as "Here's the summary:" and formatting such as bold text. These checks count words; they cannot tell whether the meaning survived.
+- **Automatic word checks** (the first eight panels), described in [Automatic word checks](#automatic-word-checks). The plots call limiting words *qualifiers*.
 - **The judge's verdicts** (four panels): key facts kept, critical facts kept, facts contradicted, and rewrites that could mislead. These are the numbers in the table above, shown for each passage set.
 - **Running costs** (the last three panels): seconds per passage, peak memory, and passage length in tokens. Time and memory were measured on a desktop graphics card. They compare the models with each other, but they do not predict speed on a laptop. Memory here is in GiB (1 GiB is about 1.07 GB).
 
