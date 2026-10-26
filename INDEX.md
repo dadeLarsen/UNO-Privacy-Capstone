@@ -140,7 +140,7 @@ One-time scripts that froze data files or imported runs. Each refuses to overwri
 | Runs started `20260918-*` and `20261002-*` | Historical | The six runs imported from the AirLLM workspace, each with its original `legacy-run.json`. Reruns under transformers 5.19.0 sit beside them. |
 | [fits/classification/](privacy-research/results/fits/classification/)`<fit>/<UTC start>/` | Frozen | `fit.toml`, `fit.json` (provenance, cross-validation results, and the weights' hash), and `weights.safetensors`. |
 | `runs/**/evaluation/` | Generated | Scores from `pbench run` or `pbench evaluate`; rewrite runs add `review.md`, each passage above its rewrite. |
-| `comparisons/<name>/` | Generated | `summary.csv` and `matrix-overview.png`/`.svg` from `pbench compare`, plus `side-by-side.md` for rewrite comparisons. Five are committed so readers can see results without running it: `appsi139-test-half`, `embeddinggemma2-instructions`, `pilot-embeddinggemma2-heads`, `pilot-models-embeddinggemma2`, and `qwen-privacy-jev`. |
+| `comparisons/<name>/` | Generated | `summary.csv` and `matrix-overview.png`/`.svg` from `pbench compare`, plus `side-by-side.md` for rewrite comparisons. Nine are committed so readers can see results without running it: `appsi139-test-half`, `embeddinggemma2-instructions`, `pilot-embeddinggemma2-heads`, `pilot-models-embeddinggemma2`, `qwen-privacy-jev`, `rewrite-summary-prompts`, `rewrite-summary-v2`, `rewrite-summary-v3`, and `rewrite-summary-holdout`. |
 
 ### Project files
 

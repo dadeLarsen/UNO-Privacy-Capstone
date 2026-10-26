@@ -1,0 +1,24 @@
+task = "rewrite"
+title = "Nine rewriters on the baseline and v2 summary prompts"
+# Both Qwen3.5 baselines ran before the chat backend stopped on <|im_end|>, so each of their rewrites
+# ends with that token.
+runs = [
+    "rewrite/qwen3.5-0.8b-bf16-summary-baseline/20261025-213909Z",
+    "rewrite/gemma-3-1b-bf16-summary-baseline/20261025-204107Z",
+    "rewrite/lfm2.5-1.2b-bf16-summary-baseline/20261025-211759Z",
+    "rewrite/granite-4.2-3b-bf16-summary-baseline/20261025-211524Z",
+    "rewrite/qwen3.5-4b-bf16-summary-baseline/20261025-214158Z",
+    "rewrite/gemma-4-e4b-int8-summary-baseline/20261025-205852Z",
+    "rewrite/gemma-4-12b-int8-summary-baseline/20261025-204249Z",
+    "rewrite/ministral-3-14b-int8-summary-baseline/20261025-211829Z",
+    "rewrite/qwen3-14b-int8-summary-baseline/20261025-212933Z",
+    "rewrite/qwen3.5-0.8b-bf16-summary-v2/20261025-232700Z",
+    "rewrite/gemma-3-1b-bf16-summary-v2/20261025-225253Z",
+    "rewrite/lfm2.5-1.2b-bf16-summary-v2/20261025-231028Z",
+    "rewrite/granite-4.2-3b-bf16-summary-v2/20261025-230831Z",
+    "rewrite/qwen3.5-4b-bf16-summary-v2/20261025-232830Z",
+    "rewrite/gemma-4-e4b-int8-summary-v2/20261026-152215Z",
+    "rewrite/gemma-4-12b-int8-summary-v2/20261025-225420Z",
+    "rewrite/ministral-3-14b-int8-summary-v2/20261025-231059Z",
+    "rewrite/qwen3-14b-int8-summary-v2/20261025-231945Z",
+]
