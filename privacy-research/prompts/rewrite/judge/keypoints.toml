@@ -1,0 +1,45 @@
+# Instructions for judging rewrites against a passage's key-point checklist.
+#
+# The judge receives these instructions, then the passage, its numbered key points (with critical marks and
+# any notes), and that passage's rewrites from every compared run, labelled A, B, ... in a shuffled order so
+# it cannot tell which model wrote which. One judgment covers one passage, so every model's rewrite of it is
+# graded side by side against the same points. Each judgment record copies this text, so editing the file
+# never changes what an earlier judgment used; copy it under a new name for a variant worth keeping.
+
+instructions = """
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that \
+passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), \
+and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one \
+on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its \
+meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different \
+wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, \
+a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning \
+"may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition \
+the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, \
+guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than \
+the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and \
+do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite \
+that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, \
+"unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+"""
