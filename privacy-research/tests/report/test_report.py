@@ -10,7 +10,7 @@ from privacy_bench.core.conditions import parse_condition
 from privacy_bench.core.harness import execute
 from privacy_bench.core.protocols import Panel, Selection
 from privacy_bench.report.comparisons import parse_comparison
-from privacy_bench.report.plot import draw_matrix, group_label
+from privacy_bench.report.plot import draw_matrix, group_label, series_colors
 from privacy_bench.report.summary import COST_PANELS, summarize, write_summary
 
 
@@ -199,12 +199,23 @@ def test_group_labels_wrap_each_line_splitting_words_only_at_hyphens():
     assert group_label("linear-frequencies") == "linear-\nfrequencies"
 
 
-def figure_pixels(tmp_path, flavours, folder):
+def figure_pixels(tmp_path, flavours, folder, footnotes=("Toy footnote.",)):
     runs = [make_run(tmp_path / folder, f"m{i}", "bf16", flavour) for i, flavour in enumerate(flavours)]
     rows = summarize(ToyTask(), comparison(runs), runs_root=tmp_path / folder)
     paths = draw_matrix(rows, [*ToyTask().quality_panels({}), *COST_PANELS], tmp_path / folder / "plots",
-                        title="Toy comparison", context="toy runs", footnotes=["Toy footnote."])
+                        title="Toy comparison", context="toy runs", footnotes=list(footnotes))
     return imread(paths[0]).shape[:2]
+
+
+def test_long_footnotes_wrap_onto_more_lines_instead_of_running_off_the_figure(tmp_path):
+    one_line = figure_pixels(tmp_path, "ab", "one-line")
+    wrapped = figure_pixels(tmp_path, "ab", "wrapped", footnotes=["word " * 120])
+    assert wrapped[1] == one_line[1] and wrapped[0] > one_line[0]
+
+
+def test_nine_series_get_nine_colours():
+    series = [(f"o/m{i}", "a" * 40, "bf16" if i < 3 else "nf4") for i in range(9)]
+    assert len(set(series_colors(series).values())) == 9
 
 
 def test_matrix_plot_grows_to_fit_long_group_labels(tmp_path):
