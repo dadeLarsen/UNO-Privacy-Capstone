@@ -17,6 +17,7 @@ Data, configuration, and results entries have a status:
 | [docs/Requirements-Document.md](docs/Requirements-Document.md) | What the app must do and how each requirement will be checked |
 | [privacy-research/README.md](privacy-research/README.md) | Which models lead and why, plus setup and the `pbench` workflow |
 | [privacy-research/docs/classification.md](privacy-research/docs/classification.md) | The classification task in detail: data, output contract, scoring, strategies, fitted heads |
+| [privacy-research/docs/rewriting-findings.md](privacy-research/docs/rewriting-findings.md) | Which rewriting model to use and why, in plain language, for the team and presentations |
 
 ## Top level
 
@@ -51,6 +52,7 @@ The `privacy_bench` package and its `pbench` command. Run every command from `pr
 | --- | --- | --- |
 | [README.md](privacy-research/README.md) | Current | Current direction, results with caveats, repository layout, setup, running and comparing, extending, and history. |
 | [docs/classification.md](privacy-research/docs/classification.md) | Current | The ten categories and the OPP-115 mapping, every dataset and sample, the `{"label_id": N}` output contract, scoring rules, strategies, fitted heads, and prior shift. |
+| [docs/rewriting-findings.md](privacy-research/docs/rewriting-findings.md) | Current | A plain-language summary of the judged rewriting results: nine models on 40 passages, key facts kept or lost, examples of errors, and a recommendation per computer size, what compression changes, and its limits. Numbers and plots come from `rewrite-keypoints-v3`, `rewrite-keypoints-v3-holdout`, and `rewrite-precision-v3-holdout`. |
 
 ### Code: [src/privacy_bench/](privacy-research/src/privacy_bench/)
 
