@@ -1,0 +1,23 @@
+task = "rewrite"
+title = "Nine rewriters on the v2 and v3 summary prompts, held-out passages"
+# The held-out passages come from policies the first 20 did not use; no prompt was tuned on them.
+runs = [
+    "rewrite/qwen3.5-0.8b-bf16-summary-v2-holdout/20261026-053942Z",
+    "rewrite/gemma-3-1b-bf16-summary-v2-holdout/20261026-043214Z",
+    "rewrite/lfm2.5-1.2b-bf16-summary-v2-holdout/20261026-050657Z",
+    "rewrite/granite-4.2-3b-bf16-summary-v2-holdout/20261026-050258Z",
+    "rewrite/qwen3.5-4b-bf16-summary-v2-holdout/20261026-054242Z",
+    "rewrite/gemma-4-e4b-bf16-summary-v2-holdout/20261026-045601Z",
+    "rewrite/gemma-4-12b-int8-summary-v2-holdout/20261026-043447Z",
+    "rewrite/ministral-3-14b-int8-summary-v2-holdout/20261026-050754Z",
+    "rewrite/qwen3-14b-int8-summary-v2-holdout/20261026-052434Z",
+    "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+    "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+    "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+    "rewrite/granite-4.2-3b-bf16-summary-v3-holdout/20261026-050456Z",
+    "rewrite/qwen3.5-4b-bf16-summary-v3-holdout/20261026-054449Z",
+    "rewrite/gemma-4-e4b-bf16-summary-v3-holdout/20261026-045928Z",
+    "rewrite/gemma-4-12b-int8-summary-v3-holdout/20261026-044507Z",
+    "rewrite/ministral-3-14b-int8-summary-v3-holdout/20261026-051615Z",
+    "rewrite/qwen3-14b-int8-summary-v3-holdout/20261026-053200Z",
+]

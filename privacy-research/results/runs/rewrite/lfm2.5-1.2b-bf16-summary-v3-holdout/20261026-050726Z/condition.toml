@@ -1,0 +1,16 @@
+task = "rewrite"
+strategy = "prompted"
+warmup = 1
+
+[items]
+passages = "appsi139-sections-20-holdout"
+
+[model]
+id = "LiquidAI/LFM2.5-1.2B-Instruct"
+revision = "0f604ada3f766f9f257460c4c9f0b5d6f69d431b"
+precision = "bf16"
+
+[options]
+prompt = "summary-v3"
+max_new_tokens = 1024
+seed = 42
