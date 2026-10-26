@@ -1,0 +1,16 @@
+task = "rewrite"
+strategy = "prompted"
+warmup = 1
+
+[items]
+passages = "appsi139-sections-20-holdout"
+
+[model]
+id = "google/gemma-4-E4B-it"
+revision = "ee0ef6023621cff504d758262d4e04895a5af4a2"
+precision = "int8"
+
+[options]
+prompt = "summary-v3"
+max_new_tokens = 1024
+seed = 42
