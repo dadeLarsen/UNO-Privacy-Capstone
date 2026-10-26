@@ -113,8 +113,8 @@ def readability_counts(text: str) -> tuple:
 
 def reading_level(texts) -> dict:
     """Flesch-Kincaid grade pooled over the texts, with the two things that drive it."""
-    words, sentences, syllables, long_words = (sum(column) for column in
-                                               zip((0, 0, 0, 0), *map(readability_counts, texts)))
+    counts = [readability_counts(text) for text in texts]
+    words, sentences, syllables, long_words = map(sum, zip(*counts)) if counts else (0, 0, 0, 0)
     if not words:
         return {"reading_grade": None, "words_per_sentence": None, "long_word_rate": None}
     return {"reading_grade": 0.39 * words / sentences + 11.8 * syllables / words - 15.59,

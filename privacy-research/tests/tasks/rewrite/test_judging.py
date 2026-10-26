@@ -125,6 +125,18 @@ def test_record_refuses_quotes_the_rewrite_does_not_contain(judged):
         task.prepare_judgment(comparison, "keypoints", "a test judge", runs_root=runs_root)
 
 
+def test_passages_with_no_valid_rewrite_get_no_prompt_and_need_no_reply(judged):
+    task, _, runs_root = judged
+    broken = parse_comparison("broken-only", 'task = "rewrite"\nruns = ["rewrite/broken/1"]\n')
+    directory = task.prepare_judgment(broken, "keypoints", "a test judge", runs_root=runs_root)
+    assert list((directory / "prompts").iterdir()) == []
+    task.record_judgment(directory, runs_root=runs_root)
+    scored = parse_comparison("broken-only", 'task = "rewrite"\nruns = ["rewrite/broken/1"]\n'
+                                             '[scoring]\njudgments = "broken-only"\n')
+    [row] = summarize(task, scored, runs_root=runs_root)
+    assert row["judged_rewrites"] == 0 and row["misleading_rate"] is None
+
+
 @pytest.mark.parametrize("reply, message", [
     ("not json", "not valid JSON"),
     ('{"rewrites": [], "notes": 1}', "exactly"),

@@ -3,9 +3,10 @@
 A judgment covers one comparison's runs on one passage set. ``prepare`` writes a pending record with
 one prompt per passage: the judge instructions, the passage, its numbered key points from
 data/rewrite/keypoints/<passages>.json, and every run's valid rewrite under a letter shuffled per
-passage, so the judge cannot tell which model wrote which. Invalid rewrites are not judged. A judge
-outside pbench answers each prompt in replies/<passage>.json; ``record`` checks every reply against its
-prompt, quotes included, and freezes the record. ``load`` and ``run_scores`` then score a run from it.
+passage, so the judge cannot tell which model wrote which. Invalid rewrites are not judged, and a
+passage with no valid rewrite gets no prompt. A judge outside pbench answers each prompt in
+replies/<passage>.json; ``record`` checks every reply against its prompt, quotes included, and freezes
+the record. ``load`` and ``run_scores`` then score a run from it.
 """
 
 import json
@@ -48,8 +49,8 @@ def load_checklist(passages: list, identity: dict) -> tuple:
         if not isinstance(items, list) or not items or not all(
                 isinstance(item, dict) and {"id", "point", "critical"} <= set(item) <= POINT_KEYS
                 and isinstance(item["critical"], bool)
-                and all(isinstance(item.get(key, ""), str) and item.get(key, "x").strip()
-                        for key in ("id", "point", "note"))
+                and all(isinstance(item[key], str) and item[key].strip() for key in ("id", "point"))
+                and ("note" not in item or (isinstance(item["note"], str) and item["note"].strip()))
                 for item in items):
             raise ValueError(f"{path}, passage {entry['passage']}: every point needs an id, a point, critical "
                              "true or false, and optionally a note")
@@ -179,16 +180,22 @@ def prepare(name: str, runs: dict, selection, instructions: str, judge: str, out
         order = list(texts)
         random.Random(f"{name}:{passage.id}").shuffle(order)
         labels = dict(zip(LETTERS, order))
-        prompt = render_prompt(spec["text"], passage, checklist[passage.id],
-                               {label: texts[path] for label, path in labels.items()})
-        (output / "prompts" / f"{passage.id}.txt").write_text(prompt, encoding="utf-8", newline="\n")
-        record["passages"][passage.id] = {
-            "prompt_sha256": digest_text(prompt),
-            "labels": {label: {"run": path, "rewrite_sha256": digest_text(texts[path])} for label, path in labels.items()},
-            "not_judged": skipped,
-        }
+        entry = {"labels": {label: {"run": path, "rewrite_sha256": digest_text(texts[path])}
+                            for label, path in labels.items()},
+                 "not_judged": skipped}
+        if labels:
+            prompt = render_prompt(spec["text"], passage, checklist[passage.id],
+                                   {label: texts[path] for label, path in labels.items()})
+            (output / "prompts" / f"{passage.id}.txt").write_text(prompt, encoding="utf-8", newline="\n")
+            entry = {"prompt_sha256": digest_text(prompt), **entry}
+        record["passages"][passage.id] = entry
     write_json(output / "judgment.json", record)
     return output
+
+
+def prompted(record: dict) -> dict:
+    """The passages a judgment has prompts and replies for: those with at least one valid rewrite."""
+    return {passage_id: entry for passage_id, entry in record["passages"].items() if entry["labels"]}
 
 
 def read_record(directory: Path, selection, *, recorded: bool) -> tuple:
@@ -204,7 +211,7 @@ def read_record(directory: Path, selection, *, recorded: bool) -> tuple:
     checklist, identity = load_checklist(selection.items, selection.identity)
     if identity != record["checklist"]:
         raise ValueError(f"The checklist {identity['name']} changed after judgment {directory} used it")
-    for passage_id, entry in record["passages"].items():
+    for passage_id, entry in prompted(record).items():
         prompt = (directory / "prompts" / f"{passage_id}.txt").read_text(encoding="utf-8")
         if digest_text(prompt) != entry["prompt_sha256"]:
             raise ValueError(f"The prompt for {passage_id} differs from the hash in {directory}/judgment.json")
@@ -226,7 +233,7 @@ def record(directory: Path, runs: dict, selection) -> dict:
         expected = next(entry["condition_sha256"] for entry in judgment["runs"] if entry["path"] == path)
         if run.record["condition_sha256"] != expected:
             problems.append(f"run {path} no longer matches the judgment")
-    for passage_id, entry in judgment["passages"].items():
+    for passage_id, entry in prompted(judgment).items():
         texts, _ = judged_texts(passage_id, runs)
         rewrites = {label: texts.get(item["run"], "") for label, item in entry["labels"].items()}
         if any(digest_text(rewrites[label]) != item["rewrite_sha256"] for label, item in entry["labels"].items()):
@@ -243,7 +250,7 @@ def record(directory: Path, runs: dict, selection) -> dict:
         raise ValueError("The judgment cannot be recorded:\n" + "\n".join(problems))
     judgment.update(status="recorded", recorded_utc=utc_now(),
                     replies={passage_id: digest_text(reply_text(directory, passage_id))
-                             for passage_id in judgment["passages"]})
+                             for passage_id in prompted(judgment)})
     write_json(directory / "judgment.json", judgment)
     return judgment
 
@@ -252,8 +259,8 @@ def load(directory: Path, selection) -> dict:
     """A recorded judgment: its record, checklist, each passage's grades by run path, and its own hash."""
     directory = Path(directory)
     judgment, checklist = read_record(directory, selection, recorded=True)
-    grades = {}
-    for passage_id, entry in judgment["passages"].items():
+    grades = {passage_id: {} for passage_id in judgment["passages"]}
+    for passage_id, entry in prompted(judgment).items():
         by_label = parse_reply(reply_text(directory, passage_id), entry["labels"],
                                [item["id"] for item in checklist[passage_id]])
         grades[passage_id] = {entry["labels"][label]["run"]: grade for label, grade in by_label.items()}
