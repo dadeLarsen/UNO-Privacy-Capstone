@@ -1,5 +1,7 @@
 import pytest
 
+from privacy_bench.core.files import read_json
+from privacy_bench.core.paths import data_file
 from privacy_bench.tasks.rewrite.data import Passage, load_passages, load_prompt, parse_prompt, render
 
 PROMPT = 'system = """\nBe careful.\n"""\nuser = """\nSummarize {x}:\n{passage}\n"""\n'
@@ -34,6 +36,15 @@ def test_baseline_prompt_and_frozen_passages_load():
     assert len(passages) == 20 and len({passage.id for passage in passages}) == 20
     assert identity["passages"]["name"] == "appsi139-sections-20" and identity["passages"]["n"] == 20
     assert len(identity["passages"]["sha256"]) == 64
+
+
+def test_the_holdout_passages_come_from_policies_the_first_draw_did_not_use():
+    def policies(name):
+        passages = read_json(data_file("rewrite", "passages", name, suffix=".json"))["passages"]
+        return {passage["policy_first_id"] for passage in passages}
+    assert len(load_passages("appsi139-sections-20-holdout")[0]) == 20
+    assert len(policies("appsi139-sections-20-holdout")) == 20
+    assert not policies("appsi139-sections-20") & policies("appsi139-sections-20-holdout")
 
 
 def test_prompt_names_cannot_leave_the_prompts_folder():

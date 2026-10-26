@@ -103,7 +103,7 @@ One-time scripts that froze data files or imported runs. Each refuses to overwri
 | [split_appsi139.py](privacy-research/tools/split_appsi139.py) | Historical | The APPSI-139 tuning and test halves. |
 | [make_opp115_examples.py](privacy-research/tools/make_opp115_examples.py) | Historical | `opp115-examples.json`, the training sentences for fitted heads. |
 | [import_legacy_runs.py](privacy-research/tools/import_legacy_runs.py) | Historical | The six runs imported from the AirLLM workspace. |
-| [make_appsi139_sections.py](privacy-research/tools/make_appsi139_sections.py) | Historical | `appsi139-sections-20.json`, the rewrite passages, from the AirLLM workspace's `annotation.jsonl`. |
+| [make_appsi139_sections.py](privacy-research/tools/make_appsi139_sections.py) | Historical | `appsi139-sections-20.json` and `appsi139-sections-20-holdout.json`, the rewrite passages, from the AirLLM workspace's `annotation.jsonl`. Rerunning it checks that existing files still match their draw. |
 
 ### Inputs: [data/](privacy-research/data/)
 
@@ -116,6 +116,7 @@ One-time scripts that froze data files or imported runs. Each refuses to overwri
 | [classification/examples/opp115-examples.json](privacy-research/data/classification/examples/opp115-examples.json) | Frozen | The 10,417 OPP-115 sentences fitted heads learn from; none appears in a test sample. |
 | [classification/prompts/definitions.json](privacy-research/data/classification/prompts/definitions.json) | Frozen | One definition per category, used by every strategy. |
 | [rewrite/passages/appsi139-sections-20.json](privacy-research/data/rewrite/passages/appsi139-sections-20.json) | Frozen | 20 APPSI-139 policy sections (86–340 words, one per policy, across three length bands) for rewriting, with each section's heading and sentence IDs. |
+| [rewrite/passages/appsi139-sections-20-holdout.json](privacy-research/data/rewrite/passages/appsi139-sections-20-holdout.json) | Frozen | 20 more sections (93–302 words), drawn the same way from the policies the first 20 did not use, for checking prompts tuned on the first 20. |
 
 ### Configuration
 

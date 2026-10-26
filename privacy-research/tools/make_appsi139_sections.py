@@ -13,10 +13,12 @@ section is the lines after a heading (a Markdown heading, or a line that is bold
 the next heading. A section can be drawn when it has 3 to 12 lines and 80 to 350 words, and none of its
 lines holds an image, a table, a link, or a URL. Bold markers and Markdown escapes are removed from the
 text, and sections whose start repeats another's (boilerplate such as "Links to other sites") are
-dropped. The tool draws 20 sections, at most one per policy, across three length bands, and writes,
-refusing to overwrite:
+dropped. The tool draws 20 sections, at most one per policy, across three length bands. It then draws
+a held-out 20 the same way from the policies the first draw did not use, for checking prompts tuned on
+the first. A file that exists must match its draw exactly; the tool never overwrites one. It writes:
 
 - data/rewrite/passages/appsi139-sections-20.json
+- data/rewrite/passages/appsi139-sections-20-holdout.json
 """
 
 import argparse
@@ -25,11 +27,12 @@ from pathlib import Path
 import random
 import re
 
-from privacy_bench.core.files import digest_bytes, unique_keys, write_json
+from privacy_bench.core.files import digest_bytes, read_json, unique_keys, write_json
 from privacy_bench.core.paths import DATA_DIR
 
 SOURCE_SHA256 = "c38dbe2f470c241f835cc28ba9ba2c678b4f79041ea096ac9a850e994a1083e8"
-OUTPUT = DATA_DIR / "rewrite" / "passages" / "appsi139-sections-20.json"
+PASSAGES_DIR = DATA_DIR / "rewrite" / "passages"
+FIRST, HOLDOUT = "appsi139-sections-20", "appsi139-sections-20-holdout"
 HEADING = re.compile(r"\s*(#{1,6}\s|\*\*[^*]+\*\*\s*$)")
 UNUSABLE = re.compile(r"!\[|\]\(|\|.*\||https?://|www\.")
 MARKDOWN_ESCAPE = re.compile(r"\\([\\`*_{}\[\]()#+\-.!])")
@@ -100,7 +103,7 @@ def passage(section: dict) -> dict:
             "heading": section["heading"], "sentence_ids": ids, "words": len(text.split()), "text": text}
 
 
-def draw(candidates: list) -> list:
+def draw(candidates: list, excluded=()) -> list:
     seen, unique = set(), []
     for item in candidates:
         start = re.sub(r"[^a-z0-9]+", " ", item["text"].lower())[:60]
@@ -109,7 +112,7 @@ def draw(candidates: list) -> list:
             unique.append(item)
     rng = random.Random(SEED)
     rng.shuffle(unique)
-    used, drawn = set(), []
+    used, drawn = set(excluded), []
     for low, high, count in BANDS:
         band = [item for item in unique if low <= item["words"] <= high and item["policy_first_id"] not in used]
         picked = []
@@ -127,23 +130,31 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("annotation", type=Path, help="annotation.jsonl in the AirLLM workspace")
     args = parser.parse_args(argv)
-    if OUTPUT.exists():
-        raise FileExistsError(f"Refusing to overwrite: {OUTPUT}")
     runs = policies(read_lines(args.annotation))
     found = sections(runs)
     candidates = [passage(section) for section in found if eligible(section)]
-    drawn = draw(candidates)
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    write_json(OUTPUT, {
-        "name": OUTPUT.stem,
-        "source": {"file": "annotation.jsonl (AirLLM workspace)", "sha256": SOURCE_SHA256,
-                   "corpus": "APPSI-139", "policies": len(runs)},
-        "selection": {"section_lines": list(LINES), "section_words": list(WORDS),
-                      "bands": [list(band) for band in BANDS], "one_per_policy": True, "seed": SEED,
-                      "sections": len(found), "eligible": len(candidates)},
-        "passages": drawn,
-    })
-    print(f"{len(runs)} policies, {len(found)} sections, {len(candidates)} eligible; wrote {len(drawn)} to {OUTPUT}")
+    first = draw(candidates)
+    holdout = draw(candidates, excluded={item["policy_first_id"] for item in first})
+    print(f"{len(runs)} policies, {len(found)} sections, {len(candidates)} eligible")
+    for name, drawn, excludes in ((FIRST, first, None), (HOLDOUT, holdout, FIRST)):
+        document = {
+            "name": name,
+            "source": {"file": "annotation.jsonl (AirLLM workspace)", "sha256": SOURCE_SHA256,
+                       "corpus": "APPSI-139", "policies": len(runs)},
+            "selection": {"section_lines": list(LINES), "section_words": list(WORDS),
+                          "bands": [list(band) for band in BANDS], "one_per_policy": True, "seed": SEED,
+                          "sections": len(found), "eligible": len(candidates),
+                          **({"excludes_policies_of": excludes} if excludes else {})},
+            "passages": drawn,
+        }
+        path = PASSAGES_DIR / f"{name}.json"
+        if path.exists():
+            if read_json(path) != document:
+                raise ValueError(f"{path} no longer matches its draw; freeze a changed draw under a new name")
+            print(f"{path} matches its draw")
+        else:
+            write_json(path, document)
+            print(f"Wrote {len(drawn)} passages to {path}")
 
 
 if __name__ == "__main__":
