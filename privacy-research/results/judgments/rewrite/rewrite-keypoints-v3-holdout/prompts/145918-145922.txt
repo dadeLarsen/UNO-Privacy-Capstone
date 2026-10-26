@@ -1,0 +1,60 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+This Privacy Statement is expected to change over time. We reserve the right to update it at any time, for any reason. We will notify you of changes to our Privacy Statement by updating the “Last Updated” date and posting the updated Privacy Statement on this page. We may e-mail periodic reminders of our notices and terms and conditions, but you should check our Services frequently to see the current Privacy Statement and any changes made to it. If there are any differences between the English version of our Privacy Statement and a version translated in another language, the English version controls.
+
+Key points:
+1. (critical) The Privacy Statement is expected to change, and the company may update it at any time, for any reason.
+2. (critical) The company notifies you of changes by updating the "Last Updated" date and posting the new statement on the page.
+3. The company may email periodic reminders, but you should check the Services often for the current statement.
+4. If a translated version differs from the English version, the English version controls.
+
+Rewrite A:
+The company may change its privacy policy anytime. They will let you know by updating the date and posting the new version. You should regularly check their services for the latest information. English remains the official version, even if it's translated elsewhere.
+
+Rewrite B:
+This Privacy Statement is subject to change. We’ll update it whenever we do. We’ll notify you of any changes by updating the “Last Updated” date and posting the new statement on this page. We might send you emails about our policies and terms, but please check our services regularly for the latest version. If there are differences between the English version and a translated version, the English version is the final authority.
+
+Rewrite C:
+This privacy statement may change. We can update it anytime for any reason. We will notify you of changes by updating the "Last Updated" date and posting the new statement here. We might email you reminders about our notices and terms. You should check our services often to see the current privacy statement and any changes. If there are differences between the English and any translated version, the English version is the controlling one.
+
+Rewrite D:
+We may change this privacy policy at any time for any reason. We’ll update the "Last Updated" date and post the new version here. You might get an email reminder about these changes, but you should check our services regularly to see the latest policy.
+
+If our policy is translated into another language, the English version is the official one in case of any disagreements.
+
+Rewrite E:
+This Privacy Statement may change over time. We reserve the right to update it at any time for any reason. We will notify you of changes by updating the "Last Updated" date and posting the updated Privacy Statement on this page. We may e-mail periodic reminders of our notices and terms and conditions, but you should check our Services frequently to see the current Privacy Statement and any changes made to it. If there are differences between the English version of our Privacy Statement and a version translated in another language, the English version controls.
+
+Rewrite F:
+This Privacy Statement may change at any time, for any reason. When changes are made, the “Last Updated” date will be changed, and the new version will be posted on this page. We might also send you email reminders about updates, but you should check the page regularly to see the latest version. If there is a difference between the English version and a translated version, the English one takes precedence.
+
+Rewrite G:
+We may update this Privacy Statement at any time for any reason. We will notify you of changes by updating the Last Updated date and posting the new statement on this page. We may send periodic email reminders of our notices and terms, but you should check our Services frequently for the current Privacy Statement and any changes. The English version of the Privacy Statement controls if there are differences between it and a translation.
+
+Rewrite H:
+The privacy statement may change at any time and we will update the “Last Updated” date and post the new version on the page. We may send e‑mail reminders about notices and terms, but you should check the page regularly for the latest privacy statement. If a translated version exists, the English version takes precedence.
+
+Rewrite I:
+This Privacy Statement may change at any time for any reason. We will notify you of changes by updating the "Last Updated" date and posting the new version on this page. We may also send periodic email reminders, but you should check the Services frequently to see the current statement. If the English version differs from a translated version, the English version controls.

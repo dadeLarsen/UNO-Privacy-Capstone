@@ -1,0 +1,17 @@
+{"rewrites": [
+{"label": "A", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "B", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "C", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "D", "verdicts": {"1": "kept", "2": "missing", "3": "partial", "4": "partial", "5": "missing"}, "evidence": {"3": "This data helps improve the games and support their business", "4": "they will notify you of any changes to the privacy policy"}, "unsupported": [
+  {"quote": "such as your game play", "claim": "Gives game play as an example of the data processed; the passage names no such example", "severity": "minor"},
+  {"quote": "There are some limitations to what they can do with this data, like sharing it with other companies", "claim": "Invents limits on what SayGames can do with the data, including on sharing it with other companies; the passage states no such limits", "severity": "major"},
+  {"quote": "They may not be able to use it for other purposes", "claim": "Invents a purpose limitation on the data that the passage does not state", "severity": "major"}
+]},
+{"label": "E", "verdicts": {"1": "kept", "2": "missing", "3": "missing", "4": "partial", "5": "contradicted"}, "evidence": {"4": "They update the rules regularly and will let you know if changes happen", "5": "You should review the updated policy and agree to any new terms"}, "unsupported": []},
+{"label": "F", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "G", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "H", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "kept"}, "evidence": {}, "unsupported": [
+  {"quote": "you may be notified by revising the date at the top of the policy or by providing additional notice or requiring renewed consent", "claim": "Presents revising the date as one optional way of notifying, an alternative to additional notice or renewed consent; the passage says the date is always revised and the extra notice or consent comes on top, depending on the change", "severity": "minor"}
+]},
+{"label": "I", "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "kept", "5": "kept"}, "evidence": {"3": "handle their business"}, "unsupported": []}
+]}

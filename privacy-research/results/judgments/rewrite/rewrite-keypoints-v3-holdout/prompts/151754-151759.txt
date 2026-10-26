@@ -1,0 +1,69 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+Niantic operates its Services across the globe. Your Personal Data will likely be transferred and stored in a country outside of your home country, including in the USA, for the purposes outlined in this Privacy Policy to the extent permitted by applicable laws. The data protection laws in these countries may not be the same as in your home country. If we transfer your Personal Data from the UK or the EEA to other countries, including the USA, we ensure that a similar degree of protection is provided to your Personal Data as within the UK or the EEA, as applicable, by ensuring that at least one of the following safeguards is implemented: * The country that your Personal Data is transferred to is a country that the European Commission (or the UK Government, if you are based in the UK) has deemed to provide an adequate level of protection for Personal Data as the UK or the EEA, as applicable. * We use specific contracts approved by the European Commission (or the UK Information Commissioner’s Office, if you are based in the UK), which give Personal Data the same protection as it has in the UK or the EEA, as applicable, when we engage with service providers.
+
+Key points:
+1. (critical) Niantic operates globally, so your personal data will likely be transferred to and stored outside your home country, including in the USA, to the extent applicable laws permit.
+2. (critical) Data protection laws in those countries may differ from your home country's.
+3. (critical) For transfers from the UK or the EEA, Niantic ensures a similar degree of protection through at least one safeguard.
+4. One safeguard: the destination country has been found by the European Commission (or the UK Government) to provide adequate protection.
+5. The other: contracts approved by the European Commission (or the UK Information Commissioner's Office) when Niantic works with service providers.
+
+Rewrite A:
+Niantic collects and processes your Personal Data worldwide.  
+Your data may be transferred to countries outside your home country, including the USA, for the purposes in this Privacy Policy, subject to applicable laws.  
+If you are in the UK or EEA and we transfer your data to other countries, we make sure the receiving country provides at least the same level of protection as the UK or EEA does. This is done by either:  
+- Transferring to a country the European Commission (or UK Government) says provides adequate protection, or  
+- Using contracts approved by the European Commission (or UK Information Commissioner’s Office) that give the same protection as in the UK or EEA.  
+
+We do not promise stronger protection than the passage states. All conditions and exceptions are as written.
+
+Rewrite B:
+Niantic may transfer and store your Personal Data in countries outside your home country, including the USA, for the purposes described in this Privacy Policy as permitted by law. Data protection laws in these countries may differ from those in your home country. If Niantic transfers your Personal Data from the UK or the EEA to other countries, including the USA, it will ensure a similar degree of protection by using at least one of two safeguards. These are transferring data to a country deemed to have an adequate level of protection by the European Commission or the UK Government, or using specific contracts approved by the European Commission or the UK Information Commissioner’s Office to provide the same protection as in the UK or the EEA.
+
+Rewrite C:
+The company handles your data in places outside your home country, often in the USA. They follow rules to protect your information, but they use certain safeguards when moving data internationally. These measures aim to match the protection standards in the UK or the EEA. The process depends on specific agreements and legal requirements.
+
+Rewrite D:
+Niantic transfers your personal data to countries outside your home country, such as the USA, for the purposes described in this policy. The laws in these countries may differ from those in your home country. If you are based in the UK or the EEA, Niantic ensures that your data is protected to the same degree as in the UK or EEA. This protection is achieved through two main methods: first, the country where your data is transferred is deemed to provide adequate protection by the European Commission or the UK Government; second, you use contracts approved by the European Commission that give your data the same protection as in the UK or EEA.
+
+Rewrite E:
+Niantic collects and handles your personal information globally, including in the U.S. Your data may be sent to countries with different privacy laws than your home country.
+
+If you’re in the UK or the European Economic Area (EEA), Niantic ensures your data gets similar protection when moved outside these regions by either:
+- Sending it to countries the EU or UK government has approved for strong data protection, or
+- Using special contracts with service providers that match the UK/EEA’s data protection standards.
+
+Rewrite F:
+Niantic provides its services worldwide and may transfer and store your personal data in countries outside your home country, including the USA. These countries may have different data protection laws. When moving data from the UK or EEA to other countries, including the USA, Niantic ensures a similar level of protection by using approved safeguards. One safeguard is transferring data to countries recognized by the European Commission or UK Government as providing adequate protection. Another is using approved contracts with service providers that ensure the same level of protection as in the UK or EEA.
+
+Rewrite G:
+Niantic operates its Services globally, and your Personal Data will likely be transferred and stored in countries outside your home country, including the USA, for the purposes outlined in this Privacy Policy to the extent permitted by applicable laws. The data protection laws in these countries may not be the same as in your home country. If we transfer your Personal Data from the UK or the EEA to other countries, including the USA, we ensure that a similar degree of protection is provided to your Personal Data as within the UK or the EEA, as applicable, by ensuring that at least one of the following safeguards is implemented: the country that your Personal Data is transferred to is a country that the European Commission (or the UK Government, if you are based in the UK) has deemed to provide an adequate level of protection for Personal Data as the UK or the EEA, as applicable; or we use specific contracts approved by the European Commission (or the UK Information Commissioner's Office, if you are based in the UK), which give Personal Data the same protection as it has in the UK or the EEA, as applicable, when we engage with service providers.
+
+Rewrite H:
+Niantic operates globally. Your personal data may likely be transferred and stored outside your home country, possibly in the USA, for the purposes described here, as allowed by law. Data protection laws in those countries might differ from your home country's laws. If we transfer your data from the UK or EEA to other countries, including the USA, we ensure your data receives protection similar to that in the UK or EEA. This is done by ensuring one of two things: either the destination country has been deemed adequate by the European Commission or the UK Government, or we use specific contracts approved by the European Commission or the UK ICO that give your data the same protection as in the UK or EEA when we work with service providers.
+
+Rewrite I:
+The company, Niantic, collects your personal data globally, potentially transferring it to a country outside of your home country, like the USA. They use this data to fulfill the terms of this Privacy Policy, and they take steps to protect it in those countries, such as using approved contracts with the European Commission or the UK government.

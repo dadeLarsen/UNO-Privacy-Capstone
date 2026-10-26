@@ -1,0 +1,60 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+When using our services, including on third-party platforms, we may automatically collect or receive certain information associated with you or your devices, such as your computer, mobile device, gaming system, smart TVs, or other streaming devices. The types of information we may collect automatically include your use of our services, your preferences, and how you interact with our content. It may also include device identifiers such as IP address (including approximate location information), advertising ID, cookie ID, media access control (MAC) address, and other unique identifiers. We may automatically collect this information using device-based tracking technologies such as cookies, pixels, tags, beacons, scripts, and similar technologies. For more information about tracking technologies, please see “Cookies and other tracking technologies“.
+
+Key points:
+1. (critical) When you use the services, including on third-party platforms, the company may automatically collect or receive information associated with you or your devices, such as computers, phones, gaming systems, smart TVs, or streaming devices.
+2. This may include how you use the services, your preferences, and how you interact with content.
+3. (critical) It may include device identifiers such as your IP address (including approximate location), advertising ID, cookie ID, MAC address, and other unique identifiers.
+4. The company may collect this with tracking technologies such as cookies, pixels, tags, beacons, and scripts.
+
+Rewrite A:
+We may automatically collect or receive information about you and your devices, including computers, mobile devices, gaming systems, smart TVs, and other streaming devices, when you use our services on our platforms or third-party platforms. This information may include your service use, preferences, and content interactions. It may also include device identifiers like IP addresses with approximate location information, advertising IDs, cookie IDs, MAC addresses, and other unique identifiers. We may collect this data using tracking technologies such as cookies, pixels, tags, beacons, and scripts.
+
+Rewrite B:
+When you use our services—even on other websites or apps—we may collect or get certain info tied to you or your devices, like phones, computers, or smart TVs. This includes how you use our services, your settings, and how you engage with our content.
+
+We might also collect device details like your IP address (which can show your general location), ad tracking IDs, cookie IDs, your device’s hardware address (MAC), and other unique identifiers. We gather this automatically using tracking tools like cookies, hidden pixels, or scripts. For more on these tools, see our section on “Cookies and other tracking technologies.”
+
+Rewrite C:
+When you use our services, including on third-party platforms, we may automatically collect information about your devices and how you use our services. This can include your preferences, how you interact with our content, and device identifiers like IP address, advertising ID, cookie ID, MAC address, and other unique IDs. We use tracking technologies like cookies, pixels, tags, beacons, and scripts to collect this information. For more details about these technologies, see the section on "Cookies and other tracking technologies."
+
+Rewrite D:
+When you use our services, even on other websites, we might automatically gather information about you or your devices. This information includes how you use our services, your preferences, and how you interact with our content. We may also collect identifiers like your IP address and approximate location, advertising ID, cookie ID, MAC address, and other unique IDs. We collect this information using technologies like cookies, pixels, tags, beacons, and scripts. See the "Cookies and other tracking technologies" section for more details on these technologies.
+
+Rewrite E:
+We may collect information about you or your devices when you use our services, including on third‑party platforms. This includes your use of our services, preferences, and how you interact with our content, as well as device identifiers such as IP address, advertising ID, cookie ID, MAC address, and other unique IDs. We may collect this using cookies, pixels, tags, beacons, scripts, and similar tracking technologies.
+
+Rewrite F:
+When you use our services, like our apps or streaming platforms, we might collect information about your devices. This includes things like what you do on our site, your preferences, and how you interact with our content. We might also collect information like your IP address, device IDs, and location. We use these to personalize your experience and track usage. We collect this information using technologies like cookies and pixels. You can find more details about these technologies in our “Cookies and other tracking technologies” page.
+
+Rewrite G:
+The policy explains how data is gathered when using the services. They collect information like your device details, usage patterns, and preferences. This happens automatically through tracking tools such as cookies and pixels. The data helps improve the experience but is handled in a way that follows their stated practices.
+
+Rewrite H:
+When you use our services, including on third-party platforms, we may automatically collect or receive information about you or your devices. This includes your use of the services, your preferences, and how you interact with our content. We may also collect device identifiers such as your IP address (including approximate location), advertising ID, cookie ID, media access control address, and other unique identifiers. We collect this information using device-based tracking technologies like cookies, pixels, tags, beacons, scripts, and similar tools. For more information about these technologies, please see "Cookies and other tracking technologies".
+
+Rewrite I:
+When you use our services, we may automatically gather information about you or your devices, such as your computer, mobile phone, gaming system, smart TV, or streaming device. This data includes your usage of our services, your preferences, and how you interact with our content. It may also include device identifiers like your IP address, advertising ID, cookie ID, media access control (MAC) address, and other unique tags. We may collect this information using tracking technologies such as cookies, pixels, tags, beacons, scripts, and similar methods. For more details on tracking, see the Cookies and other tracking technologies section.

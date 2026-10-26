@@ -1,0 +1,62 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+We work in the cross-border area and provide our App to our Users around the world. We and third-party organizations that provide automatic data processing technologies for the App or our third-party advertising partners may transfer the automatically processed information across borders and from your country or jurisdiction to other countries or jurisdictions around the world. If you are located in the European Union or other regions with laws governing data processing that may differ from U.S. law, please note that we may transfer information, including personal information, to a country and jurisdiction that does not have the same data protection laws as in your jurisdiction. This means that your personal information can be transferred to a third country, a territory or one or more specified sectors within that third country, or to the international organization where data protection and confidentiality regulations may not provide the same level of protection of a personal data as your country does. We try to make sure that the recipient of any personal data provides a proper protection of the personal data received, in accordance with the current legislation on the protection of such information. By using the App, you agree that we may transfer your personal data to any third country, a territory or one or more specified sectors within that third country, or to the international organization. For the purposes of data storage, we recourse to the services of the hosting organizations. We take your privacy seriously and, therefore, encrypt your personal data – if possible – before sending it to the hosting organizations for the purposes of its storage. Please note that we cooperate only with those hosting organizations that have passed our security and reliability check.
+
+Key points:
+1. (critical) The company provides its App worldwide, and it, its data-processing technology providers, and its advertising partners may transfer automatically processed information across borders.
+2. (critical) If you are in the EU or a region with different data laws, your personal information may go to countries or international organizations whose laws may not protect it as well as yours.
+3. The company tries to make sure recipients protect the personal data properly, as current law requires.
+4. (critical) By using the App, you agree to your personal data being transferred to any third country or international organization.
+5. (critical) The company stores data with hosting organizations and encrypts personal data before sending it to them, where possible.
+6. The company works only with hosting organizations that have passed its security and reliability check.
+
+Rewrite A:
+We process personal data across borders and send it to third parties or international organizations. If you are in the EU or a region with different data protection laws, we may transfer your data to a country or sector that does not have the same level of protection. We ensure that the recipient of your data is protected by current laws. We encrypt your data before sending it to hosting providers. We only use hosting services that have passed our security and reliability checks.
+
+Rewrite B:
+We and our third-party technology and advertising partners may transfer automatically processed information, including personal information, across borders to other countries or jurisdictions. If you are in the European Union or other regions with data laws different from U.S. law, your personal information may be transferred to a country, territory, or international organization where data protection regulations may not provide the same level of protection as your country. By using the App, you agree to these transfers. We use hosting organizations for data storage and try to ensure these recipients provide proper protection according to current legislation. We encrypt your personal data before sending it to hosting organizations if possible. We only cooperate with hosting organizations that have passed our security and reliability check.
+
+Rewrite C:
+We provide our App to users worldwide and may transfer automatically processed information across borders, including from your country to others. If you are in the European Union or other regions with different data laws, we may transfer your personal information to countries or jurisdictions that do not have the same data protection laws as your jurisdiction. This means your data could go to a third country, territory, or international organization where regulations might not offer the same level of protection as your country. We try to ensure that recipients provide proper protection for the data in accordance with current legislation. By using the App, you agree that we may transfer your personal data to any third country, territory, or specified sector within it, or to an international organization. For data storage, we use hosting organizations. We encrypt your personal data before sending it to these hosts for storage, if possible. We only cooperate with hosting organizations that have passed our security and reliability checks.
+
+Rewrite D:
+Because we operate internationally, we and third parties using automatic data processing for the App or our advertising partners may move your automatically processed information across borders from your location to other countries. If you are in the EU or another region with different data laws, your personal information may be sent to a country or jurisdiction whose data protection laws are not as strong as yours. This means your data could go to a third country, territory, or sector where data protection standards may not match your country's. We try to ensure the recipient protects the data according to current laws. By using the App, you agree to this transfer of your personal data to any third country, territory, or sector. We use hosting organizations for data storage. We encrypt your personal data before sending it to these hosting organizations for storage, if possible. We only work with hosting organizations that pass our security and reliability checks.
+
+Rewrite E:
+The company handles data across borders and may send information to other countries. This applies if you're in the EU or similar regions with different data rules. They aim to protect your data but only use trusted services and encrypt it before storage. Your use of the app means you agree to this transfer. They follow strict security standards and respect privacy.
+
+Rewrite F:
+We operate globally and may transfer automatically collected information, including personal data, across borders to other countries or regions. This includes moving data to places with different or less strict data protection laws than where you live. We aim to ensure that any organization receiving your data provides adequate protection as required by law. Using the App means you agree to this possible transfer. For data storage, we use hosting services and encrypt your data when possible before sending it. We only work with hosting providers that pass our security and reliability checks.
+
+Rewrite G:
+We collect and share information about our users, both within and outside the United States, to provide our app. This includes data processed automatically by our systems and data shared with third-party partners for advertising and analytics. We may transfer this data across borders to countries with different data protection laws. To protect your information, we use encryption where possible and store it with hosting organizations that have security measures. We want to ensure your data is handled responsibly and that you have a reasonable expectation of privacy.
+
+Rewrite H:
+This app is used worldwide, and we share some of your data with companies that help run the app or show ads. Your data may be sent outside your country, including to places with weaker privacy laws than where you live. We try to make sure these companies protect your data properly, but the laws in those places might not be as strong as yours.
+
+By using the app, you agree to let us send your personal data to these countries or organizations. We store your data with trusted hosting companies that we’ve checked for security. We encrypt your data before sending it to them when we can.
+
+Rewrite I:
+We transfer your personal data when using the App, and we may share it with third parties that process data automatically or work with our advertising partners. This transfer can cross borders, to countries, territories, or sectors within a country, or to international organizations. If you are in the European Union or other regions with different data protection laws, we may transfer your data to a country or place that does not have the same level of protection as your country. We do not transfer data to places where protection is lower than in your jurisdiction. We agree to transfer your data to any third country, territory, or sector, or to an international organization, when using the App. We use hosting organizations to store your data, and we encrypt your data before sending it, only with hosting organizations that have passed our security and reliability check.

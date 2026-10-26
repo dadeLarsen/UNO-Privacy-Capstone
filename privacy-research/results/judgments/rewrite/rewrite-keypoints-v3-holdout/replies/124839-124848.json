@@ -1,0 +1,15 @@
+{"rewrites": [
+{"label": "A", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "partial", "5": "partial", "6": "partial", "7": "partial"}, "evidence": {"4": "Affiliates, who share information with our parent company, subsidiaries, and other affiliates", "5": "Authorities and others, who assist in compliance and protection", "6": "Business Transferees, who share information with acquirers and advisors in business transactions or due diligence", "7": "who may disclose personal information to third parties or with your consent"}, "unsupported": []},
+{"label": "B", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "partial", "6": "kept", "7": "partial"}, "evidence": {"5": "if we believe it’s necessary for legal or security reasons", "7": "Other people or groups you tell us to share your information with, if you give us permission"}, "unsupported": []},
+{"label": "C", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "partial", "6": "kept", "7": "kept"}, "evidence": {"5": "if we believe it is necessary for compliance or protection"}, "unsupported": []},
+{"label": "D", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "kept", "6": "kept", "7": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "E", "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "kept", "5": "partial", "6": "partial", "7": "contradicted"}, "evidence": {"3": "advertising partners", "5": "authorities", "6": "other participants in business transactions", "7": "We may disclose personal information to these parties, with or without your consent"}, "unsupported": []},
+{"label": "F", "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "kept", "5": "partial", "6": "partial", "7": "kept"}, "evidence": {"3": "advertising partners", "5": "authorities", "6": "business transfees"}, "unsupported": []},
+{"label": "G", "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "partial", "5": "partial", "6": "partial", "7": "partial"}, "evidence": {"3": "advertisers", "4": "affiliates, and professionals", "5": "They also share information with authorities", "6": "during business transactions", "7": "Personal details may be shared with recipients as agreed"}, "unsupported": [
+  {"quote": "The company keeps this information for specific purposes and follows rules about when and how it can be disclosed", "claim": "Adds assurances about purpose-limited retention and rules governing disclosure that the passage does not give", "severity": "minor"}
+]},
+{"label": "H", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "partial", "6": "kept", "7": "kept"}, "evidence": {"5": "if we believe it's necessary for legal or safety reasons"}, "unsupported": []},
+{"label": "I", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "partial", "6": "kept", "7": "kept"}, "evidence": {"5": "if we reasonably believe it is necessary for compliance or protection"}, "unsupported": [
+  {"quote": "reasonably believe", "claim": "Sets a reasonable-belief standard for disclosure to authorities; the passage says good-faith belief", "severity": "minor"}
+]}
+]}

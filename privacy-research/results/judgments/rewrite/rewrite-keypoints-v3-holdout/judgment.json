@@ -1,0 +1,936 @@
+{
+  "schema_version": 1,
+  "task": "rewrite",
+  "name": "rewrite-keypoints-v3-holdout",
+  "status": "recorded",
+  "created_utc": "2026-10-26T17:18:36.888086+00:00",
+  "code": {
+    "commit": "fd14ec0e2ab7a037d4418d7138345b782e950343",
+    "dirty": true,
+    "uncommitted_paths": [
+      " M privacy-research/src/privacy_bench/cli.py",
+      " M privacy-research/src/privacy_bench/core/paths.py",
+      " M privacy-research/src/privacy_bench/tasks/rewrite/task.py",
+      "?? privacy-research/src/privacy_bench/tasks/rewrite/chart.py",
+      "?? privacy-research/src/privacy_bench/tasks/rewrite/judging.py"
+    ],
+    "uncommitted_diff_sha256": "1e08efc19aa91d951b09c953558f655d05920913abfa3675c44904cb95fd832e"
+  },
+  "judge": "claude-opus-5-5, in six fresh Claude Code subagent sessions of six or seven passages each, mixing both passage sets",
+  "runs": [
+    {
+      "path": "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+      "condition_sha256": "57c28e292f699982c49c934f20940e4e860565d033b63cb375a78e833e1ebfe0"
+    },
+    {
+      "path": "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+      "condition_sha256": "dd42a28cfdf337b15e8e6cd472a89ec0f191379f1e0f516b8084b7bd082b1b82"
+    },
+    {
+      "path": "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+      "condition_sha256": "cd922e2c1562da331c81e4025eb2a5544012fc33bbfb76482fd27f979445554d"
+    },
+    {
+      "path": "rewrite/granite-4.2-3b-nf4-summary-v3-holdout/20261026-163235Z",
+      "condition_sha256": "054566759b36667a2de5e583652f0f82a22bdaf5077332a2477a00727542fccf"
+    },
+    {
+      "path": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+      "condition_sha256": "f98bc849a192b3a7000b2313aec07745ac2a7bb14cabb49d6c64d388438f552c"
+    },
+    {
+      "path": "rewrite/gemma-4-e4b-nf4-summary-v3-holdout/20261026-163443Z",
+      "condition_sha256": "a3643954aaf2a01ad9422344e2fad683b2bba45d92735f0b17b3e2e951ec63cf"
+    },
+    {
+      "path": "rewrite/gemma-4-12b-nf4-summary-v3-holdout/20261026-163844Z",
+      "condition_sha256": "81c3496d7be04a62f646732dc945ee4154709d9f75a2bf983caa47529248ef6b"
+    },
+    {
+      "path": "rewrite/ministral-3-14b-nf4-summary-v3-holdout/20261026-164319Z",
+      "condition_sha256": "63eb1513b2cae2ef63672f1796442570b9f415a1cfd35c26a92aa874553bbb0b"
+    },
+    {
+      "path": "rewrite/qwen3-14b-nf4-summary-v3-holdout/20261026-164559Z",
+      "condition_sha256": "3a39c7c88c22c3db29bed1904f0570300fb62b4b92cb59a1b16306a9723470d3"
+    }
+  ],
+  "items": {
+    "passages": {
+      "name": "appsi139-sections-20-holdout",
+      "sha256": "c01a76aced12af91278f348ad32415b3015f9965027507faea25dea30bbf80c8",
+      "n": 20
+    }
+  },
+  "checklist": {
+    "name": "appsi139-sections-20-holdout",
+    "sha256": "2ebf8d9dbfd0e035a047dff47a5def972f2009c00db6ec5fa657a4934d94ca9d",
+    "reviewed_by": null
+  },
+  "instructions": {
+    "name": "keypoints",
+    "sha256": "21226f0642995eec57bc2701cf56bf9bab7af4863aeb8c41cf9b0c3e3d60a69b",
+    "text": "You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.\n\nFor every rewrite and every key point, choose one verdict:\n- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as \"may\", \"only\", \"unless\", \"knowingly\", \"reasonable\", or \"at least 30 days\". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.\n- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.\n- missing: the rewrite does not convey the point.\n- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning \"may\" into \"will\" or \"does not knowingly\" into an absolute promise, or adding an exception or condition the passage does not make.\n\nWhere a point has a note, the note says how to treat an ambiguity in the passage; follow it.\n\nThen list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:\n- major: a reader who believed it would be wrong about their data, their rights, or their risks.\n- minor: it is unsupported, but it would not mislead a reader about those things.\nDo not list fair paraphrases, and do not list a claim you already counted as a contradicted point.\n\nJudge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.\n\nFor every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.\n\nReply with JSON only, in this form:\n{\"rewrites\": [{\"label\": \"A\", \"verdicts\": {\"1\": \"kept\", \"2\": \"partial\"}, \"evidence\": {\"2\": \"quoted words\"}, \"unsupported\": [{\"quote\": \"quoted words\", \"claim\": \"what the rewrite adds\", \"severity\": \"major\"}]}]}\nGive every rewrite a verdict for every point."
+  },
+  "passages": {
+    "153863-153865": {
+      "prompt_sha256": "58f034687a5368d43c77a1c7153b3ab1f3b2267312da623072ee82a0037901ad",
+      "labels": {
+        "A": {
+          "run": "rewrite/ministral-3-14b-nf4-summary-v3-holdout/20261026-164319Z",
+          "rewrite_sha256": "b7e1c0511f843c3cb64885f243dadc2925c42020dd06a88044ad4952c66654d6"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "b3fa14b0f328ff9abd2a8ba2f3d7d9460d47aa35866832f3976352f02f50ab3d"
+        },
+        "C": {
+          "run": "rewrite/gemma-4-12b-nf4-summary-v3-holdout/20261026-163844Z",
+          "rewrite_sha256": "306cfcdf18985ed986405cf354a5364237f7630327c3c09d5a24f87320684ce9"
+        },
+        "D": {
+          "run": "rewrite/qwen3-14b-nf4-summary-v3-holdout/20261026-164559Z",
+          "rewrite_sha256": "a8091ab7e82af8205e56ad63b3ac62258b9be203d7a417d9e58f1e142e4b385f"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+          "rewrite_sha256": "2ac92ca019c1dc42e888d420db3ae82c797903b080227ea76f91f3786eb775b2"
+        },
+        "F": {
+          "run": "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+          "rewrite_sha256": "1ff98df5ca29e3e5dd00619e56c785b3146e20f09e8b130897a8f5976eab71cb"
+        },
+        "G": {
+          "run": "rewrite/granite-4.2-3b-nf4-summary-v3-holdout/20261026-163235Z",
+          "rewrite_sha256": "9b1fddca825f661da3270d848b3beeb3624154cfc6416c2061e22fafc1972ed4"
+        },
+        "H": {
+          "run": "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+          "rewrite_sha256": "beae03480651c8aad411eaa87ec5410a3bfc14257858c1eb5b845e11aa18879d"
+        },
+        "I": {
+          "run": "rewrite/gemma-4-e4b-nf4-summary-v3-holdout/20261026-163443Z",
+          "rewrite_sha256": "b1f4afd05d076024f7244326ffafe9f157a8d835c46cb89188b771a62e667751"
+        }
+      },
+      "not_judged": {}
+    },
+    "138537-138545": {
+      "prompt_sha256": "b90ec54b6e5cab006e88a976e65a9f0c71b5abf489b83afe158a77fed405498e",
+      "labels": {
+        "A": {
+          "run": "rewrite/granite-4.2-3b-nf4-summary-v3-holdout/20261026-163235Z",
+          "rewrite_sha256": "f1491ce9a00db5fd08f76dca59c3a56eb10b78c1f4149d93e8224d25b0534473"
+        },
+        "B": {
+          "run": "rewrite/ministral-3-14b-nf4-summary-v3-holdout/20261026-164319Z",
+          "rewrite_sha256": "25f8cb3c95c483306675d47ed156f0ef822a9cff18574a6e170ff8fb623e015f"
+        },
+        "C": {
+          "run": "rewrite/gemma-4-12b-nf4-summary-v3-holdout/20261026-163844Z",
+          "rewrite_sha256": "6ab8625ccd8220a1888ff418114e58c603bbf2a261a6eeea5cad8a805d95ad7c"
+        },
+        "D": {
+          "run": "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+          "rewrite_sha256": "409f9fe60730564014c5afe1022e6392b28b8b7abca3247628afd3697e6f892e"
+        },
+        "E": {
+          "run": "rewrite/qwen3-14b-nf4-summary-v3-holdout/20261026-164559Z",
+          "rewrite_sha256": "6399b02b695a1a8f776fbac821625124fdd1f4426f5e95d2ae56014ae659f194"
+        },
+        "F": {
+          "run": "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+          "rewrite_sha256": "70c66a7db57fa67916b49ccb384818b7e67edf671662ea5994d5a950d72d5335"
+        },
+        "G": {
+          "run": "rewrite/gemma-4-e4b-nf4-summary-v3-holdout/20261026-163443Z",
+          "rewrite_sha256": "5f92a0e6465b145cdcbe91400ffc72430d7c4630ac3bdb18e69928d6566ac16f"
+        },
+        "H": {
+          "run": "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+          "rewrite_sha256": "62439eacac5799a21b06406b62ca82fdb2f56f07437d71c4c60d37443b1766e8"
+        },
+        "I": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "ffe3ed1819e3e4b716c1e8ca9f9a17b03940afcbf8e66bb91f3b0aba3b9bc575"
+        }
+      },
+      "not_judged": {}
+    },
+    "145918-145922": {
+      "prompt_sha256": "7c9fa26fca6d22b69dfe97b2955f9bd4efffbba4824117990e565695214264c2",
+      "labels": {
+        "A": {
+          "run": "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+          "rewrite_sha256": "240fd0ea36a2861eb85688168a410afdfe65d6b1f7332414ef803749748b295b"
+        },
+        "B": {
+          "run": "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+          "rewrite_sha256": "df7fa79e2494d645045bbca8bea47581485e2e94a9ff03c79d5d3cc7c0a19a22"
+        },
+        "C": {
+          "run": "rewrite/gemma-4-e4b-nf4-summary-v3-holdout/20261026-163443Z",
+          "rewrite_sha256": "a5ce49585cfdf8d91b49272dbb214ccaa6b403c8440c3a83db8e47974443da63"
+        },
+        "D": {
+          "run": "rewrite/ministral-3-14b-nf4-summary-v3-holdout/20261026-164319Z",
+          "rewrite_sha256": "8906bec6f8edbf57438792b9299d12f24f991010f755f5cff86f0dfd3571707d"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+          "rewrite_sha256": "652a10b58eb87cc2c36230774ebb8b8b1e14bf2f3d1c5ebc01a73014f5e89b04"
+        },
+        "F": {
+          "run": "rewrite/qwen3-14b-nf4-summary-v3-holdout/20261026-164559Z",
+          "rewrite_sha256": "6c42c14e2d1cf67785d7b9465dd9656c5c66354d0e0192c0eaecb4bd39e312a6"
+        },
+        "G": {
+          "run": "rewrite/gemma-4-12b-nf4-summary-v3-holdout/20261026-163844Z",
+          "rewrite_sha256": "b3742f88b206daf2a8779bfc0894c892df71830b816af4f4435b2e4e1363f758"
+        },
+        "H": {
+          "run": "rewrite/granite-4.2-3b-nf4-summary-v3-holdout/20261026-163235Z",
+          "rewrite_sha256": "1f26683573951b032a7891aa4ef6495abcb38982a66ee30c4aaa9c1ce001193b"
+        },
+        "I": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "98ad530e8588bcb691ab2b78cb4a446cd67214ebfd4c7d9aa11cc034e270dd72"
+        }
+      },
+      "not_judged": {}
+    },
+    "127522-127526": {
+      "prompt_sha256": "d696c22661bca675f0161c3a484aacbbc7bf47f7df60942f2c45d7813d393f94",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+          "rewrite_sha256": "09edf8e95f2276e76479cfae2b865cc5d609bde151f324694ac621c66fb4b162"
+        },
+        "B": {
+          "run": "rewrite/gemma-4-12b-nf4-summary-v3-holdout/20261026-163844Z",
+          "rewrite_sha256": "794a7b9e7b2b62f6a1f5a74122edf63daf9e717e602e5ce4735006068bb24238"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "b178cdb3eee1a994988ea1eeb0a769b64423736a0e53e8363d5aa52901a26e81"
+        },
+        "D": {
+          "run": "rewrite/gemma-4-e4b-nf4-summary-v3-holdout/20261026-163443Z",
+          "rewrite_sha256": "fe6705257c1617053fc389a669cd584bed4c5938b4c6beb495b15e4f9ac74f8d"
+        },
+        "E": {
+          "run": "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+          "rewrite_sha256": "5775acfc4e7b897e875456c23b33ccf4af9bec5c20da926f7f76b38e345c6320"
+        },
+        "F": {
+          "run": "rewrite/granite-4.2-3b-nf4-summary-v3-holdout/20261026-163235Z",
+          "rewrite_sha256": "f6f6e6932941c861fa2d6fcc9aa1b048e794d9bb4c0ad7aa7551dd3823d609db"
+        },
+        "G": {
+          "run": "rewrite/qwen3-14b-nf4-summary-v3-holdout/20261026-164559Z",
+          "rewrite_sha256": "2175426a3250e236089f4a799871c1f1affb85272b3d42dfe1029694f96d4052"
+        },
+        "H": {
+          "run": "rewrite/ministral-3-14b-nf4-summary-v3-holdout/20261026-164319Z",
+          "rewrite_sha256": "66a5664ff6f760b717a4d9376ec6f20c4eeadcc1b61d1bafe0a7fc0f06fc25b0"
+        },
+        "I": {
+          "run": "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+          "rewrite_sha256": "423069351d742ab5b25172bdf467e059ef7c0e15ecd7b78aef181b2106eee411"
+        }
+      },
+      "not_judged": {}
+    },
+    "175498-175504": {
+      "prompt_sha256": "41e5f7087ff6dddcc5010e0e75a71098e6d6f2356a487b57acf4db0b53d35860",
+      "labels": {
+        "A": {
+          "run": "rewrite/gemma-4-e4b-nf4-summary-v3-holdout/20261026-163443Z",
+          "rewrite_sha256": "0516b3c498d91ba8541fee7570f382709beb8d627eea582473c7c175375f00c8"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "6e005679439c93ccae5cf2111964b54962ace4f7616beb8edc7f25022be50210"
+        },
+        "C": {
+          "run": "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+          "rewrite_sha256": "a35f5efbb73a219aea139481ce76467dd7df9efe6aa3be7d6dcd4883ca1ae521"
+        },
+        "D": {
+          "run": "rewrite/ministral-3-14b-nf4-summary-v3-holdout/20261026-164319Z",
+          "rewrite_sha256": "647dc746dcf73853dc2618659bb6c800c465c74707df28be1af6e2b46ed57d61"
+        },
+        "E": {
+          "run": "rewrite/granite-4.2-3b-nf4-summary-v3-holdout/20261026-163235Z",
+          "rewrite_sha256": "ec0997ac021b5f02868a533b93b0aaf4c0729b8e1cf244d3611395524ad10c13"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+          "rewrite_sha256": "a874568066bd4a38e19e468dafcb05ce6c5754996253b75b322222ebf920256f"
+        },
+        "G": {
+          "run": "rewrite/qwen3-14b-nf4-summary-v3-holdout/20261026-164559Z",
+          "rewrite_sha256": "f91351da632b69ae31aa8a7f31c7286c3128046216fc70fa0b941cb39679ef6d"
+        },
+        "H": {
+          "run": "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+          "rewrite_sha256": "34603b70a579e680adcd29d267f6197c9cd6b14d17d013b798d45cb8f4e70935"
+        }
+      },
+      "not_judged": {
+        "rewrite/gemma-4-12b-nf4-summary-v3-holdout/20261026-163844Z": "reasoning"
+      }
+    },
+    "183961-183964": {
+      "prompt_sha256": "fd11fd34f7356ed6461661765b2d2783b830804d367f91619a88a6bdff606348",
+      "labels": {
+        "A": {
+          "run": "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+          "rewrite_sha256": "2abdfe95512e7782986fd73a53ac55d07df8dd5733c9a54d76d76516241bb78e"
+        },
+        "B": {
+          "run": "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+          "rewrite_sha256": "3b2701a96a17d0d5859740ad5e2bbd976fc9b6044aebb29c64a1918f645510b6"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "7d7bda4f4faab287fd59861066e8e1565578284493c7babdbc907652db62a03c"
+        },
+        "D": {
+          "run": "rewrite/granite-4.2-3b-nf4-summary-v3-holdout/20261026-163235Z",
+          "rewrite_sha256": "5f2cd14b571e57be1879a535e182c2205907cf63ff03b7b4d4fb8fee03e11c3a"
+        },
+        "E": {
+          "run": "rewrite/qwen3-14b-nf4-summary-v3-holdout/20261026-164559Z",
+          "rewrite_sha256": "3e7537b96107a0b01475812f3de92ec68407a543d8ae1610b41f719b400a9cdc"
+        },
+        "F": {
+          "run": "rewrite/gemma-4-e4b-nf4-summary-v3-holdout/20261026-163443Z",
+          "rewrite_sha256": "d82398fe5f742fa77c2cd1ee52c33f17d2c8c39171591e5390599078ef84b070"
+        },
+        "G": {
+          "run": "rewrite/ministral-3-14b-nf4-summary-v3-holdout/20261026-164319Z",
+          "rewrite_sha256": "c87c33e7f2b2426ccd98fced0c98a31cf798de9fa48685ce67e9d9480308a44c"
+        },
+        "H": {
+          "run": "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+          "rewrite_sha256": "2f81d961a7612ac6b6e7f44f2b3d3a621476d9b239dc31a60e5fc8bf1b39e637"
+        },
+        "I": {
+          "run": "rewrite/gemma-4-12b-nf4-summary-v3-holdout/20261026-163844Z",
+          "rewrite_sha256": "da90190f6d905567339cd87f5cabeb0b10d594a7c57d935ded25c368f3ec77ad"
+        }
+      },
+      "not_judged": {}
+    },
+    "130997-131003": {
+      "prompt_sha256": "20b49b9d3a1e1f51d7dfe19f2fbf779198a6d34d757762f6d5dcebade580b22a",
+      "labels": {
+        "A": {
+          "run": "rewrite/granite-4.2-3b-nf4-summary-v3-holdout/20261026-163235Z",
+          "rewrite_sha256": "1d6d7983a24b0c9a5df548df02388acde7620a342fc29876122df7446dc7b2aa"
+        },
+        "B": {
+          "run": "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+          "rewrite_sha256": "ba4173937a147c8eff3e1350df4efa2ae455eddc88bd84637e869abbd290f4d1"
+        },
+        "C": {
+          "run": "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+          "rewrite_sha256": "b02ac81dce01d862913169698dd46207b79b71332759cbb1af7e1dd9925d5af6"
+        },
+        "D": {
+          "run": "rewrite/qwen3-14b-nf4-summary-v3-holdout/20261026-164559Z",
+          "rewrite_sha256": "9a39177836a0d87630bc455a6eabf82e96eb65e4352ceb3afcca3c4f19a96baf"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+          "rewrite_sha256": "b6ef678090c30f8daf2f0fd041d34dfa4e2a5b00f719bf3032ab8cf851cc6e01"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "2d2a9fad97b48aa48d0ad55e84490005f47b1187bfaaaa17f1387416ea3d2fca"
+        },
+        "G": {
+          "run": "rewrite/gemma-4-12b-nf4-summary-v3-holdout/20261026-163844Z",
+          "rewrite_sha256": "26182c716c9f54e95288cf38f6b6e3e9aeedee5113275df0e6e8da44d2dc507c"
+        },
+        "H": {
+          "run": "rewrite/ministral-3-14b-nf4-summary-v3-holdout/20261026-164319Z",
+          "rewrite_sha256": "60c4d3f73f1216b0f3069d3584e28117ca1f897e4c59fd7eaf0e9478f3c7db6e"
+        },
+        "I": {
+          "run": "rewrite/gemma-4-e4b-nf4-summary-v3-holdout/20261026-163443Z",
+          "rewrite_sha256": "4824105e1c730e082e78d49b59627f32283449066a897c0889bf01a3810e9791"
+        }
+      },
+      "not_judged": {}
+    },
+    "174125-174130": {
+      "prompt_sha256": "2f0ac5007cbcea5d34a2733a15383003cdab48d5f6fd0a5285388faf540c9915",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "a60d6b1f110a412b33160a7fa35666d0be38b65e1e94c0f8ef160c4e1347a5db"
+        },
+        "B": {
+          "run": "rewrite/granite-4.2-3b-nf4-summary-v3-holdout/20261026-163235Z",
+          "rewrite_sha256": "40112dc5d766925829ad5de3beaa3bf6cae07b65db8c7da4f71e69d17478cb97"
+        },
+        "C": {
+          "run": "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+          "rewrite_sha256": "81dc5a6ef8b4367caa3b846fd40ca8112d38f365c90bfc96e32d89accddb7bef"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+          "rewrite_sha256": "0029da4c204450d7daf98bf4534c6985616c6f799e35e2a4edfff1b0786fcba1"
+        },
+        "E": {
+          "run": "rewrite/qwen3-14b-nf4-summary-v3-holdout/20261026-164559Z",
+          "rewrite_sha256": "a80b0d4b57ccc2b4a3e636f067013843b829c3d52253d228446e14a821408366"
+        },
+        "F": {
+          "run": "rewrite/gemma-4-e4b-nf4-summary-v3-holdout/20261026-163443Z",
+          "rewrite_sha256": "fd95c7fdaaafbc82ea0829b16cef9880ddee216777064f62dfd699fe2c6d128d"
+        },
+        "G": {
+          "run": "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+          "rewrite_sha256": "87feb277a7e02fe9fc08e33c9063b3006dfbf57ed518ec8bafdef0013383e34a"
+        },
+        "H": {
+          "run": "rewrite/ministral-3-14b-nf4-summary-v3-holdout/20261026-164319Z",
+          "rewrite_sha256": "a67b24de2a6e084451262493cfbc07fd588299f92b210a20dfcf10271d5e8d70"
+        }
+      },
+      "not_judged": {
+        "rewrite/gemma-4-12b-nf4-summary-v3-holdout/20261026-163844Z": "reasoning"
+      }
+    },
+    "126639-126641": {
+      "prompt_sha256": "dc8341f9e918afa0b0f3493cf8134b4a4fffb70844e5735cb3927abf798df1c5",
+      "labels": {
+        "A": {
+          "run": "rewrite/gemma-4-12b-nf4-summary-v3-holdout/20261026-163844Z",
+          "rewrite_sha256": "492e4e691e94e03f98ce4c67a305b8e30d31124721edbc7083bebd22ae3fa112"
+        },
+        "B": {
+          "run": "rewrite/qwen3-14b-nf4-summary-v3-holdout/20261026-164559Z",
+          "rewrite_sha256": "069c2f12089ad948e27f5bc8b14023f99b395864880317c6c56ef57bf0927078"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "0c8c196bebd195486e29d9b58a3c6a37383fad454a262cec0fb8d2e88ea7be44"
+        },
+        "D": {
+          "run": "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+          "rewrite_sha256": "c98533eaeb013419dd6168d7f0a8d661b0b6bf9aaaed9d7735abb775865a219f"
+        },
+        "E": {
+          "run": "rewrite/gemma-4-e4b-nf4-summary-v3-holdout/20261026-163443Z",
+          "rewrite_sha256": "3285988231179e2a4cfecf73b9528636f915edda18f0f4d335609d266f787aee"
+        },
+        "F": {
+          "run": "rewrite/ministral-3-14b-nf4-summary-v3-holdout/20261026-164319Z",
+          "rewrite_sha256": "29159fad02240b76515160c7aeb5c35e8a44ddf054661e1e694a6be2359ff542"
+        },
+        "G": {
+          "run": "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+          "rewrite_sha256": "a5d8fdf90cac10d7b8caaccf23a8138a34862a3e8ed42d730a4b059382223bc4"
+        },
+        "H": {
+          "run": "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+          "rewrite_sha256": "3f683fb1f50d9addcff6d0e927f8f8cbc747799d43bbc425994fa0280362b0e0"
+        },
+        "I": {
+          "run": "rewrite/granite-4.2-3b-nf4-summary-v3-holdout/20261026-163235Z",
+          "rewrite_sha256": "8ce8db4447195bfc474de0a4b64c4c2fdbd7aaaa9b6f89baeca2967bd83825b0"
+        }
+      },
+      "not_judged": {}
+    },
+    "133007-133016": {
+      "prompt_sha256": "d86b7fc0df2b2d10e15301eda3cadd00ea0874f5a79d36202ff131c6837535f4",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3-14b-nf4-summary-v3-holdout/20261026-164559Z",
+          "rewrite_sha256": "79b7625b3dd711538561ec5f76dba0bab55dced8517050310b3227fececc9b5a"
+        },
+        "B": {
+          "run": "rewrite/granite-4.2-3b-nf4-summary-v3-holdout/20261026-163235Z",
+          "rewrite_sha256": "c2f8783e406002195628543c91f73c5a38fd07c611cf84a339a15f5fa965bf9d"
+        },
+        "C": {
+          "run": "rewrite/gemma-4-e4b-nf4-summary-v3-holdout/20261026-163443Z",
+          "rewrite_sha256": "203b3d36f9de965fa04a2f6c0ad54d4bedcbea4d751466760f0748d476e188bd"
+        },
+        "D": {
+          "run": "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+          "rewrite_sha256": "483eb8f5ca21f4804fea4a3ff542d00937e2343d856ba4914de351f167f37cad"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "f238e533200c13b183a9e6f9095d0e617afe27631068a52bbd3cd08c085749e7"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+          "rewrite_sha256": "0b71627b2ad514cb2bc91ad25af55e8c5e392b45b5249f7bc1d70742827001c7"
+        },
+        "G": {
+          "run": "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+          "rewrite_sha256": "9e88a46bc7d26a18cac20857b2cc23224813a0373f526a7aef8acbc553ba385d"
+        },
+        "H": {
+          "run": "rewrite/ministral-3-14b-nf4-summary-v3-holdout/20261026-164319Z",
+          "rewrite_sha256": "e122ed0718015cb82a29538e12452d544a6ca6457a5b34369faf272cccd81449"
+        },
+        "I": {
+          "run": "rewrite/gemma-4-12b-nf4-summary-v3-holdout/20261026-163844Z",
+          "rewrite_sha256": "e39259535ebc737682dbbc1d50a65ceb16ad40c431c04006589ab31ed9440378"
+        }
+      },
+      "not_judged": {}
+    },
+    "151754-151759": {
+      "prompt_sha256": "7d4ee85d92422187b97fca8929488464de230f87615ae51dca8e859d62ef8461",
+      "labels": {
+        "A": {
+          "run": "rewrite/granite-4.2-3b-nf4-summary-v3-holdout/20261026-163235Z",
+          "rewrite_sha256": "b2feff257de0f21609754da4ae392faddda88ce2142ca71e85b153334b597955"
+        },
+        "B": {
+          "run": "rewrite/gemma-4-12b-nf4-summary-v3-holdout/20261026-163844Z",
+          "rewrite_sha256": "4a2ab927f108d382a9f1fd041017c60e0282ebb3f5ee5510fa55edcb9b78e95b"
+        },
+        "C": {
+          "run": "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+          "rewrite_sha256": "0a2af2e70257526bea126be048565487879dc28aa3ff31298707f1d8a9de39a1"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+          "rewrite_sha256": "2fff302c42b91e2fe4c9707315b7fcc39d095b2405d6fb0d890e8d841c1bc45d"
+        },
+        "E": {
+          "run": "rewrite/ministral-3-14b-nf4-summary-v3-holdout/20261026-164319Z",
+          "rewrite_sha256": "b9fb50f1e2c44ba905416a2c48a3fb4ea9c880f5a0225167b903e94de93ab4dc"
+        },
+        "F": {
+          "run": "rewrite/qwen3-14b-nf4-summary-v3-holdout/20261026-164559Z",
+          "rewrite_sha256": "52cea04d3a8b9c162f52f13ae1e7e26dd623932cb0e9f93676d504ed48873e64"
+        },
+        "G": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "905dd65c2701652e8f8fc528a375dc1d2faedd980ae35dbd598a5ac7f2c78ec2"
+        },
+        "H": {
+          "run": "rewrite/gemma-4-e4b-nf4-summary-v3-holdout/20261026-163443Z",
+          "rewrite_sha256": "a521fa79b7cb593358cbbfdbbe4ac9d8973c75325493bcd5e3030ff464165077"
+        },
+        "I": {
+          "run": "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+          "rewrite_sha256": "754e571f41d8cd288008415f3c1b7cbaba2735386c1f0feee40b8f2bf56a42d1"
+        }
+      },
+      "not_judged": {}
+    },
+    "146092-146097": {
+      "prompt_sha256": "10dd527762e26c43448fc3b64284de343b3e7d376bcf1e1019c81c7528f9163b",
+      "labels": {
+        "A": {
+          "run": "rewrite/granite-4.2-3b-nf4-summary-v3-holdout/20261026-163235Z",
+          "rewrite_sha256": "37557d5a88996d4801ad9830590a9528cfad848aca9599ac47048498d4387201"
+        },
+        "B": {
+          "run": "rewrite/ministral-3-14b-nf4-summary-v3-holdout/20261026-164319Z",
+          "rewrite_sha256": "8687e6eb2d42012995342ca12ed6332b0baefc509cf0c5db248f17ea0ec00679"
+        },
+        "C": {
+          "run": "rewrite/gemma-4-12b-nf4-summary-v3-holdout/20261026-163844Z",
+          "rewrite_sha256": "8daa0369e07976c22ef0e04c1ed8a23e20b828d1bf275c7bbda6f22de0342e4c"
+        },
+        "D": {
+          "run": "rewrite/gemma-4-e4b-nf4-summary-v3-holdout/20261026-163443Z",
+          "rewrite_sha256": "57185cf8f4340267ec4eaa5b732d2b394d3c456f2367da03042debb4bf0b7a17"
+        },
+        "E": {
+          "run": "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+          "rewrite_sha256": "22cf30a800cb41bb1755e9a25427e0821ae5bb933c465e6a266de043f580333c"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "092ff4936fcf633736eeb36c4b045a85ee8ddab32b753c7c9b9cff581b519d7f"
+        },
+        "G": {
+          "run": "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+          "rewrite_sha256": "826ea215568f5c74ad8361eac0a15a7ec4fa2b5898b25ddef90c13f9ed80ad16"
+        },
+        "H": {
+          "run": "rewrite/qwen3-14b-nf4-summary-v3-holdout/20261026-164559Z",
+          "rewrite_sha256": "510fbb137738f17da1cacb3d806340b312a37ba7264f33cf2e27c77b3c4c7de7"
+        },
+        "I": {
+          "run": "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+          "rewrite_sha256": "6c2ddd9d771c40750ab447e6095292c123f3d8204d9575f577af4b561e71ef6e"
+        }
+      },
+      "not_judged": {}
+    },
+    "158575-158585": {
+      "prompt_sha256": "7d8639dffc84a23c85b952a2a4dc6bdd4f6f639333532047a4ed41add1a921dc",
+      "labels": {
+        "A": {
+          "run": "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+          "rewrite_sha256": "5e1333141105ef7fb85dbab85e8ae5276e3c0eb0cdd0aa22b2b4118f2fb54543"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "ef26cf6abdcb809f82b50a2174e07a00775ec66fcc896d54025c0e5496b458be"
+        },
+        "C": {
+          "run": "rewrite/granite-4.2-3b-nf4-summary-v3-holdout/20261026-163235Z",
+          "rewrite_sha256": "2faab7c440aea1701c3d6bfa57600ce9bcf69af88d916ef4308b7580afebd1da"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+          "rewrite_sha256": "a43bf74fee74fa79b9eac6ef6ed4861e9b8b0393927d5c7cf03a03b7e50e165f"
+        },
+        "E": {
+          "run": "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+          "rewrite_sha256": "3de00757cdcc4791bdbc072dfce19eff3be980f6aad412d7db9a128f1ff63b63"
+        },
+        "F": {
+          "run": "rewrite/ministral-3-14b-nf4-summary-v3-holdout/20261026-164319Z",
+          "rewrite_sha256": "a8d795e0c3ee9dabedd0ec7efd123ca4b15185c4d80785cf37861548eea85eae"
+        },
+        "G": {
+          "run": "rewrite/qwen3-14b-nf4-summary-v3-holdout/20261026-164559Z",
+          "rewrite_sha256": "67d76a290387bb3cde4a88ad10c29ad9ffe64af13bfe07e05f8e331856b5d99d"
+        },
+        "H": {
+          "run": "rewrite/gemma-4-e4b-nf4-summary-v3-holdout/20261026-163443Z",
+          "rewrite_sha256": "279a231749b9a84b6858b9ba44ea43e2f06c66b0804db54f8f5597095dbf9127"
+        },
+        "I": {
+          "run": "rewrite/gemma-4-12b-nf4-summary-v3-holdout/20261026-163844Z",
+          "rewrite_sha256": "580e550426bb9757439bb173f9d2d9ee4f3ac3ae292b38fa8db7a90e1f2c6202"
+        }
+      },
+      "not_judged": {}
+    },
+    "154033-154041": {
+      "prompt_sha256": "b107241aeacec1a4032d4f5bcd1506ac5fb0b1749759460ff2fbf7ebde0f253c",
+      "labels": {
+        "A": {
+          "run": "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+          "rewrite_sha256": "adcb2af33c41ef99b81676b3722580b75c2a5837bbdcd5288971de06647b3438"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "ae2c2f7363439a8b2112812dacb3ff24b1ccf6104574e9f3c9f464e12afc3056"
+        },
+        "C": {
+          "run": "rewrite/gemma-4-12b-nf4-summary-v3-holdout/20261026-163844Z",
+          "rewrite_sha256": "bc413cd6e07384d408371a8825047ee685c5f019bbcec58ca60eb77bc83839c5"
+        },
+        "D": {
+          "run": "rewrite/gemma-4-e4b-nf4-summary-v3-holdout/20261026-163443Z",
+          "rewrite_sha256": "022f7e35cfaac0ce3f38f8b1850c863d7f558d4b58e1058798729a9075472bd1"
+        },
+        "E": {
+          "run": "rewrite/ministral-3-14b-nf4-summary-v3-holdout/20261026-164319Z",
+          "rewrite_sha256": "f962d82a39ee860355dd42ab0d35ad98aa44aaa20d0678d415d01a0cb64b087a"
+        },
+        "F": {
+          "run": "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+          "rewrite_sha256": "c395833231540e0e0b018d54898ce26aa0320d557f576ca2bdaab26a8d95e836"
+        },
+        "G": {
+          "run": "rewrite/qwen3-14b-nf4-summary-v3-holdout/20261026-164559Z",
+          "rewrite_sha256": "fb7e1a1c6267711c877c88db95646b0bc8e936c7aebd944cb11e319eca9f3649"
+        },
+        "H": {
+          "run": "rewrite/granite-4.2-3b-nf4-summary-v3-holdout/20261026-163235Z",
+          "rewrite_sha256": "4575ab4ba0e01701a0e3d42f9633d1f0a6d341cf6a69cc70754d2ec327a6d8e1"
+        },
+        "I": {
+          "run": "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+          "rewrite_sha256": "712d13286d466285654a9495ed7a45cf809ef9aaa93c644e80d5a14c309ef4a6"
+        }
+      },
+      "not_judged": {}
+    },
+    "124839-124848": {
+      "prompt_sha256": "a257bcfc5dc1be6afff2c8e91c9724482dbee42940793ef93133d61e3391777f",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+          "rewrite_sha256": "c3956e2b5440e31652f15eaa7d66c1430b58d664d29de133285785a928b79092"
+        },
+        "B": {
+          "run": "rewrite/ministral-3-14b-nf4-summary-v3-holdout/20261026-164319Z",
+          "rewrite_sha256": "92fb69bb587a14473aad6fd2b72adc90598d270506f2437d7be31e0e192b6a04"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "ddff6f93196448cd1e6cb644b1fee6bec2a5115f47e936ad992c0b7489e755b6"
+        },
+        "D": {
+          "run": "rewrite/gemma-4-12b-nf4-summary-v3-holdout/20261026-163844Z",
+          "rewrite_sha256": "8e707664131ffe22543ccde454efeb76b6ef8a7006f2775787a9cb0842c3d8b9"
+        },
+        "E": {
+          "run": "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+          "rewrite_sha256": "da6ea22cb02700671821f2dbcbbc4c6be96f90b0d987305abe2d6b188eb6cfc6"
+        },
+        "F": {
+          "run": "rewrite/granite-4.2-3b-nf4-summary-v3-holdout/20261026-163235Z",
+          "rewrite_sha256": "178d81274d70fa26f00fb46c182a9f60823442122a050bf88796fc7780cb2cc0"
+        },
+        "G": {
+          "run": "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+          "rewrite_sha256": "5c81c2a8d54cb51123d34fd7d6d80f4d2f11c4855c802b271c4eda0fe992c172"
+        },
+        "H": {
+          "run": "rewrite/qwen3-14b-nf4-summary-v3-holdout/20261026-164559Z",
+          "rewrite_sha256": "561a31af9a63727981c314f8ea900232909e946d81993b8c4ba63b2558690c0f"
+        },
+        "I": {
+          "run": "rewrite/gemma-4-e4b-nf4-summary-v3-holdout/20261026-163443Z",
+          "rewrite_sha256": "ce5bfea25cad01d0e2cb0dde6dc0b2261d2592b28a4c2069ab75fdf0c3249979"
+        }
+      },
+      "not_judged": {}
+    },
+    "134424-134431": {
+      "prompt_sha256": "58f9def0d9c26b4c340be7a96611b1044b857cf1d8a802ec8396f135604aae4f",
+      "labels": {
+        "A": {
+          "run": "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+          "rewrite_sha256": "88ec0c42b9b40efadf5a05fa734e41f2658a8d7fbfeb18ad7731bb57fc3199d9"
+        },
+        "B": {
+          "run": "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+          "rewrite_sha256": "6b8fb2a4249de39c086fe2f3a9a5cf84fa40e8a3a7366ac1fb41cf4f03f1a08d"
+        },
+        "C": {
+          "run": "rewrite/gemma-4-12b-nf4-summary-v3-holdout/20261026-163844Z",
+          "rewrite_sha256": "3d4839c1c87eeedd3593f916768e94a6d4ebc08ce4bd6fd2e1fb47db2fb44d70"
+        },
+        "D": {
+          "run": "rewrite/granite-4.2-3b-nf4-summary-v3-holdout/20261026-163235Z",
+          "rewrite_sha256": "4fb50ed32135560426ce5c644b94573e2ca8c46483bdaff9747678d972e6cf08"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "6164ca57a1a222dfc2847907d97eaff57595fefb2fd83eb497b526a81c8393e8"
+        },
+        "F": {
+          "run": "rewrite/qwen3-14b-nf4-summary-v3-holdout/20261026-164559Z",
+          "rewrite_sha256": "ecd5f5997dde72231621b870b13774959d3f5db698e667a0ccc6d52e6f62cc22"
+        },
+        "G": {
+          "run": "rewrite/ministral-3-14b-nf4-summary-v3-holdout/20261026-164319Z",
+          "rewrite_sha256": "d61329f503c232bff47c7f8bfeec240cffee6596f1801be7a571b11182dba6a6"
+        },
+        "H": {
+          "run": "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+          "rewrite_sha256": "e43278aa213e0e3ef4c6dcb3e16c7bf8c38bb216f9d001b26125f943ef112a24"
+        },
+        "I": {
+          "run": "rewrite/gemma-4-e4b-nf4-summary-v3-holdout/20261026-163443Z",
+          "rewrite_sha256": "b7fb173b1e9da794ca498508053fa99d521e48d8fdd2d5ab6e40861477a19141"
+        }
+      },
+      "not_judged": {}
+    },
+    "166926-166932": {
+      "prompt_sha256": "df50e05fa96151221b8ffb7418c2075be6f4285a9dd0d1b265f8a15a3ec7a21c",
+      "labels": {
+        "A": {
+          "run": "rewrite/gemma-4-12b-nf4-summary-v3-holdout/20261026-163844Z",
+          "rewrite_sha256": "ca6ca9e4696fcaad7317f23868e44a7107d60d25a0d2a4b2730a0ceb4965a22d"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+          "rewrite_sha256": "7de8f531434e628df66ab055a5f660b2ac34b1c74ab04e1e0b2d0bc0f0cbc584"
+        },
+        "C": {
+          "run": "rewrite/granite-4.2-3b-nf4-summary-v3-holdout/20261026-163235Z",
+          "rewrite_sha256": "cdcb0cc125707e6a91ab32c4c065d98ded5b47d1e4d525ef42a1c748500f54c3"
+        },
+        "D": {
+          "run": "rewrite/gemma-4-e4b-nf4-summary-v3-holdout/20261026-163443Z",
+          "rewrite_sha256": "6286f43838416bda09c2908da975656e5d1a8cfe4bd13b75d9ba3816697d855b"
+        },
+        "E": {
+          "run": "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+          "rewrite_sha256": "54fcd53e8b97b32e6fd1e9b1591fce255ff9997375f1aa4e99d1901a79ae1621"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "39612015e8a763db3090bd1dd14bbbb53b0f3694d51b29222ee4cd60eb664339"
+        },
+        "G": {
+          "run": "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+          "rewrite_sha256": "d6dc98c54732f29b23e84153a47ddeb7c37a96e3c4272efa39aa5c92a4623e44"
+        },
+        "H": {
+          "run": "rewrite/ministral-3-14b-nf4-summary-v3-holdout/20261026-164319Z",
+          "rewrite_sha256": "d5292f7a993b49b24dfca7d093c84910e4cb89090bc54fa91afdb6829682af8e"
+        },
+        "I": {
+          "run": "rewrite/qwen3-14b-nf4-summary-v3-holdout/20261026-164559Z",
+          "rewrite_sha256": "db729a246d425bf256f0e91d0f3e15d914a7e4e4904419a53bccf76d0485d5c9"
+        }
+      },
+      "not_judged": {}
+    },
+    "134609-134616": {
+      "prompt_sha256": "68bace414c66114913c7bec6552b07a892b8d3600440368ca29d66038ad0ad7f",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+          "rewrite_sha256": "89bd31bbfe6433d8c1a244670cae1c3f43c23674367bf8652a099b1c76e546bb"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "434c81b3ac6583591caca470cd3bb0251b722596b0df221cd970f0a04329c7bc"
+        },
+        "C": {
+          "run": "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+          "rewrite_sha256": "34044d9c08ea6a516fbfc3b1d57c9b32a4091642c725eedee2533921c61ae379"
+        },
+        "D": {
+          "run": "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+          "rewrite_sha256": "4afe3260188ef007f9ca228aeabcfe6288c2f33be720412403b9304f1eeb8c79"
+        },
+        "E": {
+          "run": "rewrite/granite-4.2-3b-nf4-summary-v3-holdout/20261026-163235Z",
+          "rewrite_sha256": "4088015889b47010ead33862ea761c27e31e87970b9f0a3fc02b42aa41c86605"
+        },
+        "F": {
+          "run": "rewrite/qwen3-14b-nf4-summary-v3-holdout/20261026-164559Z",
+          "rewrite_sha256": "fe723217795bf94ee452b38d13e202be6318f228c07e49a8ca36a1d62aa5a2b5"
+        },
+        "G": {
+          "run": "rewrite/ministral-3-14b-nf4-summary-v3-holdout/20261026-164319Z",
+          "rewrite_sha256": "491586090131df7600f65b511f0082ec74d50b5af7388e0ad52eb41a4d92c636"
+        },
+        "H": {
+          "run": "rewrite/gemma-4-e4b-nf4-summary-v3-holdout/20261026-163443Z",
+          "rewrite_sha256": "6909f69027e419f4c54f7c34beb9e7aaf94ec40544a07871a191b48c8171bf2d"
+        },
+        "I": {
+          "run": "rewrite/gemma-4-12b-nf4-summary-v3-holdout/20261026-163844Z",
+          "rewrite_sha256": "5f313fc64cfa521e5f45a30c6f62b6b0b1d147a4e6602bba8aae5ec764889681"
+        }
+      },
+      "not_judged": {}
+    },
+    "130910-130918": {
+      "prompt_sha256": "db1f09a09288c041ffc9a2c2bd4f15ea3ab7a762c8a224c0507030dbd8565579",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+          "rewrite_sha256": "a93ae3a8124f7ecdae1c3b82fc522908755d71db18f06f24c7a83d128472a4ef"
+        },
+        "B": {
+          "run": "rewrite/gemma-4-12b-nf4-summary-v3-holdout/20261026-163844Z",
+          "rewrite_sha256": "2ceb5a5ec8e69d0913f156f068e0619e24c0091067d48e8f6b96b9ba7c17b0ba"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "53ed5c467d167586c66d56008300c7ba0ef8b77753b69e35b57a1b8a976d631d"
+        },
+        "D": {
+          "run": "rewrite/gemma-4-e4b-nf4-summary-v3-holdout/20261026-163443Z",
+          "rewrite_sha256": "f3756bb354cf836bfa75bcef5d69e912ff300694b18f7f5eebda8ae146f719cf"
+        },
+        "E": {
+          "run": "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+          "rewrite_sha256": "36d5de052a3b4d80e966c44b66f4b9403f93c8919ad3066746b59ed5dbfa9445"
+        },
+        "F": {
+          "run": "rewrite/qwen3-14b-nf4-summary-v3-holdout/20261026-164559Z",
+          "rewrite_sha256": "7d18d375fc9f65e84f0476c7b1ea8da524232e6a7f015998e252c642e5ed7da4"
+        },
+        "G": {
+          "run": "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+          "rewrite_sha256": "945d77d2ce592123bc2ff473098d10c52f90cb3a5427da2f0eb50a6367d5bdb7"
+        },
+        "H": {
+          "run": "rewrite/ministral-3-14b-nf4-summary-v3-holdout/20261026-164319Z",
+          "rewrite_sha256": "f334b07480bcba82f8a7015d1641a0564777f912f6e8fe55c949c2686bd38f0c"
+        },
+        "I": {
+          "run": "rewrite/granite-4.2-3b-nf4-summary-v3-holdout/20261026-163235Z",
+          "rewrite_sha256": "7672366e5dd86266c48f23144221bf47b595bd24f2c60825759fad12ba3d44c1"
+        }
+      },
+      "not_judged": {}
+    },
+    "125707-125710": {
+      "prompt_sha256": "1b525664359719dd385a324fb433cc4923615c9dd8ab3067f23680c2a6c22505",
+      "labels": {
+        "A": {
+          "run": "rewrite/gemma-4-e4b-nf4-summary-v3-holdout/20261026-163443Z",
+          "rewrite_sha256": "de07a18a55549f226bcd6dbb683b7c45ec584dd349d17585cfc182f23c09a355"
+        },
+        "B": {
+          "run": "rewrite/lfm2.5-1.2b-bf16-summary-v3-holdout/20261026-050726Z",
+          "rewrite_sha256": "c7d8be34a00b2badc33206df978fe7bc14ee6351c8ffcbe3fa0c4ed28aa55f66"
+        },
+        "C": {
+          "run": "rewrite/granite-4.2-3b-nf4-summary-v3-holdout/20261026-163235Z",
+          "rewrite_sha256": "9bf4159b5a9ab565bceb1aff289276f5aaba34b396e4aafa2b70ba35465bcff5"
+        },
+        "D": {
+          "run": "rewrite/gemma-3-1b-bf16-summary-v3-holdout/20261026-043335Z",
+          "rewrite_sha256": "e0e8c60217280404e85dd5cb9faf5686104e9221d7b0b664c6ec1f265cb1b534"
+        },
+        "E": {
+          "run": "rewrite/gemma-4-12b-nf4-summary-v3-holdout/20261026-163844Z",
+          "rewrite_sha256": "1e28936d50bbaef183e7e24b847037e8402ac04cfebad000e02fd7433e7611a7"
+        },
+        "F": {
+          "run": "rewrite/ministral-3-14b-nf4-summary-v3-holdout/20261026-164319Z",
+          "rewrite_sha256": "8f9e10a024cd10966c720f1808881d592723301460d921a5465b5bb5bbe2efe7"
+        },
+        "G": {
+          "run": "rewrite/qwen3-14b-nf4-summary-v3-holdout/20261026-164559Z",
+          "rewrite_sha256": "49bcd37445f4c4d178c6a0db0d86b0647da1568144262ec41d2a4f4f50a7d7a8"
+        },
+        "H": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "1befe22589e1f2f08717e5b57457934b45133bf7216e6ff763ceffa9535acdc5"
+        },
+        "I": {
+          "run": "rewrite/qwen3.5-0.8b-bf16-summary-v3-holdout/20261026-054112Z",
+          "rewrite_sha256": "76109487992d7a7528ce47d1786b5d8fffbc1f23bbb645d63d4eeaaf5ee6895b"
+        }
+      },
+      "not_judged": {}
+    }
+  },
+  "recorded_utc": "2026-10-26T17:34:18.567150+00:00",
+  "replies": {
+    "153863-153865": "7b84e041ab432ce5451d46b4ffc32db5a91c7c378ce99fcbb7afc65442090c8f",
+    "138537-138545": "e1e3a7a843db17396d0b361b34da4f96141fe9106ef18be490c335dd42eb321e",
+    "145918-145922": "77dd48b52d150ce506eeb85ac12f4c6a051980d01f21888093241ce5aa14faff",
+    "127522-127526": "9dd8f03de13faa4a8b5ddcdcc9b49f9ba8b444b8cd44b985766aefab89d62fa5",
+    "175498-175504": "bd45fd59d2c868e622cbbcee65962f60292e48ae9cfc6062c25df12e0432a456",
+    "183961-183964": "3f37b29f6cb7515fd15b131ef3aee1bcd1aa4c497729666cea1cbacb18588aca",
+    "130997-131003": "88ac3fa7907ff4474682d1a387b7a2159e01e3b3906b7bb3e0a676c03a92c2db",
+    "174125-174130": "bb63f599dff30768777473bb3d1e3a09bceb135028bac563368b14a19345f6cb",
+    "126639-126641": "107d9433e6fd91faf6108120b6f8edefe47640333af7f9237ce9701d72f661a3",
+    "133007-133016": "5451a426aa40c7bb84c971b6422db1b05bad06c4a83bf5f4b5ec7b354e4a74ad",
+    "151754-151759": "8d36fcc3b65d35210cb99219f014db97d00b9a689bca1e9ef03e1c6b244ea703",
+    "146092-146097": "4b4687e3fa04bfd748cf28301861c0a8482a7cb96770a029daa561d0ac9dd543",
+    "158575-158585": "2dde99a0944088ad723b752174d47a3f7c822fe6813e8d00a8dd90aca9f52d02",
+    "154033-154041": "6f4c4cee3628ce9b9c252c92a84b34d4ab18e49b1284a212bf713a46795d428c",
+    "124839-124848": "b2fe72242b2e6615de7774a53eba40e21a4a1d9cc9eee053ae0a9c045e49d78e",
+    "134424-134431": "40bb19aeaa09a824483304e7522b5ac2471d7f740b95ba655b3482aaedb7a01f",
+    "166926-166932": "c75a83d344109623031416f1256066ebc307ccb3ddd9be58b06e47db5e92f74d",
+    "134609-134616": "276668b90082ebea49bbf821a6c71198dab214539164a15721aabed9b9e06edd",
+    "130910-130918": "bca19f8bbb9805b699210625e66e244dc31d3f4ab9add3767fe31cbe2ac8c666",
+    "125707-125710": "15e456b89f0b70a86529a51a269dc0a12f23cf4f43d652e092d7562ea15ee861"
+  }
+}

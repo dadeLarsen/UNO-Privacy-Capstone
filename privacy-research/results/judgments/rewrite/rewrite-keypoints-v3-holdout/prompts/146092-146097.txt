@@ -1,0 +1,64 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+We will retain your Personal Data only for as long as is necessary for the purposes set out in this Privacy Policy. We will retain and use your Personal Data to the extent necessary to comply with our legal obligations (for example, if we are required to retain your data to comply with applicable laws), resolve disputes, provide our Services and enforce our legal agreements and policies. We will also retain Personal Data and Usage Information for internal analysis purposes and legitimate business interest to the extent necessary to improve the functionality of our Services, for business purposes or when we are legally obligated to retain this data for longer time periods. Your Personal Data collected through our Services will be retained for as long as permitted by applicable law or necessary depending on the respective purpose of collection and shall be deleted when they no longer serve one of the above-mentioned purposes or shall be anonymized and therefore will no longer constitute Personal Data. It is clarified that in no case the retention period should exceed the 5 years from the date of collection. Once we have deleted or anonymized your Personal Data, you will not be able to exercise the right to access, the right to erasure, the right to rectification or the right to data portability.
+
+Key points:
+1. (critical) Personal data is kept only as long as necessary for the purposes in the Privacy Policy.
+2. The company keeps and uses data as needed to meet legal obligations, resolve disputes, provide its Services, and enforce its agreements.
+3. (critical) It also keeps personal data and usage information for internal analysis and legitimate business interests, such as improving its Services.
+4. (critical) Data is deleted, or anonymized so it is no longer personal data, once it no longer serves those purposes.
+5. (critical) The retention period should in no case exceed 5 years from collection. Note: The passage also says data is kept longer when the law requires it, without reconciling that with the 5-year cap; a rewrite need not resolve this.
+6. (critical) After deletion or anonymization, you can no longer exercise your rights of access, erasure, rectification, or portability.
+
+Rewrite A:
+We keep your Personal Data only as long as needed for the purposes in this Privacy Policy. We may keep it longer if required by law, to resolve disputes, provide services, enforce agreements, or for internal analysis or business purposes. We will not keep it longer than 5 years from when you collected it. After deletion or anonymization, you cannot access, erase, correct, or move your data.
+
+Rewrite B:
+We keep your personal information only as long as needed for the reasons we collect it—like providing our services, following the law, or handling disputes. We may also hold it longer if required by law or for improving our services or business needs.
+
+Your data stays on file only as long as the law allows or until it’s no longer needed for its original purpose. We’ll delete or anonymize it (so it’s no longer identifiable as yours) once it’s no longer useful. In no case will we keep it for more than five years from when we first collected it.
+
+After deletion or anonymization, you can’t request access to, corrections of, or removal of that data anymore.
+
+Rewrite C:
+We keep your Personal Data for as long as necessary to provide our Services, enforce our legal agreements and policies, resolve disputes, and comply with legal obligations. We also keep Personal Data and Usage Information for internal analysis and legitimate business interests to improve our Services or when required by law. We will delete your Personal Data when it no longer serves these purposes or anonymize it so it is no longer Personal Data. In no case will we keep your data for more than 5 years from the date of collection. Once we delete or anonymize your Personal Data, you cannot exercise your rights to access, erasure, rectification, or data portability.
+
+Rewrite D:
+We will keep your personal data only as long as needed for the purposes described here. We will keep and use your data as necessary to meet legal duties, settle disagreements, provide our services, and enforce our agreements. We will also keep personal data and usage information for internal analysis and legitimate business interests to improve our services or if the law requires us to keep the data longer. Your personal data will be kept as long as allowed by law or necessary for the collection purpose. It will be deleted or anonymized when it no longer serves one of these purposes. The retention period will not exceed five years from the collection date. After we delete or anonymize your data, you cannot exercise your rights to access, erasure, rectification, or data portability.
+
+Rewrite E:
+The company keeps your data only when needed for specific reasons like following laws, resolving issues, or improving their services. They will delete it after those purposes end or if it’s no longer useful. You won’t be able to access your data after five years unless it’s still needed. The company can’t force you to keep your information beyond these limits.
+
+Rewrite F:
+We keep your Personal Data only as long as needed for the purposes set out in this Privacy Policy, to comply with legal obligations, resolve disputes, provide our Services, enforce agreements, or for internal analysis and business purposes. We will also retain data when legally required for longer periods. Your data will be deleted or anonymized when it no longer serves these purposes, and in no case will the retention period exceed five years from the date of collection. Once deleted or anonymized, you will no longer be able to exercise rights to access, erasure, rectification, or data portability.
+
+Rewrite G:
+We keep your personal data only for the time needed to fulfill our legal obligations, resolve disputes, provide our services, and enforce our agreements. We also keep data for internal analysis and legitimate business interests to improve our services, subject to legal requirements. Your data is kept as long as required by law or the specific purpose of collection, and it is deleted when no longer needed or when it is anonymized. We do not retain data beyond five years from the date of collection. Once deleted or anonymized, you cannot request access, erase, correct, or share your data.
+
+Rewrite H:
+We keep your personal data only as long as needed for the reasons listed in our Privacy Policy. This includes meeting legal requirements, resolving disputes, providing our services, and enforcing agreements. We also use the data for internal analysis and business purposes when necessary. Data is kept as long as allowed by law or needed for its original purpose. If data is deleted or made anonymous, it no longer counts as personal data. Once this happens, you can no longer request access, deletion, correction, or transfer of your data. In no case will we keep your data longer than 5 years from when it was collected.
+
+Rewrite I:
+We keep your personal information for as long as needed to fulfill our services and legal requirements. This includes complying with laws, resolving issues, and protecting our business. We retain data for up to five years, after which it will be deleted or anonymized. You can request access, erasure, correction, or portability of your data.

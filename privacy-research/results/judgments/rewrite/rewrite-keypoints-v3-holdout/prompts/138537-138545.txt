@@ -1,0 +1,68 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+Categories of information we collect from you include: Identifying information (such as name, phone number, e-mail address, mailing address, corporate or educational affiliations, photograph, contact information, and billing information). Protected classification characteristics under state or federal law (such as age and gender). Commercial information (such as products and services purchased from us and partners, as well as your consumer preferences). Biometric information (such as your physical characteristics or measurements). Workout and machine usage information. Account information such as username, password, unique user ID, and communication preferences. Credit card or banking information. Reviews and comments.
+
+Key points:
+1. The company collects identifying information, such as your name, phone number, email and mailing address, corporate or educational affiliations, photograph, and billing information.
+2. It collects protected characteristics such as age and gender.
+3. It collects commercial information, such as products and services you bought from it and its partners, and your consumer preferences.
+4. (critical) It collects biometric information, such as your physical characteristics or measurements.
+5. It collects workout and machine usage information.
+6. It collects account information (username, password, user ID, and communication preferences), credit card or banking information, and your reviews and comments.
+
+Rewrite A:
+We collect identifying information like your name, phone number, email, address, affiliations, photos, contact details, and billing info. We also collect protected classification characteristics such as age and gender. You may provide commercial information like purchases, services, and preferences. We gather biometric data, workout and machine usage details, account details including username, password, user ID, and communication preferences, credit or banking information, and reviews or comments.
+
+Rewrite B:
+We collect several types of personal information from you, including:
+
+Your name, contact details (like phone, email, and address), work or school info, photos, and payment details. We also gather legally protected traits like age and gender.
+
+We track what you buy from us or our partners, your preferences, and how you use our products or machines. This includes workout data and device usage.
+
+We store account details like your username, password, and how you want to be contacted. If you use payment methods, we collect credit card or banking info.
+
+Finally, we collect any reviews, comments, or feedback you provide.
+
+Rewrite C:
+We collect identifying information, including your name, contact details, mailing address, photos, and affiliations. We also collect protected characteristics like age and gender, and commercial information about your purchases and preferences. We collect biometric information, workout and machine usage data, account details like usernames and passwords, and your communication preferences. Finally, we collect your banking or credit card information and your reviews and comments.
+
+Rewrite D:
+The policy explains what data the company gathers and why. They collect personal details like names, contact info, and payment info. They also track usage data, biometric traits, and purchase history. This information helps them serve products, protect accounts, and improve services. The data is used for legitimate business purposes and to maintain security. Users should be aware of how their information is handled and have options to manage their privacy.
+
+Rewrite E:
+We collect different types of information about you, including your name, phone number, email, address, and other contact details. We also gather information about your age, gender, and any products or services you buy from us or our partners. This includes your preferences, account details like your username and password, and how you use our equipment or services. We may also collect biometric data, such as physical measurements, and information about your workouts. If you provide reviews or comments, we will keep those as well.
+
+Rewrite F:
+We gather information about you to help us understand your needs and provide services. This includes your name, contact details, and payment information. We also collect data about your purchases, preferences, and usage of our products and services. We may collect biometric data, such as photos and measurements. We also gather information about your workouts and machine usage. Finally, we store account details like usernames and passwords.
+
+Rewrite G:
+We collect several types of information from you. This includes identifying details like your name, phone number, email, mailing address, and affiliations, along with contact and billing information. We also collect protected characteristics like age and gender, as required by law. Commercial information, such as what you buy from us or our partners and your preferences, is collected. Biometric data, including physical characteristics or measurements, may be gathered. We also collect workout and machine usage data. Account details, like your username, password, user ID, and communication choices, are collected. Credit card or banking information may be collected. Finally, we collect your reviews and comments.
+
+Rewrite H:
+We collect identifying information like name, phone number, email, address, and billing details. We also track protected characteristics such as age and gender. We gather commercial information including products and services you buy, your preferences, and biometric data like physical traits or measurements. We collect workout and machine usage data. We store account information such as usernames, passwords, user IDs, and communication settings. We hold credit card or banking information. We also collect reviews and comments.
+
+Rewrite I:
+We collect identifying information like your name, phone number, email, address, affiliations, photos, and billing details. We also gather protected classification characteristics such as age and gender. We collect commercial information about products and services you or partners have purchased, along with your consumer preferences. We collect biometric information regarding your physical characteristics or measurements. We collect data on your workout and machine usage. We collect account information including your username, password, unique user ID, and communication preferences. We collect credit card or banking information. We collect reviews and comments.

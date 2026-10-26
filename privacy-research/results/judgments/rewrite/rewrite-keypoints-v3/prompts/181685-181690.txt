@@ -1,0 +1,63 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+Nike, our service providers and third parties collect information, which may include personal information, from your browser, devices, or apps when you use our Platform using a variety of methods, such as cookies, pixel tags, identifiers for mobile devices, and other similar technologies. The information collected by these cookies and similar technologies may include your: IP address; unique cookie identifier and information obtained through cookies; unique device identifier and device type; domain, browser type and language, operating system, and system settings; country and time zone; previously visited websites; information about your interaction with our Platform such as click behavior, purchases and indicated preferences; and access times and referring URLs. We use cookies and similar technologies to analyze and understand how you access, use, and interact with our Platform and our consumer’s preferences (such as country and language choices), as well as to assess, secure, protect, optimize, and improve the performance of our Platform. This enables us to provide services to our consumers and improve their online experience. We also use cookies and pixel tags to obtain aggregate data about Platform traffic and interaction, to conduct analytics, identify trends and obtain statistics so that we can improve our Platform. We also use cookies and similar technologies to target advertising and content across our Platform and third-party sites and services.
+
+Key points:
+1. (critical) Nike, its service providers, and third parties collect information, which may include personal information, from your browser, devices, or apps through cookies, pixel tags, mobile device identifiers, and similar technologies.
+2. This may include your IP address, cookie and device identifiers, device and browser details, country and time zone, websites you visited before, how you interact with the Platform (such as clicks, purchases, and preferences), and access times.
+3. Nike uses these technologies to understand how you use the Platform and your preferences, and to secure and improve the Platform.
+4. Nike uses cookies and pixel tags to gather aggregate traffic data for analytics and statistics.
+5. (critical) Nike uses cookies and similar technologies to target advertising and content on its Platform and on third-party sites and services.
+
+Rewrite A:
+When you use Nike’s website or apps, they and their partners collect data from your browser, devices, or apps. This includes things like your IP address, device type, browser info, location, browsing history, how you use the site (like clicks or purchases), and when you visit.
+
+They use tools like cookies, tracking pixels, and device IDs to gather this data. Nike uses it to understand how you interact with their site, improve performance and security, and tailor your experience (like language or country settings). They also analyze this data in bulk to study trends and traffic patterns.
+
+Additionally, Nike and their partners use this data to show you ads and content on Nike’s site and other websites.
+
+Rewrite B:
+Nike collects information about your online activity when you use their services. This includes information from your browser, devices, and apps. Cookies, pixel tags, and other technologies track your IP address, device type, and browsing history. This data helps them understand how you use the platform and your preferences. Nike uses this information to improve their services and personalize your experience. They also collect data about your interactions, such as clicks and purchases. They use cookies to analyze traffic and provide analytics. Finally, they use cookies for targeted advertising.
+
+Rewrite C:
+Nike collects personal information from your browser, devices, or apps when you use our Platform. This data may include your IP address, unique identifiers for cookies and devices, domain and browser details, operating system, country, time zone, previously visited websites, and interaction patterns like clicks and purchases. We use these cookies and similar technologies to analyze how you use our Platform, understand your preferences, assess and protect the service, optimize performance, and improve the experience. We also use these tools to gather aggregate traffic and interaction data for analytics, identify trends, and target advertising and content across our Platform and third-party sites.
+
+Rewrite D:
+Nike, its service providers, and third parties collect information from your browser, devices, or apps when you use the Platform. They use methods like cookies, pixel tags, and mobile device identifiers to collect data, which may include your IP address, unique identifiers, device type, browser and operating system details, location, and language settings. They also collect data on your previous websites, interactions like clicks and purchases, preferences, and referring URLs. Nike uses these technologies to analyze how you use the Platform, understand consumer preferences, and secure, protect, and improve Platform performance. This helps Nike provide services and improve the online experience. Nike also uses cookies and pixel tags to gather aggregate data for analytics and statistics to identify trends. Finally, they use these technologies to target advertising and content on the Platform and other third-party sites and services.
+
+Rewrite E:
+The company gathers data from your device when you use their platform. This includes details like your IP address, device info, browsing habits, and interactions. They use this information to understand how you use the site, improve performance, and deliver better services. They also collect data for analytics, advertising, and to tailor content across their services. The data collection happens automatically through tools like cookies and tracking technologies.
+
+Rewrite F:
+Nike, its service providers, and third parties collect information from your browser, device, or app when you use the Platform using methods like cookies, pixel tags, and device identifiers. This data may include your IP address, unique identifiers, device type, browser and operating system details, location, time zone, visited websites, interaction history such as clicks and purchases, and access times. We use this information to analyze how you access and interact with the Platform, understand consumer preferences, and secure, protect, optimize, and improve the Platform's performance. We also use it to obtain aggregate traffic data, conduct analytics, identify trends, and improve the Platform. Additionally, we use cookies and similar technologies to target advertising and content across the Platform and third-party sites.
+
+Rewrite G:
+Nike and its partners collect information from your browser, devices, or apps when you use the Platform. This collection happens through cookies, pixel tags, mobile device identifiers, and similar technologies. This information may include your IP address, unique cookie and device identifiers, device type, browser and operating system details, country, time zone, past websites visited, interaction details like clicks and purchases, and access times and referring URLs. Nike uses these technologies to understand how you use the Platform and your preferences, and to improve the Platform's performance and services. They also use this data to gather traffic statistics, identify trends, and improve the Platform. Furthermore, Nike uses cookies and pixel tags to target ads and content on the Platform and on third-party sites.
+
+Rewrite H:
+Nike and its partners collect information from your browser, devices, or apps when you use their Platform. This can include your IP address, cookie identifiers, device details, browser and system information, location, time zone, visited websites, and how you interact with the Platform, like clicks and purchases. They use this data to understand how you use the Platform, improve its performance, and enhance your experience. Cookies and similar tools also help them track overall traffic, find trends, and show targeted ads on their site and others.
+
+Rewrite I:
+Nike, along with its service providers and third parties, collects information from your browser, devices, or apps when you use our platform. This includes your IP address, cookie and device identifiers, browser and system details, country, time zone, visited websites, interaction data such as clicks, purchases, and preferences, and access times and referring URLs. We use cookies and similar technologies to analyze how you use the platform, understand your preferences, and improve the service. We also use them to get aggregate traffic and interaction data for analytics, identify trends, and improve the platform. We use them to target advertising and content across our platform and third‑party sites.

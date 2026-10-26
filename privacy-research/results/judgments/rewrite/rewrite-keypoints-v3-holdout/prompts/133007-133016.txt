@@ -1,0 +1,66 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+When you access or engage with a third-party service, application, or website, even when doing so through GoodRx equipment or applications, you are entering that service, application, or website and governed by its policies. Many third parties have their own privacy policies that differ from ours. This privacy policy only covers our Services and does not cover any other third parties. GoodRx may also collect usage information related to those third-party products, services, applications, or websites if they are accessed through GoodRx equipment, websites, or applications. We may offer contests, sweepstakes, or promotions sponsored or co-sponsored by third parties. You may choose to participate in such contests, sweepstakes or promotions and provide information requested by such third parties. We have no control over such third parties’ use of such information. You may also choose, when available, to connect your account with third party accounts, including with third-party social networks. If you share information about your usage of or activities on our Services with such third-party accounts, then the collection, use, and disclosure of such information will be subject to that third party's privacy policies, which may differ from our own. We are not responsible for the practices of such third parties.
+
+Key points:
+1. (critical) Third-party services, apps, or websites you use, even through GoodRx equipment or applications, are governed by their own policies, which may differ from GoodRx's.
+2. (critical) GoodRx's privacy policy covers only GoodRx's Services, not third parties.
+3. (critical) GoodRx may collect usage information about third-party products you access through GoodRx equipment, websites, or applications.
+4. (critical) GoodRx may offer contests or promotions sponsored by third parties, and it has no control over how those third parties use the information you give them.
+5. (critical) If you connect your account to third-party accounts such as social networks and share your activity there, that third party's privacy policy governs it.
+6. GoodRx is not responsible for third parties' practices.
+
+Rewrite A:
+Using third-party services, apps, or websites, even through GoodRx, means you're subject to their privacy policies, which may differ from ours. Our privacy policy only covers our Services. GoodRx might collect usage data from third-party services accessed through our platforms. We may run contests or promotions with third parties, and if you join, you may share information with them. We don’t control how they use that information. You can also link your account to third-party accounts, like social networks. If you share activity from our Services with those accounts, their privacy policies will apply, and we aren’t responsible for their practices.
+
+Rewrite B:
+You are entering a third‑party service when you use GoodRx equipment, applications, or websites. That service’s own privacy policy applies, and GoodRx’s privacy policy only covers its own services. GoodRx may collect usage information about products, services, apps, or sites you access through GoodRx. If you join contests, sweepstakes, or promotions sponsored by third parties, you may provide information to those parties, and GoodRx has no control over how they use it. If you link your GoodRx account to third‑party accounts, sharing your usage information will follow that third party’s privacy policy, which may differ from GoodRx’s, and GoodRx is not responsible for those practices.
+
+Rewrite C:
+When you use a third-party service through GoodRx, you are subject to that service's policies. This policy only covers GoodRx Services. GoodRx may collect usage information about third-party products accessed through GoodRx. If you enter third-party contests or promotions, you may give them requested information, and we have no control over how they use it. If you link your account to a third-party account, like a social network, and share your activity on our Services with that third party, that third party's privacy policy will govern the collection and use of that information. We are not responsible for the practices of these third parties.
+
+Rewrite D:
+When you use third-party services linked to GoodRx, you follow their privacy rules. GoodRx may collect data from other sites or apps you use. They might run contests or promotions and ask for your info. You can join these if you want, but GoodRx isn’t in control. If you share usage details with third parties, their privacy rules apply. GoodRx isn’t liable for how those third parties handle your information.
+
+Rewrite E:
+When you use a third-party service, app, or website through GoodRx equipment or applications, you enter that service and are governed by its own policies, which may differ from ours. This policy covers only GoodRx's Services and does not cover other third parties. GoodRx may collect usage information about those third-party products if accessed through GoodRx channels. You may choose to participate in third-party contests, sweepstakes, or promotions and provide information requested by them, but GoodRx has no control over how such third parties use that information. You may also connect your GoodRx account with third-party accounts, including social networks. If you share information about your usage or activities on GoodRx Services with such third-party accounts, the collection, use, and disclosure of that information will be subject to that third party's privacy policies, which may differ from ours. We are not responsible for the practices of such third parties.
+
+Rewrite F:
+When you use GoodRx, you are bound by its own privacy policy. This policy covers only GoodRx's services and does not apply to other third parties. GoodRx may collect usage data from third-party products, services, or applications if they are accessed through GoodRx tools. You can participate in contests, sweepstakes, or promotions sponsored by third parties, but you must provide information requested by those third parties. You may also connect your account with third-party social networks, and sharing your usage or activity data with them means the data is subject to those third parties' privacy policies, which may differ from ours. GoodRx does not control how third parties use this information. You are not responsible for the practices of those third parties.
+
+Rewrite G:
+When you use services like GoodRx, you're agreeing to their privacy policies. These policies cover our services and don't cover other third-party services. GoodRx might collect information about your use of those services. You might participate in contests, and you could connect your account to third-party social networks.  Be aware that those third-party services have their own privacy policies, which could differ from ours. We are not responsible for their actions.
+
+Rewrite H:
+When you use a third-party service, app, or website—even through GoodRx—you follow that third party’s rules, not GoodRx’s. GoodRx’s privacy policy only applies to its own services, not to those third parties.
+
+GoodRx may collect data about how you use third-party services if you access them through GoodRx’s tools.
+
+If you enter a contest, sweepstakes, or promotion (even if GoodRx helps organize it), you’re giving info directly to the third party running it. GoodRx can’t control how they use that info.
+
+You can also link your GoodRx account to third-party accounts (like social media). If you share your GoodRx activity with them, their privacy rules apply instead of GoodRx’s. GoodRx isn’t responsible for how those third parties handle your data.
+
+Rewrite I:
+When you use a third-party service, application, or website, you are governed by that third party's policies, even if you access them through GoodRx equipment or applications. This privacy policy only covers GoodRx Services. GoodRx may collect usage information related to third-party products, services, applications, or websites if you access them through GoodRx equipment, websites, or applications. If you participate in third-party sponsored contests, sweepstakes, or promotions, you may provide information requested by those third parties. GoodRx has no control over how those third parties use that information. You may also choose to connect your account with third-party accounts, such as social networks. If you share information about your activities on GoodRx Services with those third-party accounts, that information is subject to the third party's privacy policies, which may differ from GoodRx's. GoodRx is not responsible for the practices of third parties.

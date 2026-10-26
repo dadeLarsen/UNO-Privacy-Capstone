@@ -1,0 +1,70 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+We use cookies, web beacons, and other similar technologies, including from third-party partners such as Google and Facebook, for measurement services, better targeting advertisements, marketing purposes and to improve the performance of the Sites. This takes place from the Sites, when you download or install an Indeed App, and in some of our advertisements on third party websites. These cookies, web beacons, and other similar technologies allow us to display our promotional material to you on other sites you visit across the Internet and connect you with more Employers. We may also share information about your behavior on the Sites with third parties (including operators of third-party websites and/or social networking sites) in order to show you targeted advertisements and other content that has been customized for you. We also use these cookies, web beacons, and other similar technologies to facilitate the Indeed Targeted Ads Program and other advertisements to help us to determine which advertisements users have seen, how many times users have seen a particular advertisement, and on which sites a particular advertisement appeared. We may also allow Employers who participate in our Indeed Targeted Ads Program to place cookies, web beacons, and other similar technologies in advertisements we serve on our Site and on third party websites to help these Employers understand how individuals interact with our advertisements about their Job Listings. We may also use these cookies, web beacons, and other similar technologies on the Sites to understand and inform an Employer about which users saw a particular Job Listing, Company Page, Hiring Event, or other advertisement in which the Employer is identified.
+
+Key points:
+1. (critical) Indeed uses cookies, web beacons, and similar technologies, including from partners such as Google and Facebook, for measurement, targeted advertising, marketing, and site performance.
+2. This happens on its Sites, when you install an Indeed App, and in some of its ads on other websites.
+3. These technologies let Indeed show its promotional material on other sites you visit and connect you with more employers.
+4. (critical) Indeed may share information about your behavior on its Sites with third parties, including other websites and social networks, to show you targeted ads and customized content.
+5. Indeed uses these technologies to track which ads users saw, how often, and where.
+6. (critical) Indeed may let employers in its Targeted Ads Program place cookies and similar technologies in the ads it serves, on its Site and on other websites, to see how people interact with their job ads.
+7. (critical) Indeed may tell an employer which users saw a particular job listing, company page, hiring event, or ad that identifies the employer.
+
+Rewrite A:
+We use cookies, web beacons, and similar technologies from us and third-party partners like Google and Facebook for measurement, marketing, and improving Site performance. These technologies are used on our Sites, when you download or install an Indeed App, and in some of our advertisements on third-party websites. They allow us to show you promotional material on other websites and connect you with more Employers. We may share your behavior information on our Sites with third parties, including social networking sites, to show you customized content and targeted advertisements. We use these technologies to facilitate the Indeed Targeted Ads Program and other advertisements to track which ads users see, how often they see them, and where they appear. We may also allow participating Employers to place these technologies in advertisements on our Site and third-party websites to help them understand how individuals interact with their Job Listing advertisements. We may also use these technologies on our Sites to inform an Employer which users saw a specific Job Listing, Company Page, Hiring Event, or other advertisement where the Employer is identified.
+
+Rewrite B:
+We use cookies, web beacons, and similar technologies from third parties like Google and Facebook to measure services, target ads, and improve site performance. These tools allow us to show promotional material to you on other sites you visit and connect you with more employers. We may share your behavior with third parties to show you targeted ads and customized content. We also use these tools to help the Indeed Targeted Ads Program determine which ads users see, how many times they see a specific ad, and on which sites it appeared. Employers who participate in the program may place cookies on advertisements we serve on our site or on third-party websites to understand how individuals interact with our job listings. We may use these tools on the site to understand and inform employers about which users saw a particular job listing, company page, hiring event, or advertisement.
+
+Rewrite C:
+We use cookies, web beacons, and similar technologies from third parties like Google and Facebook to measure services, target ads, and improve site performance. These tools let us show your promotional material on other sites and connect you with more employers. We may share your behavior information with third parties, including operators of third‑party websites and social networks, to show you targeted ads and customized content. We use these cookies to run the Indeed Targeted Ads Program, track which ads you’ve seen, how many times, and where they appeared. Employers in the Targeted Ads Program may place cookies and web beacons in ads we serve on our site and on third‑party sites to learn how people interact with their job listings. We also use these cookies on our site to learn which users saw a particular job listing, company page, hiring event, or other ad where the employer is identified.
+
+Rewrite D:
+We use cookies and similar technologies, including those from partners like Google and Facebook, for several reasons. This happens on our Sites, when you use an Indeed App, and in some third-party ads. These technologies help us measure services, improve ad targeting, and market our services. They also help us improve Site performance. These technologies allow us to show you our ads on other websites you visit and connect you with more employers. We may share your Site activity with third parties, including those who run third-party or social networking sites, to show you targeted and customized ads and content. We use these technologies to run the Indeed Targeted Ads Program and other ads. This helps us track which ads you saw, how many times you saw them, and where you saw them. Participating Employers may also place cookies in ads we serve on our Site and on third-party sites to help them see how people interact with their Job Listing ads. We also use these technologies on our Sites to inform an Employer which users saw a specific Job Listing, Company Page, Hiring Event, or other ad featuring that Employer.
+
+Rewrite E:
+The company uses cookies and tracking tools to improve their services and target ads. These tools help them show relevant content, connect with employers, and measure ad performance. They share user behavior data with third parties to refine advertising and understand how people interact with job listings. The process applies to their sites, partner apps, and ads on other websites.
+
+Rewrite F:
+We use cookies, web beacons, and similar technologies from third-party partners like Google and Facebook on our Sites, when you download or install an Indeed App, and in some advertisements on third-party websites. These tools help us measure performance, target ads, market to you, and connect you with more employers. We may share information about your behavior on the Sites with third parties, including operators of third-party websites and social networking sites, to show you customized advertisements and content. We use these technologies to track which ads users see, how many times they see them, and where they appear to run the Indeed Targeted Ads Program. We may also allow participating employers to place these technologies in ads we serve to help them understand how individuals interact with their Job Listings. Additionally, we use these technologies to inform employers about which users saw their Job Listings, Company Pages, Hiring Events, or other advertisements.
+
+Rewrite G:
+We use cookies and other technologies to track your activity and show you ads. These technologies help us understand what you’re interested in and deliver targeted advertising. We share information with third parties to show you relevant ads. We may also use these technologies to help employers with their advertising programs.
+
+Rewrite H:
+This company uses tracking tools like cookies and web beacons—some from third parties such as Google and Facebook—to track your activity. These tools work on their website, their apps, and even ads you see on other sites.
+
+They use this tracking to:
+- Show you ads and promotions based on your behavior.
+- Improve how their website and ads perform.
+- Help employers see which job listings or ads you’ve viewed.
+
+They may also share your activity data with third parties (like other websites or social media) to show you more personalized ads. Employers who pay for their ad program can also track how people interact with their job ads on other sites.
+
+The tracking happens automatically when you visit their site, use their app, or see their ads elsewhere online.
+
+Rewrite I:
+We use cookies, web beacons, and similar technologies, including from third parties like Google and Facebook, to measure activity, improve ads, and enhance site performance. This happens on our Sites, when you download the Indeed App, and in some ads on other websites. These tools help show you targeted ads and promotional content across the internet and connect you with more employers. We may share your behavior on the Sites with third parties to display personalized ads. We also use these tools to track which ads users see, how often, and where they appear. Employers in our Targeted Ads Program may place their own cookies and beacons in ads to understand how users interact with their job listings and other content. We may also use these tools to inform employers about which users viewed their ads or job postings.

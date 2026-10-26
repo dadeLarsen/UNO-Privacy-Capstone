@@ -1,0 +1,79 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+The type of information we collect depends on how you use the Services. Generally, we collect the following information: * Identifiers / Contact Information : Name, user name, gamertag, postal and email address, phone number, unique IDs, mobile device ID, platform ID, gaming service ID, advertising ID (IDFA, Android ID) and IP address * Protected Characteristics : Age and gender * Commercial Information : Purchase and usage history and preferences, including gameplay information * Billing Information : Payment information (credit / debit card information) and shipping address * Internet / Electronic Activity : Web / app browsing and gameplay information related to the Services; information about your online interaction(s) with the Services or our advertising; and details about the games and platforms you use and other information related to installed applications * Device and Usage Data : Device type, software and hardware details, language settings, browser type and version, operating system, and information about how users use and interact with the Services (e.g., content viewed, pages visited, clicks, scrolls) * Profile Inferences : Inferences made from your information and web activity to help create a personalized profile so we can identify goods and services that may be of interest * Audio / Visual Information : Account photos, images, and avatars, audio information via chat features and functionality, and gameplay recordings and video footage (such as when you participate in playtesting) * Sensitive Information : Precise location information (if you allow the Services to collect your location), account credentials (user name and password), and contents of communications via chat features and functionality.
+
+Key points:
+1. The information collected depends on how you use the Services.
+2. It includes identifiers and contact information, such as your name, user name, postal and email address, phone number, device and advertising IDs, and IP address.
+3. It includes your age and gender.
+4. It includes your purchase, usage, and gameplay history, and your payment and shipping details.
+5. It includes browsing, app, and device activity, and details about the games, platforms, and other applications you have installed.
+6. (critical) It includes inferences drawn from your information and web activity to build a personalized profile of goods and services that may interest you.
+7. It includes account photos and avatars, chat audio, and gameplay recordings or video, such as from playtesting.
+8. (critical) It includes sensitive information: your precise location (if you allow it), your account credentials, and the contents of your chat communications.
+
+Rewrite A:
+We collect different types of information depending on how you use the Services. This includes identifiers like your name, email, phone number, and device IDs, as well as protected characteristics such as age and gender. We also gather commercial data like purchase history and preferences, along with billing details including payment and shipping information. Our collection covers your internet and electronic activity, such as browsing, gameplay, and interactions with our advertising, plus details about the games and platforms you use. We collect device and usage data, including hardware and software details, language settings, and how you interact with the Services. We may create profile inferences from your information and web activity to help identify goods and services of interest. We collect audio and visual information like account photos, avatars, chat audio, gameplay recordings, and video footage. We also collect sensitive information such as precise location data if you allow it, account credentials, and the contents of your communications via chat features.
+
+Rewrite B:
+The policy explains what data the company gathers based on how you use their services. They collect personal details like name, contact info, and device data. They also track usage patterns, billing info, and online behavior to personalize experiences. Additional data includes location, account credentials, and communication content. The company uses this information to improve services and target relevant offers.
+
+Rewrite C:
+We collect different types of personal information based on how you use our services. This includes:
+
+Your name, usernames, email, phone number, device IDs, and IP address. We also collect your age and gender, as well as details about your purchases, gameplay, and preferences.
+
+We track your activity on our websites and apps, including what you browse, click, or view, as well as how you interact with our services and ads. We also gather details about your device, like its type, software, and settings.
+
+We use this information to create a profile about you, so we can suggest products or services you might like. This includes photos, avatars, chat messages, gameplay recordings, and other visual or audio content you share.
+
+If you allow it, we may also collect your exact location, your account login details, and the content of your chats.
+
+Rewrite D:
+We collect different types of information based on how you use the Services. This includes identifiers and contact information like your name, username, gamertag, postal and email addresses, phone numbers, unique IDs, mobile device IDs, platform IDs, gaming service IDs, advertising IDs, and IP addresses. We also collect protected characteristics like age and gender. Commercial information includes your purchase and usage history and preferences, including gameplay information. We collect billing information such as payment details and shipping addresses. We collect internet and electronic activity data regarding your web and app browsing, gameplay related to the Services, online interactions with the Services or our advertising, and details about the games and platforms you use and other information related to installed applications. Device and usage data includes device type, software and hardware details, language settings, browser type and version, operating system, and information about how you use and interact with the Services, such as content viewed, pages visited, clicks, and scrolls. We create profile inferences from your information and web activity to identify goods and services that may be of interest. We collect audio and visual information including account photos, images, avatars, audio from chat features and functionality, and gameplay recordings and video footage, such as when you participate in playtesting. We collect sensitive information including precise location information if you allow the Services to collect it, account credentials like username and password, and contents of communications via chat features and functionality.
+
+Rewrite E:
+We collect different types of information based on how you use the services.  
+We gather identifiers and contact details such as name, username, gamertag, postal address, email, phone number, device IDs, platform IDs, gaming service IDs, advertising IDs, and IP address.  
+We also collect age and gender.  
+We record purchase and usage history, preferences, gameplay details, and other commercial information.  
+We collect billing details like payment information and shipping address.  
+We record web and app browsing activity, online interactions, game and platform details, and other app usage data.  
+We gather device information including type, software, hardware, language settings, browser and OS details, and how you interact with the services.  
+We make profile inferences from your information and web activity to create personalized profiles.  
+We collect audio and visual data such as photos, images, avatars, chat audio, gameplay recordings, and video footage.  
+We may collect precise location if you allow it, account credentials, and contents of chat communications.
+
+Rewrite F:
+We collect information based on how you use our services. We gather identifiers like your name, username, gamertag, email, phone number, and IP address. We also collect protected characteristics such as age and gender. We hold commercial information including purchase history, usage preferences, and gameplay details. We store billing information, payment details, and shipping addresses. We track internet and electronic activity, such as web browsing, app usage, and interactions with our services or advertising. We gather device and usage data, including the type of device, software details, browser information, operating system, and how you interact with the services. We may infer personal information from your activity to help create personalized profiles. We collect audio and visual data, such as account photos, chat messages, gameplay recordings, and video footage. We also collect sensitive information, including precise location, account credentials, and chat content.
+
+Rewrite G:
+We gather information about you to help us improve and personalize your experience. This includes your name, email, gamertag, and other unique identifiers. We collect information about your age, gender, purchase history, and payment details. We also track your browsing and gameplay activities, including what you watch, play, and interact with. We collect device information like your device type and software, and location data if you allow it. We use this data to create a profile and offer you relevant services and advertising. We protect your privacy by limiting what we collect and how we use it.
+
+Rewrite H:
+We collect different types of information based on how you use our Services. This includes your name, contact details, and unique IDs. We also collect age and gender, purchase and usage history, payment and shipping details, and information about how you interact with our apps and websites. We gather data about your device, software, and online activity, such as pages visited and clicks. We may infer details about you to create a personalized profile and suggest relevant products or services. We collect images, audio from chats, and gameplay videos if you participate in playtesting. If allowed, we also collect your precise location, login details, and messages sent through our chat features.
+
+Rewrite I:
+The information we collect depends on how you use the Services. We generally collect identifiers like your name, username, gamertag, postal and email address, phone number, unique IDs, mobile device ID, platform ID, gaming service ID, and advertising ID, as well as your IP address. We also collect protected characteristics such as your age and gender. Commercial information includes your purchase and usage history and preferences, including gameplay details. Billing information involves payment details like credit or debit card information and your shipping address. Internet and electronic activity data includes your browsing and gameplay information related to the Services, your online interactions with the Services or our advertising, and details about the games and platforms you use and other installed applications. Device and usage data includes your device type, software and hardware details, language settings, browser type and version, operating system, and how you use and interact with the Services, such as content viewed, pages visited, clicks, or scrolls. We also make profile inferences from your information and web activity to help create a personalized profile to identify potentially interesting goods and services. Audio and visual information includes account photos, images, and avatars, audio from chat features, and gameplay recordings or video footage from playtesting. Sensitive information collected includes precise location if you allow it, your account credentials like username and password, and the contents of your chat communications.

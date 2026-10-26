@@ -1,0 +1,62 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+8.1 We use appropriate organizational, technical, and physical safeguards to protect user information. We have adopted protective measures at multiple levels (e.g., industry-standard technical security measures, supporting organizational structures and management systems) to prevent, to the maximum extent technically practical, user information from leakage, destruction, misuse, unauthorized access, unauthorized disclosure or modification. 8.2 _THE SECURITY OF USER INFORMATION IS VERY IMPORTANT TO US, BUT PLEASE BE REMINDED THAT NO METHOD OF TRANSMISSION OVER THE INTERNET OR METHOD OF ELECTRONIC STORAGE IS 100% SECURE. WHILE WE STRIVE TO USE COMMERCIALLY VIABLE MEANS TO PROTECT USER PERSONAL INFORMATION, WE CANNOT GUARANTEE ITS ABSOLUTE SECURITY._ 8.3 In the event of a data breach, we will carry out an assessment expeditiously. If the breach results in, or is likely to result in, significant harm to affected individuals, or is, or is likely to be, of a significant scale, we will notify the relevant authorities and our users as soon as it is practicable to do so, and in any event, no later than the mandatory time limit under applicable laws.
+
+Key points:
+1. The company uses appropriate organizational, technical, and physical safeguards to protect user information.
+2. Its measures aim to prevent, as far as technically practical, leakage, destruction, misuse, unauthorized access, disclosure, or modification.
+3. (critical) No method of internet transmission or electronic storage is 100% secure, and the company cannot guarantee absolute security.
+4. (critical) After any data breach, the company will assess it quickly.
+5. (critical) If a breach causes or is likely to cause significant harm, or is or is likely to be of significant scale, the company will notify the relevant authorities and its users.
+6. (critical) It will notify them as soon as practicable, and no later than the legal deadline.
+
+Rewrite A:
+The company takes steps to keep your data safe using strong technical and organizational protections. They aim to prevent unauthorized access or misuse of your information. However, they cannot promise complete security over the internet or storage. If a breach happens, they will investigate quickly and notify authorities or users if there’s a serious risk.
+
+Rewrite B:
+We take steps to protect user information using organizational, technical, and physical security measures. These steps are meant to prevent leaks, damage, misuse, or unauthorized access as much as possible. However, no method of internet transmission or electronic storage is completely secure, and we can't guarantee absolute security. If a data breach happens, we will quickly assess the situation. If the breach could cause serious harm or is large in scale, we will inform the proper authorities and affected users as soon as possible, but no later than required by law.
+
+Rewrite C:
+We take steps to protect your personal information using security measures like encryption, secure storage, and company policies. These efforts aim to prevent leaks, loss, or misuse of your data—but no method is completely safe, especially when sending data over the internet.
+
+If a security issue happens and affects many people or could seriously harm them, we’ll investigate quickly. If needed, we’ll notify you and the proper authorities as soon as possible, but always within the time required by law.
+
+Rewrite D:
+We use technical, organizational, and physical safeguards to protect your information from leakage, misuse, unauthorized access, disclosure, or modification to the maximum extent technically possible. However, no internet transmission or electronic storage method is completely secure, and we cannot guarantee absolute security. If a data breach occurs, we will assess it quickly. If the breach likely causes significant harm to individuals or is of a significant scale, we will notify authorities and users as soon as it is practical, and no later than the legal deadline.
+
+Rewrite E:
+We protect user information using technical and organizational safeguards to prevent leakage, destruction, misuse, unauthorized access, or modification. We adopt these measures at multiple levels to prevent, to the maximum extent technically practical, such actions. However, no method of transmission over the internet or electronic storage is 100% secure, and we cannot guarantee absolute security. In the event of a data breach, we assess it quickly. If the breach causes significant harm to individuals or is of a significant scale, we notify relevant authorities and users as soon as practicable, and no later than the applicable time limit.
+
+Rewrite F:
+We use strong security measures to protect your information. We employ multiple layers of protection, including industry-standard technology and organizational systems. However, no security method is perfect, and we cannot guarantee absolute protection. We will quickly assess any data breaches and notify authorities and users if necessary.
+
+Rewrite G:
+We protect user information with safeguards at organizational, technical, and physical levels to prevent leakage, destruction, misuse, unauthorized access, disclosure, or modification. We cannot guarantee absolute security because no internet or electronic storage method is 100% secure. In case of a data breach, we will assess it quickly. If the breach may cause significant harm to individuals or is of significant scale, we will notify the relevant authorities and users as soon as practicable, and no later than the legal time limit.
+
+Rewrite H:
+We use organizational, technical, and physical safeguards to prevent the leakage, destruction, misuse, unauthorized access, disclosure, or modification of user information to the maximum extent technically practical. While we use commercially viable means to protect personal information, we cannot guarantee absolute security because no internet transmission or electronic storage method is 100% secure. If a data breach occurs, we will conduct an assessment quickly. We will notify authorities and users as soon as practicable if a breach is, or is likely to be, of a significant scale or likely to result in significant harm to individuals, and no later than the mandatory legal time limit.
+
+Rewrite I:
+We use organizational, technical, and physical safeguards to prevent user information from leakage, destruction, misuse, unauthorized access, disclosure, or modification to the maximum extent technically practical. While we strive to use commercially viable means to protect your personal information, no internet transmission or electronic storage method is 100% secure, and we cannot guarantee absolute security. If a data breach occurs and is likely to cause significant harm to individuals or is of significant scale, we will notify relevant authorities and users as soon as practicable, but no later than the mandatory time limit under applicable laws.
