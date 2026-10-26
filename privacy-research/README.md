@@ -195,7 +195,7 @@ The rewrite task runs on 20 frozen APPSI-139 policy sections ([tools/make_appsi1
 uv run pbench run conditions/rewrite/qwen3.5-4b-bf16-summary-baseline.toml
 ```
 
-No reference rewrite exists, so the scores only flag outputs to check: whether a rewrite is valid (finished, nonempty, no reasoning tags), how many of the source's numbers and qualifiers (*may*, *unless*, *not*, …) it still contains, and whether it adds an exception, *only*, or a negation that the passage lacks. Three more describe how a rewrite is written: how much it copies from the passage (the copied-run length of Grusky et al., 2018), its Flesch–Kincaid reading grade beside the passages' own, and how often it opens with an introduction such as "Here's the summary:" or uses Markdown. Each run writes `evaluation/review.md`, which shows each passage above its rewrite. A rewrite comparison takes no `[scoring]`, and `compare` adds `side-by-side.md`, which shows every compared model's rewrite under each passage:
+No reference rewrite exists, so the scores only flag outputs to check: whether a rewrite is valid (finished, nonempty, no reasoning tags), how many of the source's numbers and qualifiers (*may*, *unless*, *not*, …) it still contains, and whether it adds an exception, *only*, or a negation that the passage lacks. Three more describe how a rewrite is written: how much it copies from the passage (the copied-run length of Grusky et al., 2018), its Flesch–Kincaid reading grade beside the passages' own, and how often it opens with an introduction such as "Here's the summary:" or uses Markdown. Each run writes `evaluation/review.md`, which shows each passage above its rewrite. A rewrite comparison needs no `[scoring]`, and `compare` adds `side-by-side.md`, which shows every compared model's rewrite under each passage:
 
 ```toml
 task = "rewrite"
@@ -203,6 +203,19 @@ runs = [
     "rewrite/qwen3.5-4b-bf16-summary-baseline/<UTC start>",
     "rewrite/gemma-4-e4b-int8-summary-baseline/<UTC start>",
 ]
+```
+
+The flags cannot tell whether a rewrite keeps the passage's meaning, so a judge grades rewrites against key-point checklists, one per passage set under `data/rewrite/keypoints/`. `pbench judge prepare` writes one prompt per passage under `results/judgments/rewrite/<comparison>/`: the judge instructions from `prompts/rewrite/judge/`, the passage, its key points, and every valid rewrite under a letter shuffled per passage, so the judge cannot tell which model wrote which. The judge marks each key point kept, partial, missing, or contradicted, and lists claims the passage does not support, quoting the rewrite for each. `pbench judge record` refuses a reply that skips a point or quotes words its rewrite does not contain, then freezes the record. A comparison that names the judgment adds key-point panels and `keypoints.png`:
+
+```powershell
+uv run pbench judge prepare comparisons/rewrite-keypoints-v3.toml --judge "<the model, and how it ran>"
+# The judge answers each prompt in replies/<passage>.json, then:
+uv run pbench judge record results/judgments/rewrite/rewrite-keypoints-v3
+```
+
+```toml
+[scoring]
+judgments = "rewrite-keypoints-v3"
 ```
 
 ## Extending

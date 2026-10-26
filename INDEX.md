@@ -43,6 +43,7 @@ The `privacy_bench` package and its `pbench` command. Run every command from `pr
 - A **condition** (`conditions/`) names one task, strategy, sample, and pinned model. `pbench run` turns it into a run record under `results/runs/`.
 - A **fit** (`fits/`) names labeled examples and the heads to learn from them. `pbench fit` writes the weights under `results/fits/`, and conditions refer to them.
 - A **comparison** (`comparisons/`) lists saved runs and how to score them. `pbench compare` rescores them with the current code and writes a table and plots.
+- A **judgment** grades a rewrite comparison's runs against each passage's key points. `pbench judge prepare` writes one blind prompt per passage under `results/judgments/`, a judge answers each, and `pbench judge record` checks the replies and freezes them; `[scoring] judgments` in a comparison then scores runs from it.
 
 ### Guides
 
@@ -57,7 +58,7 @@ Layers depend only downward: `core`, `models`, and `report` never import a task,
 
 | File | Purpose |
 | --- | --- |
-| [cli.py](privacy-research/src/privacy_bench/cli.py) | `pbench run`, `fit`, `download`, `evaluate`, and `compare`. |
+| [cli.py](privacy-research/src/privacy_bench/cli.py) | `pbench run`, `fit`, `download`, `evaluate`, `compare`, and `judge`. |
 | **[core/](privacy-research/src/privacy_bench/core/)** | **Task-agnostic machinery** |
 | [protocols.py](privacy-research/src/privacy_bench/core/protocols.py) | The `Task` and `Strategy` contracts between the harness, tasks, and strategies. Start here to understand the design. |
 | [harness.py](privacy-research/src/privacy_bench/core/harness.py) | The one run loop: select items, preflight every input, warm up, predict, record, evaluate. |
@@ -84,7 +85,9 @@ Layers depend only downward: `core`, `models`, and `report` never import a task,
 | [classification/fitting.py](privacy-research/src/privacy_bench/tasks/classification/fitting.py) | The `embedding-heads` and `prior-shift` fitters. |
 | [classification/report.py](privacy-research/src/privacy_bench/tasks/classification/report.py) | How classification runs are rescored, labeled, and annotated in comparisons. |
 | [classification/strategies/](privacy-research/src/privacy_bench/tasks/classification/strategies/) | One file per strategy (`prompted`, `classifier_head`, `jev_choice`, `embedding_similarity`, `embedding_head`), registered in `STRATEGIES`; `settings.py` holds shared condition parsing. |
-| [rewrite/task.py](privacy-research/src/privacy_bench/tasks/rewrite/task.py) | The rewrite task object: selects passages, builds the strategy, evaluates, and writes `side-by-side.md` for comparisons. |
+| [rewrite/task.py](privacy-research/src/privacy_bench/tasks/rewrite/task.py) | The rewrite task object: selects passages, builds the strategy, evaluates, prepares and records judgments, and writes `side-by-side.md` and, with judgments, `keypoints.png` for comparisons. |
+| [rewrite/judging.py](privacy-research/src/privacy_bench/tasks/rewrite/judging.py) | Blind key-point judging: the checklists, one prompt per passage with shuffled letters, strict checks of each reply (every point graded, every quote found in its rewrite), the frozen record, and each run's scores. |
+| [rewrite/chart.py](privacy-research/src/privacy_bench/tasks/rewrite/chart.py) | `keypoints.png`: each run's key points kept, partly kept, left out, or contradicted, and its share of rewrites that could mislead. |
 | [rewrite/data.py](privacy-research/src/privacy_bench/tasks/rewrite/data.py) | Frozen passage files, and prompt files: an optional `system` message and a `user` template with one `{passage}`. |
 | [rewrite/strategy.py](privacy-research/src/privacy_bench/tasks/rewrite/strategy.py) | The `prompted` strategy: renders the prompt file for each passage and generates with the chat backend. |
 | [rewrite/scoring.py](privacy-research/src/privacy_bench/tasks/rewrite/scoring.py) | Validity, length, and the numbers and qualifiers a rewrite dropped or added (flags, not quality scores); copying, reading grade, and format breaks; and the review Markdown. |

@@ -8,6 +8,7 @@ RESULTS_DIR = REPO_ROOT / "results"
 RUNS_DIR = RESULTS_DIR / "runs"
 FITS_DIR = RESULTS_DIR / "fits"
 COMPARISONS_DIR = RESULTS_DIR / "comparisons"
+JUDGMENTS_DIR = RESULTS_DIR / "judgments"
 # Prompts stay editable, unlike data/: every run copies the full prompt text into its input.json.
 PROMPTS_DIR = REPO_ROOT / "prompts"
 
