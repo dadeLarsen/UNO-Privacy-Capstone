@@ -23,8 +23,17 @@ def test_status(response, expected):
 def test_checks_name_dropped_numbers_and_qualifiers_and_read_contractions_as_not():
     flags = check(SOURCE, "They keep records for up to 30 days and do not sell data.")
     assert (flags["numbers_in_source"], flags["numbers_kept"], flags["missing_numbers"]) == (2, 1, "90")
-    assert (flags["qualifiers_in_source"], flags["missing_qualifiers"]) == (3, "except may")
+    assert (flags["qualifiers_in_source"], flags["missing_qualifiers"]) == (3, "except/unless may")
     assert check(SOURCE, SOURCE)["missing_qualifiers"] == ""
+
+
+def test_added_exceptions_and_negations_are_flagged_but_added_hedges_and_restated_exceptions_are_not():
+    flags = check("We do not knowingly process data under 16 without consent.",
+                  "We don't process data under 16 without consent unless the law requires it.")
+    assert (flags["missing_qualifiers"], flags["added_qualifiers"]) == ("knowingly", "except/unless")
+    restated = check("We keep data except as the law requires.", "We may keep data unless the law requires otherwise.")
+    assert (restated["missing_qualifiers"], restated["added_qualifiers"]) == ("", "")
+    assert check("Breaches likely to cause harm are reported.", "Harmful breaches are reported.")["missing_qualifiers"] == "likely"
 
 
 def test_cannot_and_curly_contractions_negate_and_section_labels_are_not_numbers():
@@ -70,15 +79,15 @@ def test_metrics_pool_checks_over_every_passage_and_average_length_over_valid_on
     assert metrics["numbers_kept_rate"] == 2 / 3
     assert [detail["status"] for detail in details] == ["valid", "truncated"]
     assert metrics["mean_copy_density"] == copying(SOURCE, SOURCE)["copy_density"]
-    assert metrics["format_break_rate"] == 0
+    assert metrics["format_break_rate"] == 0 and metrics["qualifier_added_rate"] == 0
     assert metrics["reading_grade"] == reading_level([SOURCE])["reading_grade"]
     assert metrics["source_reading_grade"] == reading_level([SOURCE, "We share data with 3 partners."])["reading_grade"]
 
 
 def test_review_shows_each_passage_once_with_every_rewrite_and_its_flags():
     passages = [Passage("a", "Retention", SOURCE)]
-    text = review_markdown(passages, [("Model A", {"a": {"id": "a", "raw_output": "Here is it: kept for 30 days."}}),
+    text = review_markdown(passages, [("Model A", {"a": {"id": "a", "raw_output": "Here is it: kept only for 30 days."}}),
                                       ("Model B", {})])
     assert text.count(SOURCE) == 1 and "### Model A" in text and "### Model B" in text
     assert "numbers dropped: 90" in text and "*(no output)*" in text and "**missing**" in text
-    assert "; introduction;" in text
+    assert "; introduction;" in text and "qualifiers added: only" in text

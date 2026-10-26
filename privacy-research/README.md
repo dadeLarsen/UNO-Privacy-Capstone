@@ -195,7 +195,7 @@ The rewrite task runs on 20 frozen APPSI-139 policy sections ([tools/make_appsi1
 uv run pbench run conditions/rewrite/qwen3.5-4b-bf16-summary-baseline.toml
 ```
 
-No reference rewrite exists, so the scores only flag outputs to check: whether a rewrite is valid (finished, nonempty, no reasoning tags), and how many of the source's numbers and qualifiers (*may*, *unless*, *not*, …) it still contains. Three more describe how a rewrite is written: how much it copies from the passage (the copied-run length of Grusky et al., 2018), its Flesch–Kincaid reading grade beside the passages' own, and how often it opens with an introduction such as "Here's the summary:" or uses Markdown. Each run writes `evaluation/review.md`, which shows each passage above its rewrite. A rewrite comparison takes no `[scoring]`, and `compare` adds `side-by-side.md`, which shows every compared model's rewrite under each passage:
+No reference rewrite exists, so the scores only flag outputs to check: whether a rewrite is valid (finished, nonempty, no reasoning tags), how many of the source's numbers and qualifiers (*may*, *unless*, *not*, …) it still contains, and whether it adds an exception, *only*, or a negation that the passage lacks. Three more describe how a rewrite is written: how much it copies from the passage (the copied-run length of Grusky et al., 2018), its Flesch–Kincaid reading grade beside the passages' own, and how often it opens with an introduction such as "Here's the summary:" or uses Markdown. Each run writes `evaluation/review.md`, which shows each passage above its rewrite. A rewrite comparison takes no `[scoring]`, and `compare` adds `side-by-side.md`, which shows every compared model's rewrite under each passage:
 
 ```toml
 task = "rewrite"

@@ -87,7 +87,7 @@ Layers depend only downward: `core`, `models`, and `report` never import a task,
 | [rewrite/task.py](privacy-research/src/privacy_bench/tasks/rewrite/task.py) | The rewrite task object: selects passages, builds the strategy, evaluates, and writes `side-by-side.md` for comparisons. |
 | [rewrite/data.py](privacy-research/src/privacy_bench/tasks/rewrite/data.py) | Frozen passage files, and prompt files: an optional `system` message and a `user` template with one `{passage}`. |
 | [rewrite/strategy.py](privacy-research/src/privacy_bench/tasks/rewrite/strategy.py) | The `prompted` strategy: renders the prompt file for each passage and generates with the chat backend. |
-| [rewrite/scoring.py](privacy-research/src/privacy_bench/tasks/rewrite/scoring.py) | Validity, length, and the numbers and qualifiers a rewrite dropped (flags, not quality scores); copying, reading grade, and format breaks; and the review Markdown. |
+| [rewrite/scoring.py](privacy-research/src/privacy_bench/tasks/rewrite/scoring.py) | Validity, length, and the numbers and qualifiers a rewrite dropped or added (flags, not quality scores); copying, reading grade, and format breaks; and the review Markdown. |
 
 ### Tests: [tests/](privacy-research/tests/)
 

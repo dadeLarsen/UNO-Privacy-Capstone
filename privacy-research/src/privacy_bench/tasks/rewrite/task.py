@@ -68,6 +68,8 @@ class RewriteTask:
                   "percent", "higher"),
             Panel("qualifiers_kept_rate", "Qualifiers kept", "Source hedges and negations still present (%)",
                   100, "percent", "higher"),
+            Panel("qualifier_added_rate", "Qualifiers added", "Rewrites adding an exception, only, or a negation (%)",
+                  100, "percent", "lower"),
             Panel("mean_output_words", "Rewrite length", "Mean words / valid rewrite", 1, "tokens", "neutral"),
             Panel("reading_grade", "Reading grade", "Flesch-Kincaid grade, pooled", 1, "tokens", "lower"),
             Panel("mean_copy_density", "Copying", "Mean copied run (words)", 1, "tokens", "neutral"),
@@ -86,8 +88,10 @@ class RewriteTask:
             "Nothing here scores quality; read side-by-side.md. Valid means finished before the token limit, "
             "nonempty, and free of reasoning tags.",
             "Numbers and qualifiers kept pool every passage's distinct numbers (section labels such as 8.2 "
-            "excluded) and words such as may, unless, only, and not; a drop flags a rewrite to check, and "
-            "keeping them proves nothing.",
+            "excluded) and words such as may, unless, only, not, and knowingly; a drop flags a rewrite to "
+            "check, and keeping them proves nothing. Qualifiers added: an exception, only, or a negation the "
+            "passage lacks, which can reverse a promise; rewording such as irreversible to cannot be undone "
+            "also counts.",
             f"Reading grade: Flesch-Kincaid, pooled over valid rewrites; the passages themselves score "
             f"{rows[0]['source_reading_grade']:.1f}. Copying: the copied-run length an average rewrite word "
             "sits in (Grusky et al., 2018); 1-2 means the model's own words. Format breaks: an opening such "

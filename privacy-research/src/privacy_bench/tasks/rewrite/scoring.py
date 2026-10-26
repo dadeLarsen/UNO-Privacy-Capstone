@@ -17,9 +17,15 @@ from ...core.files import write_json
 NUMBER = re.compile(r"\d+(?:[.,:/]\d+)*")
 # Section labels such as "8.2 We ..." open a line or sentence; a summary should drop them, not keep them.
 SECTION_LABEL = re.compile(r"(?:^|(?<=[.!?_]\s))\d+(?:\.\d+)+(?=\s)", re.M)
-# Words whose loss can change what a sentence promises: hedges, conditions, exceptions, and negation.
-QUALIFIERS = ("may", "might", "could", "except", "unless", "only", "if", "not", "never", "without")
+# Words whose loss can change what a sentence promises: hedges and likelihood, conditions, exceptions,
+# negation, and knowledge ("we do not knowingly collect").
+QUALIFIERS = ("may", "might", "could", "likely", "except", "unless", "only", "if", "not", "never", "without",
+              "knowingly")
 QUALIFIER = re.compile(r"\b(" + "|".join(QUALIFIERS) + r")\b")
+# A rewrite often restates "except as the law requires" as "unless the law requires it".
+SAME_QUALIFIER = {"except": "except/unless", "unless": "except/unless"}
+# Adding an exception, a restriction, or a negation can reverse a promise; added hedges are usually rewording.
+ADDED_QUALIFIERS = ("except/unless", "only", "not", "never", "without")
 # Qwen, Granite, and LFM think inside <think>; Gemma 4 thinks in a <|channel>thought ... <channel|> block.
 REASONING_TAGS = ("<think>", "</think>", "<|channel>", "<channel|>")
 TOKEN = re.compile(r"\w+")
@@ -52,7 +58,7 @@ def status(response: dict | None) -> str:
 
 def qualifiers(text: str) -> set:
     text = text.lower().replace("’", "'").replace("cannot", "can not").replace("n't", " not")
-    return set(QUALIFIER.findall(text))
+    return {SAME_QUALIFIER.get(word, word) for word in QUALIFIER.findall(text)}
 
 
 def check(source: str, output: str) -> dict:
@@ -63,6 +69,7 @@ def check(source: str, output: str) -> dict:
         "missing_numbers": " ".join(sorted(numbers - kept_numbers)),
         "qualifiers_in_source": len(words), "qualifiers_kept": len(words & kept_words),
         "missing_qualifiers": " ".join(sorted(words - kept_words)),
+        "added_qualifiers": " ".join(sorted((kept_words - words) & set(ADDED_QUALIFIERS))),
     }
 
 
@@ -149,14 +156,17 @@ def evaluate(passages: list, responses: list) -> tuple:
         "mean_output_words": mean("output_words"), "mean_compression": mean("compression"),
         "numbers_kept_rate": pooled("numbers_kept", "numbers_in_source"),
         "qualifiers_kept_rate": pooled("qualifiers_kept", "qualifiers_in_source"),
+        "qualifier_added_rate": (sum(bool(detail["added_qualifiers"]) for detail in valid) / len(valid)
+                                 if valid else None),
         "mean_copy_coverage": mean("copy_coverage"), "mean_copy_density": mean("copy_density"),
         **reading_level(outputs[detail["id"]] for detail in valid),
         **{f"source_{key}": value for key, value in reading_level(passage.text for passage in passages).items()},
         "introduction_rate": mean("introduction"), "markdown_rate": mean("markdown"),
         "format_break_rate": (sum(detail["introduction"] or detail["markdown"] for detail in valid) / len(valid)
                               if valid else None),
-        "checks_scope": "numbers other than section labels, and qualifiers, pooled over every passage; "
-                        "an invalid rewrite keeps what it shows",
+        "checks_scope": "numbers other than section labels, and qualifiers, pooled over every passage, with "
+                        "except and unless as one; an invalid rewrite keeps what it shows; the added rate is "
+                        "the share of valid rewrites adding an exception, restriction, or negation",
         "style_scope": "copying, format, and reading level over valid rewrites; reading level pooled, with "
                        "pyphen en_US syllables, Markdown removed, and every line ending a sentence",
         "qualifiers": list(QUALIFIERS),
@@ -183,6 +193,8 @@ def review_markdown(passages: list, columns: list) -> str:
                 notes.append(f"numbers dropped: {flags['missing_numbers']}")
             if flags["missing_qualifiers"]:
                 notes.append(f"qualifiers dropped: {flags['missing_qualifiers']}")
+            if flags["added_qualifiers"]:
+                notes.append(f"qualifiers added: {flags['added_qualifiers']}")
             lines += [f"### {label}", "", f"*{'; '.join(notes)}*", "", output or "*(no output)*", ""]
     return "\n".join(lines)
 
