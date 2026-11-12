@@ -34,40 +34,40 @@ NFR-02).
 ## Setup
 
 The project uses [uv](https://docs.astral.sh/uv/) and Python 3.12. `modelService`
-depends on `privacy-research` by path, so both folders must stay side by side.
+depends on `privacy-research` by path, so both folders must stay side by side. Run
+every command below from this folder. Installing the service also installs the
+benchmark and its `pbench` command, so `privacy-research/` needs no setup of its own.
 
-First cache the pinned model files from the benchmark project while online. Both
-default conditions pin the same checkpoint, so this one download serves the GPU and
-the CPU:
+Choose one of the two setups. Each installs the service, caches the pinned model
+files while online, and runs the tests. Both default conditions pin the same
+checkpoint, so either download serves the GPU and the CPU.
 
-```powershell
-cd ../privacy-research
-uv sync
-uv run pbench download conditions/classification/appsi139/embeddinggemma2-bf16-head-linear-balanced-tuned-appsi139-test-half.toml
-```
-
-Some checkpoints may require accepting their license on Hugging Face first. The service
-itself never downloads; it reads the snapshot from the local cache.
-
-Then install the service:
+**With an NVIDIA GPU.** This installs the CUDA 12.8 build of torch:
 
 ```powershell
-cd ../modelService
 uv sync
+uv run pbench download ../privacy-research/conditions/classification/appsi139/embeddinggemma2-bf16-head-linear-balanced-tuned-appsi139-test-half.toml
 uv run pytest
 ```
 
-This install works with or without an NVIDIA GPU, because the CUDA build of torch
-also runs on the CPU. That was checked with the GPU hidden
-(`CUDA_VISIBLE_DEVICES=-1`), not yet on a computer without an NVIDIA driver.
+This setup also works without an NVIDIA GPU, because the CUDA build of torch also
+runs on the CPU. That was checked with the GPU hidden (`CUDA_VISIBLE_DEVICES=-1`),
+not yet on a computer without an NVIDIA driver.
 
-**Optional, without an NVIDIA GPU:** the CPU build of torch is a much smaller
-download.
+**Without an NVIDIA GPU.** This installs the much smaller CPU build of torch:
 
 ```powershell
-$env:UV_NO_SYNC = "1"    # keep `uv run` from installing the CUDA build
+$env:UV_NO_SYNC = "1"    # keep `uv run` from installing the CUDA build; set it in your profile
 uv sync --no-group cu128 --group cpu
+uv run pbench download ../privacy-research/conditions/classification/appsi139/embeddinggemma2-fp32-cpu-head-linear-balanced-tuned-appsi139-test-half.toml
+uv run pytest
 ```
+
+Set `UV_NO_SYNC` before any other `uv` command. After pulling a change to `uv.lock`,
+rerun the `uv sync` line.
+
+Some checkpoints may require accepting their license on Hugging Face first. The service
+itself never downloads; it reads the snapshot from the local cache.
 
 ## Run
 
