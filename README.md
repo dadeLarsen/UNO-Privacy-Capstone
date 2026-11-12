@@ -21,7 +21,7 @@ Not planned for the first version: chat about a policy, PDF or DOCX import, lang
 
 ## Status
 
-The app itself has not been started. The work so far chooses its models:
+The interface is still a scaffold. [`modelService/`](modelService/) now runs the chosen classifier on a pasted or uploaded policy and returns one category per sentence; the browser UI does not call it yet, and rewriting is not built. The work so far also chooses the models:
 
 - **Classifier:** a linear head on EmbeddingGemma 2 embeddings leads, at about 0.04 s per sentence and 0.6 GiB, with accuracy close to much larger models. It has not yet been timed on a computer without a GPU.
 - **Rewriter:** not chosen; no rewriting has been evaluated.
@@ -34,6 +34,7 @@ Results and their caveats are in the [model research README](privacy-research/RE
 | Path | Contents |
 | --- | --- |
 | [docs/](docs/) | The [requirements](docs/Requirements-Document.md): goal model, functional and nonfunctional requirements, wireframes, object model, and the analyses that choose the models. The draft of Chapter 2 of the final report. |
+| [modelService/](modelService/) | The localhost-only Python service that classifies a policy and returns one category per sentence. Reuses the benchmark's pinned models. Has its own setup. |
 | [privacy-research/](privacy-research/) | The model benchmark (`pbench`): run conditions, datasets, tracked run records, and results. Has its own setup. |
 
 [INDEX.md](INDEX.md) maps every folder and file.

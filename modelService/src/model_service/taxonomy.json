@@ -1,0 +1,76 @@
+{
+  "taxonomy_id": "opp115-10-other",
+  "version": 1,
+  "categories": [
+    {
+      "id": 0,
+      "name": "Policy Change",
+      "display_name": "Policy Change",
+      "definition": "Whether or how the policy may change, and how users are told.",
+      "color": "#a57bc1"
+    },
+    {
+      "id": 1,
+      "name": "Third Party Sharing/Collection",
+      "display_name": "Third Party Sharing/Collection",
+      "definition": "Disclosure of user information to third parties, or collection of it by third parties.",
+      "color": "#6ea84f"
+    },
+    {
+      "id": 2,
+      "name": "User Choice/Control",
+      "display_name": "User Choice/Control",
+      "definition": "Choices users have about collection, use, or sharing, including consent and opting out.",
+      "color": "#507bc7"
+    },
+    {
+      "id": 3,
+      "name": "Data Retention",
+      "display_name": "Data Retention",
+      "definition": "How long user information is kept, or what decides the storage period.",
+      "color": "#e3a33b"
+    },
+    {
+      "id": 4,
+      "name": "User Access Edit and Deletion",
+      "display_name": "User Access, Edit and Deletion",
+      "definition": "Whether and how users can access, correct, update, or delete their information.",
+      "color": "#31a8b5"
+    },
+    {
+      "id": 5,
+      "name": "International and Specific Audiences",
+      "display_name": "International and Specific Audiences",
+      "definition": "Practices for specific groups, such as children or residents of particular regions.",
+      "color": "#dd657c"
+    },
+    {
+      "id": 6,
+      "name": "Data Security",
+      "display_name": "Data Security",
+      "definition": "Measures that protect user information, or statements about its security.",
+      "color": "#3aab9c"
+    },
+    {
+      "id": 7,
+      "name": "Do Not Track",
+      "display_name": "Do Not Track",
+      "definition": "Whether and how browser Do Not Track signals are honored.",
+      "color": "#9367a8"
+    },
+    {
+      "id": 8,
+      "name": "First Party Collection/Use",
+      "display_name": "First Party Collection/Use",
+      "definition": "Information the service provider collects or uses, including how and why.",
+      "color": "#e8754e"
+    },
+    {
+      "id": 9,
+      "name": "Other",
+      "display_name": "Other",
+      "definition": "Introductions, general statements, scope, headings, dates, contact information, and practices outside the nine.",
+      "color": "#b39a75"
+    }
+  ]
+}

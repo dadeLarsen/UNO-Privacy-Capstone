@@ -24,10 +24,25 @@ Data, configuration, and results entries have a status:
 | Path | Contents |
 | --- | --- |
 | [docs/](docs/) | Requirements and design for the app |
+| [modelService/](modelService/) | The localhost-only model service: classifies a policy and returns one category per sentence |
 | [privacy-research/](privacy-research/) | The model benchmark: a self-contained Python project with its own environment |
 | [.gitignore](.gitignore) | Ignores for the whole repository; `privacy-research/` adds its own |
 
-The app has no code yet. When it does, its folder gets a section here.
+The browser interface is still a scaffold. `modelService/` is the first app code; the
+UI does not call it yet, and rewriting is not implemented.
+
+## Model service: [modelService/](modelService/)
+
+A small FastAPI service that reuses the benchmark's pinned classifier. It binds to
+localhost only, never downloads at request time, and returns exact character offsets
+for every sentence.
+
+| File | Status | Contents |
+| --- | --- | --- |
+| [README.md](modelService/README.md) | Current | Setup, run, API examples, configuration, and what is not implemented |
+| [pyproject.toml](modelService/pyproject.toml) | Current | Dependencies, CUDA/CPU torch groups, and the `model-service` command |
+| [src/model_service/](modelService/src/model_service/) | Current | `app.py` routes, `classifier.py` benchmark adapter, `sentences.py` splitter, `settings.py` configuration, and `taxonomy.json` |
+| [tests/](modelService/tests/) | Current | API tests with a fake classifier and splitter tests; no model or GPU needed |
 
 ## App requirements: [docs/](docs/)
 
