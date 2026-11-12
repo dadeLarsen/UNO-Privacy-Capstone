@@ -35,14 +35,15 @@ UI does not call it yet, and rewriting is not implemented.
 
 A small FastAPI service that reuses the benchmark's pinned classifier. It binds to
 localhost only, never downloads at request time, and returns exact character offsets
-for every sentence.
+for every sentence. It runs the same fitted head on an NVIDIA GPU or on the CPU, and
+chooses between them at startup.
 
 | File | Status | Contents |
 | --- | --- | --- |
 | [README.md](modelService/README.md) | Current | Setup, run, API examples, configuration, and what is not implemented |
 | [pyproject.toml](modelService/pyproject.toml) | Current | Dependencies, CUDA/CPU torch groups, and the `model-service` command |
-| [src/model_service/](modelService/src/model_service/) | Current | `app.py` routes, `classifier.py` benchmark adapter, `sentences.py` splitter, `settings.py` configuration, and `taxonomy.json` |
-| [tests/](modelService/tests/) | Current | API tests with a fake classifier and splitter tests; no model or GPU needed |
+| [src/model_service/](modelService/src/model_service/) | Current | `app.py` routes, `classifier.py` benchmark adapter, `sentences.py` splitter, `settings.py` configuration and the GPU or CPU choice, and `taxonomy.json` |
+| [tests/](modelService/tests/) | Current | API tests with a fake classifier, splitter tests, and settings tests; no model or GPU needed |
 
 ## App requirements: [docs/](docs/)
 

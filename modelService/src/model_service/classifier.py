@@ -6,7 +6,7 @@ label order, and the strategy checks the fitted weight hashes before inference.
 """
 
 from collections import OrderedDict
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from pathlib import Path
 from threading import RLock
 from types import SimpleNamespace
@@ -36,8 +36,7 @@ class Classifier(Protocol):
 class PrivacyBenchClassifier:
     """Run one pinned classification condition on arbitrary sentences."""
 
-    def __init__(self, condition_path: Path, *, device: str | None = None, cache_size: int = 4096):
-        # Imported here so the HTTP app and its tests do not need torch until a model is loaded.
+    def __init__(self, condition_path: Path, *, cache_size: int = 4096):
         from privacy_bench.core.conditions import load_condition
         from privacy_bench.tasks import get_task
 
@@ -46,15 +45,6 @@ class PrivacyBenchClassifier:
             raise ValueError(
                 f"modelService needs a classification condition, not {condition.task!r}: {condition_path}"
             )
-        if device is not None and device != condition.model.get("device"):
-            model = dict(condition.model)
-            if device == "cpu" and model.get("precision") != "fp32":
-                raise ValueError(
-                    f"Condition {condition.name!r} uses {model.get('precision')!r} weights, which run only on CUDA. "
-                    "Use a fp32 condition, such as privacy-model-fp32, to run on the CPU."
-                )
-            model["device"] = device
-            condition = replace(condition, model=model)
         self._condition = condition
         self._strategy = get_task(condition.task).build_strategy(condition)
         self._cache_size = cache_size

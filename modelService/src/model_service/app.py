@@ -24,14 +24,12 @@ class AnalyzeRequest(BaseModel):
 
 def create_app(settings: Settings | None = None, classifier: Classifier | None = None) -> FastAPI:
     settings = settings or Settings.from_env()
-    service = classifier or PrivacyBenchClassifier(
-        settings.condition, device=settings.device, cache_size=settings.cache_size
-    )
+    service = classifier or PrivacyBenchClassifier(settings.condition_path, cache_size=settings.cache_size)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         if settings.preload:
-            logger.info("Loading the classifier from %s", settings.condition.name)
+            logger.info("Loading the classifier from %s", settings.condition_path.name)
             service.load()
             logger.info("Classifier ready")
         yield
