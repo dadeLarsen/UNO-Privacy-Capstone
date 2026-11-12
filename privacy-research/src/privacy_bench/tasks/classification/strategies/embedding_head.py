@@ -29,6 +29,9 @@ PRIOR_SHIFT_KIND = "prior-shift"
 FIT_KINDS = (EMBEDDING_FIT_KIND, PRIOR_SHIFT_KIND)
 # The fit's embeddings are only valid for the same checkpoint at the same precision and module set.
 MATCHED_MODEL_KEYS = {"id": None, "revision": None, "precision": None, "text_only": False}
+# The one precision mismatch allowed, as (fit, condition): fp32 is the only precision the CPU runs, and it
+# computes unrounded the embeddings a bf16 fit saw rounded. No other pair has been tested.
+FP32_ON_BF16_FIT = ("bf16", "fp32")
 HEAD_KEYS = ("method", "class_weight", "c", "base_head", "strength")
 
 
@@ -70,6 +73,8 @@ class EmbeddingHeadStrategy:
         fitted_model = embedding_fit.record["fit"]["model"]
         differing = [key for key, default in MATCHED_MODEL_KEYS.items()
                      if fitted_model.get(key, default) != self.model[key]]
+        if (fitted_model.get("precision"), self.model["precision"]) == FP32_ON_BF16_FIT:
+            differing.remove("precision")
         if differing:
             raise ValueError(f"Condition [model] differs from the model fit {embedding_fit.reference!r} used: "
                              f"{', '.join(differing)}")

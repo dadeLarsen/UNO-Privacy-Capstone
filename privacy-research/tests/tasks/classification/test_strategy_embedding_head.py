@@ -77,13 +77,26 @@ def test_input_spec_takes_the_prefix_and_head_from_the_fit(make_condition, fits_
     (MODEL, options(fit="classification/toy-heads/20991231-000000Z"), "No fit record"),
     (MODEL, options(head="nope"), "has no head 'nope'; it has linear"),
     ({**MODEL, "revision": "b" * 40}, options(), "differs from the model .* used: revision"),
-    ({**MODEL, "precision": "fp32"}, options(), "used: precision"),
     ({**MODEL, "text_only": False}, options(), "used: text_only"),
     ({**MODEL, "id": "o/other"}, options(), "used: id"),
 ])
 def test_invalid_conditions_fail_before_any_model_loads(make_condition, fits_root, model, settings, message):
     with pytest.raises(ValueError, match=message):
         EmbeddingHeadStrategy(make_condition("embedding-head", model, settings))
+
+
+def test_fp32_inference_on_a_bf16_fit_builds(make_condition, fits_root):
+    strategy = EmbeddingHeadStrategy(
+        make_condition("embedding-head", {**MODEL, "precision": "fp32", "device": "cpu"}, options()))
+    assert (strategy.model["precision"], strategy.model["device"]) == ("fp32", "cpu")
+    assert strategy.input_spec["fit"]["reference"] == REFERENCE
+
+
+def test_bf16_inference_on_an_fp32_fit_is_refused(make_condition, fits_root):
+    fits_root(FIT_SPEC.replace('"bf16"', '"fp32"'), name="fp32-heads")
+    with pytest.raises(ValueError, match="used: precision"):
+        EmbeddingHeadStrategy(make_condition("embedding-head", MODEL,
+                                             options(fit="classification/fp32-heads/20261012-000000Z")))
 
 
 def test_fits_of_another_kind_are_refused(make_condition, fits_root):
