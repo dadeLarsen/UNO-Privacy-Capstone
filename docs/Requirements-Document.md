@@ -355,7 +355,7 @@ Policies and results are processed on the user's computer. Nothing is saved unle
 
   | Total memory | Supports |
   | --- | --- |
-  | 8–12 GB, no dedicated GPU | Every Must and Should feature. The app's peak stays under half of total memory. |
+  | 8–12 GB, no dedicated GPU | Every Must and Should feature. The app's peak stays under 6 GiB. |
   | 2–4 GB | Labeling and highlighting (Could). |
   | 16 GB or more | A larger rewriter (Could). |
 
