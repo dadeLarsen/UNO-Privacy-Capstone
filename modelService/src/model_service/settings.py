@@ -3,22 +3,25 @@
 Every value can be set with an environment variable; the command line can override
 the condition, device, host, port, and preload behavior. The service refuses to bind
 to anything except a loopback address (NFR-02).
+
+Without a condition, the service runs one of two default conditions, the same fitted
+head on the GPU or on the CPU. The device picks between them and is detected when
+unset. A condition names its own device, so it cannot be combined with one.
 """
 
 from dataclasses import dataclass
 import os
 from pathlib import Path
 
+import torch
+
 SERVICE_ROOT = Path(__file__).resolve().parents[2]
 REPO_ROOT = SERVICE_ROOT.parent
-DEFAULT_CONDITION = (
-    REPO_ROOT
-    / "privacy-research"
-    / "conditions"
-    / "classification"
-    / "appsi139"
-    / "embeddinggemma2-bf16-head-linear-balanced-tuned-appsi139-test-half.toml"
-)
+CONDITIONS = REPO_ROOT / "privacy-research" / "conditions" / "classification" / "appsi139"
+DEFAULT_CONDITIONS = {
+    "cuda": CONDITIONS / "embeddinggemma2-bf16-head-linear-balanced-tuned-appsi139-test-half.toml",
+    "cpu": CONDITIONS / "embeddinggemma2-fp32-cpu-head-linear-balanced-tuned-appsi139-test-half.toml",
+}
 LOOPBACK_HOSTS = frozenset({"127.0.0.1", "::1", "localhost"})
 DEFAULT_CORS_ORIGINS = (
     "http://localhost:5173",
@@ -53,9 +56,20 @@ def _env_int(name: str, default: int, *, minimum: int) -> int:
     return parsed
 
 
+def detect_device() -> str:
+    """The device whose default condition this computer can run."""
+    # By default torch counts emulated bf16 as support. NVIDIA cards older than the RTX 30 series only
+    # emulate it, and the GPU condition is untested on them, so they take the CPU condition.
+    if torch.cuda.is_available() and torch.cuda.is_bf16_supported(including_emulation=False):
+        return "cuda"
+    return "cpu"
+
+
 @dataclass(frozen=True)
 class Settings:
-    condition: Path = DEFAULT_CONDITION
+    # Holds only a condition that was given, never a default: replace() runs __post_init__ again, and a
+    # default stored here would then look like a condition given together with a device.
+    condition: Path | None = None
     device: str | None = None
     host: str = "127.0.0.1"
     port: int = 8000
@@ -65,12 +79,19 @@ class Settings:
     cors_origins: tuple[str, ...] = DEFAULT_CORS_ORIGINS
 
     def __post_init__(self):
-        if not isinstance(self.condition, Path):
+        if self.condition is not None and not isinstance(self.condition, Path):
             object.__setattr__(self, "condition", Path(self.condition))
-        if not self.condition.is_file():
-            raise ValueError(f"Condition file does not exist: {self.condition}")
         if self.device not in (None, "cuda", "cpu"):
             raise ValueError(f"device must be cuda, cpu, or unset, not {self.device!r}")
+        if self.condition is not None and self.device is not None:
+            raise ValueError(
+                f"Set a condition or a device, not both: got condition {self.condition} and device "
+                f"{self.device!r}. A condition names its own device; a device only picks between the two "
+                "default conditions. Check --condition, --device, MODEL_SERVICE_CONDITION, and "
+                "MODEL_SERVICE_DEVICE."
+            )
+        if not self.condition_path.is_file():
+            raise ValueError(f"Condition file does not exist: {self.condition_path}")
         if self.host not in LOOPBACK_HOSTS:
             raise ValueError(f"The service only listens on localhost; refusing host {self.host!r}")
         if not 1 <= self.port <= 65535:
@@ -82,13 +103,18 @@ class Settings:
         if not self.cors_origins:
             raise ValueError("cors_origins must not be empty")
 
+    @property
+    def condition_path(self) -> Path:
+        """The condition to run: the one given, else the default for the device, detected when unset."""
+        return self.condition or DEFAULT_CONDITIONS[self.device or detect_device()]
+
     @classmethod
     def from_env(cls) -> "Settings":
         condition = os.environ.get("MODEL_SERVICE_CONDITION")
         device = os.environ.get("MODEL_SERVICE_DEVICE")
         origins = os.environ.get("MODEL_SERVICE_CORS_ORIGINS")
         return cls(
-            condition=Path(condition) if condition else DEFAULT_CONDITION,
+            condition=Path(condition) if condition else None,
             device=(device or "").strip().lower() or None,
             host=os.environ.get("MODEL_SERVICE_HOST", "127.0.0.1").strip(),
             port=_env_int("MODEL_SERVICE_PORT", 8000, minimum=1),

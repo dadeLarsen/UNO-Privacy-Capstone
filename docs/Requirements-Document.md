@@ -355,7 +355,7 @@ Policies and results are processed on the user's computer. Nothing is saved unle
 
   | Total memory | Supports |
   | --- | --- |
-  | 8–12 GB, no dedicated GPU | Every Must and Should feature. The app's peak stays under half of total memory. |
+  | 8–12 GB, no dedicated GPU | Every Must and Should feature. The app's peak stays under 6 GiB. |
   | 2–4 GB | Labeling and highlighting (Could). |
   | 16 GB or more | A larger rewriter (Could). |
 
@@ -373,7 +373,7 @@ Policies and results are processed on the user's computer. Nothing is saved unle
 - **Goal:** Analyze the app's classifier to accept or reject it, with respect to label accuracy, from the client's and user's point of view, on policies it was not tuned on.
 - **Questions:** How often does its label match one a reviewer accepts? How does it do on each category, including rare ones? Is it at least as good as the best small baseline?
 - **Metrics:** accuracy against accepted labels on the APPSI-139 test half (natural category mix) and the 460-sentence balanced sample; macro accuracy, weighting each category equally; per-category accuracy; share of valid outputs.
-- **Target:** not significantly less accurate than skythrone/privacy-model on either sample (exact McNemar test, p < 0.05), with every output valid. The prior-shifted EmbeddingGemma 2 head meets this, tying privacy-model on both; no head yet beats it on both (AR-01).
+- **Target:** not significantly less accurate than skythrone/privacy-model on either sample (exact McNemar test, p < 0.05), with every output valid. The prior-shifted EmbeddingGemma 2 head meets this, tying privacy-model on both; no head yet beats it on both (AR-01). Run on the CPU in fp32, the same head still meets it: 0.857 against privacy-model's 0.858 on the test half (p = 0.75), and 0.815 against 0.824 on the balanced sample (p = 0.74).
 
 **NFR-06 [Must] Faithful, readable rewrites.** *(Q4, Q2, Q8)*
 

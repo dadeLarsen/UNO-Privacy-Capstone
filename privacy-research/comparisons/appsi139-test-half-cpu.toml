@@ -1,0 +1,20 @@
+task = "classification"
+title = "APPSI-139 test half: the tuned balanced head on the CPU"
+# Accepted labels are the original mapped labels plus every label ChatGPT Astra marked.
+# Both EmbeddingGemma 2 runs use the same shifted head, fitted on BF16 embeddings: one in BF16 on the GPU,
+# one in FP32 on the CPU. The head tuned on the other half. privacy-model's run covers all of APPSI-139 and
+# is scored on the test half alone.
+runs = [
+    "classification/privacy-model-fp32-appsi139-all/20261012-014711Z",
+    "classification/embeddinggemma2-bf16-head-linear-balanced-tuned-appsi139-test-half/20261012-050604Z",
+    "classification/embeddinggemma2-fp32-cpu-head-linear-balanced-tuned-appsi139-test-half/20261112-185826Z",
+]
+
+[scoring]
+gold = "appsi139-astra"
+sample = "appsi139-test-half"
+
+[labels]
+"classification/privacy-model-fp32-appsi139-all/20261012-014711Z" = "skythrone/privacy-model · FP32 on the GPU"
+"classification/embeddinggemma2-bf16-head-linear-balanced-tuned-appsi139-test-half/20261012-050604Z" = "google/embeddinggemma-2 · BF16 on the GPU"
+"classification/embeddinggemma2-fp32-cpu-head-linear-balanced-tuned-appsi139-test-half/20261112-185826Z" = "google/embeddinggemma-2 · FP32 on the CPU"

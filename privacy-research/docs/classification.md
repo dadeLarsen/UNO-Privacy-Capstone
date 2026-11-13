@@ -87,6 +87,8 @@ The `embedding-heads` fit embeds every example once with a sentence embedder, af
 
 `fit.json` reports each head's cross-validated balanced accuracy, and for logistic heads the score at every C. These scores come from OPP-115 examples only, so they say nothing about the test samples.
 
+A condition that uses a head names the checkpoint, revision, and precision its fit embedded with, and the strategy refuses any other. The one exception is fp32 inference on a head fitted in bf16: the embedder runs on the CPU only in fp32, so this is how a bf16 head runs there. The `fp32-cpu` conditions under `conditions/classification/appsi139/` use it.
+
 ### Prior shift
 
 A logistic head expects categories in the mix it was trained on: an even mix with balanced weights, otherwise the examples' own mix. A `prior-shift` fit moves logistic heads of an `embedding-heads` fit, its base, toward the mix of a tuning sample. A logistic head's scores are log-odds, so a new category mix adds `log target share - log training share` to each category's bias. A head's `strength` scales that shift: 0 leaves the base head as it was, and 1 assumes the tuning mix in full.

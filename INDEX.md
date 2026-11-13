@@ -35,14 +35,15 @@ UI does not call it yet, and rewriting is not implemented.
 
 A small FastAPI service that reuses the benchmark's pinned classifier. It binds to
 localhost only, never downloads at request time, and returns exact character offsets
-for every sentence.
+for every sentence. It runs the same fitted head on an NVIDIA GPU or on the CPU, and
+chooses between them at startup.
 
 | File | Status | Contents |
 | --- | --- | --- |
 | [README.md](modelService/README.md) | Current | Setup, run, API examples, configuration, and what is not implemented |
 | [pyproject.toml](modelService/pyproject.toml) | Current | Dependencies, CUDA/CPU torch groups, and the `model-service` command |
-| [src/model_service/](modelService/src/model_service/) | Current | `app.py` routes, `classifier.py` benchmark adapter, `sentences.py` splitter, `settings.py` configuration, and `taxonomy.json` |
-| [tests/](modelService/tests/) | Current | API tests with a fake classifier and splitter tests; no model or GPU needed |
+| [src/model_service/](modelService/src/model_service/) | Current | `app.py` routes, `classifier.py` benchmark adapter, `sentences.py` splitter, `settings.py` configuration and the GPU or CPU choice, and `taxonomy.json` |
+| [tests/](modelService/tests/) | Current | API tests with a fake classifier, splitter tests, and settings tests; no model or GPU needed |
 
 ## App requirements: [docs/](docs/)
 
@@ -144,14 +145,14 @@ One-time scripts that froze data files or imported runs. Each refuses to overwri
 | Path | Status | Contents |
 | --- | --- | --- |
 | [conditions/classification/](privacy-research/conditions/classification/) | Current | One run condition per file, on the OPP-115 pilot. Names read `<model>-<precision>-<method>`: `definitions` is the definitions prompt (or, for EmbeddingGemma 2, similarity to the definitions, with a suffix naming its instruction prefix), and `head-<name>` is a fitted head. `privacy-model-fp32` has no method: it classifies the raw sentence. |
-| [conditions/classification/appsi139/](privacy-research/conditions/classification/appsi139/) | Current | The same conditions on APPSI-139 samples, named `…-appsi139-<sample>`. `-tuned` and `-full` heads are prior-shifted at the tuned strength and at strength 1. |
+| [conditions/classification/appsi139/](privacy-research/conditions/classification/appsi139/) | Current | The same conditions on APPSI-139 samples, named `…-appsi139-<sample>`. `-tuned` and `-full` heads are prior-shifted at the tuned strength and at strength 1. The two `fp32-cpu` conditions run the tuned balanced head on the CPU in fp32; every other condition runs on the GPU. |
 | [conditions/rewrite/](privacy-research/conditions/rewrite/) | Current | One rewrite condition per candidate model and prompt on the 20 passages, named `<model>-<precision>-<prompt>`. |
 | [conditions/rewrite/holdout/](privacy-research/conditions/rewrite/holdout/) | Current | The `summary-v2` and `summary-v3` conditions on the held-out passages, named `…-holdout`. |
 | [prompts/rewrite/](privacy-research/prompts/rewrite/) | Current | Rewrite prompt files, editable: each run copies the prompt it used into its `input.json`. `summary-baseline` is a generic summary prompt for a first comparison; `summary-v2` adds length, format, and faithfulness instructions; `summary-v3` also forbids making a promise stronger or weaker. |
 | [prompts/rewrite/judge/](privacy-research/prompts/rewrite/judge/) | Current | Judge instructions, editable: each judgment copies the text it used. `keypoints` grades every rewrite against the key points and lists unsupported claims, with quotes. |
 | [fits/classification/embeddinggemma2-opp115-heads.toml](privacy-research/fits/classification/embeddinggemma2-opp115-heads.toml) | Current | The `centroid`, `linear-balanced`, and `linear-frequencies` heads on EmbeddingGemma 2, learned from the OPP-115 examples. |
 | [fits/classification/embeddinggemma2-appsi139-prior-shift.toml](privacy-research/fits/classification/embeddinggemma2-appsi139-prior-shift.toml) | Current | Shifts both linear heads toward the APPSI-139 tuning half's category mix. |
-| [comparisons/](privacy-research/comparisons/) | Current | Each file backs a table or finding in the research README: `pilot-embeddinggemma2-heads` and `pilot-models-embeddinggemma2` (OPP-115 pilot), `appsi139-random-1000`, `appsi139-balanced-50`, and `appsi139-all` (APPSI-139), `appsi139-test-half` and `appsi139-balanced-50-prior-shift` (prior shift), and `embeddinggemma2-instructions` (instruction prefixes). `rewrite-summary-prompts` (baseline and v2), `rewrite-summary-v2`, `rewrite-summary-v3` (v2 and v3), and `rewrite-summary-holdout` (v2 and v3 on the held-out passages) compare the candidate rewriters, `rewrite-precision-v3` and `rewrite-precision-v3-holdout` compare six of them at NF4 with their earlier precisions, and `rewrite-keypoints-v3` and `rewrite-keypoints-v3-holdout` score all nine, each at its tier's precision, from judgments of the same names; no README result uses them yet. |
+| [comparisons/](privacy-research/comparisons/) | Current | Each file backs a table or finding in the research README: `pilot-embeddinggemma2-heads` and `pilot-models-embeddinggemma2` (OPP-115 pilot), `appsi139-random-1000`, `appsi139-balanced-50`, and `appsi139-all` (APPSI-139), `appsi139-test-half` and `appsi139-balanced-50-prior-shift` (prior shift), `appsi139-test-half-cpu` and `appsi139-balanced-50-cpu` (the tuned balanced head on the CPU, beside its GPU run and privacy-model), and `embeddinggemma2-instructions` (instruction prefixes). `rewrite-summary-prompts` (baseline and v2), `rewrite-summary-v2`, `rewrite-summary-v3` (v2 and v3), and `rewrite-summary-holdout` (v2 and v3 on the held-out passages) compare the candidate rewriters, `rewrite-precision-v3` and `rewrite-precision-v3-holdout` compare six of them at NF4 with their earlier precisions, and `rewrite-keypoints-v3` and `rewrite-keypoints-v3-holdout` score all nine, each at its tier's precision, from judgments of the same names; no README result uses them yet. |
 | [comparisons/qwen-privacy-jev.toml](privacy-research/comparisons/qwen-privacy-jev.toml) | Historical | The imported runs, made under transformers 5.16.1. |
 
 ### Results: [results/](privacy-research/results/)
