@@ -51,6 +51,7 @@ class PrivacyBenchClassifier:
         self._cache: OrderedDict[str, Classification] = OrderedDict()
         self._lock = RLock()
         self._metadata: dict | None = None
+        self._score_order: list[int] | None = None
 
     @property
     def condition(self):
@@ -65,6 +66,11 @@ class PrivacyBenchClassifier:
             if tuple(MODEL_LABELS) != LABELS:
                 raise ValueError("modelService/taxonomy.json does not match privacy_bench's category order")
             loaded = self._strategy.load()
+            # A classifier-head checkpoint has its own label order, and its logits follow that order.
+            mapping = loaded.get("label_mapping")
+            if mapping is not None:
+                by_label = {item["label_id"]: item["model_label_id"] for item in mapping}
+                self._score_order = [by_label[label_id] for label_id in range(len(LABELS))]
             self._metadata = {
                 "id": loaded.get("model"),
                 "revision": loaded.get("revision"),
@@ -94,20 +100,19 @@ class PrivacyBenchClassifier:
                 return cached
             prepared = self._strategy.prepare(SimpleNamespace(text=sentence))
             response = self._strategy.predict(prepared)
-            label_id = response.get("model_label_id")
-            if label_id is None and "raw_output" in response:
-                # Generative strategies answer with text; reuse the benchmark's strict parser.
-                from privacy_bench.tasks.classification.scoring import parse_response
+            from privacy_bench.tasks.classification.scoring import parse_response
 
-                label_id = parse_response(response["raw_output"])
-            if not isinstance(label_id, int) or not 0 <= label_id < len(LABELS):
-                raise RuntimeError(f"Model returned an invalid label id: {label_id!r}")
+            # Every strategy answers in raw_output, and the benchmark scores that answer with this parser.
+            # model_label_id is the checkpoint's own index, which is not always the benchmark's label_id.
+            label_id = parse_response(response.get("raw_output"))
             scores = response.get("scores")
             if scores is None:
                 for key in ("similarities", "logits"):
                     if key in response:
                         scores = response[key]
                         break
+            if scores is not None and self._score_order is not None:
+                scores = [scores[index] for index in self._score_order]
             result = Classification(
                 label_id=label_id,
                 label=LABELS[label_id],
