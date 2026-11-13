@@ -80,13 +80,23 @@ The service listens on `http://127.0.0.1:8000`. At startup it runs the GPU condi
 when torch finds an NVIDIA GPU with native bf16 (the RTX 30 series and newer), and
 the CPU condition on every other computer. `/health` reports the device in use.
 
+These examples work in Windows PowerShell 5.1 and in PowerShell 7. They call
+`curl.exe` because 5.1 makes `curl` an alias of `Invoke-WebRequest`, and they pipe the
+JSON in because 5.1 strips the double quotes inside a program's arguments.
+
 ```powershell
-curl http://127.0.0.1:8000/health
-curl -X POST http://127.0.0.1:8000/analyze `
-  -H "Content-Type: application/json" `
-  -d '{"text":"We collect your email address. We share it with marketing partners."}'
-curl -X POST "http://127.0.0.1:8000/analyze/upload?include_scores=true" `
-  -F "file=@policy.txt"
+curl.exe http://127.0.0.1:8000/health
+
+'{"text":"We collect your email address. We share it with marketing partners."}' |
+  curl.exe -X POST http://127.0.0.1:8000/analyze -H "Content-Type: application/json" -d "@-"
+
+curl.exe -X POST "http://127.0.0.1:8000/analyze/upload?include_scores=true" -F "file=@policy.txt"
+```
+
+In cmd, the first and last commands work as written. Escape the JSON's quotes instead:
+
+```bat
+curl -X POST http://127.0.0.1:8000/analyze -H "Content-Type: application/json" -d "{\"text\":\"We collect your email address. We share it with marketing partners.\"}"
 ```
 
 Example response (abridged):
@@ -94,13 +104,13 @@ Example response (abridged):
 ```json
 {
   "text_sha256": "…",
-  "characters": 72,
+  "characters": 67,
   "sentences": [
     {
       "id": 0,
       "text": "We collect your email address.",
       "start": 0,
-      "end": 31,
+      "end": 30,
       "label_id": 8,
       "label": "First Party Collection/Use"
     }
