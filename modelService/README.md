@@ -25,7 +25,8 @@ between them at startup, so every computer gets the same head.
 Each sentence in the response has `id`, `text`, `start`, `end`, `label_id`, and
 `label`. `start` and `end` are offsets into the policy exactly as submitted, so the
 UI can highlight the original text without re-splitting it. `label_id` follows
-`taxonomy.json` (the same order as `privacy_bench.tasks.classification.taxonomy`).
+`privacy_bench.tasks.classification.taxonomy`, the category order the model was
+fitted on.
 
 A sentence the model cannot classify, such as one over the model's token limit, does
 not fail the request. It comes back with `label_id` and `label` set to `null` and an
@@ -158,13 +159,14 @@ src/model_service/
   classifier.py  privacy_bench condition/strategy adapter and sentence cache
   sentences.py   offset-preserving sentence splitter
   settings.py    environment and CLI configuration, and the GPU or CPU choice
-  taxonomy.json  the ten categories, definitions, display names, and colors
+  taxonomy.py    the ten categories: names and order from privacy_bench, the rest from taxonomy.json
+  taxonomy.json  each category's display name, definition, and color, keyed by its name
 tests/
   test_api.py        routes with a fake classifier (no model or GPU needed)
   test_classifier.py default conditions and label order (skipped without privacy_bench)
   test_sentences.py  splitter behavior and offsets
   test_settings.py   the GPU or CPU choice, and the condition and device rule
-  test_taxonomy.py   category order, checked against the benchmark
+  test_taxonomy.py   taxonomy.json names exactly the benchmark's ten categories
 ```
 
 ## Not implemented yet

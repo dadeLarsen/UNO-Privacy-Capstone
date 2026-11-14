@@ -61,10 +61,6 @@ class PrivacyBenchClassifier:
         with self._lock:
             if self._metadata is not None:
                 return dict(self._metadata)
-            from privacy_bench.tasks.classification.taxonomy import LABELS as MODEL_LABELS
-
-            if tuple(MODEL_LABELS) != LABELS:
-                raise ValueError("modelService/taxonomy.json does not match privacy_bench's category order")
             loaded = self._strategy.load()
             # A classifier-head checkpoint has its own label order, and its logits follow that order.
             mapping = loaded.get("label_mapping")
