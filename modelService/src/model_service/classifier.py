@@ -12,6 +12,10 @@ from threading import RLock
 from types import SimpleNamespace
 from typing import Protocol
 
+from privacy_bench.core.conditions import load_condition
+from privacy_bench.tasks import get_task
+from privacy_bench.tasks.classification.scoring import parse_response
+
 from .taxonomy import LABELS, TAXONOMY
 
 
@@ -37,9 +41,6 @@ class PrivacyBenchClassifier:
     """Run one pinned classification condition on arbitrary sentences."""
 
     def __init__(self, condition_path: Path, *, cache_size: int = 4096):
-        from privacy_bench.core.conditions import load_condition
-        from privacy_bench.tasks import get_task
-
         condition = load_condition(condition_path)
         if condition.task != "classification":
             raise ValueError(
@@ -96,8 +97,6 @@ class PrivacyBenchClassifier:
                 return cached
             prepared = self._strategy.prepare(SimpleNamespace(text=sentence))
             response = self._strategy.predict(prepared)
-            from privacy_bench.tasks.classification.scoring import parse_response
-
             # Every strategy answers in raw_output, and the benchmark scores that answer with this parser.
             # model_label_id is the checkpoint's own index, which is not always the benchmark's label_id.
             label_id = parse_response(response.get("raw_output"))

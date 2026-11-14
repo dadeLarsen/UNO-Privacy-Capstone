@@ -3,8 +3,6 @@ import pytest
 from model_service.classifier import PrivacyBenchClassifier
 from model_service.settings import DEFAULT_CONDITIONS
 
-pytest.importorskip("privacy_bench")
-
 # privacy-model's checkpoint lists its labels alphabetically: the benchmark label_id at each checkpoint index.
 CHECKPOINT_ORDER = [3, 6, 7, 8, 5, 9, 0, 1, 4, 2]
 LOGITS = [0.0, 1.0, 2.0, 30.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]

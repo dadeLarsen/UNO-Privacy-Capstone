@@ -163,7 +163,7 @@ src/model_service/
   taxonomy.json  each category's display name, definition, and color, keyed by its name
 tests/
   test_api.py        routes with a fake classifier (no model or GPU needed)
-  test_classifier.py default conditions and label order (skipped without privacy_bench)
+  test_classifier.py default conditions and label order
   test_sentences.py  splitter behavior and offsets
   test_settings.py   the GPU or CPU choice, and the condition and device rule
   test_taxonomy.py   taxonomy.json names exactly the benchmark's ten categories

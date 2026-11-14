@@ -4,6 +4,8 @@ import argparse
 from dataclasses import replace
 from pathlib import Path
 
+import uvicorn
+
 from .app import create_app
 from .settings import Settings
 
@@ -40,8 +42,6 @@ def main(argv=None) -> None:
         changes["preload"] = False
     if changes:
         settings = replace(settings, **changes)
-
-    import uvicorn
 
     uvicorn.run(create_app(settings), host=settings.host, port=settings.port, log_level="info")
 
