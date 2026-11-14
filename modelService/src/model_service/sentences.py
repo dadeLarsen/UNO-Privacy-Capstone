@@ -2,8 +2,9 @@
 
 The splitter never rewrites or normalizes the policy. It only chooses spans, so every
 label can point back to the exact characters the model saw (FR-01, FR-04). Punctuation
-inside common abbreviations and decimals does not end a sentence, and a blank line is a
-hard boundary so headings without punctuation stay separate.
+inside common abbreviations and decimals, or after a section number, does not end a
+sentence, and a blank line is a hard boundary so headings without punctuation stay
+separate.
 """
 
 from dataclasses import dataclass
@@ -58,7 +59,7 @@ def _split_span(text: str, start: int, end: int, sentences: list[Sentence]) -> N
         while boundary < end and text[boundary] in CLOSERS:
             boundary += 1
         followed_by_space = boundary == end or text[boundary].isspace()
-        if followed_by_space and not _is_abbreviation(text, index):
+        if followed_by_space and not _is_abbreviation(text, index, cursor):
             _append(text, cursor, boundary, sentences)
             cursor = boundary
         index = punctuation_end
@@ -74,12 +75,15 @@ def _append(text: str, start: int, end: int, sentences: list[Sentence]) -> None:
         sentences.append(Sentence(index=len(sentences), text=text[start:end], start=start, end=end))
 
 
-def _is_abbreviation(text: str, punctuation_start: int) -> bool:
+def _is_abbreviation(text: str, punctuation_start: int, sentence_start: int) -> bool:
     token_start = punctuation_start
     while token_start > 0 and (text[token_start - 1].isalnum() or text[token_start - 1] in ".&'"):
         token_start -= 1
     token = text[token_start:punctuation_start].lower()
     if token in ABBREVIATIONS:
+        return True
+    # A number that opens a sentence, as in "2.1. Cookies", numbers the section and belongs to its heading.
+    if token.replace(".", "").isdigit() and not text[sentence_start:token_start].strip():
         return True
     # A single initial, as in "J. Smith", is not a sentence boundary.
     return len(token) == 1 and token.isalpha()
