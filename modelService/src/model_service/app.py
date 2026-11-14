@@ -102,26 +102,22 @@ def _analyze(service: Classifier, settings: Settings, text: str, include_scores:
 
     results = []
     for sentence in sentences:
+        item = {"id": sentence.index, "text": sentence.text, "start": sentence.start, "end": sentence.end}
         try:
             classification = service.classify(sentence.text)
         except ValueError as exc:
-            raise HTTPException(
-                status_code=422,
-                detail=f"Sentence {sentence.index} cannot be classified: {exc}",
-            ) from exc
+            # The model cannot take this sentence, for example because it is over the token limit.
+            # It is reported in place, and the rest of the policy still gets its labels.
+            item.update(label_id=None, label=None, error=str(exc))
+            if include_scores:
+                item["scores"] = None
         except Exception as exc:
             logger.error("Classification failed at sentence %d (%s)", sentence.index, type(exc).__name__)
             raise HTTPException(status_code=500, detail="Classification failed.") from exc
-        item = {
-            "id": sentence.index,
-            "text": sentence.text,
-            "start": sentence.start,
-            "end": sentence.end,
-            "label_id": classification.label_id,
-            "label": classification.label,
-        }
-        if include_scores:
-            item["scores"] = list(classification.scores or ())
+        else:
+            item.update(label_id=classification.label_id, label=classification.label)
+            if include_scores:
+                item["scores"] = list(classification.scores or ())
         results.append(item)
 
     return {

@@ -27,6 +27,11 @@ Each sentence in the response has `id`, `text`, `start`, `end`, `label_id`, and
 UI can highlight the original text without re-splitting it. `label_id` follows
 `taxonomy.json` (the same order as `privacy_bench.tasks.classification.taxonomy`).
 
+A sentence the model cannot classify, such as one over the model's token limit, does
+not fail the request. It comes back with `label_id` and `label` set to `null` and an
+`error` that gives the reason, and every other sentence keeps its label. With
+`include_scores`, its `scores` is `null` too.
+
 The service never logs policy text. It binds to a loopback address only, loads models
 from the local Hugging Face cache, and never downloads at request time (NFR-01,
 NFR-02).

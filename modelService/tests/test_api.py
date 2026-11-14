@@ -88,6 +88,28 @@ def test_scores_are_optional(client):
     assert len(response.json()["sentences"][0]["scores"]) == len(LABELS)
 
 
+class RefusesOneSentence(FakeClassifier):
+    def classify(self, sentence):
+        if "endless" in sentence:
+            raise ValueError("Input has 9000 tokens; exceeds the 8192-token limit.")
+        return super().classify(sentence)
+
+
+def test_a_sentence_the_model_refuses_does_not_fail_the_policy():
+    text = "We collect your email. This endless sentence is refused. We share it with partners."
+    with TestClient(create_app(Settings(), RefusesOneSentence())) as test_client:
+        response = test_client.post("/analyze", json={"text": text, "include_scores": True})
+    assert response.status_code == 200
+    first, refused, last = response.json()["sentences"]
+    assert refused["text"] == "This endless sentence is refused."
+    assert (refused["label_id"], refused["label"], refused["scores"]) == (None, None, None)
+    assert refused["error"] == "Input has 9000 tokens; exceeds the 8192-token limit."
+    for sentence, label_id in ((first, 8), (last, 1)):
+        assert sentence["label_id"] == label_id
+        assert len(sentence["scores"]) == len(LABELS)
+        assert "error" not in sentence
+
+
 def test_empty_policy_is_rejected(client):
     assert client.post("/analyze", json={"text": ""}).status_code == 422
     assert client.post("/analyze", json={"text": "   \n\n "}).status_code == 422
