@@ -97,7 +97,8 @@ def _analyze(service: Classifier, settings: Settings, text: str, include_scores:
     try:
         metadata = service.load()
     except Exception as exc:
-        logger.error("Classifier failed to load (%s)", type(exc).__name__)
+        # A traceback names code locations, not policy text.
+        logger.exception("Classifier failed to load")
         raise HTTPException(status_code=503, detail=f"Classifier model unavailable: {exc}") from exc
 
     results = []
@@ -112,7 +113,7 @@ def _analyze(service: Classifier, settings: Settings, text: str, include_scores:
             if include_scores:
                 item["scores"] = None
         except Exception as exc:
-            logger.error("Classification failed at sentence %d (%s)", sentence.index, type(exc).__name__)
+            logger.exception("Classification failed at sentence %d", sentence.index)
             raise HTTPException(status_code=500, detail="Classification failed.") from exc
         else:
             item.update(label_id=classification.label_id, label=classification.label)
