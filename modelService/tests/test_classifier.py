@@ -12,8 +12,10 @@ class CheckpointOrderStrategy:
     """Answers as the classifier-head strategy does: checkpoint index 3 wins, which is benchmark label 8."""
 
     name = "classifier-head"
+    loads = 0
 
     def load(self):
+        self.loads += 1
         return {"label_mapping": [{"model_label_id": index, "label_id": label_id}
                                   for index, label_id in enumerate(CHECKPOINT_ORDER)]}
 
@@ -44,3 +46,22 @@ def test_a_checkpoint_with_its_own_label_order_gets_benchmark_labels_and_scores(
     assert (result.label_id, result.label) == (8, "First Party Collection/Use")
     assert result.scores == tuple(LOGITS[CHECKPOINT_ORDER.index(label_id)] for label_id in range(10))
     assert result.scores.index(max(result.scores)) == 8
+
+
+def test_a_release_drops_the_loaded_strategy_keeps_the_metadata_and_the_next_use_loads_again(monkeypatch):
+    classifier = PrivacyBenchClassifier(DEFAULT_CONDITIONS["cpu"], cache_size=0)
+    loaded = CheckpointOrderStrategy()
+    monkeypatch.setattr(classifier, "_strategy", loaded)
+    metadata = classifier.load()
+
+    classifier.release()
+    # The strategy held the model. Its replacement is built from the condition and has loaded nothing.
+    assert classifier._strategy is not loaded
+    assert classifier._strategy.name == "embedding-head"
+    # /health reads this, and a released model must not look like one that is still loading.
+    assert classifier.metadata() == metadata
+
+    reloaded = CheckpointOrderStrategy()
+    monkeypatch.setattr(classifier, "_strategy", reloaded)
+    assert classifier.classify("We collect your email address.").label_id == 8
+    assert (loaded.loads, reloaded.loads) == (1, 1)

@@ -7,6 +7,7 @@ label order, and the strategy checks the fitted weight hashes before inference.
 
 from collections import OrderedDict
 from dataclasses import dataclass
+import gc
 from pathlib import Path
 from threading import RLock
 from types import SimpleNamespace
@@ -15,6 +16,7 @@ from typing import Protocol
 from privacy_bench.core.conditions import load_condition
 from privacy_bench.tasks import get_task
 from privacy_bench.tasks.classification.scoring import parse_response
+import torch
 
 from .taxonomy import LABELS, TAXONOMY
 
@@ -28,13 +30,16 @@ class Classification:
 
 class Classifier(Protocol):
     def load(self) -> dict:
-        """Load the model once and return its safe provenance metadata."""
+        """Load the model unless it is loaded and return its safe provenance metadata."""
 
     def metadata(self) -> dict | None:
-        """Return the loaded model's metadata, or None before it is loaded."""
+        """Return the model's metadata, or None before its first load. A release keeps it."""
 
     def classify(self, sentence: str) -> Classification:
         """Classify one sentence."""
+
+    def release(self) -> None:
+        """Free the model's memory. The next load brings the model back."""
 
 
 class PrivacyBenchClassifier:
@@ -51,6 +56,7 @@ class PrivacyBenchClassifier:
         self._cache_size = cache_size
         self._cache: OrderedDict[str, Classification] = OrderedDict()
         self._lock = RLock()
+        self._loaded = False
         self._metadata: dict | None = None
         self._score_order: list[int] | None = None
 
@@ -60,7 +66,7 @@ class PrivacyBenchClassifier:
 
     def load(self) -> dict:
         with self._lock:
-            if self._metadata is not None:
+            if self._loaded:
                 return dict(self._metadata)
             loaded = self._strategy.load()
             # A classifier-head checkpoint has its own label order, and its logits follow that order.
@@ -80,11 +86,22 @@ class PrivacyBenchClassifier:
                 "taxonomy_id": TAXONOMY["taxonomy_id"],
                 "taxonomy_version": TAXONOMY["version"],
             }
+            self._loaded = True
             return dict(self._metadata)
 
     def metadata(self) -> dict | None:
         with self._lock:
             return dict(self._metadata) if self._metadata is not None else None
+
+    def release(self) -> None:
+        with self._lock:
+            # Building a strategy loads no model, so a fresh one replaces the one that holds the model.
+            self._strategy = get_task(self._condition.task).build_strategy(self._condition)
+            self._loaded = False
+            # The dropped model sits in reference cycles, so only a collection frees it, and torch keeps
+            # the freed blocks for itself until empty_cache() hands them back to the GPU.
+            gc.collect()
+            torch.cuda.empty_cache()
 
     def classify(self, sentence: str) -> Classification:
         if not isinstance(sentence, str) or not sentence.strip():
