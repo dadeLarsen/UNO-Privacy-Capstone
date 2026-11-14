@@ -42,8 +42,8 @@ chooses between them at startup.
 | --- | --- | --- |
 | [README.md](modelService/README.md) | Current | Setup, run, API examples, configuration, and what is not implemented |
 | [pyproject.toml](modelService/pyproject.toml) | Current | Dependencies, CUDA/CPU torch groups, and the `model-service` command |
-| [src/model_service/](modelService/src/model_service/) | Current | `app.py` routes, `classifier.py` benchmark adapter, `sentences.py` splitter, `settings.py` configuration and the GPU or CPU choice, and `taxonomy.py` with `taxonomy.json`, the benchmark's ten categories plus each one's display name, definition, and color |
-| [tests/](modelService/tests/) | Current | API tests with a fake classifier, splitter tests, and settings tests; no model or GPU needed |
+| [src/model_service/](modelService/src/model_service/) | Current | `app.py` routes, `classifier.py` benchmark adapter, `idle.py` idle GPU release, `sentences.py` splitter, `settings.py` configuration and the GPU or CPU choice, and `taxonomy.py` with `taxonomy.json`, the benchmark's ten categories plus each one's display name, definition, and color |
+| [tests/](modelService/tests/) | Current | API and idle-release tests with a fake classifier, and classifier, splitter, settings, and taxonomy tests; no model or GPU needed |
 
 ## App requirements: [docs/](docs/)
 

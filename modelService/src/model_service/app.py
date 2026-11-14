@@ -1,5 +1,6 @@
 """FastAPI app for classifying uploaded privacy policies on the local machine."""
 
+import asyncio
 from contextlib import asynccontextmanager
 import hashlib
 import logging
@@ -10,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from .classifier import Classifier, PrivacyBenchClassifier
+from .idle import IdleRelease
 from .sentences import split_sentences
 from .settings import Settings
 from .taxonomy import TAXONOMY
@@ -25,14 +27,18 @@ class AnalyzeRequest(BaseModel):
 def create_app(settings: Settings | None = None, classifier: Classifier | None = None) -> FastAPI:
     settings = settings or Settings.from_env()
     service = classifier or PrivacyBenchClassifier(settings.condition_path, cache_size=settings.cache_size)
+    idle = IdleRelease(service, settings.idle_release_seconds)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         if settings.preload:
             logger.info("Loading the classifier from %s", settings.condition_path.name)
-            service.load()
+            with idle.in_use():
+                service.load()
             logger.info("Classifier ready")
+        watcher = asyncio.create_task(_release_when_idle(idle))
         yield
+        watcher.cancel()
 
     app = FastAPI(title="Privacy Policy Reader model service", version="0.1.0", lifespan=lifespan)
     app.state.settings = settings
@@ -57,9 +63,14 @@ def create_app(settings: Settings | None = None, classifier: Classifier | None =
             "categories": TAXONOMY["categories"],
         }
 
+    def analyze_text(text: str, include_scores: bool) -> dict:
+        # An idle release waits for every request under way, so it never unloads the model in the middle of one.
+        with idle.in_use():
+            return _analyze(service, settings, text, include_scores)
+
     @app.post("/analyze")
     def analyze(request: AnalyzeRequest):
-        return _analyze(service, settings, request.text, request.include_scores)
+        return analyze_text(request.text, request.include_scores)
 
     @app.post("/analyze/upload")
     def analyze_upload(file: UploadFile = File(...), include_scores: bool = False):
@@ -80,9 +91,22 @@ def create_app(settings: Settings | None = None, classifier: Classifier | None =
             text = data.decode("utf-8-sig")
         except UnicodeDecodeError:
             raise HTTPException(status_code=400, detail="The file is not valid UTF-8 text.") from None
-        return _analyze(service, settings, text, include_scores)
+        return analyze_text(text, include_scores)
 
     return app
+
+
+async def _release_when_idle(idle: IdleRelease) -> None:
+    while True:
+        try:
+            # A check can wait for a lock and collect garbage, so it runs off the event loop.
+            wait = await asyncio.to_thread(idle.check)
+        except Exception:
+            # The model stays loaded and still answers. Say why it was not released; the next idle period
+            # tries again.
+            logger.exception("Could not release the idle model")
+            wait = idle.idle_seconds
+        await asyncio.sleep(wait)
 
 
 def _analyze(service: Classifier, settings: Settings, text: str, include_scores: bool) -> dict:

@@ -17,7 +17,7 @@ between them at startup, so every computer gets the same head.
 
 | Route | Input | Output |
 | --- | --- | --- |
-| `GET /health` | — | Whether the model is loaded, plus its pinned identity |
+| `GET /health` | — | Whether the service is ready to analyze, plus the model's pinned identity |
 | `GET /categories` | — | The ten categories, definitions, display names, and colors |
 | `POST /analyze` | JSON `{"text": "...", "include_scores": false}` | One label per sentence, with exact character offsets |
 | `POST /analyze/upload` | multipart `.txt` file, optional `include_scores` query | Same response as `/analyze` |
@@ -86,6 +86,13 @@ The service listens on `http://127.0.0.1:8000`. At startup it runs the GPU condi
 when torch finds an NVIDIA GPU with native bf16 (the RTX 30 series and newer), and
 the CPU condition on every other computer. `/health` reports the device in use.
 
+On a GPU, the service frees the model's GPU memory after 300 seconds without an
+analyze request (NFR-03); `MODEL_SERVICE_IDLE_RELEASE_SECONDS` changes the time. The
+next request loads the model again before it answers, which took about 2 s on an
+RTX 4090, and `/health` reports ready throughout. The process keeps its CUDA context
+until it exits, so its GPU memory falls but not to zero. On the CPU the model stays
+loaded.
+
 These examples work in Windows PowerShell 5.1 and in PowerShell 7. They call
 `curl.exe` because 5.1 makes `curl` an alias of `Invoke-WebRequest`, and they pipe the
 JSON in because 5.1 strips the double quotes inside a program's arguments.
@@ -145,6 +152,7 @@ Example response (abridged):
 | `MODEL_SERVICE_MAX_CHARACTERS` | `200000` | Maximum policy length |
 | `MODEL_SERVICE_CACHE_SIZE` | `4096` | Sentences kept in the in-memory cache |
 | `MODEL_SERVICE_PRELOAD` | `true` | Load the model at startup |
+| `MODEL_SERVICE_IDLE_RELEASE_SECONDS` | `300` | Seconds without an analyze request before the service frees the model's GPU memory. On the CPU the model stays loaded |
 | `MODEL_SERVICE_CORS_ORIGINS` | `http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173` | Allowed browser origins |
 
 Command-line flags `--condition`, `--device`, `--host`, `--port`, and `--no-preload`
@@ -157,13 +165,15 @@ condition and a device, whether each comes from a flag or a variable.
 src/model_service/
   app.py         FastAPI routes, upload handling, and response shape
   classifier.py  privacy_bench condition/strategy adapter and sentence cache
+  idle.py        frees the model's GPU memory once the service has been idle
   sentences.py   offset-preserving sentence splitter
   settings.py    environment and CLI configuration, and the GPU or CPU choice
   taxonomy.py    the ten categories: names and order from privacy_bench, the rest from taxonomy.json
   taxonomy.json  each category's display name, definition, and color, keyed by its name
 tests/
   test_api.py        routes with a fake classifier (no model or GPU needed)
-  test_classifier.py default conditions and label order
+  test_classifier.py default conditions, label order, and releasing the model
+  test_idle.py       when an idle model is released, with a fake classifier and clock
   test_sentences.py  splitter behavior and offsets
   test_settings.py   the GPU or CPU choice, and the condition and device rule
   test_taxonomy.py   taxonomy.json names exactly the benchmark's ten categories
@@ -178,8 +188,6 @@ tests/
   at startup and runs the same head on both. Choosing a model by memory tier is
   FR-19. Only NVIDIA GPUs are used; a computer with an AMD, Intel, or Apple GPU runs
   on the CPU.
-- **Idle GPU release.** The classifier stays loaded between requests. Releasing GPU
-  memory when the service is idle (NFR-03) is not implemented.
 - **History and caching across restarts.** The service keeps an in-memory cache only.
   Nothing is written to disk.
 - **Browser wiring.** `frontend/` still uses example data and does not call this
