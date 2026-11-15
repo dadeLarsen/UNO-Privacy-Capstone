@@ -76,6 +76,8 @@ class Settings:
     max_characters: int = 200_000
     cache_size: int = 4096
     preload: bool = True
+    # Seconds without a request before the model's GPU memory is released (NFR-03).
+    idle_release_seconds: int = 300
     cors_origins: tuple[str, ...] = DEFAULT_CORS_ORIGINS
 
     def __post_init__(self):
@@ -100,6 +102,8 @@ class Settings:
             raise ValueError(f"max_characters must be positive, not {self.max_characters}")
         if self.cache_size < 0:
             raise ValueError(f"cache_size must be nonnegative, not {self.cache_size}")
+        if self.idle_release_seconds < 1:
+            raise ValueError(f"idle_release_seconds must be positive, not {self.idle_release_seconds}")
         if not self.cors_origins:
             raise ValueError("cors_origins must not be empty")
 
@@ -121,6 +125,7 @@ class Settings:
             max_characters=_env_int("MODEL_SERVICE_MAX_CHARACTERS", 200_000, minimum=1),
             cache_size=_env_int("MODEL_SERVICE_CACHE_SIZE", 4096, minimum=0),
             preload=_env_bool("MODEL_SERVICE_PRELOAD", True),
+            idle_release_seconds=_env_int("MODEL_SERVICE_IDLE_RELEASE_SECONDS", 300, minimum=1),
             cors_origins=(
                 tuple(origin.strip() for origin in origins.split(",") if origin.strip())
                 if origins

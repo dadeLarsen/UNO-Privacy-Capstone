@@ -1,3 +1,5 @@
+import time
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -8,8 +10,10 @@ from model_service.taxonomy import LABELS, TAXONOMY
 
 
 class FakeClassifier:
-    def __init__(self):
+    def __init__(self, device="cpu"):
+        self._device = device
         self._metadata = None
+        self.loaded = False
         self.calls = []
 
     def load(self):
@@ -19,17 +23,21 @@ class FakeClassifier:
                 "revision": "0" * 40,
                 "resolved_revision": "0" * 40,
                 "precision": "fp32",
-                "device": "cpu",
+                "device": self._device,
                 "strategy": "fake",
                 "head": None,
                 "fit": None,
                 "taxonomy_id": TAXONOMY["taxonomy_id"],
                 "taxonomy_version": TAXONOMY["version"],
             }
+        self.loaded = True
         return dict(self._metadata)
 
     def metadata(self):
         return dict(self._metadata) if self._metadata is not None else None
+
+    def release(self):
+        self.loaded = False
 
     def classify(self, sentence):
         self.calls.append(sentence)
@@ -88,6 +96,28 @@ def test_scores_are_optional(client):
     assert len(response.json()["sentences"][0]["scores"]) == len(LABELS)
 
 
+class RefusesOneSentence(FakeClassifier):
+    def classify(self, sentence):
+        if "endless" in sentence:
+            raise ValueError("Input has 9000 tokens; exceeds the 8192-token limit.")
+        return super().classify(sentence)
+
+
+def test_a_sentence_the_model_refuses_does_not_fail_the_policy():
+    text = "We collect your email. This endless sentence is refused. We share it with partners."
+    with TestClient(create_app(Settings(), RefusesOneSentence())) as test_client:
+        response = test_client.post("/analyze", json={"text": text, "include_scores": True})
+    assert response.status_code == 200
+    first, refused, last = response.json()["sentences"]
+    assert refused["text"] == "This endless sentence is refused."
+    assert (refused["label_id"], refused["label"], refused["scores"]) == (None, None, None)
+    assert refused["error"] == "Input has 9000 tokens; exceeds the 8192-token limit."
+    for sentence, label_id in ((first, 8), (last, 1)):
+        assert sentence["label_id"] == label_id
+        assert len(sentence["scores"]) == len(LABELS)
+        assert "error" not in sentence
+
+
 def test_empty_policy_is_rejected(client):
     assert client.post("/analyze", json={"text": ""}).status_code == 422
     assert client.post("/analyze", json={"text": "   \n\n "}).status_code == 422
@@ -131,3 +161,18 @@ def test_lazy_mode_reports_not_ready_until_the_first_request(classifier):
         assert test_client.get("/health").json()["ready"] is False
         assert test_client.post("/analyze", json={"text": "We collect data."}).status_code == 200
         assert test_client.get("/health").json()["ready"] is True
+
+
+def test_an_idle_gpu_model_is_released_and_the_next_request_loads_it_again():
+    classifier = FakeClassifier(device="cuda:0")
+    with TestClient(create_app(Settings(idle_release_seconds=1), classifier)) as test_client:
+        assert classifier.loaded
+        deadline = time.monotonic() + 10
+        while classifier.loaded and time.monotonic() < deadline:
+            time.sleep(0.05)
+        assert not classifier.loaded
+        # The service still answers, so /health must not tell a caller to wait.
+        health = test_client.get("/health").json()
+        assert (health["status"], health["ready"]) == ("ok", True)
+        assert test_client.post("/analyze", json={"text": "We collect data."}).status_code == 200
+        assert classifier.loaded

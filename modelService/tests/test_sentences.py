@@ -38,6 +38,18 @@ def test_does_not_split_decimals():
     assert texts("Version 3.5 is out. Next.") == ["Version 3.5 is out.", "Next."]
 
 
+def test_a_section_number_stays_with_its_heading():
+    assert texts("1. Information We Collect. We collect your email.") == [
+        "1. Information We Collect.",
+        "We collect your email.",
+    ]
+    assert texts("2.1. Cookies. We use cookies.") == ["2.1. Cookies.", "We use cookies."]
+
+
+def test_a_number_that_ends_a_sentence_still_splits():
+    assert texts("The limit is 30. We delete it after.") == ["The limit is 30.", "We delete it after."]
+
+
 def test_blank_line_is_a_hard_boundary():
     assert texts("Heading\n\nFirst sentence. Second.") == ["Heading", "First sentence.", "Second."]
 

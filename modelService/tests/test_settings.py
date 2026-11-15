@@ -8,7 +8,7 @@ from model_service.settings import DEFAULT_CONDITIONS, Settings
 
 @pytest.fixture(autouse=True)
 def no_service_environment(monkeypatch):
-    for name in ("MODEL_SERVICE_CONDITION", "MODEL_SERVICE_DEVICE"):
+    for name in ("MODEL_SERVICE_CONDITION", "MODEL_SERVICE_DEVICE", "MODEL_SERVICE_IDLE_RELEASE_SECONDS"):
         monkeypatch.delenv(name, raising=False)
 
 
@@ -55,6 +55,14 @@ def test_a_device_flag_alone_is_not_mistaken_for_a_condition_plus_a_device():
     settings = replace(Settings.from_env(), device="cpu")
     assert settings.condition is None
     assert settings.condition_path == DEFAULT_CONDITIONS["cpu"]
+
+
+def test_the_idle_release_time_defaults_to_five_minutes_and_must_be_positive(monkeypatch):
+    assert Settings.from_env().idle_release_seconds == 300
+    monkeypatch.setenv("MODEL_SERVICE_IDLE_RELEASE_SECONDS", "45")
+    assert Settings.from_env().idle_release_seconds == 45
+    with pytest.raises(ValueError, match="idle_release_seconds must be positive"):
+        Settings(idle_release_seconds=0)
 
 
 def test_a_missing_condition_file_is_refused(tmp_path):
