@@ -1,10 +1,12 @@
 """Start the localhost model service."""
 
 import argparse
+from copy import deepcopy
 from dataclasses import replace
 from pathlib import Path
 
 import uvicorn
+from uvicorn.config import LOGGING_CONFIG
 
 from .app import create_app
 from .settings import Settings
@@ -43,7 +45,12 @@ def main(argv=None) -> None:
     if changes:
         settings = replace(settings, **changes)
 
-    uvicorn.run(create_app(settings), host=settings.host, port=settings.port, log_level="info")
+    # uvicorn configures only its own loggers, so the service's INFO lines would go nowhere.
+    log_config = deepcopy(LOGGING_CONFIG)
+    log_config["loggers"]["model_service"] = {"handlers": ["default"], "level": "INFO", "propagate": False}
+    uvicorn.run(
+        create_app(settings), host=settings.host, port=settings.port, log_config=log_config, log_level="info"
+    )
 
 
 if __name__ == "__main__":
