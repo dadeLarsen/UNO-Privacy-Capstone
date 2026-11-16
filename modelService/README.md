@@ -48,7 +48,9 @@ Choose one of the two setups. Each installs the service, caches the pinned model
 files while online, and runs the tests. Both default conditions pin the same
 checkpoint, so either download serves the GPU and the CPU.
 
-**With an NVIDIA GPU.** This installs the CUDA 12.8 build of torch:
+**With an NVIDIA GPU.** This installs the CUDA 13.2 build of torch. It needs a newer
+NVIDIA driver than the CUDA 12.8 build did: NVIDIA names 595.45.04 as the oldest for
+Linux and gives no number for Windows, where it was checked on driver 610.88:
 
 ```powershell
 uv sync
@@ -64,7 +66,7 @@ not yet on a computer without an NVIDIA driver.
 
 ```powershell
 $env:UV_NO_SYNC = "1"    # keep `uv run` from installing the CUDA build; set it in your profile
-uv sync --no-group cu128 --group cpu
+uv sync --no-group cu132 --group cpu
 uv run pbench download ../privacy-research/conditions/classification/appsi139/embeddinggemma2-fp32-cpu-head-linear-balanced-tuned-appsi139-test-half.toml
 uv run pytest
 ```

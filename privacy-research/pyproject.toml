@@ -16,8 +16,8 @@ dependencies = [
     "scikit-learn==1.9.1",
     "sentence-transformers==6.1.0",
     "tokenizers==0.23.2",
-    "torch==2.8.0",
-    "torchvision==0.23.0",
+    "torch==2.15.0",
+    "torchvision==0.29.2",
     "transformers==5.19.0",
 ]
 
@@ -27,8 +27,8 @@ pbench = "privacy_bench.cli:main"
 [dependency-groups]
 dev = ["pytest==9.1.1"]
 # Which torch build to install; see Setup in README.md.
-cu128 = ["torch==2.8.0", "torchvision==0.23.0"]
-cpu = ["torch==2.8.0", "torchvision==0.23.0"]
+cu132 = ["torch==2.15.0", "torchvision==0.29.2"]
+cpu = ["torch==2.15.0", "torchvision==0.29.2"]
 
 [build-system]
 requires = ["hatchling==1.32.4"]
@@ -38,8 +38,8 @@ build-backend = "hatchling.build"
 packages = ["src/privacy_bench"]
 
 [tool.uv]
-default-groups = ["dev", "cu128"]
-conflicts = [[{ group = "cu128" }, { group = "cpu" }]]
+default-groups = ["dev", "cu132"]
+conflicts = [[{ group = "cu132" }, { group = "cpu" }]]
 # Transitive packages stay pinned, so a library change is always a deliberate edit here.
 # Each run records the full package list it ran with.
 constraint-dependencies = [
@@ -90,12 +90,12 @@ constraint-dependencies = [
 ]
 
 [tool.uv.sources]
-torch = [{ index = "pytorch-cu128", group = "cu128" }, { index = "pytorch-cpu", group = "cpu" }]
-torchvision = [{ index = "pytorch-cu128", group = "cu128" }, { index = "pytorch-cpu", group = "cpu" }]
+torch = [{ index = "pytorch-cu132", group = "cu132" }, { index = "pytorch-cpu", group = "cpu" }]
+torchvision = [{ index = "pytorch-cu132", group = "cu132" }, { index = "pytorch-cpu", group = "cpu" }]
 
 [[tool.uv.index]]
-name = "pytorch-cu128"
-url = "https://download.pytorch.org/whl/cu128"
+name = "pytorch-cu132"
+url = "https://download.pytorch.org/whl/cu132"
 explicit = true
 
 [[tool.uv.index]]

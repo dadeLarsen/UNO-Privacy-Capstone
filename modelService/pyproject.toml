@@ -15,22 +15,22 @@ model-service = "model_service.__main__:main"
 
 [dependency-groups]
 dev = ["httpx==0.28.1", "pytest==9.1.1"]
-cu128 = ["torch==2.8.0", "torchvision==0.23.0"]
-cpu = ["torch==2.8.0", "torchvision==0.23.0"]
+cu132 = ["torch==2.15.0", "torchvision==0.29.2"]
+cpu = ["torch==2.15.0", "torchvision==0.29.2"]
 
 [tool.uv]
-default-groups = ["dev", "cu128"]
-conflicts = [[{ group = "cu128" }, { group = "cpu" }]]
+default-groups = ["dev", "cu132"]
+conflicts = [[{ group = "cu132" }, { group = "cpu" }]]
 
 [tool.uv.sources]
 # Reuse the benchmark's pinned model backends, strategies, and fitted heads.
 privacy-bench = { path = "../privacy-research", editable = true }
-torch = [{ index = "pytorch-cu128", group = "cu128" }, { index = "pytorch-cpu", group = "cpu" }]
-torchvision = [{ index = "pytorch-cu128", group = "cu128" }, { index = "pytorch-cpu", group = "cpu" }]
+torch = [{ index = "pytorch-cu132", group = "cu132" }, { index = "pytorch-cpu", group = "cpu" }]
+torchvision = [{ index = "pytorch-cu132", group = "cu132" }, { index = "pytorch-cpu", group = "cpu" }]
 
 [[tool.uv.index]]
-name = "pytorch-cu128"
-url = "https://download.pytorch.org/whl/cu128"
+name = "pytorch-cu132"
+url = "https://download.pytorch.org/whl/cu132"
 explicit = true
 
 [[tool.uv.index]]

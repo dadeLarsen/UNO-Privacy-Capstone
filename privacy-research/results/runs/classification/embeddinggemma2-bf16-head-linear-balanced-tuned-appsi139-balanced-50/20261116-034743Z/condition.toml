@@ -1,0 +1,20 @@
+task = "classification"
+strategy = "embedding-head"
+warmup = 1
+
+[items]
+dataset = "appsi139-sentences"
+sample = "appsi139-balanced-50"
+gold = "appsi139-astra"
+
+[model]
+id = "google/embeddinggemma-2"
+revision = "914f7f89142e33e77833254d9c9b90c3cef7303b"
+precision = "bf16"
+device = "cuda"
+text_only = true
+
+[options]
+fit = "classification/embeddinggemma2-appsi139-prior-shift/20261012-043915Z"
+head = "linear-balanced-tuned"
+max_input_tokens = 8192

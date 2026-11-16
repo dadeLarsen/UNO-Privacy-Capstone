@@ -90,6 +90,7 @@ A logistic head expects the category mix it trained on: an even mix for the bala
 - **The shift gives up the balanced lead.** On the balanced sample the tuned balanced head fell from 0.867 to 0.817 (p = 0.003), level with privacy-model (p = 0.82) and behind Qwen3-14B and JEV-9B (p ≤ 0.001). Rarer categories lose: Policy Change fell from 0.92 to 0.76, Data Retention from 0.92 to 0.82, and Do Not Track from 10 of 10 to 5 of 10, while First Party Collection/Use rose from 0.78 to 0.90. No head here leads on both mixes. On the tuning half, macro accuracy peaked near strength 0.3–0.4, a possible compromise that the test half has not checked.
 - **Strengths near 1 differ little.** Strength 0.9 and 1 disagree on 65 test-half sentences, split 36 to 29 (p = 0.46). The frequency head also tuned to full strength and finished at 0.850, behind the balanced head (p = 0.03).
 - **The tuned balanced head keeps its accuracy on the CPU.** The head was fitted on bf16 embeddings. These runs embed in fp32 on the same PC's CPU, a Ryzen 9 7950X3D, at 0.058 s per sentence against 0.040 s on the GPU. On the test half the CPU run scored 0.8566 and gave the GPU run's label on 6,029 of 6,058 sentences: 13 were right only on the GPU and 7 only on the CPU (exact McNemar p = 0.26). Against privacy-model's 0.8584, 480 were right only for privacy-model and 469 only for the head (p = 0.75). Source: [comparisons/appsi139-test-half-cpu.toml](comparisons/appsi139-test-half-cpu.toml). On the balanced sample it scored 0.815 and changed one label, on a sentence the GPU run had right (1 to 0, p = 1). Against privacy-model's 0.824 the split was 42 to 38 (p = 0.74). Source: [comparisons/appsi139-balanced-50-cpu.toml](comparisons/appsi139-balanced-50-cpu.toml). Runs record memory only on CUDA, so these have no peak RAM.
+- **The upgrade to torch 2.15.0 changed no CPU label and 22 GPU labels.** Both projects moved from torch 2.8.0 to torch 2.15.0 on CUDA 13.2, whose allocator can hand a released model's system RAM back to Windows; the service does not release on the CPU yet. Only the tuned balanced head ran again, on both samples, on the GPU and on the CPU, so every other result here is from torch 2.8.0. On the CPU every sentence kept the label of its torch 2.8.0 run, 6,058 of 6,058 on the test half and 460 of 460 on the balanced sample, and no score moved by more than 0.00002. On the GPU the bf16 scores moved by up to 0.19. The balanced sample kept all 460 labels and the test half 6,036 of 6,058. The 22 that changed were near ties, with the top two scores within 0.10 of each other on torch 2.8.0: 9 were right only on torch 2.8.0 and 5 only on 2.15.0 (exact McNemar p = 0.42). On the test half the head now scores 0.8569 on the GPU and 0.8566 on the CPU against privacy-model's 0.8584, with splits of 477 to 468 (p = 0.79) and 480 to 469 (p = 0.75); the GPU and CPU runs split 8 to 6 (p = 0.79). Source: [comparisons/appsi139-test-half-torch215.toml](comparisons/appsi139-test-half-torch215.toml). On the balanced sample it scores 0.817 and 0.815 against 0.824, as before (p = 0.82 and 0.74). Source: [comparisons/appsi139-balanced-50-torch215.toml](comparisons/appsi139-balanced-50-torch215.toml). A sentence took 0.037–0.038 s on the GPU and 0.060–0.061 s on the CPU. Three unrecorded repeats of the balanced run on each version, taken in turn, put torch 2.15.0 about a tenth faster on the GPU and no slower on the CPU.
 
 Earlier findings kept in the AirLLM archive (`C:\Projects\AirLLM`), from runners not carried over:
 
@@ -130,7 +131,7 @@ A **model backend** loads a pinned checkpoint and runs one input without knowing
 
 Choose one of the two setups.
 
-**With an NVIDIA GPU.** This installs the CUDA 12.8 build of torch, which every run in `results/` used:
+**With an NVIDIA GPU.** This installs the CUDA 13.2 build of torch 2.15.0. It needs a newer NVIDIA driver than the CUDA 12.8 build did: NVIDIA names 595.45.04 as the oldest for Linux and gives no number for Windows, where it was checked on driver 610.88. Runs that started before `20261116` used torch 2.8.0 on CUDA 12.8, and each run's `run.json` lists its packages:
 
 ```powershell
 uv sync
@@ -141,7 +142,7 @@ uv run pytest
 
 ```powershell
 $env:UV_NO_SYNC = "1"    # keep `uv run` from installing the CUDA build; set it in your profile
-uv sync --no-group cu128 --group cpu
+uv sync --no-group cu132 --group cpu
 uv run pytest
 ```
 
