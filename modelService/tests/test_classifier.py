@@ -1,3 +1,6 @@
+import os
+import time
+
 import pytest
 
 from model_service.classifier import PrivacyBenchClassifier
@@ -34,6 +37,16 @@ def test_default_conditions_build_without_loading_the_model(device):
     assert classifier.metadata() is None
 
 
+def test_a_classifier_loads_weights_on_the_calling_thread_unless_the_user_chose_otherwise(monkeypatch):
+    monkeypatch.delenv("HF_DEACTIVATE_ASYNC_LOAD", raising=False)
+    PrivacyBenchClassifier(DEFAULT_CONDITIONS["cpu"])
+    assert os.environ["HF_DEACTIVATE_ASYNC_LOAD"] == "1"
+
+    monkeypatch.setenv("HF_DEACTIVATE_ASYNC_LOAD", "0")
+    PrivacyBenchClassifier(DEFAULT_CONDITIONS["cpu"])
+    assert os.environ["HF_DEACTIVATE_ASYNC_LOAD"] == "0"
+
+
 def test_both_default_conditions_use_the_same_fitted_head():
     cuda, cpu = (PrivacyBenchClassifier(DEFAULT_CONDITIONS[device]).condition for device in ("cuda", "cpu"))
     assert cuda.options == cpu.options
@@ -65,3 +78,17 @@ def test_a_release_drops_the_loaded_strategy_keeps_the_metadata_and_the_next_use
     monkeypatch.setattr(classifier, "_strategy", reloaded)
     assert classifier.classify("We collect your email address.").label_id == 8
     assert (loaded.loads, reloaded.loads) == (1, 1)
+
+
+@pytest.mark.parametrize(("device", "waits"), [("cpu", [0.1]), ("cuda:0", [])])
+def test_only_a_release_on_the_cpu_waits_for_the_allocator(monkeypatch, device, waits):
+    classifier = PrivacyBenchClassifier(DEFAULT_CONDITIONS["cpu"], cache_size=0)
+    strategy = CheckpointOrderStrategy()
+    monkeypatch.setattr(strategy, "load", lambda: {"device": device})
+    monkeypatch.setattr(classifier, "_strategy", strategy)
+    classifier.load()
+    sleeps = []
+    monkeypatch.setattr(time, "sleep", sleeps.append)
+
+    classifier.release()
+    assert sleeps == waits

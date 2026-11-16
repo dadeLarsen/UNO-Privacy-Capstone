@@ -2,9 +2,11 @@
 
 A loaded model holds GPU memory that other programs could use. After the idle time with no
 request, the model is released, and the next request loads it again. On the CPU the model
-stays loaded: NFR-03 names GPU memory, a computer without a GPU has the least time to
-spare for a reload, and a release there gives little back. Measured with the default CPU
-condition, each load and release left the process about 0.5 GiB larger.
+stays loaded: NFR-03 names GPU memory, and a computer without a GPU has the least time to
+spare for a reload. A release there returns system RAM only when it runs on the thread that
+loaded the model, and check() runs on another. On one thread, six load and release cycles
+of the default CPU condition took the process from about 1.47 GiB above its start to 0.16
+to 0.20 GiB after each release.
 """
 
 from contextlib import contextmanager

@@ -8,8 +8,10 @@ label order, and the strategy checks the fitted weight hashes before inference.
 from collections import OrderedDict
 from dataclasses import dataclass
 import gc
+import os
 from pathlib import Path
 from threading import RLock
+import time
 from types import SimpleNamespace
 from typing import Protocol
 
@@ -52,6 +54,8 @@ class PrivacyBenchClassifier:
                 f"modelService needs a classification condition, not {condition.task!r}: {condition_path}"
             )
         self._condition = condition
+        # Weights loaded by worker threads that then exit can never give their memory back after a release.
+        os.environ.setdefault("HF_DEACTIVATE_ASYNC_LOAD", "1")
         self._strategy = get_task(condition.task).build_strategy(condition)
         self._cache_size = cache_size
         self._cache: OrderedDict[str, Classification] = OrderedDict()
@@ -102,6 +106,12 @@ class PrivacyBenchClassifier:
             # the freed blocks for itself until empty_cache() hands them back to the GPU.
             gc.collect()
             torch.cuda.empty_cache()
+            # torch's CPU allocator hands freed memory back to the system only while it frees another large
+            # block, and not within 0.1 s of the first free, so one short-lived block makes it return the model.
+            # After a GPU release it returned no host memory, so the GPU skips the wait.
+            if self._metadata is not None and self._metadata["device"] == "cpu":
+                time.sleep(0.1)
+                torch.empty(32 * 2**20, dtype=torch.uint8)
 
     def classify(self, sentence: str) -> Classification:
         if not isinstance(sentence, str) or not sentence.strip():
