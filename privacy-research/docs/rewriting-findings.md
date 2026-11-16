@@ -191,6 +191,7 @@ The labels are the models' full download names, so Ministral's ends in "BF16" ev
 - **Copying is not simplifying.** A rewrite that copies the passage keeps every fact but helps no one. Compressed Qwen3.5-4B copied two passages almost word for word and leaned heavily on the original wording in a few others. Its rewrites read at grade 13, the hardest of the medium models. This helped its score and is worth watching.
 - **Short passages only.** The passages are 86–340 words. Users can paste any length.
 - **Speed is unknown.** All tests ran on a desktop graphics card, so we have no timings for the laptops the app targets.
+- **The rewrites came from an older library version.** They were generated with torch 2.8.0. The project now uses torch 2.15.0, which makes the same model write different text for some passages. In a hand check, compressed Qwen3.5-4B wrote exactly its judged rewrite for 10 of the first 20 passages; the rest change partway through, from a few words to most of the rewrite. The scores here describe the torch 2.8.0 rewrites, and the new ones have not been judged.
 
 ## Next steps
 
