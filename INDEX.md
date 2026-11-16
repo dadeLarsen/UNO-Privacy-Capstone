@@ -170,6 +170,6 @@ One-time scripts that froze data files or imported runs. Each refuses to overwri
 
 | File | Contents |
 | --- | --- |
-| [pyproject.toml](privacy-research/pyproject.toml), [uv.lock](privacy-research/uv.lock), [.python-version](privacy-research/.python-version) | Python 3.12 and every package pinned, transitive ones included; torch comes from the CUDA 12.8 index. |
+| [pyproject.toml](privacy-research/pyproject.toml), [uv.lock](privacy-research/uv.lock), [.python-version](privacy-research/.python-version) | Python 3.12 and every package pinned, transitive ones included; torch comes from the CUDA 13.2 index. |
 | [.gitattributes](privacy-research/.gitattributes) | LF line endings, and no line-ending conversion under `data/` and `results/`, whose bytes are hashed. |
 | [.gitignore](privacy-research/.gitignore) | The environment, caches, and the generated `results/` folders. |

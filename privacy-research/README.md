@@ -130,7 +130,7 @@ A **model backend** loads a pinned checkpoint and runs one input without knowing
 
 Choose one of the two setups.
 
-**With an NVIDIA GPU.** This installs the CUDA 12.8 build of torch, which every run in `results/` used:
+**With an NVIDIA GPU.** This installs the CUDA 13.2 build of torch 2.15.0. It needs a newer NVIDIA driver than the CUDA 12.8 build did: NVIDIA names 595.45.04 as the oldest for Linux and gives no number for Windows, where it was checked on driver 610.88. Runs that started before `20261116` used torch 2.8.0 on CUDA 12.8, and each run's `run.json` lists its packages:
 
 ```powershell
 uv sync
@@ -141,7 +141,7 @@ uv run pytest
 
 ```powershell
 $env:UV_NO_SYNC = "1"    # keep `uv run` from installing the CUDA build; set it in your profile
-uv sync --no-group cu128 --group cpu
+uv sync --no-group cu132 --group cpu
 uv run pytest
 ```
 
