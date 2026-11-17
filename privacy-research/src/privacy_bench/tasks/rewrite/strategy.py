@@ -19,7 +19,8 @@ class PromptedRewriteStrategy:
 
     def __init__(self, condition: Condition):
         self.model = take_settings(condition.model, f"Condition {condition.name!r} [model]",
-                                   required=("id", "revision", "precision"))
+                                   required=("id", "revision", "precision"),
+                                   optional={"device": "cuda", "compute": "bf16"})
         require_commit(self.model["id"], self.model["revision"])
         self.options = take_settings(condition.options, f"Condition {condition.name!r} [options]",
                                      required=("prompt",), optional={"max_new_tokens": 1024, "seed": 42})
@@ -37,8 +38,9 @@ class PromptedRewriteStrategy:
 
     def load(self) -> dict:
         snapshot = resolve_snapshot(self.model["id"], self.model["revision"])
-        self._backend = ChatModel(snapshot, precision=self.model["precision"],
-                                  max_new_tokens=self.options["max_new_tokens"], seed=self.options["seed"])
+        self._backend = ChatModel(snapshot, precision=self.model["precision"], device=self.model["device"],
+                                  compute=self.model["compute"], max_new_tokens=self.options["max_new_tokens"],
+                                  seed=self.options["seed"])
         identity = snapshot_identity(self.model["id"], self.model["revision"], snapshot)
         return {**identity, **self._backend.load()}
 

@@ -1,4 +1,4 @@
-"""Greedy generation from a local chat model on one GPU, one prompt at a time, never truncating."""
+"""Greedy generation from a local chat model on one GPU or the CPU, one prompt at a time, never truncating."""
 
 from copy import deepcopy
 import json
@@ -14,7 +14,10 @@ from .hub import context_limit, reject_prequantized, require_exact_load, validat
 from .measure import gpu_metadata, measured, require_cuda, timed_load
 from .quantization import bitsandbytes_config, install_int8_cast_log_filter
 
-PRECISIONS = ("bf16", "int8", "nf4")
+# Device, precision and compute type: only the combinations that have been run.
+MODES = (("cuda", "bf16", "bf16"), ("cuda", "int8", "bf16"), ("cuda", "nf4", "bf16"),
+         ("cpu", "nf4", "bf16"), ("cpu", "nf4", "fp32"))
+DTYPES = {"bf16": torch.bfloat16, "fp32": torch.float32}
 CHAT_TEMPLATE_KWARGS = {"tokenize": False, "add_generation_prompt": True, "enable_thinking": False}
 LOCAL = {"local_files_only": True, "trust_remote_code": False}
 # transformers flags these tokenizers' pre-tokenizer regex from the config's transformers_version alone.
@@ -77,21 +80,26 @@ def visible_token_ids(ids, generation):
 
 
 class ChatModel:
-    def __init__(self, snapshot: Path, *, precision: str, max_new_tokens: int, seed: int):
-        if precision not in PRECISIONS:
-            raise ValueError(f"Chat model precision must be one of {', '.join(PRECISIONS)}, not {precision!r}")
+    def __init__(self, snapshot: Path, *, precision: str, max_new_tokens: int, seed: int, device: str = "cuda",
+                 compute: str = "bf16"):
+        if (device, precision, compute) not in MODES:
+            raise ValueError("Chat models run on cuda at precision bf16, int8 or nf4 with bf16 compute, or on cpu at "
+                             f"precision nf4 with bf16 or fp32 compute; got device {device!r}, precision "
+                             f"{precision!r}, compute {compute!r}")
         if type(max_new_tokens) is not int or max_new_tokens < 1:
             raise ValueError("max_new_tokens must be a positive integer")
         if type(seed) is not int or seed < 0:
             raise ValueError("seed must be a nonnegative integer")
-        self.snapshot, self.precision = Path(snapshot), precision
+        self.snapshot, self.precision, self.compute = Path(snapshot), precision, compute
         self.max_new_tokens, self.seed = max_new_tokens, seed
-        self._cuda, self._device = True, "cuda:0"
+        self._cuda = device == "cuda"
+        self._device = "cuda:0" if self._cuda else "cpu"
         self._model = self._tokenizer = self._generation = self._context_limit = None
 
     def load(self) -> dict:
-        require_cuda(bf16=True)
-        dtype = torch.bfloat16
+        if self._cuda:
+            require_cuda(bf16=True)
+        dtype = DTYPES[self.compute]
         set_seed(self.seed)
         reject_prequantized(self.snapshot)
         validate_weights(self.snapshot)
@@ -107,8 +115,9 @@ class ChatModel:
         if not chat_template:
             raise ValueError("This checkpoint has an empty chat template; choose an instruction model")
         limit, candidates = context_limit(model_config, tokenizer)
-        free_gpu, _ = torch.cuda.mem_get_info(0)
-        kwargs = {**LOCAL, "dtype": dtype, "attn_implementation": "sdpa", "device_map": {"": 0}}
+        free_gpu = torch.cuda.mem_get_info(0)[0] if self._cuda else None
+        kwargs = {**LOCAL, "dtype": dtype, "attn_implementation": "sdpa",
+                  "device_map": {"": 0 if self._cuda else "cpu"}}
         quantization = None
         if self.precision in ("int8", "nf4"):
             quantization = bitsandbytes_config(self.precision, dtype)
@@ -118,14 +127,16 @@ class ChatModel:
         auto_class = model_class(model_config.model_type)
         try:
             (model, loading), load_seconds = timed_load(
-                lambda: auto_class.from_pretrained(str(self.snapshot), **kwargs, output_loading_info=True), cuda=True)
+                lambda: auto_class.from_pretrained(str(self.snapshot), **kwargs, output_loading_info=True),
+                cuda=self._cuda)
         except torch.cuda.OutOfMemoryError as exc:
             raise RuntimeError("The model does not fit on CUDA device 0; choose int8 or nf4, or a smaller model") from exc
         model.eval()
         require_exact_load(loading)
         device_map = getattr(model, "hf_device_map", kwargs["device_map"])
-        if any(str(device) not in ("0", "cuda", "cuda:0") for device in device_map.values()):
-            raise RuntimeError(f"Expected the whole model on CUDA device 0, got {device_map!r}")
+        expected = ("0", "cuda", "cuda:0") if self._cuda else ("cpu",)
+        if any(str(device) not in expected for device in device_map.values()):
+            raise RuntimeError(f"Expected the whole model on {self._device}, got {device_map!r}")
         self._generation = greedy_config(model.generation_config, GenerationConfig(), self.max_new_tokens,
                                          tokenizer.eos_token_id)
         # generate() fills every unset field from model.generation_config before the library defaults.
@@ -138,11 +149,11 @@ class ChatModel:
             warnings.append("bitsandbytes casts BF16 activations to FP16 before INT8 quantization; that log "
                             "message is shown once per process.")
         metadata = {
-            "backend": "transformers-chat-generation", **gpu_metadata(),
-            "gpu_free_before_load_bytes": free_gpu, "load_seconds": load_seconds,
+            "backend": "transformers-chat-generation", "load_seconds": load_seconds,
             "precision": self.precision, "nonquantized_dtype": str(dtype),
             "quantization_config": quantization.to_dict() if quantization else None,
-            "device_map": device_map, "auto_class": auto_class.__name__, "model_class": type(model).__name__,
+            "device": self._device, "device_map": device_map,
+            "auto_class": auto_class.__name__, "model_class": type(model).__name__,
             "model_type": model_config.model_type, "tokenizer_kwargs": tokenizer_kwargs,
             "model_config_sha256": digest_text((self.snapshot / "config.json").read_text(encoding="utf-8")),
             "chat_template_sha256": digest_text(chat_template), "chat_template_kwargs": CHAT_TEMPLATE_KWARGS,
@@ -154,10 +165,13 @@ class ChatModel:
             "timing_scope": "synchronized model.generate only; excludes tokenization, input transfer, "
                             "decoding, and model load",
             "memory_scope": "PyTorch CUDA device 0 peak allocated/reserved bytes; includes resident model "
-                            "and KV cache, excludes CPU RAM",
+                            "and KV cache, excludes CPU RAM" if self._cuda
+                            else "CUDA memory metrics not applicable on CPU",
             "output_decoding": "skip_special_tokens=False; only trailing EOS/PAD IDs removed from raw_output",
             "warnings": warnings,
         }
+        if self._cuda:
+            metadata.update(gpu_metadata(), gpu_free_before_load_bytes=free_gpu)
         return json.loads(json.dumps(metadata, default=str))
 
     def encode(self, prompt: str, system: str | None = None) -> dict:

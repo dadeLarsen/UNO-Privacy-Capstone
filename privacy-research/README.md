@@ -197,6 +197,13 @@ The rewrite task runs on 20 frozen APPSI-139 policy sections ([tools/make_appsi1
 uv run pbench run conditions/rewrite/qwen3.5-4b-bf16-summary-baseline.toml
 ```
 
+A rewrite condition runs on the GPU unless its `[model]` table says `device = "cpu"`. The CPU takes `precision = "nf4"` only. It computes in bf16, or in float32 with `compute = "fp32"`, which is meant for CPUs without native bf16 instructions. On a computer with an NVIDIA GPU, hide the GPU for a CPU run. Otherwise bitsandbytes loads its CUDA library, whose CPU code is slower: one unrecorded passage took 232 s in bf16 with the GPU visible and 43 s with it hidden.
+
+```powershell
+$env:CUDA_VISIBLE_DEVICES = "-1"
+uv run pbench run conditions/rewrite/qwen3.5-4b-nf4-cpu-summary-v3.toml
+```
+
 No reference rewrite exists, so the scores only flag outputs to check: whether a rewrite is valid (finished, nonempty, no reasoning tags), how many of the source's numbers and qualifiers (*may*, *unless*, *not*, …) it still contains, and whether it adds an exception, *only*, or a negation that the passage lacks. Three more describe how a rewrite is written: how much it copies from the passage (the copied-run length of Grusky et al., 2018), its Flesch–Kincaid reading grade beside the passages' own, and how often it opens with an introduction such as "Here's the summary:" or uses Markdown. Each run writes `evaluation/review.md`, which shows each passage above its rewrite. A rewrite comparison needs no `[scoring]`, and `compare` adds `side-by-side.md`, which shows every compared model's rewrite under each passage:
 
 ```toml
