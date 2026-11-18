@@ -1,5 +1,6 @@
 """The rewrite task end to end through the real harness and comparison summary, with a stand-in chat model."""
 
+from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
@@ -78,6 +79,31 @@ def test_a_cpu_condition_passes_its_device_and_compute_type_to_the_chat_model(mo
     strategy.load()
     assert chat.call_args.kwargs == {"precision": "nf4", "device": "cpu", "compute": "fp32",
                                      "max_new_tokens": 1024, "seed": 42}
+
+
+def test_a_gguf_condition_downloads_and_loads_its_one_file_through_llama_cpp(monkeypatch):
+    strategy = RewriteTask().build_strategy(condition("c", "q4_k_m", 'file = "m-Q4_K_M.gguf"\ndevice = "cpu"'))
+    chat, located, downloaded = Mock(), Mock(return_value=Path("snapshot")), Mock(return_value=Path("snapshot"))
+    chat.return_value.load.return_value = {}
+    monkeypatch.setattr("privacy_bench.tasks.rewrite.strategy.GgufChatModel", chat)
+    monkeypatch.setattr("privacy_bench.tasks.rewrite.strategy.resolve_snapshot", located)
+    monkeypatch.setattr("privacy_bench.tasks.rewrite.strategy.download_snapshot", downloaded)
+    monkeypatch.setattr("privacy_bench.tasks.rewrite.strategy.snapshot_identity", lambda *_: {})
+    strategy.download()
+    assert downloaded.call_args.kwargs == {"only": "m-Q4_K_M.gguf"}
+    strategy.load()
+    assert located.call_args.args == ("o/m", COMMIT, "m-Q4_K_M.gguf")
+    assert chat.call_args.args == (Path("snapshot") / "m-Q4_K_M.gguf",)
+    assert chat.call_args.kwargs == {"precision": "q4_k_m", "device": "cpu", "max_new_tokens": 1024, "seed": 42}
+
+
+@pytest.mark.parametrize("model, message", [
+    ('file = "m-Q4_K_M.gguf"', "is missing: device"),
+    ('file = "m-Q4_K_M.gguf"\ndevice = "cpu"\ncompute = "bf16"', "unknown keys: compute"),
+])
+def test_a_gguf_condition_names_its_device_and_no_compute_type(model, message):
+    with pytest.raises(ValueError, match=message):
+        RewriteTask().build_strategy(condition("c", "q4_k_m", model))
 
 
 def test_runs_compare_side_by_side(tmp_path, fake_load):

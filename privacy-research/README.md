@@ -148,6 +148,8 @@ uv run pytest
 
 Set `UV_NO_SYNC` before any other `uv` command. After pulling a change to `uv.lock`, rerun the `uv sync` line.
 
+Both setups also install `llama-cpp-python`, which runs GGUF models through llama.cpp. Windows and Linux get a built wheel that uses only the CPU. A Mac compiles the package during `uv sync`, which needs the Xcode command line tools, and that build includes llama.cpp's Metal GPU backend.
+
 Models resolve from the standard Hugging Face cache (`~/.cache/huggingface/hub`), and every condition pins a full commit. Runs never download, so fetch a condition's model once while online:
 
 ```powershell
@@ -202,6 +204,13 @@ A rewrite condition runs on the GPU unless its `[model]` table says `device = "c
 ```powershell
 $env:CUDA_VISIBLE_DEVICES = "-1"
 uv run pbench run conditions/rewrite/qwen3.5-4b-nf4-cpu-summary-v3.toml
+```
+
+A condition whose `[model]` table names a `file` runs that GGUF file through llama.cpp instead of transformers. `id` and `revision` pin the repository that holds the file, and `pbench download` fetches only that file. `precision` must match the file's type; `q4_k_m` is the one accepted. `device` is `cpu`, or `gpu` to put the whole model on the GPU backend of the installed llama.cpp build; the CPU wheel has none, and a `gpu` run stops there before it loads the model. The prompt comes from the chat template stored in the file, and each response records the same hashes of the rendered prompt and its token IDs as a transformers run, so two runs show whether they read the same input. Every passage starts from an empty context, so the time includes the whole prompt.
+
+```powershell
+uv run pbench download conditions/rewrite/qwen3.5-4b-q4km-cpu-summary-v3.toml
+uv run pbench run conditions/rewrite/qwen3.5-4b-q4km-cpu-summary-v3.toml
 ```
 
 No reference rewrite exists, so the scores only flag outputs to check: whether a rewrite is valid (finished, nonempty, no reasoning tags), how many of the source's numbers and qualifiers (*may*, *unless*, *not*, …) it still contains, and whether it adds an exception, *only*, or a negation that the passage lacks. Three more describe how a rewrite is written: how much it copies from the passage (the copied-run length of Grusky et al., 2018), its Flesch–Kincaid reading grade beside the passages' own, and how often it opens with an introduction such as "Here's the summary:" or uses Markdown. Each run writes `evaluation/review.md`, which shows each passage above its rewrite. A rewrite comparison needs no `[scoring]`, and `compare` adds `side-by-side.md`, which shows every compared model's rewrite under each passage:

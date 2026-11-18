@@ -87,10 +87,11 @@ Layers depend only downward: `core`, `models`, and `report` never import a task,
 | [paths.py](privacy-research/src/privacy_bench/core/paths.py), [files.py](privacy-research/src/privacy_bench/core/files.py) | Repository locations (including the frozen `data/` and the editable `prompts/`), hashing, and strict JSON reading (duplicate keys rejected). |
 | **[models/](privacy-research/src/privacy_bench/models/)** | **Model backends: load a pinned checkpoint, run one input, measure it; know nothing about tasks** |
 | [chat_model.py](privacy-research/src/privacy_bench/models/chat_model.py) | Greedy generation from a chat model, with an optional system message. Loads text-only and multimodal checkpoints (such as Ministral 3) and refuses one that does not load exactly. Runs on the GPU, or at 4-bit on the CPU, computing in bf16 or fp32. |
+| [gguf_chat_model.py](privacy-research/src/privacy_bench/models/gguf_chat_model.py) | Greedy generation from a GGUF chat model through llama.cpp (the `llama-cpp-python` package), with the interface and response fields of `chat_model.py`. Runs a `q4_k_m` file on the CPU, or on the GPU backend of the installed llama.cpp build. |
 | [sequence_classifier.py](privacy-research/src/privacy_bench/models/sequence_classifier.py) | FP32 sequence classifiers (skythrone/privacy-model). |
 | [sentence_embedder.py](privacy-research/src/privacy_bench/models/sentence_embedder.py) | sentence-transformers embeddings (EmbeddingGemma 2). |
 | [jev/](privacy-research/src/privacy_bench/models/jev/) | JEV-9B: bundle validation and download (`bundle.py`), the LoRA adapter and decision head (`judge.py`), and quantization planning (`quantization.py`). |
-| [hub.py](privacy-research/src/privacy_bench/models/hub.py) | Pinned Hugging Face snapshots: explicit download, then offline resolution only. Also the exact-load check every backend runs after loading weights. |
+| [hub.py](privacy-research/src/privacy_bench/models/hub.py) | Pinned Hugging Face snapshots: explicit download of a checkpoint or of one named file, then offline resolution only. Also the exact-load check every backend runs after loading weights. |
 | [quantization.py](privacy-research/src/privacy_bench/models/quantization.py), [measure.py](privacy-research/src/privacy_bench/models/measure.py) | bitsandbytes INT8/NF4 settings; CUDA setup, timing, and peak memory. |
 | **[report/](privacy-research/src/privacy_bench/report/)** | **Comparisons across saved runs** |
 | [comparisons.py](privacy-research/src/privacy_bench/report/comparisons.py), [summary.py](privacy-research/src/privacy_bench/report/summary.py), [plot.py](privacy-research/src/privacy_bench/report/plot.py) | Parses comparison files, rescores each run through its task into `summary.csv`, and draws the bar matrix. |
@@ -107,12 +108,12 @@ Layers depend only downward: `core`, `models`, and `report` never import a task,
 | [rewrite/judging.py](privacy-research/src/privacy_bench/tasks/rewrite/judging.py) | Blind key-point judging: the checklists, one prompt per passage with shuffled letters, strict checks of each reply (every point graded, every quote found in its rewrite), the frozen record, and each run's scores. |
 | [rewrite/chart.py](privacy-research/src/privacy_bench/tasks/rewrite/chart.py) | `keypoints.png`: each run's key points kept, partly kept, left out, or contradicted, and its share of rewrites that could mislead. |
 | [rewrite/data.py](privacy-research/src/privacy_bench/tasks/rewrite/data.py) | Frozen passage files, and prompt files: an optional `system` message and a `user` template with one `{passage}`. |
-| [rewrite/strategy.py](privacy-research/src/privacy_bench/tasks/rewrite/strategy.py) | The `prompted` strategy: renders the prompt file for each passage and generates with the chat backend. |
+| [rewrite/strategy.py](privacy-research/src/privacy_bench/tasks/rewrite/strategy.py) | The `prompted` strategy: renders the prompt file for each passage and generates with a chat backend: llama.cpp when the condition names a GGUF `file`, transformers otherwise. |
 | [rewrite/scoring.py](privacy-research/src/privacy_bench/tasks/rewrite/scoring.py) | Validity, length, and the numbers and qualifiers a rewrite dropped or added (flags, not quality scores); copying, reading grade, and format breaks; and the review Markdown. |
 
 ### Tests: [tests/](privacy-research/tests/)
 
-`uv run pytest` runs offline. The layout mirrors `src/privacy_bench/`, one test file per strategy; [conftest.py](privacy-research/tests/conftest.py) builds tiny classifier, embedder, and chat models on the CPU, and [models/jev/conftest.py](privacy-research/tests/models/jev/conftest.py) a tiny JEV bundle.
+`uv run pytest` runs offline. The layout mirrors `src/privacy_bench/`, one test file per strategy; [conftest.py](privacy-research/tests/conftest.py) builds tiny classifier, embedder, and chat models on the CPU, [models/jev/conftest.py](privacy-research/tests/models/jev/conftest.py) a tiny JEV bundle, and [models/test_gguf_chat_model.py](privacy-research/tests/models/test_gguf_chat_model.py) writes its own tiny GGUF files.
 
 ### Tools: [tools/](privacy-research/tools/)
 
@@ -146,8 +147,8 @@ One-time scripts that froze data files or imported runs. Each refuses to overwri
 | --- | --- | --- |
 | [conditions/classification/](privacy-research/conditions/classification/) | Current | One run condition per file, on the OPP-115 pilot. Names read `<model>-<precision>-<method>`: `definitions` is the definitions prompt (or, for EmbeddingGemma 2, similarity to the definitions, with a suffix naming its instruction prefix), and `head-<name>` is a fitted head. `privacy-model-fp32` has no method: it classifies the raw sentence. |
 | [conditions/classification/appsi139/](privacy-research/conditions/classification/appsi139/) | Current | The same conditions on APPSI-139 samples, named `…-appsi139-<sample>`. `-tuned` and `-full` heads are prior-shifted at the tuned strength and at strength 1. The two `fp32-cpu` conditions run the tuned balanced head on the CPU in fp32; every other condition runs on the GPU. |
-| [conditions/rewrite/](privacy-research/conditions/rewrite/) | Current | One rewrite condition per candidate model and prompt on the 20 passages, named `<model>-<precision>-<prompt>`. The two `nf4-cpu` conditions run Qwen3.5-4B on the CPU, computing in bf16 or, with `-fp32`, in fp32; every other condition runs on the GPU. |
-| [conditions/rewrite/holdout/](privacy-research/conditions/rewrite/holdout/) | Current | The `summary-v2` and `summary-v3` conditions on the held-out passages, named `…-holdout`, the two CPU conditions among them. |
+| [conditions/rewrite/](privacy-research/conditions/rewrite/) | Current | One rewrite condition per candidate model and prompt on the 20 passages, named `<model>-<precision>-<prompt>`. The two `nf4-cpu` conditions run Qwen3.5-4B on the CPU, computing in bf16 or, with `-fp32`, in fp32. The two `q4km` conditions run a 4-bit GGUF build of Qwen3.5-4B through llama.cpp, on the CPU or, with `-gpu`, on its GPU backend. Every other condition runs on the GPU through transformers. |
+| [conditions/rewrite/holdout/](privacy-research/conditions/rewrite/holdout/) | Current | The `summary-v2` and `summary-v3` conditions on the held-out passages, named `…-holdout`, the two `nf4-cpu` conditions and the `q4km-cpu` condition among them. |
 | [prompts/rewrite/](privacy-research/prompts/rewrite/) | Current | Rewrite prompt files, editable: each run copies the prompt it used into its `input.json`. `summary-baseline` is a generic summary prompt for a first comparison; `summary-v2` adds length, format, and faithfulness instructions; `summary-v3` also forbids making a promise stronger or weaker. |
 | [prompts/rewrite/judge/](privacy-research/prompts/rewrite/judge/) | Current | Judge instructions, editable: each judgment copies the text it used. `keypoints` grades every rewrite against the key points and lists unsupported claims, with quotes. |
 | [fits/classification/embeddinggemma2-opp115-heads.toml](privacy-research/fits/classification/embeddinggemma2-opp115-heads.toml) | Current | The `centroid`, `linear-balanced`, and `linear-frequencies` heads on EmbeddingGemma 2, learned from the OPP-115 examples. |
@@ -170,6 +171,6 @@ One-time scripts that froze data files or imported runs. Each refuses to overwri
 
 | File | Contents |
 | --- | --- |
-| [pyproject.toml](privacy-research/pyproject.toml), [uv.lock](privacy-research/uv.lock), [.python-version](privacy-research/.python-version) | Python 3.12 and every package pinned, transitive ones included; torch comes from the CUDA 13.2 index. |
+| [pyproject.toml](privacy-research/pyproject.toml), [uv.lock](privacy-research/uv.lock), [.python-version](privacy-research/.python-version) | Python 3.12 and every package pinned, transitive ones included; torch comes from the CUDA 13.2 index, and llama-cpp-python from its CPU wheel index or, on a Mac, from source. |
 | [.gitattributes](privacy-research/.gitattributes) | LF line endings, and no line-ending conversion under `data/` and `results/`, whose bytes are hashed. |
 | [.gitignore](privacy-research/.gitignore) | The environment, caches, and the generated `results/` folders. |

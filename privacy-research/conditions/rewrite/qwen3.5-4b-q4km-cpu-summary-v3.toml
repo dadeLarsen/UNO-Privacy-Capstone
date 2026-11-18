@@ -1,0 +1,18 @@
+task = "rewrite"
+strategy = "prompted"
+warmup = 1
+
+[items]
+passages = "appsi139-sections-20"
+
+[model]
+id = "unsloth/Qwen3.5-4B-GGUF"
+revision = "e87f176479d0855a907a41277aca2f8ee7a09523"
+precision = "q4_k_m"
+file = "Qwen3.5-4B-Q4_K_M.gguf"
+device = "cpu"
+
+[options]
+prompt = "summary-v3"
+max_new_tokens = 1024
+seed = 42
