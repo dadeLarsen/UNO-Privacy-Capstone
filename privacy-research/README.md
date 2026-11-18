@@ -164,7 +164,7 @@ uv run pbench compare comparisons/<name>.toml
 uv run pbench evaluate results/runs/<task>/<condition>/<UTC start>
 ```
 
-- `run` checks every input before the first model call and never truncates one. It refuses an existing output folder, keeps every completed response if the run fails or is interrupted, and records the git commit and any uncommitted diff, the full package list, the resolved model commit, and the exact input specification.
+- `run` checks every input before the first model call and never truncates one. It refuses an existing output folder, keeps every completed response if the run fails or is interrupted, and records the git commit and any uncommitted diff, the full package list, the resolved model commit, and the exact input specification. `--limit N` stops the run after the first N items, to time a condition without a full run; the record is saved as `limited`, and `compare` refuses it.
 - `compare` rescores each listed run with the current code, refuses runs scored on different items or reference answers, and writes `summary.csv`, `matrix-overview.png`, and `matrix-overview.svg` under `results/comparisons/<name>/`.
 - `evaluate` rewrites a run's `evaluation/` folder from its saved responses.
 

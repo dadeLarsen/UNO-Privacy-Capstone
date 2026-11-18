@@ -161,6 +161,22 @@ def test_interruption_marks_the_run_interrupted_and_keeps_the_attempted_item(tmp
     assert read_jsonl(output / "responses.jsonl")[-1] == {"id": "id-2", "error": "KeyboardInterrupt: "}
 
 
+def test_a_limit_stops_the_run_early_and_saves_it_as_limited(tmp_path):
+    task, output = FakeTask(), tmp_path / "run"
+    assert execute(task, CONDITION, output, limit=2) == {"n": 2}
+    record = read_json(output / "run.json")
+    assert (record["status"], record["recorded_responses"]) == ("limited", 2)
+    assert record["item_ids"] == ["id-0", "id-1", "id-2"] and record["input_audit"]["validated"] == 3
+    assert task.strategy.calls == ["id-0", "id-0", "id-1"]
+    with pytest.raises(ValueError, match="not complete"):
+        load_run(output)
+    assert evaluate_run(task, output) == {"n": 2}
+    for limit in (0, 3):
+        with pytest.raises(ValueError, match="limit must be from 1 to 2"):
+            execute(FakeTask(), CONDITION, tmp_path / f"refused-{limit}", limit=limit)
+        assert not (tmp_path / f"refused-{limit}").exists()
+
+
 def test_warmup_failure_is_saved_and_never_scored(tmp_path):
     task, output = FakeTask(warmup_fails=True), tmp_path / "run"
     with pytest.raises(RuntimeError, match="warmup broke"):

@@ -36,8 +36,11 @@ def _preflight(strategy, items, output: Path):
     return prepared, audit
 
 
-def execute(task: Task, condition: Condition, output: Path) -> dict:
-    """Run a condition into a new directory and return the evaluation summary."""
+def execute(task: Task, condition: Condition, output: Path, limit: int | None = None) -> dict:
+    """Run a condition into a new directory and return the evaluation summary.
+
+    With a limit the run stops after that many items and is saved as "limited", which is not complete.
+    """
     if condition.task != task.name:
         raise ValueError(f"Condition {condition.name!r} is for task {condition.task!r}, not {task.name!r}")
     output = Path(output)
@@ -49,6 +52,8 @@ def execute(task: Task, condition: Condition, output: Path) -> dict:
     item_ids = [item.id for item in selection.items]
     if len(set(item_ids)) != len(item_ids):
         raise ValueError("Selected items must have unique IDs")
+    if limit is not None and not 1 <= limit < len(item_ids):
+        raise ValueError(f"limit must be from 1 to {len(item_ids) - 1} for this condition's {len(item_ids)} items")
     record = {
         "schema_version": SCHEMA_VERSION,
         "task": task.name, "strategy": strategy.name,
@@ -82,8 +87,9 @@ def execute(task: Task, condition: Condition, output: Path) -> dict:
         record["status"] = "running"
         write_json(output / "run.json", record)
         progress_every = max(10, len(item_ids) // 20)
+        last = limit or len(item_ids)
         with (output / "responses.jsonl").open("x", encoding="utf-8") as log:
-            for index, (item, value) in enumerate(zip(selection.items, prepared, strict=True), 1):
+            for index, (item, value) in enumerate(zip(selection.items[:last], prepared[:last], strict=True), 1):
                 response = {"id": item.id}
                 try:
                     response.update(strategy.predict(value))
@@ -94,9 +100,11 @@ def execute(task: Task, condition: Condition, output: Path) -> dict:
                     responses.append(response)
                     log.write(json.dumps(response, ensure_ascii=False, allow_nan=False) + "\n")
                     log.flush()
-                if index == 1 or index % progress_every == 0 or index == len(item_ids):
+                if index == 1 or index % progress_every == 0 or index == last:
                     print(f"Processed {index}/{len(item_ids)}", flush=True)
-        record["status"] = "complete"
+        if limit is not None:
+            print(f"Stopped at the limit of {limit} items; the others count as missing", flush=True)
+        record["status"] = "complete" if limit is None else "limited"
     except BaseException as exc:
         record["status"] = "interrupted" if isinstance(exc, KeyboardInterrupt) else "failed"
         record["error"] = f"{type(exc).__name__}: {exc}"
