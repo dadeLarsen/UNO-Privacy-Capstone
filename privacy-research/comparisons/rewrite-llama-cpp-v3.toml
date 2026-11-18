@@ -1,0 +1,14 @@
+task = "rewrite"
+title = "Qwen3.5-4B at 4-bit through llama.cpp on the CPU, against transformers on the GPU, summary-v3"
+# The Q4_K_M file is Unsloth's GGUF build of the model. The BF16 and NF4 runs loaded the original
+# checkpoint through transformers on torch 2.8.0.
+runs = [
+    "rewrite/qwen3.5-4b-bf16-summary-v3/20261026-043005Z",
+    "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+    "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+]
+
+[labels]
+"rewrite/qwen3.5-4b-bf16-summary-v3/20261026-043005Z" = "Qwen3.5-4B · BF16 on the GPU"
+"rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z" = "Qwen3.5-4B · NF4 on the GPU"
+"rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z" = "Qwen3.5-4B · Q4_K_M on the CPU, llama.cpp"
