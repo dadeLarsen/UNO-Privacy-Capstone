@@ -1,6 +1,7 @@
 """Chat generation logic with a stand-in tokenizer and model, and a tiny local checkpoint at 4-bit on the CPU."""
 
 import json
+import platform
 from types import SimpleNamespace
 from unittest.mock import Mock
 
@@ -133,11 +134,20 @@ def test_generate_keeps_reasoning_text_and_reports_token_accounting():
     assert kwargs["input_ids"].tolist() == [[1, 2, 3]] and kwargs["attention_mask"].tolist() == [[1, 1, 1]]
 
 
+def test_a_cpu_load_is_refused_while_a_gpu_is_visible(monkeypatch):
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: True)
+    with pytest.raises(RuntimeError, match="CUDA_VISIBLE_DEVICES=-1"):
+        ChatModel(".", precision="nf4", device="cpu", max_new_tokens=4, seed=42).load()
+
+
 @pytest.mark.parametrize("compute, dtype", [("bf16", torch.bfloat16), ("fp32", torch.float32)])
-def test_tiny_checkpoint_loads_at_4_bit_on_the_cpu_and_generates(tiny_chat_model, compute, dtype):
+def test_tiny_checkpoint_loads_at_4_bit_on_the_cpu_and_generates(tiny_chat_model, monkeypatch, compute, dtype):
+    # A CPU load refuses a visible GPU, and this test must also run on a computer that has one.
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
     model = ChatModel(tiny_chat_model, precision="nf4", device="cpu", compute=compute, max_new_tokens=4, seed=42)
     metadata = model.load()
     assert (metadata["device"], metadata["device_map"]) == ("cpu", {"": "cpu"})
+    assert (metadata["cpu"], metadata["cpu_threads"]) == (platform.processor(), torch.get_num_threads())
     assert metadata["nonquantized_dtype"] == str(dtype)
     assert metadata["quantization_config"]["bnb_4bit_compute_dtype"] == str(dtype).removeprefix("torch.")
     assert "gpu" not in metadata and "gpu_free_before_load_bytes" not in metadata

@@ -197,7 +197,7 @@ The rewrite task runs on 20 frozen APPSI-139 policy sections ([tools/make_appsi1
 uv run pbench run conditions/rewrite/qwen3.5-4b-bf16-summary-baseline.toml
 ```
 
-A rewrite condition runs on the GPU unless its `[model]` table says `device = "cpu"`. The CPU takes `precision = "nf4"` only. It computes in bf16, or in float32 with `compute = "fp32"`, which is meant for CPUs without native bf16 instructions. On a computer with an NVIDIA GPU, hide the GPU for a CPU run. Otherwise bitsandbytes loads its CUDA library, whose CPU code is slower: one unrecorded passage took 232 s in bf16 with the GPU visible and 43 s with it hidden.
+A rewrite condition runs on the GPU unless its `[model]` table says `device = "cpu"`. The CPU takes `precision = "nf4"` only. It computes in bf16, or in float32 with `compute = "fp32"`, which is meant for CPUs without native bf16 instructions. On a computer with an NVIDIA GPU, hide the GPU for a CPU run, or the run stops before it loads the model. With a visible GPU, bitsandbytes loads its CUDA library, whose CPU code is slower: one unrecorded passage took 232 s in bf16 with the GPU visible and 43 s with it hidden. A CPU run records the processor and the thread count.
 
 ```powershell
 $env:CUDA_VISIBLE_DEVICES = "-1"

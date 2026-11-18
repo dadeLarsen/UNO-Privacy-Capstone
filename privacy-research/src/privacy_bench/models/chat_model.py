@@ -3,6 +3,7 @@
 from copy import deepcopy
 import json
 from pathlib import Path
+import platform
 
 import torch
 from transformers import (AutoConfig, AutoModelForCausalLM, AutoModelForImageTextToText, AutoTokenizer,
@@ -99,6 +100,10 @@ class ChatModel:
     def load(self) -> dict:
         if self._cuda:
             require_cuda(bf16=True)
+        elif torch.cuda.is_available():
+            raise RuntimeError("A CPU run needs the GPU hidden: while one is visible, bitsandbytes runs its CUDA "
+                               "library, which is slower on the CPU, and the timings are wrong. Set "
+                               "CUDA_VISIBLE_DEVICES=-1 and run again")
         dtype = DTYPES[self.compute]
         set_seed(self.seed)
         reject_prequantized(self.snapshot)
@@ -172,6 +177,8 @@ class ChatModel:
         }
         if self._cuda:
             metadata.update(gpu_metadata(), gpu_free_before_load_bytes=free_gpu)
+        else:
+            metadata.update(cpu=platform.processor(), cpu_threads=torch.get_num_threads())
         return json.loads(json.dumps(metadata, default=str))
 
     def encode(self, prompt: str, system: str | None = None) -> dict:
