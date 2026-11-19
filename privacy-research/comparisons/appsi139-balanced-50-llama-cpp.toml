@@ -1,0 +1,30 @@
+task = "classification"
+title = "APPSI-139, up to 50 per category: the tuned balanced head, llama.cpp and torch"
+# Accepted labels are the original mapped labels plus every label ChatGPT Astra marked.
+# Every EmbeddingGemma 2 run uses the same shifted head, fitted on the torch checkpoint's BF16 embeddings.
+# The two torch runs are those of appsi139-balanced-50-torch215. The four llama.cpp runs embed with a GGUF file
+# converted from that checkpoint, BF16 or Q8_0, through llama-cpp-python 0.3.37. All four come from the locked
+# environment and its CUDA 13.2 wheel, the CPU runs included; a CPU run loads the model with no GPU device.
+# privacy-model's run was made on torch 2.8.0. The head tuned on APPSI-139's tuning half, which holds 272
+# of these 460 sentences.
+runs = [
+    "classification/privacy-model-fp32-appsi139-balanced-50/20261012-014228Z",
+    "classification/embeddinggemma2-bf16-head-linear-balanced-tuned-appsi139-balanced-50/20261116-034743Z",
+    "classification/embeddinggemma2-fp32-cpu-head-linear-balanced-tuned-appsi139-balanced-50/20261116-035208Z",
+    "classification/embeddinggemma2-gguf-bf16-gpu-head-linear-balanced-tuned-appsi139-balanced-50/20261119-183916Z",
+    "classification/embeddinggemma2-gguf-bf16-cpu-head-linear-balanced-tuned-appsi139-balanced-50/20261119-183523Z",
+    "classification/embeddinggemma2-gguf-q8-gpu-head-linear-balanced-tuned-appsi139-balanced-50/20261119-184319Z",
+    "classification/embeddinggemma2-gguf-q8-cpu-head-linear-balanced-tuned-appsi139-balanced-50/20261119-184036Z",
+]
+
+[scoring]
+gold = "appsi139-astra"
+
+[labels]
+"classification/privacy-model-fp32-appsi139-balanced-50/20261012-014228Z" = "skythrone/privacy-model · FP32 on the GPU · torch 2.8.0"
+"classification/embeddinggemma2-bf16-head-linear-balanced-tuned-appsi139-balanced-50/20261116-034743Z" = "google/embeddinggemma-2 · BF16 on the GPU · torch 2.15.0"
+"classification/embeddinggemma2-fp32-cpu-head-linear-balanced-tuned-appsi139-balanced-50/20261116-035208Z" = "google/embeddinggemma-2 · FP32 on the CPU · torch 2.15.0"
+"classification/embeddinggemma2-gguf-bf16-gpu-head-linear-balanced-tuned-appsi139-balanced-50/20261119-183916Z" = "EmbeddingGemma 2 GGUF · BF16 on the GPU · llama.cpp"
+"classification/embeddinggemma2-gguf-bf16-cpu-head-linear-balanced-tuned-appsi139-balanced-50/20261119-183523Z" = "EmbeddingGemma 2 GGUF · BF16 on the CPU · llama.cpp"
+"classification/embeddinggemma2-gguf-q8-gpu-head-linear-balanced-tuned-appsi139-balanced-50/20261119-184319Z" = "EmbeddingGemma 2 GGUF · Q8_0 on the GPU · llama.cpp"
+"classification/embeddinggemma2-gguf-q8-cpu-head-linear-balanced-tuned-appsi139-balanced-50/20261119-184036Z" = "EmbeddingGemma 2 GGUF · Q8_0 on the CPU · llama.cpp"
