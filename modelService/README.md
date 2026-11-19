@@ -74,6 +74,11 @@ uv run pytest
 Set `UV_NO_SYNC` before any other `uv` command. After pulling a change to `uv.lock`,
 rerun the `uv sync` line.
 
+Both setups also install `llama-cpp-python`, which the benchmark's rewrite task uses to
+run GGUF models through llama.cpp. The service loads it at startup but does not use it
+yet. Windows and Linux on x64 get a built wheel. Every other platform compiles the
+package during `uv sync`, and on a Mac that needs the Xcode command line tools.
+
 Some checkpoints may require accepting their license on Hugging Face first. The service
 itself never downloads; it reads the snapshot from the local cache.
 
