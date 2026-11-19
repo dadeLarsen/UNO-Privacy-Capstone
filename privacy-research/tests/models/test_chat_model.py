@@ -1,8 +1,11 @@
-"""Chat generation logic with stand-in tokenizer and model; no checkpoint or GPU needed."""
+"""Chat generation logic with a stand-in tokenizer and model, and a tiny local checkpoint at 4-bit on the CPU."""
 
+import json
+import platform
 from types import SimpleNamespace
 from unittest.mock import Mock
 
+from bitsandbytes.nn import Linear4bit
 import pytest
 import torch
 from transformers import AutoModelForCausalLM, AutoModelForImageTextToText
@@ -46,7 +49,12 @@ def test_only_terminal_eos_and_padding_are_removed():
 
 
 @pytest.mark.parametrize("settings, message", [
-    ({"precision": "fp16"}, "precision"),
+    ({"precision": "fp16"}, "precision 'fp16'"),
+    ({"device": "cpu", "precision": "bf16"}, "on cpu at precision nf4"),
+    ({"device": "cpu", "precision": "int8"}, "on cpu at precision nf4"),
+    ({"precision": "nf4", "compute": "fp32"}, "compute 'fp32'"),
+    ({"device": "mps", "precision": "nf4"}, "device 'mps'"),
+    ({"device": "cpu", "precision": "nf4", "compute": "fp16"}, "compute 'fp16'"),
     ({"max_new_tokens": 0}, "max_new_tokens"),
     ({"seed": -1}, "seed"),
 ])
@@ -74,8 +82,7 @@ class FakeTokenizer:
 
 
 def cpu_model(tokenizer, *, limit=100, max_new_tokens=32):
-    model = ChatModel(".", precision="int8", max_new_tokens=max_new_tokens, seed=42)
-    model._cuda, model._device = False, "cpu"
+    model = ChatModel(".", precision="nf4", device="cpu", max_new_tokens=max_new_tokens, seed=42)
     model._tokenizer, model._context_limit = tokenizer, limit
     model._generation = SimpleNamespace(max_new_tokens=max_new_tokens, eos_token_id=99, pad_token_id=99)
     model._model = Mock()
@@ -125,3 +132,33 @@ def test_generate_keeps_reasoning_text_and_reports_token_accounting():
     kwargs = model._model.generate.call_args.kwargs
     assert kwargs["generation_config"] is model._generation
     assert kwargs["input_ids"].tolist() == [[1, 2, 3]] and kwargs["attention_mask"].tolist() == [[1, 1, 1]]
+
+
+def test_a_cpu_load_is_refused_while_a_gpu_is_visible(monkeypatch):
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: True)
+    with pytest.raises(RuntimeError, match="CUDA_VISIBLE_DEVICES=-1"):
+        ChatModel(".", precision="nf4", device="cpu", max_new_tokens=4, seed=42).load()
+
+
+@pytest.mark.parametrize("compute, dtype", [("bf16", torch.bfloat16), ("fp32", torch.float32)])
+def test_tiny_checkpoint_loads_at_4_bit_on_the_cpu_and_generates(tiny_chat_model, monkeypatch, compute, dtype):
+    # A CPU load refuses a visible GPU, and this test must also run on a computer that has one.
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
+    model = ChatModel(tiny_chat_model, precision="nf4", device="cpu", compute=compute, max_new_tokens=4, seed=42)
+    metadata = model.load()
+    assert (metadata["device"], metadata["device_map"]) == ("cpu", {"": "cpu"})
+    assert (metadata["cpu"], metadata["cpu_threads"]) == (platform.processor(), torch.get_num_threads())
+    assert metadata["nonquantized_dtype"] == str(dtype)
+    assert metadata["quantization_config"]["bnb_4bit_compute_dtype"] == str(dtype).removeprefix("torch.")
+    assert "gpu" not in metadata and "gpu_free_before_load_bytes" not in metadata
+    json.dumps(metadata)
+    linear = [module for module in model._model.modules() if isinstance(module, torch.nn.Linear)]
+    quantized = [module for module in linear if isinstance(module, Linear4bit)]
+    # bitsandbytes leaves the output head alone and replaces every other linear layer.
+    assert len(quantized) == len(linear) - 1 == 15
+    for layer in quantized:
+        assert layer.weight.bnb_quantized and layer.weight.dtype == torch.uint8 and layer.compute_dtype == dtype
+    assert {str(parameter.device) for parameter in model._model.parameters()} == {"cpu"}
+    result = model.generate(model.encode("we keep data for years ."))
+    assert 1 <= result["output_tokens"] == len(result["output_token_ids"]) <= 4
+    assert result["seconds"] >= 0 and "peak_allocated_bytes" not in result

@@ -21,7 +21,7 @@ def run(args):
     condition = load_condition(args.condition)
     task = get_task(condition.task)
     output = args.output or run_directory(task.name, condition.name)
-    metrics = execute(task, condition, output)
+    metrics = execute(task, condition, output, limit=args.limit)
     print(task.summary_line(metrics))
 
 
@@ -96,6 +96,7 @@ def main(argv=None):
     command = commands.add_parser("run", help="Run one condition file into a new run directory")
     command.add_argument("condition", type=Path)
     command.add_argument("--output", type=Path, help="New run directory (default: results/runs/<task>/<condition>/<UTC start>)")
+    command.add_argument("--limit", type=int, help="Stop after this many items; no comparison accepts the run")
     command.set_defaults(handler=run)
     command = commands.add_parser("fit", help="Fit what a fit file describes into a new fit record")
     command.add_argument("fit", type=Path)

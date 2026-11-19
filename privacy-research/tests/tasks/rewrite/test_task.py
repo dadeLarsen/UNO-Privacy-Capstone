@@ -1,5 +1,7 @@
 """The rewrite task end to end through the real harness and comparison summary, with a stand-in chat model."""
 
+from unittest.mock import Mock
+
 import pytest
 
 from privacy_bench.core.conditions import parse_condition
@@ -15,7 +17,7 @@ from privacy_bench.tasks.rewrite.task import RewriteTask
 COMMIT = "a" * 40
 
 
-def condition(name, precision):
+def condition(name, precision, model=""):
     return parse_condition(name, f"""
 task = "rewrite"
 strategy = "prompted"
@@ -25,6 +27,7 @@ passages = "appsi139-sections-20"
 id = "o/m"
 revision = "{COMMIT}"
 precision = "{precision}"
+{model}
 [options]
 prompt = "summary-baseline"
 """)
@@ -60,8 +63,21 @@ def test_registry_and_strategy_settings():
     spec = strategy.input_spec
     assert spec["prompt"]["name"] == "summary-baseline" and spec["max_new_tokens"] == 1024
     assert spec["chat_template_kwargs"]["enable_thinking"] is False
+    assert (strategy.model["device"], strategy.model["compute"]) == ("cuda", "bf16")
     with pytest.raises(ValueError, match="Unknown rewrite strategy"):
         RewriteTask().build_strategy(parse_condition("c", 'task = "rewrite"\nstrategy = "kids"\n'))
+
+
+def test_a_cpu_condition_passes_its_device_and_compute_type_to_the_chat_model(monkeypatch):
+    strategy = RewriteTask().build_strategy(condition("c", "nf4", 'device = "cpu"\ncompute = "fp32"'))
+    chat = Mock()
+    chat.return_value.load.return_value = {}
+    monkeypatch.setattr("privacy_bench.tasks.rewrite.strategy.ChatModel", chat)
+    monkeypatch.setattr("privacy_bench.tasks.rewrite.strategy.resolve_snapshot", lambda *_: "snapshot")
+    monkeypatch.setattr("privacy_bench.tasks.rewrite.strategy.snapshot_identity", lambda *_: {})
+    strategy.load()
+    assert chat.call_args.kwargs == {"precision": "nf4", "device": "cpu", "compute": "fp32",
+                                     "max_new_tokens": 1024, "seed": 42}
 
 
 def test_runs_compare_side_by_side(tmp_path, fake_load):
