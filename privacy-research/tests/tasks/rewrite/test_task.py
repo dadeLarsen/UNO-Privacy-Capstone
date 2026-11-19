@@ -18,7 +18,7 @@ from privacy_bench.tasks.rewrite.task import RewriteTask
 COMMIT = "a" * 40
 
 
-def condition(name, precision, model=""):
+def condition(name, precision, model='file = "m.gguf"\ndevice = "cpu"'):
     return parse_condition(name, f"""
 task = "rewrite"
 strategy = "prompted"
@@ -64,21 +64,15 @@ def test_registry_and_strategy_settings():
     spec = strategy.input_spec
     assert spec["prompt"]["name"] == "summary-baseline" and spec["max_new_tokens"] == 1024
     assert spec["chat_template_kwargs"]["enable_thinking"] is False
-    assert (strategy.model["device"], strategy.model["compute"]) == ("cuda", "bf16")
     with pytest.raises(ValueError, match="Unknown rewrite strategy"):
         RewriteTask().build_strategy(parse_condition("c", 'task = "rewrite"\nstrategy = "kids"\n'))
 
 
-def test_a_cpu_condition_passes_its_device_and_compute_type_to_the_chat_model(monkeypatch):
-    strategy = RewriteTask().build_strategy(condition("c", "nf4", 'device = "cpu"\ncompute = "fp32"'))
-    chat = Mock()
-    chat.return_value.load.return_value = {}
-    monkeypatch.setattr("privacy_bench.tasks.rewrite.strategy.ChatModel", chat)
-    monkeypatch.setattr("privacy_bench.tasks.rewrite.strategy.resolve_snapshot", lambda *_: "snapshot")
-    monkeypatch.setattr("privacy_bench.tasks.rewrite.strategy.snapshot_identity", lambda *_: {})
-    strategy.load()
-    assert chat.call_args.kwargs == {"precision": "nf4", "device": "cpu", "compute": "fp32",
-                                     "max_new_tokens": 1024, "seed": 42}
+def test_a_condition_for_the_retired_transformers_backend_is_refused_and_writes_nothing(tmp_path):
+    output = tmp_path / "run"
+    with pytest.raises(ValueError, match=r"'c' \[model\] names no GGUF file.*transformers backend is retired"):
+        execute(RewriteTask(), condition("c", "nf4", 'device = "cpu"\ncompute = "fp32"'), output)
+    assert not output.exists()
 
 
 def test_a_gguf_condition_downloads_and_loads_its_one_file_through_llama_cpp(monkeypatch):

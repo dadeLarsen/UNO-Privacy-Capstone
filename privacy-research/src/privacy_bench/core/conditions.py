@@ -3,7 +3,7 @@
 Example::
 
     task = "classification"
-    strategy = "prompted"
+    strategy = "classifier-head"
     warmup = 1
 
     [items]
@@ -11,12 +11,13 @@ Example::
     sample = "pilot-200-10cat"
 
     [model]
-    id = "Qwen/Qwen3-14B"
-    revision = "40c069824f4251a91eefaf281ebe4c544efd3e18"
-    precision = "int8"
+    id = "skythrone/privacy-model"
+    revision = "7b478b5606f2f27cc4c8222449886dea4da36b0b"
+    precision = "fp32"
+    device = "cuda"
 
     [options]
-    prompt = "definitions"
+    max_input_tokens = 512
 
 The core only reads ``task``, ``strategy``, and ``warmup``. The task validates ``[items]``,
 and the strategy validates ``[model]`` and ``[options]``; both reject unknown keys.

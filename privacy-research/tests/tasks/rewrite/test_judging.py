@@ -47,6 +47,7 @@ def judged(tmp_path, monkeypatch):
         execute(task, parse_condition(name, f'task = "rewrite"\nstrategy = "prompted"\n[items]\n'
                                             f'passages = "appsi139-sections-20"\n[model]\nid = "o/{name}"\n'
                                             f'revision = "{"a" * 40}"\nprecision = "{precision}"\n'
+                                            'file = "m.gguf"\ndevice = "cpu"\n'
                                             '[options]\nprompt = "summary-v3"\n'), tmp_path / "runs" / path)
     comparison = parse_comparison("judged", f'task = "rewrite"\nruns = {json.dumps(RUNS)}\n')
     directory = task.prepare_judgment(comparison, "keypoints", "a test judge", runs_root=tmp_path / "runs")

@@ -11,15 +11,24 @@ from jinja2.sandbox import ImmutableSandboxedEnvironment
 import llama_cpp
 
 from ..core.files import digest_json, digest_text
-from .chat_model import CHAT_TEMPLATE_KWARGS, chat_messages
 
 # Device and precision. gpu puts every layer on the GPU backend of the installed llama.cpp build.
 MODES = (("cpu", "q4_k_m"), ("gpu", "q4_k_m"))
+CHAT_TEMPLATE_KWARGS = {"tokenize": False, "add_generation_prompt": True, "enable_thinking": False}
 # The general.file_type that a GGUF file of each precision declares.
 FILE_TYPES = {"q4_k_m": "15"}
 # llama.cpp allocates its context at load. This many tokens hold the longest rewrite prompt and its output;
 # a model trained on a shorter context keeps its own limit.
 CONTEXT_TOKENS = 4096
+
+
+def chat_messages(prompt: str, system: str | None) -> list:
+    if not isinstance(prompt, str) or not prompt.strip():
+        raise ValueError("prompt must be a nonempty string")
+    if system is not None and (not isinstance(system, str) or not system.strip()):
+        raise ValueError("system must be None or a nonempty string")
+    turns = [{"role": "user", "content": prompt}]
+    return turns if system is None else [{"role": "system", "content": system}, *turns]
 
 
 def placement(device: str) -> dict:
@@ -106,7 +115,7 @@ class GgufChatModel:
     def generate(self, chat_input: dict) -> dict:
         input_ids = chat_input["encoded"]["input_ids"]
         # llama.cpp keeps the last prompt and skips the part a new prompt repeats. Starting empty makes
-        # every call process its whole prompt, as the transformers backend does.
+        # every call process its whole prompt, as the recorded transformers runs did.
         self._llm.reset()
         ids = []
         started = time.perf_counter()
