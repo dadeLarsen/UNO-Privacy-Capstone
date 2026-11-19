@@ -1,0 +1,19 @@
+task = "rewrite"
+title = "Qwen3.5-4B through llama.cpp on a MacBook, beside the NF4 run judged in October, judged against key points, summary-v3"
+# Three of the six runs that judgment rewrite-keypoints-llama-cpp-v3 graded side by side: the two from an
+# M4 Pro MacBook, and the desktop's NF4 run from torch 2.8.0, which rewrite-keypoints-v3 scored from the
+# October judgment. Its two scores show how far the judge moved between the judgments. Inference time
+# compares two computers here.
+runs = [
+    "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+    "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+    "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+]
+
+[scoring]
+judgments = "rewrite-keypoints-llama-cpp-v3"
+
+[labels]
+"rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z" = "Qwen3.5-4B · NF4 on the desktop GPU, bitsandbytes · torch 2.8.0"
+"rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z" = "Qwen3.5-4B · Q4_K_M on the MacBook CPU, llama.cpp"
+"rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z" = "Qwen3.5-4B · Q4_K_M on the MacBook GPU, llama.cpp"

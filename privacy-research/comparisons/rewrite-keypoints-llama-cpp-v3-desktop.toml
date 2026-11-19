@@ -1,0 +1,18 @@
+task = "rewrite"
+title = "Qwen3.5-4B on the desktop: NF4 through bitsandbytes against Q4_K_M through llama.cpp, judged against key points, summary-v3"
+# The desktop's three of the six runs that judgment rewrite-keypoints-llama-cpp-v3 graded side by side.
+# The NF4 run quantized the original checkpoint with bitsandbytes, on torch 2.15.0. The Q4_K_M file is Unsloth's
+# GGUF build of the model; its GPU run used a CUDA build of llama-cpp-python, which uv.lock does not hold.
+runs = [
+    "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+    "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+    "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+]
+
+[scoring]
+judgments = "rewrite-keypoints-llama-cpp-v3"
+
+[labels]
+"rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z" = "Qwen3.5-4B · NF4 on the GPU, bitsandbytes"
+"rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z" = "Qwen3.5-4B · Q4_K_M on the CPU, llama.cpp"
+"rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z" = "Qwen3.5-4B · Q4_K_M on the GPU, llama.cpp"
