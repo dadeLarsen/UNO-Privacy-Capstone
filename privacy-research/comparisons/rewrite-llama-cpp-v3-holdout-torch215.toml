@@ -1,0 +1,12 @@
+task = "rewrite"
+title = "Qwen3.5-4B at 4-bit through llama.cpp on the CPU, against NF4 on the GPU on torch 2.15.0, summary-v3, held-out passages"
+# The Q4_K_M file is Unsloth's GGUF build of the model. The NF4 run quantized the original checkpoint with
+# bitsandbytes, on the torch build that the CPU runs of the same day used.
+runs = [
+    "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+    "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+]
+
+[labels]
+"rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z" = "Qwen3.5-4B · NF4 on the GPU · torch 2.15.0"
+"rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z" = "Qwen3.5-4B · Q4_K_M on the CPU, llama.cpp"

@@ -1,5 +1,5 @@
 task = "rewrite"
-title = "Qwen3.5-4B at 4-bit on the CPU: bitsandbytes against llama.cpp, summary-v3"
+title = "Qwen3.5-4B at 4-bit on the CPU: bitsandbytes in bf16 against llama.cpp, summary-v3"
 # The NF4 run quantized the original checkpoint with bitsandbytes and computed in BF16, with the GPU hidden.
 # The Q4_K_M file is Unsloth's GGUF build of the model.
 runs = [
@@ -8,5 +8,5 @@ runs = [
 ]
 
 [labels]
-"rewrite/qwen3.5-4b-nf4-cpu-summary-v3/20261118-215916Z" = "Qwen3.5-4B · NF4 on the CPU, bitsandbytes"
+"rewrite/qwen3.5-4b-nf4-cpu-summary-v3/20261118-215916Z" = "Qwen3.5-4B · NF4 on the CPU in bf16, bitsandbytes"
 "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z" = "Qwen3.5-4B · Q4_K_M on the CPU, llama.cpp"
