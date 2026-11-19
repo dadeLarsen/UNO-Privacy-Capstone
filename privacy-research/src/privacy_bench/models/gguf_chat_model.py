@@ -1,5 +1,6 @@
 """Greedy generation from a local GGUF chat model through llama.cpp, one prompt at a time, never truncating."""
 
+import ctypes
 import json
 from pathlib import Path
 import platform
@@ -122,5 +123,17 @@ class GgufChatModel:
         return llama_cpp.llama_vocab_is_eog(self._vocab, token)
 
     def _decode(self, ids: list) -> str:
+        # Llama.detokenize drops every token whose text is longer than its 32-byte buffer. llama.cpp answers
+        # a buffer that is too small with the negative of the size the token needs.
+        text = b""
+        for token in ids:
+            buffer = ctypes.create_string_buffer(32)
+            length = llama_cpp.llama_token_to_piece(self._vocab, token, buffer, len(buffer), 0, True)
+            if length < 0:
+                buffer = ctypes.create_string_buffer(-length)
+                length = llama_cpp.llama_token_to_piece(self._vocab, token, buffer, len(buffer), 0, True)
+            if length < 0:
+                raise RuntimeError(f"llama.cpp could not give the text of token {token}")
+            text += buffer.raw[:length]
         # A token limit can cut a character in half; show that as U+FFFD, as transformers does.
-        return self._llm.detokenize(ids, special=True).decode("utf-8", errors="replace")
+        return text.decode("utf-8", errors="replace")

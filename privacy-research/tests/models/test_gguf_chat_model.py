@@ -10,8 +10,10 @@ import pytest
 from privacy_bench.models.gguf_chat_model import GgufChatModel
 
 SPECIAL = ["<|endoftext|>", "<|im_start|>", "<|im_end|>"]
+# Longer than the 32-byte buffer llama-cpp-python decodes a token into. No merge builds it from input text.
+RULE = "-" * 40
 # llama.cpp's byte-level BPE spells a newline as Ċ and a space as Ġ.
-TOKENS = [*SPECIAL, "Ċ", "Ġ", *(chr(code) for code in range(33, 127))]
+TOKENS = [*SPECIAL, "Ċ", "Ġ", *(chr(code) for code in range(33, 127)), RULE]
 TEMPLATE = ("{% for message in messages %}<|im_start|>{{ message.role }}\n{{ message.content }}<|im_end|>\n"
             "{% endfor %}{% if add_generation_prompt %}<|im_start|>assistant\n{% endif %}"
             "{% if enable_thinking is false %}plain\n{% endif %}")
@@ -166,3 +168,9 @@ def test_generation_stops_at_the_end_of_turn_token(tmp_path):
     assert (result["raw_output"], result["raw_output_with_special_tokens"]) == ("", "<|im_end|>")
     assert (result["output_tokens"], result["output_token_ids"]) == (1, [TOKENS.index("<|im_end|>")])
     assert result["reached_output_token_limit"] is False
+
+
+def test_a_token_longer_than_the_library_buffer_is_decoded_whole(tmp_path):
+    model = GgufChatModel(tiny_gguf(tmp_path / "ruler.gguf", winner=RULE), **SETTINGS)
+    model.load()
+    assert model.generate(model.encode("we keep data ."))["raw_output"] == RULE * 3
