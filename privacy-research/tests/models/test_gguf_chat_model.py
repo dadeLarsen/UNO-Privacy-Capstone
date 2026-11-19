@@ -148,11 +148,20 @@ def test_long_input_is_rejected_at_encoding_without_truncation(repeater):
         model.encode("we keep data .")
 
 
-def test_generation_stops_at_the_token_limit_and_every_call_starts_empty(repeater):
+def test_generation_stops_at_the_token_limit_and_every_call_starts_empty(repeater, monkeypatch):
     model = GgufChatModel(repeater, **SETTINGS)
     model.load()
     chat = model.encode("we keep data .")
+    evaluated, evaluate = [], model._llm.eval
+
+    def record(tokens):
+        evaluated.append(len(tokens))
+        evaluate(tokens)
+
+    monkeypatch.setattr(model._llm, "eval", record)
     first, second = model.generate(chat), model.generate(chat)
+    # Each call evaluates its whole prompt and then the two tokens it generated before the last.
+    assert evaluated == [len(chat["encoded"]["input_ids"]), 1, 1] * 2
     assert (first["raw_output"], first["raw_output_with_special_tokens"]) == ("aaa", "aaa")
     assert (first["output_tokens"], first["output_token_ids"]) == (3, [TOKENS.index("a")] * 3)
     assert first["input_tokens"] == len(chat["encoded"]["input_ids"]) and first["reached_output_token_limit"] is True
