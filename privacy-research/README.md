@@ -116,7 +116,8 @@ results/fits/<task>/<fit>/<UTC start>/         tracked fit records, with the fit
 results/comparisons/<name>/  summaries and plots from pbench compare; five are committed for reading
 src/privacy_bench/
   core/       condition and fit files, run and fit records, the run loop, provenance
-  models/     backends: chat generation, sequence classifiers, JEV judges, sentence embeddings
+  models/     backends: chat generation and sentence embeddings through llama.cpp, and sequence
+              classifiers and sentence embeddings through torch
   tasks/      one package per task: classification and rewrite
   report/     task-agnostic summaries and plots
   cli.py      the pbench command
@@ -200,23 +201,14 @@ uv run pbench fit fits/classification/embeddinggemma2-opp115-heads.toml
 
 The rewrite task runs on 20 frozen APPSI-139 policy sections ([tools/make_appsi139_sections.py](tools/make_appsi139_sections.py) says how they were drawn). A second, held-out 20 from other policies checks prompts that were tuned by reading rewrites of the first 20; their conditions are in `conditions/rewrite/holdout/`. Each condition names a prompt file under `prompts/rewrite/`: an optional `system` message and a `user` template with one `{passage}` placeholder. Nothing is fitted.
 
-```powershell
-uv run pbench run conditions/rewrite/qwen3.5-4b-bf16-summary-baseline.toml
-```
-
-A rewrite condition runs on the GPU unless its `[model]` table says `device = "cpu"`. The CPU takes `precision = "nf4"` only. It computes in bf16, or in float32 with `compute = "fp32"`, which is meant for CPUs without native bf16 instructions. On a computer with an NVIDIA GPU, hide the GPU for a CPU run, or the run stops before it loads the model. With a visible GPU, bitsandbytes loads its CUDA library, whose CPU code is slower: one unrecorded passage took 232 s in bf16 with the GPU visible and 43 s with it hidden. A CPU run records the processor and the thread count.
-
-```powershell
-$env:CUDA_VISIBLE_DEVICES = "-1"
-uv run pbench run conditions/rewrite/qwen3.5-4b-nf4-cpu-summary-v3.toml
-```
-
-A condition whose `[model]` table names a `file` runs that GGUF file through llama.cpp instead of transformers. `id` and `revision` pin the repository that holds the file, and `pbench download` fetches only that file. `precision` must match the file's type; `q4_k_m` is the one accepted. `device` is `cpu`, or `gpu` to put the whole model on the GPU backend of the installed llama.cpp build; a build compiled without an NVIDIA GPU has none, and a `gpu` run stops there before it loads the model. A `cpu` run loads the model with no GPU device, so a build that has a GPU backend, such as the CUDA wheel or a Mac's, still computes everything on the CPU. The prompt comes from the chat template stored in the file, and each response records the same hashes of the rendered prompt and its token IDs as a transformers run, so two runs show whether they read the same input. Every passage starts from an empty context, so the time includes the whole prompt.
+A rewrite condition's `[model]` table names a `file`, a GGUF file that runs through llama.cpp. `id` and `revision` pin the repository that holds the file, and `pbench download` fetches only that file. `precision` must match the file's type; `q4_k_m` is the one accepted. `device` is `cpu`, or `gpu` to put the whole model on the GPU backend of the installed llama.cpp build; a build compiled without an NVIDIA GPU has none, and a `gpu` run stops there before it loads the model. A `cpu` run loads the model with no GPU device, so a build that has a GPU backend, such as the CUDA wheel or a Mac's, still computes everything on the CPU and records the processor. The prompt comes from the chat template stored in the file, and each response records the same hashes of the rendered prompt and its token IDs as the recorded transformers runs, so two runs show whether they read the same input. Every passage starts from an empty context, so the time includes the whole prompt.
 
 ```powershell
 uv run pbench download conditions/rewrite/qwen3.5-4b-q4km-cpu-summary-v3.toml
 uv run pbench run conditions/rewrite/qwen3.5-4b-q4km-cpu-summary-v3.toml
 ```
+
+Every other recorded rewrite run came from the transformers chat backend, in BF16 or through bitsandbytes at INT8 or NF4. That backend is retired ([History](#history)): `pbench run` refuses a rewrite condition that names no `file`, and the recorded runs still compare.
 
 No reference rewrite exists, so the scores only flag outputs to check: whether a rewrite is valid (finished, nonempty, no reasoning tags), how many of the source's numbers and qualifiers (*may*, *unless*, *not*, …) it still contains, and whether it adds an exception, *only*, or a negation that the passage lacks. Three more describe how a rewrite is written: how much it copies from the passage (the copied-run length of Grusky et al., 2018), its Flesch–Kincaid reading grade beside the passages' own, and how often it opens with an introduction such as "Here's the summary:" or uses Markdown. Each run writes `evaluation/review.md`, which shows each passage above its rewrite. A rewrite comparison needs no `[scoring]`, and `compare` adds `side-by-side.md`, which shows every compared model's rewrite under each passage:
 
@@ -245,7 +237,7 @@ judgments = "rewrite-keypoints-v3"
 
 ## Extending
 
-- **Another model for an existing strategy:** add a condition file with the model's pinned commit, then `pbench download` and `pbench run`.
+- **Another model for an existing strategy:** add a condition file with the model's pinned commit, then `pbench download` and `pbench run`. A rewrite condition names a GGUF file. The classification strategies `prompted` and `jev-choice` are retired and take no new condition.
 - **Another rewrite prompt:** add a file under `prompts/rewrite/` and conditions that name it. Editing a prompt in place is fine while iterating; copy it under a new name once a variant is worth comparing, because comparisons label runs by prompt name.
 - **A new strategy:** add a class under `tasks/<task>/strategies/` and register it in that package's `STRATEGIES`. Reuse a backend from `models/`, or add one there that knows nothing about the task.
 - **A new kind of fit:** add a fitter to the task's `FITTERS` that turns a fit file into a report and named float32 tensors. The shared fit record stores and checks them.
@@ -254,3 +246,5 @@ judgments = "rewrite-keypoints-v3"
 ## History
 
 The benchmark began in the `C:\Projects\AirLLM` workspace, which stays as an archive of its original runs, logs, and AirLLM experiments. The six runs behind its last comparison plot were imported into `results/runs/` with [tools/import_legacy_runs.py](tools/import_legacy_runs.py): each import checked its condition, data, and per-sentence input hashes, and reproduced the original metrics exactly. Rerunning those conditions with this code reproduced every prediction: Qwen3-14B token for token although it ran under a newer transformers, and privacy-model and JEV-9B with bit-identical logits under the original libraries.
+
+The transformers chat backend and the JEV-9B backend are retired, and bitsandbytes, peft, and accelerate have left the environment, because the rewriter and the classifier now run through llama.cpp. With them went the conditions of the prompted Qwen3-14B classification runs, of the JEV-9B runs, and of every rewrite run that did not read a GGUF file: BF16, INT8, and NF4, on the GPU and on the CPU. Every run record, fit, and judgment is unchanged, and every comparison still regenerates, because each retired strategy keeps the label and timing note that a comparison reads. This checkout cannot make those runs again: `pbench run` refuses their conditions. Commit `20b2891` is the last that runs them, and each run's `condition.toml` and `run.json` hold its condition and its packages. `tools/import_legacy_runs.py` builds a run's strategy, so it also imports a Qwen3-14B or JEV-9B run only at that commit.

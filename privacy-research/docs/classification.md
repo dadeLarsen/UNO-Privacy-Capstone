@@ -68,13 +68,15 @@ A comparison's `[scoring]` table takes `gold` and, optionally, `sample`. With a 
 
 | Strategy | Backend | What the model receives | Timing covers |
 | --- | --- | --- | --- |
-| `prompted` | chat model | the definitions prompt and the sentence as a JSON string, in one user turn | prompt processing and generation |
+| `prompted` (retired) | chat model | the definitions prompt and the sentence as a JSON string, in one user turn | prompt processing and generation |
 | `classifier-head` | sequence classifier | the raw sentence | the classifier forward pass |
-| `jev-choice` | JEV judge | JEV's bare choice template with the ten categories and definitions as options A–J | the backbone forward pass and the decision head |
+| `jev-choice` (retired) | JEV judge | JEV's bare choice template with the ten categories and definitions as options A–J | the backbone forward pass and the decision head |
 | `embedding-similarity` | sentence embedder | the sentence after the condition's `sentence_prefix`; each category's name and definition are embedded once, after its `category_prefix` | the embedding forward pass |
 | `embedding-head` | sentence embedder | the sentence after the `prefix` its fit used; a fitted head from `results/fits/`, possibly prior-shifted, scores the categories (see [Fitted heads](#fitted-heads)) | the embedding forward pass; the head's 10-row product is not timed |
 
 No strategy truncates an input: every input is checked against the condition's limit before the first model call, and one input over the limit stops the run.
+
+`prompted` and `jev-choice` are retired. Their backends, the transformers chat backend and the JEV-9B judge with its LoRA adapter, left the code with bitsandbytes and peft, so `pbench run` refuses a condition that names either strategy. Their recorded Qwen3-14B and JEV-9B runs stay and still compare: each strategy keeps the label and timing note that a comparison reads, and `build_prompt` in `tasks/classification/prompts.py` still defines the prompt that the `prompted` runs received. The [README](../README.md#history) names the last commit that runs them.
 
 ## Fitted heads
 
