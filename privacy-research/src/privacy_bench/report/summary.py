@@ -35,6 +35,8 @@ def summarize(task: Task, comparison: Comparison, runs_root=RUNS_DIR) -> list:
             "run": path, "condition": run.record["condition"]["name"], "strategy": run.record["strategy"],
             "condition_label": task.condition_label(run), "legend_label": comparison.labels.get(path, ""),
             "model": model["id"], "revision": model["revision"], "precision": model["precision"],
+            # Empty when the condition leaves the device to its strategy's default.
+            "device": model.get("device", ""),
             "timing_scope": run.record["timing_scope"], "cohort_sha256": digest_json(scored["cohort"]),
             **scored["metrics"],
             **{field: costs[field] for field in COST_FIELDS},
@@ -46,9 +48,9 @@ def summarize(task: Task, comparison: Comparison, runs_root=RUNS_DIR) -> list:
         raise ValueError("Runs in one comparison must be scored on the same items and reference answers")
     seen = set()
     for row in rows:
-        cell = (row["model"], row["revision"], row["precision"], row["condition_label"])
+        cell = (row["model"], row["revision"], row["precision"], row["device"], row["condition_label"])
         if cell in seen:
-            raise ValueError(f"Two runs share model, revision, precision and condition {cell}; "
+            raise ValueError(f"Two runs share model, revision, precision, device and condition {cell}; "
                              "compare one repetition at a time instead of averaging")
         seen.add(cell)
     return rows

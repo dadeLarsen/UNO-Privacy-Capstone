@@ -82,9 +82,10 @@ class ToyTask:
         return {"context": f"{rows[0]['n']} toy items", "footnotes": ["Toy footnote."]}
 
 
-def make_run(root, name, precision, flavour, task=None, model=None):
+def make_run(root, name, precision, flavour, task=None, model=None, device=None):
+    device_line = f'device = "{device}"\n' if device else ""
     condition = parse_condition(name, f'task = "toy"\nstrategy = "echo"\n[model]\nid = "{model or f"o/{name}"}"\n'
-                                      f'revision = "{"a" * 40}"\nprecision = "{precision}"\n'
+                                      f'revision = "{"a" * 40}"\nprecision = "{precision}"\n{device_line}'
                                       f'[options]\nflavour = "{flavour}"\n')
     execute(task or ToyTask(), condition, root / "toy" / name / "run")
     return f"toy/{name}/run"
@@ -129,6 +130,16 @@ def test_repeated_conditions_are_refused_instead_of_averaged(tmp_path):
     execute(task, condition, tmp_path / "toy" / "m1" / "again")
     with pytest.raises(ValueError, match="one repetition at a time"):
         summarize(task, comparison([first, "toy/m1/again"]), runs_root=tmp_path)
+
+
+def test_one_model_and_precision_on_two_devices_compare_as_two_series(tmp_path):
+    runs = [make_run(tmp_path, "m1", "nf4", "plain", model="o/m1"),
+            make_run(tmp_path, "m1-cpu", "nf4", "plain", model="o/m1", device="cpu")]
+    rows = summarize(ToyTask(), comparison(runs), runs_root=tmp_path)
+    assert [row["device"] for row in rows] == ["", "cpu"]
+    paths = draw_matrix(rows, ToyTask().quality_panels({}), tmp_path / "plots", title="Toy", context="toy",
+                        footnotes=[])
+    assert "NF4 · cpu" in paths[1].read_text(encoding="utf-8")
 
 
 def test_comparison_task_must_match(tmp_path):
