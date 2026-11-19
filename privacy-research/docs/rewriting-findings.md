@@ -1,6 +1,6 @@
 # Choosing a rewriting model: what we found
 
-*October 26, 2026. Results from nine candidate models on 40 real privacy-policy passages.*
+*October 26, 2026. Results from nine candidate models on 40 real privacy-policy passages. Speed results added November 18, 2026.*
 
 The app's Rewrite feature turns a privacy-policy passage into plain language. It must run on the user's own computer, and it must not change what the policy promises. This page reports how well nine small AI models do that job, and which ones fit the computers we are targeting.
 
@@ -10,6 +10,7 @@ The app's Rewrite feature turns a privacy-policy passage into plain language. It
 - **Larger models do a little better but need more memory than our target computers have.** Gemma 4 12B kept 92% of key facts and never misled, but it needs about 8.6 GB. Qwen3-14B kept 78% and misled twice, at about 11 GB.
 - **The smallest models are not reliable.** The three models of about 1 billion parameters could mislead in 25–52% of their rewrites. The requirements only ask for labeling, not rewriting, on 2–4 GB computers, so this rules out rewriting on that tier.
 - **Most mistakes are small but matter for privacy.** The most common problem is dropping a limiting word: "we do not *knowingly* collect children's data" becomes "we do not collect children's data", which turns a limited promise into an absolute one.
+- **The software that runs the model decides its speed (added November 18).** With the software behind the results on this page, Qwen3.5-4B needed about 12 minutes per passage on a MacBook's processor. With llama.cpp the same MacBook needed under 4 seconds. The llama.cpp rewrites differ in wording and have not been judged (see [How fast does it run?](#how-fast-does-it-run)).
 - **Two things are still unchecked:** a person on the team has not yet reviewed the list of key facts, and no model has been timed on an actual 8–12 GB laptop.
 
 ## What we tested
@@ -183,6 +184,51 @@ Compressing to 4-bit cut memory sharply and changed the automatic word checks on
 
 The labels are the models' full download names, so Ministral's ends in "BF16" even above its 4-bit bar. The first 20 passages show the same pattern ([rewrite-precision-v3](../comparisons/rewrite-precision-v3.toml)). There, "numbers kept" swings more, because those passages hold only 17 numbers between them.
 
+## How fast does it run?
+
+*Added November 18, 2026.*
+
+Every result above came from one way of running a model: the transformers library, with the bitsandbytes library for 4-bit compression, on a desktop graphics card. We have now timed the recommended model, Qwen3.5-4B at 4-bit, on a desktop processor and on a MacBook, and with a second program, llama.cpp. llama.cpp reads its own 4-bit version of the same model (a "Q4_K_M" file).
+
+Average seconds for one passage, fastest first:
+
+| Computer | Runs on | Software | Same three passages | All 20 passages | Tokens per second |
+| --- | --- | --- | --- | --- | --- |
+| Desktop PC | Graphics card | llama.cpp | 0.4 | 0.6 | 185 |
+| MacBook | Graphics chip | llama.cpp | 1.8 | not run | 43 |
+| MacBook | Processor | llama.cpp | 3.6 | not run | 22 |
+| Desktop PC | Graphics card | bitsandbytes | 4.3 | 7.4 | 19 |
+| Desktop PC | Processor | llama.cpp | 7.2 | 10.5 | 11 |
+| Desktop PC | Processor | bitsandbytes | 46 | 79 | 1.8 |
+| Desktop PC | Processor | bitsandbytes, float32 | 106 | 176 | 0.8 |
+| MacBook | Processor | bitsandbytes, float32 | 699 | not run | 0.1 |
+
+- **The computers.** The desktop has an RTX 4090 graphics card and a Ryzen 9 7950X3D processor. The MacBook has an M4 Pro chip and 24 GB of memory.
+- **The three passages** are the first three of the first set, and its shortest. They are the only ones the MacBook ran.
+- **Tokens per second.** A token is a word or a piece of one. The rate counts the rewrite's tokens over the whole time for the three passages, which includes reading the passage.
+- **float32.** On a processor, bitsandbytes calculates in one of two number formats. The faster one needs a processor feature that the desktop has and many laptops lack. float32 works everywhere, and it is the only one the MacBook ran.
+- **Which rows are saved runs.** The desktop rows are, except llama.cpp on the graphics card: that was one trial with a build of llama.cpp that the project does not install yet. The MacBook runs are not saved in this repository.
+
+What we found:
+
+- **llama.cpp was faster in every case we could compare:** about 12 times on the desktop's graphics card, 8 to 17 times on its processor, and about 200 times on the MacBook's processor.
+- **With bitsandbytes, a laptop processor is too slow to use.** A passage took 10 to 13 minutes on the MacBook. On a processor, bitsandbytes unpacks the whole compressed model again for every token it writes. We did not try bitsandbytes on the MacBook's graphics chip: our setup for it runs on NVIDIA graphics cards and on processors only.
+- **With llama.cpp, the MacBook rewrote a passage in about 2 seconds on its graphics chip and in under 4 on its processor alone.** Both beat the desktop's graphics card running bitsandbytes.
+- **Memory.** On the MacBook, llama.cpp peaked at 5.7 GiB on the processor and 3.3 GiB on the graphics chip, against 6.9 GiB for bitsandbytes (1 GiB is about 1.07 GB). The requirements allow the app 6 GiB on an 8–12 GB computer, so the processor run fits with little room to spare, before the rest of the app is counted. macOS's own measure of an app's memory, which leaves out file contents it can drop and read again, was lower: 3.4, 0.9, and 5.4 GiB. On the desktop's processor, llama.cpp peaked at 4.2 GiB in one trial, and bitsandbytes at 4.5 GiB, or 5.6 GiB in float32, on one passage each.
+- **The MacBook is not one of our target laptops.** It has at least twice the memory and a fast processor. An 8–12 GB laptop still needs a timing.
+
+**The llama.cpp rewrites are not the rewrites we judged.** A different 4-bit version of the model writes different text. The word checks on the first 20 passages:
+
+| Version of Qwen3.5-4B | Words per rewrite | Copying | Numbers kept | Limiting words kept | Rewrites adding a limiting word |
+| --- | --- | --- | --- | --- | --- |
+| 4-bit, bitsandbytes (the judged version) | 114 | 8.4 | 15 of 17 | 82% | 0 of 20 |
+| Full size | 102 | 3.4 | 9 of 17 | 84% | 0 of 20 |
+| 4-bit, llama.cpp | 97 | 3.2 | 9 of 17 | 77% | 1 of 20 |
+
+In these checks the llama.cpp version behaves like the full-size model, not like the bitsandbytes version. It copies much less and writes shorter, easier text (grade 12 against 13). It also keeps fewer numbers, and across both passage sets it added a limiting word to 3 of its 40 rewrites, where the bitsandbytes version added none. Every llama.cpp rewrite was valid. The judged score of 82% of key facts kept belongs to the bitsandbytes rewrites, which copy the most. Whether the llama.cpp rewrites keep as many facts is untested.
+
+The wording also changes with the computer. On the three passages, llama.cpp wrote the same text on the desktop's processor and on the MacBook's for one passage, and the runs on a graphics card or chip differ again. The differences are small rewordings.
+
 ## Limits of this evaluation
 
 - **The checklists have not been reviewed by a person.** Claude drafted them from the passages alone. If the team changes a fact or its critical mark, the affected passages need judging again; the tools refuse to reuse a judgment whose checklist changed.
@@ -190,7 +236,7 @@ The labels are the models' full download names, so Ministral's ends in "BF16" ev
 - **The same AI wrote the checklists and judged.** Both came from Claude, so they may share blind spots. None of the nine candidates is a Claude model.
 - **Copying is not simplifying.** A rewrite that copies the passage keeps every fact but helps no one. Compressed Qwen3.5-4B copied two passages almost word for word and leaned heavily on the original wording in a few others. Its rewrites read at grade 13, the hardest of the medium models. This helped its score and is worth watching.
 - **Short passages only.** The passages are 86–340 words. Users can paste any length.
-- **Speed is unknown.** All tests ran on a desktop graphics card, so we have no timings for the laptops the app targets.
+- **Speed on a target laptop is unknown.** The judged tests ran on a desktop graphics card. The one laptop timed since, a 24 GB MacBook, is larger and faster than the 8–12 GB laptops the app targets (see [How fast does it run?](#how-fast-does-it-run)).
 - **The rewrites came from an older library version.** They were generated with torch 2.8.0. The project now uses torch 2.15.0, which makes the same model write different text for some passages. In a hand check, compressed Qwen3.5-4B wrote exactly its judged rewrite for 10 of the first 20 passages; the rest change partway through, from a few words to most of the rewrite. The scores here describe the torch 2.8.0 rewrites, and the new ones have not been judged.
 
 ## Next steps
@@ -199,6 +245,7 @@ The labels are the models' full download names, so Ministral's ends in "BF16" ev
 2. **Run Qwen3.5-4B on an 8–12 GB laptop without a graphics card** to measure its speed and the whole app's memory.
 3. **Try longer passages**, and the Simplify for Kids and Simplify for Adults styles, with the leading models.
 4. **Look for a fix for dropped limiting words**, the most common error, such as an automatic check that warns when *may*, *knowingly*, or *only* disappears.
+5. **Have the judge grade the llama.cpp rewrites of Qwen3.5-4B**, so that their scores can be compared with the ones on this page.
 
 ## Where the numbers come from
 
@@ -206,3 +253,6 @@ The labels are the models' full download names, so Ministral's ends in "BF16" ev
 - The judge's prompts, replies, and settings: `results/judgments/rewrite/rewrite-keypoints-v3/` and `…-holdout/`.
 - Key-fact checklists: `data/rewrite/keypoints/`. Judge instructions: `prompts/rewrite/judge/keypoints.toml`.
 - Compression against full size: [comparisons/rewrite-precision-v3.toml](../comparisons/rewrite-precision-v3.toml) and [comparisons/rewrite-precision-v3-holdout.toml](../comparisons/rewrite-precision-v3-holdout.toml).
+- Speed on the desktop: [comparisons/rewrite-llama-cpp-v3-torch215.toml](../comparisons/rewrite-llama-cpp-v3-torch215.toml) (bitsandbytes on the graphics card, llama.cpp on the processor), and [comparisons/rewrite-cpu-runtimes-v3.toml](../comparisons/rewrite-cpu-runtimes-v3.toml) and [comparisons/rewrite-cpu-runtimes-v3-fp32.toml](../comparisons/rewrite-cpu-runtimes-v3-fp32.toml) (bitsandbytes on the processor). The three-passage averages come from the `responses.jsonl` of the same runs.
+- Word checks of the llama.cpp rewrites: [comparisons/rewrite-llama-cpp-v3.toml](../comparisons/rewrite-llama-cpp-v3.toml) and [comparisons/rewrite-llama-cpp-v3-holdout.toml](../comparisons/rewrite-llama-cpp-v3-holdout.toml).
+- Not saved in the repository: the MacBook runs, llama.cpp on the desktop's graphics card, and every memory figure in [How fast does it run?](#how-fast-does-it-run).
