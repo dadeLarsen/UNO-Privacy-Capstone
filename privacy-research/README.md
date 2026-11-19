@@ -148,7 +148,7 @@ uv run pytest
 
 Set `UV_NO_SYNC` before any other `uv` command. After pulling a change to `uv.lock`, rerun the `uv sync` line.
 
-Both setups also install `llama-cpp-python`, which runs GGUF models through llama.cpp. Windows and Linux get a built wheel that uses only the CPU. A Mac compiles the package during `uv sync`, which needs the Xcode command line tools, and that build includes llama.cpp's Metal GPU backend.
+Both setups also install `llama-cpp-python`, which runs GGUF models through llama.cpp. Windows and Linux on x64 get a built wheel that uses only the CPU, pinned by its hash in `uv.lock`. Every other platform compiles the package during `uv sync`. On a Mac that needs the Xcode command line tools, and the build includes llama.cpp's Metal GPU backend.
 
 Models resolve from the standard Hugging Face cache (`~/.cache/huggingface/hub`), and every condition pins a full commit. Runs never download, so fetch a condition's model once while online:
 
