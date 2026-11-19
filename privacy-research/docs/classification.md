@@ -87,7 +87,10 @@ The `embedding-heads` fit embeds every example once with a sentence embedder, af
 
 `fit.json` reports each head's cross-validated balanced accuracy, and for logistic heads the score at every C. These scores come from OPP-115 examples only, so they say nothing about the test samples.
 
-A condition that uses a head names the checkpoint, revision, and precision its fit embedded with, and the strategy refuses any other. The one exception is fp32 inference on a head fitted in bf16: the embedder runs on the CPU only in fp32, so this is how a bf16 head runs there. The `fp32-cpu` conditions under `conditions/classification/appsi139/` use it.
+A condition that uses a head names the checkpoint, revision, and precision its fit embedded with, and the strategy refuses any other. There are two exceptions.
+
+- **fp32 inference on a head fitted in bf16.** The embedder runs on the CPU only in fp32, so this is how a bf16 head runs there. The `fp32-cpu` conditions under `conditions/classification/appsi139/` use it.
+- **A GGUF file on a head fitted on the torch checkpoint.** A condition whose `[model]` names a `file` embeds with that GGUF file through llama.cpp. `id` and `revision` then pin the repository that holds the file, so the condition also names the checkpoint the file was converted from, as `converted_from` and `converted_from_revision`. The strategy accepts that checkpoint's bf16 fit for a `bf16` or `q8_0` file and refuses every other pair. The eight `gguf` conditions under `conditions/classification/appsi139/` use it.
 
 ### Prior shift
 

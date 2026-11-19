@@ -1,7 +1,6 @@
 """GGUF chat generation through llama.cpp, on tiny model files that these tests write."""
 
 import json
-import struct
 
 import llama_cpp
 import numpy as np
@@ -21,41 +20,7 @@ WIDTH = 8
 SETTINGS = {"precision": "q4_k_m", "device": "cpu", "max_new_tokens": 3, "seed": 42}
 
 
-def gguf_string(text: str) -> bytes:
-    data = text.encode("utf-8")
-    return struct.pack("<Q", len(data)) + data
-
-
-def gguf_value(value) -> bytes:
-    """One metadata value after its type tag: a bool, uint32, float32, string, or list of strings or int32."""
-    if isinstance(value, bool):
-        return struct.pack("<I?", 7, value)
-    if isinstance(value, int):
-        return struct.pack("<II", 4, value)
-    if isinstance(value, float):
-        return struct.pack("<If", 6, value)
-    if isinstance(value, str):
-        return struct.pack("<I", 8) + gguf_string(value)
-    strings = all(isinstance(item, str) for item in value)
-    items = b"".join(gguf_string(item) if strings else struct.pack("<i", item) for item in value)
-    return struct.pack("<IIQ", 9, 8 if strings else 5, len(value)) + items
-
-
-def write_gguf(path, metadata: dict, tensors: dict):
-    """Write metadata and float32 tensors as a GGUF version 3 file."""
-    header = struct.pack("<4sIQQ", b"GGUF", 3, len(tensors), len(metadata))
-    header += b"".join(gguf_string(key) + gguf_value(value) for key, value in metadata.items())
-    data = b""
-    for name, tensor in tensors.items():
-        # GGUF lists dimensions innermost first, the reverse of a numpy shape.
-        header += gguf_string(name) + struct.pack(f"<I{tensor.ndim}Q", tensor.ndim, *reversed(tensor.shape))
-        header += struct.pack("<IQ", 0, len(data))
-        data += tensor.astype("<f4").tobytes()
-        data += b"\0" * (-len(data) % 32)
-    path.write_bytes(header + b"\0" * (-len(header) % 32) + data)
-
-
-def tiny_gguf(path, *, winner: str, file_type: int = 15):
+def tiny_gguf(write_gguf, path, *, winner: str, file_type: int = 15):
     """A one-layer model that always predicts `winner`.
 
     Every token has the same embedding, the layer adds nothing to it, and only the winner's output row
@@ -65,7 +30,7 @@ def tiny_gguf(path, *, winner: str, file_type: int = 15):
     embedding[:, 0] = output[TOKENS.index(winner), 0] = 1
     ones, square = np.ones(WIDTH), np.zeros((WIDTH, WIDTH))
     layer = ("attn_q", "attn_k", "attn_v", "attn_output", "ffn_gate", "ffn_down", "ffn_up")
-    write_gguf(path, {
+    return write_gguf(path, {
         "general.architecture": "llama", "general.file_type": file_type,
         "llama.context_length": 64, "llama.embedding_length": WIDTH, "llama.block_count": 1,
         "llama.feed_forward_length": WIDTH, "llama.attention.head_count": 2,
@@ -77,12 +42,11 @@ def tiny_gguf(path, *, winner: str, file_type: int = 15):
     }, {"token_embd.weight": embedding, "output_norm.weight": ones, "output.weight": output,
         "blk.0.attn_norm.weight": ones, "blk.0.ffn_norm.weight": ones,
         **{f"blk.0.{name}.weight": square for name in layer}})
-    return path
 
 
 @pytest.fixture(scope="module")
-def repeater(tmp_path_factory):
-    return tiny_gguf(tmp_path_factory.mktemp("gguf") / "repeater.gguf", winner="a")
+def repeater(tmp_path_factory, write_gguf):
+    return tiny_gguf(write_gguf, tmp_path_factory.mktemp("gguf") / "repeater.gguf", winner="a")
 
 
 @pytest.mark.parametrize("settings, message", [
@@ -96,11 +60,11 @@ def test_invalid_settings_fail_before_loading(tmp_path, settings, message):
         GgufChatModel(tmp_path / "model.gguf", **{**SETTINGS, **settings})
 
 
-def test_a_missing_file_and_a_file_of_another_precision_are_refused(tmp_path):
+def test_a_missing_file_and_a_file_of_another_precision_are_refused(tmp_path, write_gguf):
     with pytest.raises(ValueError, match="pbench download"):
         GgufChatModel(tmp_path / "absent.gguf", **SETTINGS).load()
     with pytest.raises(ValueError, match="declares file type 7, not the 15 of precision q4_k_m"):
-        GgufChatModel(tiny_gguf(tmp_path / "q8.gguf", winner="a", file_type=7), **SETTINGS).load()
+        GgufChatModel(tiny_gguf(write_gguf, tmp_path / "q8.gguf", winner="a", file_type=7), **SETTINGS).load()
 
 
 def test_a_gpu_condition_is_refused_by_a_build_without_a_gpu_backend(tmp_path, monkeypatch):
@@ -170,8 +134,8 @@ def test_generation_stops_at_the_token_limit_and_every_call_starts_empty(repeate
     assert {**second, "seconds": None} == {**first, "seconds": None}
 
 
-def test_generation_stops_at_the_end_of_turn_token(tmp_path):
-    model = GgufChatModel(tiny_gguf(tmp_path / "silent.gguf", winner="<|im_end|>"), **SETTINGS)
+def test_generation_stops_at_the_end_of_turn_token(tmp_path, write_gguf):
+    model = GgufChatModel(tiny_gguf(write_gguf, tmp_path / "silent.gguf", winner="<|im_end|>"), **SETTINGS)
     model.load()
     result = model.generate(model.encode("we keep data ."))
     assert (result["raw_output"], result["raw_output_with_special_tokens"]) == ("", "<|im_end|>")
@@ -179,7 +143,7 @@ def test_generation_stops_at_the_end_of_turn_token(tmp_path):
     assert result["reached_output_token_limit"] is False
 
 
-def test_a_token_longer_than_the_library_buffer_is_decoded_whole(tmp_path):
-    model = GgufChatModel(tiny_gguf(tmp_path / "ruler.gguf", winner=RULE), **SETTINGS)
+def test_a_token_longer_than_the_library_buffer_is_decoded_whole(tmp_path, write_gguf):
+    model = GgufChatModel(tiny_gguf(write_gguf, tmp_path / "ruler.gguf", winner=RULE), **SETTINGS)
     model.load()
     assert model.generate(model.encode("we keep data ."))["raw_output"] == RULE * 3
