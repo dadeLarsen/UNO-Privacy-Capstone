@@ -1,0 +1,50 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+Etsy will retain your information only for as long as is necessary for the purposes set out in this Policy, for as long as your account is active, or as needed to comply with our legal obligations under national applicable law. We decide how long we need information on a case-by-case basis and depending on the retention laws applicable. The following factors typically affect the retention period: Necessity for the provision of our Services We keep your information as long as is necessary to provide the Services to you. This includes things like maintaining and improving the performance of our Sites and Apps, keeping our Services secure, and maintaining appropriate business and financial records. Most of our retention periods are determined on the basis of this general rule. Consent-based processing of personal data If we process personal data on the basis of consent (including consent to the extended storage), we store the data for as long as necessary in order to process it according to your consent or until you withdraw your consent. Statutory, contractual or other similar obligations Etsy will retain and use your information to the extent necessary to comply with our legal obligations, for example, if we are required to retain your information to comply with applicable tax/revenue laws or our Know Your Customer (“KYC”) obligations. Here's what we consider when we deciding how long to keep your information:
+
+Key points:
+1. (critical) Etsy keeps your information only as long as needed for the purposes in the Policy, while your account is active, or as needed to meet its legal obligations.
+2. Etsy decides how long to keep information case by case, depending on the applicable retention laws.
+3. Most information is kept as long as needed to provide the Services, including keeping them secure and keeping business and financial records.
+4. (critical) Data processed on the basis of consent is kept as long as needed to process it under that consent, or until you withdraw your consent.
+5. (critical) Etsy keeps and uses information as needed to meet legal obligations, such as tax laws or Know Your Customer rules.
+
+Rewrite A:
+Etsy keeps your information only as long as needed to provide its services, maintain security, and keep business records, or until your account is no longer active. Retention periods are decided case-by-case based on these needs and applicable laws. If you gave consent for data processing, Etsy stores it until you withdraw that consent. Etsy also retains data required to comply with legal obligations, such as tax laws or Know Your Customer rules.
+
+Rewrite B:
+Etsy keeps your information only as long as needed to provide services, comply with laws, or honor your consent. We decide retention periods case-by-case based on necessity, applicable laws, and your specific consent. We retain data to maintain and improve our sites and apps, keep services secure, and maintain business and financial records. If you gave consent for extended storage, we keep the data until you withdraw it. We also retain information required to meet legal obligations like tax laws or Know Your Customer rules.
+
+Rewrite C:
+Etsy keeps your information only as long as needed to provide its services, maintain security, and keep business records, or until your account is no longer active. Retention periods are decided case-by-case based on these needs and applicable laws. If you gave consent for data processing, Etsy stores it until you withdraw that consent. Etsy also retains data required to comply with legal obligations, such as tax laws or Know Your Customer rules.
+
+Rewrite D:
+Etsy keeps your information only as long as needed to provide services, comply with laws, or honor your consent. We decide retention periods case-by-case based on necessity, applicable laws, and specific factors. We retain data to maintain and improve our sites and apps, keep services secure, and maintain business and financial records. If you gave consent for storage, we keep the data until you withdraw it or until it is no longer needed for that purpose. We also retain information required by tax laws or customer identification rules.
+
+Rewrite E:
+Etsy keeps your information only as long as needed to provide services, comply with laws, or honor your consent. We decide retention periods case-by-case based on necessity, applicable laws, and your specific consent. We retain data to maintain and improve our sites and apps, keep services secure, and maintain business records. If you gave consent for storage, we keep the data until you withdraw it. We also retain information required by tax laws or customer identity checks.
+
+Rewrite F:
+Etsy keeps your information only as long as needed to provide services, comply with laws, or honor your consent. We decide retention periods case-by-case based on necessity, applicable laws, and specific factors. We retain data to maintain and improve our sites and apps, keep services secure, and maintain business and financial records. If you gave consent for storage, we keep the data until you withdraw it or until it is no longer needed for that purpose. We also retain information required to meet legal obligations such as tax laws or Know Your Customer rules.

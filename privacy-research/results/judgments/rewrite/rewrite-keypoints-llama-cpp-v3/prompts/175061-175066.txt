@@ -1,0 +1,51 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+You have the right to receive the personal data concerning you which you have provided to the Controller in a structured, commonly used and machine-readable format. In addition, you have the right to transmit that data to another controller without hindrance by the Controller to which the personal data has been provided, where the processing is based on consent pursuant * Art.6 (1)(a) GDPR or Art.9 (2)(a) GDPR or on a contract pursuant to Art.6 (1)(b) GDPR; and * to the processing is carried out by automated means. When exercising this right, you also have the right to have the personal data concerning you transmitted directly from one controller to another, where this is technically feasible. This right must not adversely affect the rights and freedoms of others. The right to data portability does not apply to processing of personal data that is necessary for the performance of a task carried out in the public interest or in the exercise of official authority vested in the Controller.
+
+Key points:
+1. (critical) You have the right to receive the personal data you provided to the Controller in a structured, commonly used, machine-readable format.
+2. (critical) You have the right to pass that data to another controller without the Controller hindering you.
+3. (critical) These rights apply where the processing is based on your consent or on a contract, and is carried out by automated means.
+4. Where technically feasible, you can have the data sent directly from one controller to another.
+5. The right must not adversely affect the rights and freedoms of others.
+6. (critical) The right does not apply to processing needed for a task in the public interest or in the exercise of official authority.
+
+Rewrite A:
+You can request your personal data in a structured, commonly used, and machine-readable format. You may also send that data to another controller without the original controller's hindrance, provided the processing is based on consent under Art.6 (1)(a) GDPR or Art.9 (2)(a) GDPR, or on a contract under Art.6 (1)(b) GDPR, and the processing is carried out by automated means. When exercising this right, you can have the data transmitted directly from one controller to another if technically feasible. This right must not adversely affect the rights and freedoms of others. The right to data portability does not apply to processing of personal data that is necessary for the performance of a task carried out in the public interest or in the exercise of official authority vested in the Controller.
+
+Rewrite B:
+You can request your personal data in a structured, machine-readable format. You may also send that data to another service provider without the current provider's interference, provided the processing is based on your consent, a contract, or is done automatically. You can ask for the data to be sent directly from one provider to another if technology allows, as long as this does not harm others' rights. This right does not apply if the data is needed for tasks carried out in the public interest or official duties.
+
+Rewrite C:
+You can request your personal data in a structured, machine-readable format. You may also send that data to another service provider without the current provider's interference, provided the processing is based on your consent or a contract and is done automatically. You can ask for the data to be sent directly from one provider to another if technology allows, as long as this does not harm others' rights. This right does not apply when the data is processed for tasks in the public interest or official duties.
+
+Rewrite D:
+You can request your personal data in a structured, machine-readable format. You may also send that data directly to another controller if the processing is based on your consent, a contract, or is carried out by automated means, provided this does not harm others' rights. This right does not apply to processing required for tasks in the public interest or official authority.
+
+Rewrite E:
+You can request your personal data in a structured, machine-readable format. You may also send that data to another service provider without the current provider's interference, provided the processing is based on your consent or a contract and is done automatically. You can ask for the data to be sent directly from one provider to another if technology allows, as long as this does not harm others' rights. This right does not apply when the data is needed for tasks carried out in the public interest or official duties.
+
+Rewrite F:
+You can request your personal data in a structured, commonly used, and machine-readable format. You may also send that data to another controller without the original controller's hindrance, provided the processing is based on consent under Art.6 (1)(a) GDPR or Art.9 (2)(a) GDPR, or on a contract under Art.6 (1)(b) GDPR, and the processing is carried out by automated means. When exercising this right, you can have the data transmitted directly from one controller to another if technically feasible. This right must not adversely affect the rights and freedoms of others. The right to data portability does not apply to processing of personal data that is necessary for the performance of a task carried out in the public interest or in the exercise of official authority vested in the Controller.

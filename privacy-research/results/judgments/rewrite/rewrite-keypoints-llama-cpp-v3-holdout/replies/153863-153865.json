@@ -1,0 +1,8 @@
+{"rewrites": [
+{"label": "A", "verdicts": {"1": "partial", "2": "partial", "3": "kept"}, "evidence": {"1": "other Telegram users outside the European Economic Area (EEA)", "2": "If you choose to communicate with other Telegram users outside the European Economic Area (EEA), you are instructing us to transfer your personal data to them"}, "unsupported": []},
+{"label": "B", "verdicts": {"1": "kept", "2": "kept", "3": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "C", "verdicts": {"1": "kept", "2": "kept", "3": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "D", "verdicts": {"1": "partial", "2": "partial", "3": "kept"}, "evidence": {"1": "other Telegram users outside the European Economic Area (EEA)", "2": "If you choose to communicate with other Telegram users outside the European Economic Area (EEA), you are instructing us to transfer your personal data to them"}, "unsupported": []},
+{"label": "E", "verdicts": {"1": "partial", "2": "partial", "3": "kept"}, "evidence": {"1": "other Telegram users outside the European Economic Area (EEA)", "2": "If you choose to communicate with other Telegram users outside the European Economic Area (EEA), you are instructing us to transfer your personal data to them"}, "unsupported": []},
+{"label": "F", "verdicts": {"1": "partial", "2": "partial", "3": "kept"}, "evidence": {"1": "other Telegram users outside the European Economic Area (EEA)", "2": "If you choose to communicate with other Telegram users outside the European Economic Area (EEA), you are instructing us to transfer your personal data to them"}, "unsupported": []}
+]}

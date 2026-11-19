@@ -1,0 +1,52 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+We may share information we collect for the following purposes: * Service Providers. With service providers that perform services on our behalf or enhance our Services, including hosting services, customer service, analytics services and to assist us in our marketing efforts; * Payment Processors. With third-party payment processors that process payments you make; * Advertising Partners. Advertisers, ad exchanges and other ad technology companies that require the data to select and serve our relevant advertisements to you and others, and assist us in our marketing efforts, including as described in the Online Advertising section below; * Affiliates. With our parent company, subsidiaries and other affiliates; * Professional Advisors. With professional advisors, such as lawyers, auditors, bankers and insurers, where necessary in the course of the professional services that they render to us; * Authorities and others. With law enforcement and public authorities, as we believe in good faith to be necessary or appropriate for the compliance and protection purposes described above; * Business Transferees. With acquirers and other relevant participants (and their advisors) in business transactions (or negotiations of or due diligence for such transactions) involving a corporate divestiture, merger, consolidation, acquisition, reorganization, sale or other disposition of all or any portion of the business or assets of, or equity interests in, Studio or our affiliates (including, in connection with a bankruptcy or similar proceedings); and * Your specified recipients. We may disclose personal information about an individual to certain other third parties or publicly with their consent or direction.
+
+Key points:
+1. (critical) The company may share the information it collects with service providers working on its behalf, such as for hosting, customer service, analytics, and marketing.
+2. It may share it with payment processors that handle your payments.
+3. (critical) It may share it with advertisers, ad exchanges, and ad technology companies that use it to select and serve its ads to you and others.
+4. It may share it with its parent company, subsidiaries, and affiliates, and with professional advisors such as lawyers, auditors, bankers, and insurers.
+5. (critical) It may share it with law enforcement and public authorities when it believes in good faith this is necessary or appropriate for compliance and protection.
+6. (critical) It may share it with buyers and other participants in business deals such as mergers, acquisitions, or bankruptcy proceedings.
+7. (critical) With your consent or at your direction, it may disclose your personal information to other third parties or publicly.
+
+Rewrite A:
+We may share collected information with service providers for hosting, customer service, analytics, and marketing; payment processors to handle your payments; advertising partners to serve relevant ads and assist marketing; our affiliates; professional advisors like lawyers and bankers when needed for their services; law enforcement and public authorities if we believe it is necessary for compliance or protection; business transferees and their advisors during corporate transactions, mergers, acquisitions, or bankruptcy proceedings; and to third parties or the public with your consent or direction.
+
+Rewrite B:
+We may share collected information with service providers for hosting, customer service, analytics, and marketing; payment processors to handle your payments; advertising partners to serve relevant ads and assist marketing; our affiliates; professional advisors like lawyers and bankers when needed for their services; law enforcement and public authorities if we believe it is necessary for compliance or protection; business transferees and their advisors during corporate transactions, mergers, acquisitions, or bankruptcy proceedings; and to third parties or the public with your consent or direction.
+
+Rewrite C:
+We may share your information with service providers, payment processors, advertising partners, affiliates, professional advisors, authorities, business transferees, and your specified recipients. We share data with service providers to host services, handle customer support, analyze usage, and support marketing. We share data with payment processors to handle your payments. We share data with advertising partners to select and serve relevant ads and assist in marketing. We share data with affiliates, such as parent companies and subsidiaries. We share data with professional advisors like lawyers, auditors, bankers, and insurers when necessary for their services. We share data with law enforcement and public authorities if we believe it is necessary or appropriate for compliance and protection. We share data with acquirers and participants in business transactions, including mergers, acquisitions, divestitures, reorganizations, sales, bankruptcy proceedings, and due diligence. We may disclose your information to third parties or publicly if you consent or direct us to do so.
+
+Rewrite D:
+We may share your information with service providers, payment processors, advertising partners, affiliates, professional advisors, authorities, business transferees, or your specified recipients. We share data with service providers for hosting, customer service, analytics, and marketing. We share data with payment processors to handle your payments. We share data with advertising partners to select and serve relevant ads and assist in marketing. We share data with affiliates, including our parent company and subsidiaries. We share data with professional advisors like lawyers and bankers when necessary for their services. We share data with law enforcement and public authorities if we believe it is necessary for compliance or protection. We share data with acquirers and participants in business transactions, mergers, acquisitions, or bankruptcy proceedings. We may also disclose your information to third parties or publicly if you consent or direct us to do so.
+
+Rewrite E:
+We may share your information with service providers, payment processors, advertising partners, affiliates, professional advisors, authorities, business transferees, and your specified recipients. We share data with service providers to host services, handle customer support, analyze usage, and support marketing. We share data with payment processors to handle your payments. We share data with advertising partners to select and serve relevant ads and assist in marketing. We share data with affiliates, including our parent company and subsidiaries. We share data with professional advisors like lawyers and bankers when necessary for their services. We share data with law enforcement and public authorities if we believe it is necessary or appropriate for compliance and protection. We share data with acquirers and participants in business transactions, mergers, acquisitions, or bankruptcy proceedings. We may also disclose your information to third parties or publicly if you consent or direct us to do so.
+
+Rewrite F:
+We may share your information with service providers, payment processors, advertising partners, affiliates, professional advisors, authorities, business transferees, and your specified recipients. We share data with service providers for hosting, customer service, analytics, and marketing. We share data with payment processors to handle your payments. We share data with advertising partners to select and serve relevant ads and assist in marketing. We share data with affiliates, including our parent company and subsidiaries. We share data with professional advisors like lawyers and bankers when necessary for their services. We share data with law enforcement and public authorities if we believe it is necessary or appropriate for compliance and protection. We share data with acquirers and participants in business transactions, mergers, acquisitions, or bankruptcy proceedings. We may disclose your information to third parties or publicly if you consent or direct us to do so.

@@ -1,0 +1,8 @@
+{"rewrites": [
+{"label": "A", "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "kept", "5": "kept", "6": "kept", "7": "kept"}, "evidence": {"3": "These tools help us measure performance, target ads, market to you, and connect you with employers"}, "unsupported": []},
+{"label": "B", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "kept", "6": "kept", "7": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "C", "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "kept", "5": "kept", "6": "kept", "7": "contradicted"}, "evidence": {"3": "These tools help us measure performance, target ads, market to you, and connect you with more employers", "7": "Additionally, we use these technologies to inform employers about which users saw their Job Listings"}, "unsupported": []},
+{"label": "D", "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "kept", "5": "kept", "6": "kept", "7": "contradicted"}, "evidence": {"3": "These tools help us measure performance, target ads, market to you, and connect you with more employers", "7": "Additionally, we use these technologies to inform employers about which users saw their Job Listings"}, "unsupported": []},
+{"label": "E", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "kept", "6": "kept", "7": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "F", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "kept", "6": "kept", "7": "kept"}, "evidence": {}, "unsupported": []}
+]}

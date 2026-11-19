@@ -1,0 +1,8 @@
+{"rewrites": [
+{"label": "A", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept", "5": "kept"}, "evidence": {"1": "Insider is based in the U.S. and processes your personal information on its servers"}, "unsupported": []},
+{"label": "B", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "partial", "5": "kept"}, "evidence": {"1": "Insider is based in the U.S. and processes personal information on servers", "4": "Your use of the Service or providing personal information means you consent to having your data transferred to and used in locations outside your jurisdiction"}, "unsupported": []},
+{"label": "C", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept", "5": "kept"}, "evidence": {"1": "Insider is based in the U.S. and processes your personal information on its servers"}, "unsupported": []},
+{"label": "D", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept", "5": "kept"}, "evidence": {"1": "Insider is based in the U.S. and processes your personal information on its servers"}, "unsupported": []},
+{"label": "E", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept", "5": "kept"}, "evidence": {"1": "Insider is based in the U.S. and processes your personal information on its servers"}, "unsupported": []},
+{"label": "F", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept", "5": "kept"}, "evidence": {"1": "Insider is based in the U.S. and processes personal information on servers"}, "unsupported": []}
+]}

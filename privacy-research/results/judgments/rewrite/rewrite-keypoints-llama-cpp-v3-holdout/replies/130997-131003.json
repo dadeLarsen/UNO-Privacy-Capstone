@@ -1,0 +1,8 @@
+{"rewrites": [
+{"label": "A", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "B", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "C", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "D", "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "kept", "5": "kept"}, "evidence": {"3": "which may include details about your actions on our sites or prompts like cart abandon messages"}, "unsupported": []},
+{"label": "E", "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "kept", "5": "kept"}, "evidence": {"3": "which may include details about your actions on our sites or prompts like cart abandon messages"}, "unsupported": []},
+{"label": "F", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "kept"}, "evidence": {}, "unsupported": []}
+]}

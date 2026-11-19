@@ -68,7 +68,7 @@ Findings:
 - **The instruction prefix helps EmbeddingGemma 2 only a little.** Against 0.575 with its classification instruction, sentence similarity scores 0.610 and search mode 0.605 with the sentence as the query or 0.655 with each category description as the query. Only the 0.655 gain is beyond chance on 200 sentences, and it was picked from three tries on the same pilot. Each instruction mostly changes which categories collect too many sentences; User Choice sentences go to Do Not Track under all four. Source: [comparisons/embeddinggemma2-instructions.toml](comparisons/embeddinggemma2-instructions.toml).
 - **Library versions matter for JEV-9B.** Moving from transformers 5.16.1 to 5.19.0 made JEV 1.6–2.3× faster and shifted its logits slightly; two INT8 near-ties flipped in opposite directions. Qwen3-14B and privacy-model were unaffected. The original JEV runs are kept for comparison in [comparisons/qwen-privacy-jev.toml](comparisons/qwen-privacy-jev.toml).
 - **Quantization barely changes accuracy.** Qwen3-14B: 0.890 INT8, 0.885 NF4 (0.900 BF16 with CPU offload, in the AirLLM archive). JEV-9B: 0.860, 0.860, 0.855. NF4 roughly halves memory.
-- **Rewriting has not been evaluated at all.** Every measurement here is classification.
+- **Rewriting is reported in its own document.** Every measurement here is classification. [docs/rewriting-findings.md](docs/rewriting-findings.md) gives the judged rewriting results, how fast the recommended rewriter runs through bitsandbytes and through llama.cpp, and how the judge graded its rewrites from each.
 
 ### Shifting the heads toward APPSI-139's category mix
 
@@ -148,6 +148,8 @@ uv run pytest
 
 Set `UV_NO_SYNC` before any other `uv` command. After pulling a change to `uv.lock`, rerun the `uv sync` line.
 
+Both setups also install `llama-cpp-python`, which runs GGUF models through llama.cpp. Windows and Linux on x64 get a built wheel that uses only the CPU, pinned by its hash in `uv.lock`. Every other platform compiles the package during `uv sync`. On a Mac that needs the Xcode command line tools, and the build includes llama.cpp's Metal GPU backend.
+
 Models resolve from the standard Hugging Face cache (`~/.cache/huggingface/hub`), and every condition pins a full commit. Runs never download, so fetch a condition's model once while online:
 
 ```powershell
@@ -204,6 +206,13 @@ $env:CUDA_VISIBLE_DEVICES = "-1"
 uv run pbench run conditions/rewrite/qwen3.5-4b-nf4-cpu-summary-v3.toml
 ```
 
+A condition whose `[model]` table names a `file` runs that GGUF file through llama.cpp instead of transformers. `id` and `revision` pin the repository that holds the file, and `pbench download` fetches only that file. `precision` must match the file's type; `q4_k_m` is the one accepted. `device` is `cpu`, or `gpu` to put the whole model on the GPU backend of the installed llama.cpp build; the CPU wheel has none, and a `gpu` run stops there before it loads the model. A `cpu` run loads the model with no GPU device, so a build that has a GPU backend, such as a Mac's, still computes everything on the CPU. The prompt comes from the chat template stored in the file, and each response records the same hashes of the rendered prompt and its token IDs as a transformers run, so two runs show whether they read the same input. Every passage starts from an empty context, so the time includes the whole prompt.
+
+```powershell
+uv run pbench download conditions/rewrite/qwen3.5-4b-q4km-cpu-summary-v3.toml
+uv run pbench run conditions/rewrite/qwen3.5-4b-q4km-cpu-summary-v3.toml
+```
+
 No reference rewrite exists, so the scores only flag outputs to check: whether a rewrite is valid (finished, nonempty, no reasoning tags), how many of the source's numbers and qualifiers (*may*, *unless*, *not*, …) it still contains, and whether it adds an exception, *only*, or a negation that the passage lacks. Three more describe how a rewrite is written: how much it copies from the passage (the copied-run length of Grusky et al., 2018), its Flesch–Kincaid reading grade beside the passages' own, and how often it opens with an introduction such as "Here's the summary:" or uses Markdown. Each run writes `evaluation/review.md`, which shows each passage above its rewrite. A rewrite comparison needs no `[scoring]`, and `compare` adds `side-by-side.md`, which shows every compared model's rewrite under each passage:
 
 ```toml
@@ -226,6 +235,8 @@ uv run pbench judge record results/judgments/rewrite/rewrite-keypoints-v3
 [scoring]
 judgments = "rewrite-keypoints-v3"
 ```
+
+`pbench judge prepare` reads only the file's `runs`, so the file may name runs that `pbench compare` refuses to put together, such as two runs of one model, precision, device, and prompt. `comparisons/rewrite-keypoints-llama-cpp-v3.toml` is such a judging set: one judge grades all six runs side by side, and its `-desktop` and `-macbook` twins each score three of them from that one judgment.
 
 ## Extending
 

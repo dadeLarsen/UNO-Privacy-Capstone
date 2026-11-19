@@ -1,0 +1,52 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+We also collect data in a form that does not, on its own, permit direct association with any specific individual. We may collect, use, transfer, and disclose non-personal information for any purpose. The following are some examples of non-personal information that we collect and how we may use it: * We may collect information such as occupation, language, zip code, area code, unique device identifier, referrer URL, location, and the time zone where an Apple product is used so that we can better understand customer behavior and improve our products, services, and advertising. * We may collect information regarding customer activities on our website, iCloud services, our iTunes Store, App Store, Mac App Store, App Store for Apple TV and iBooks Stores and from our other products and services. This information is aggregated and used to help us provide more useful information to our customers and to understand which parts of our website, products, and services are of most interest. Aggregated data is considered non‑personal information for the purposes of this Privacy Policy. * We may collect and store details of how you use our services, including search queries. This information may be used to improve the relevancy of results provided by our services. Except in limited instances to ensure quality of our services over the Internet, such information will not be associated with your IP address. * With your explicit consent, we may collect data about how you use your device and applications in order to help app developers improve their apps. If we do combine non-personal information with personal information the combined information will be treated as personal information for as long as it remains combined.
+
+Key points:
+1. Apple collects data that cannot, on its own, be directly linked to a specific person (non-personal information).
+2. (critical) Apple may collect, use, transfer, and disclose non-personal information for any purpose.
+3. Examples include occupation, language, zip code, area code, device identifier, referrer URL, location, and time zone, used to understand customer behavior and improve products, services, and advertising.
+4. Activity on Apple's websites and services, such as iCloud and its stores, is aggregated, and aggregated data counts as non-personal information.
+5. (critical) Apple may store how you use its services, including search queries; except in limited cases to ensure service quality, this is not linked to your IP address.
+6. (critical) With your explicit consent, Apple may collect data about how you use your device and apps, to help app developers improve their apps.
+7. (critical) If Apple combines non-personal information with personal information, the combined information is treated as personal information for as long as it stays combined.
+
+Rewrite A:
+We collect data that does not, on its own, identify a specific person, and we may use, transfer, or disclose this non-personal information for any purpose. Examples include occupation, language, zip code, device identifiers, referrer URLs, location, and time zone, which we use to understand customer behavior and improve products, services, and advertising. We also collect aggregated data about activities on websites, iCloud, iTunes, App Store, and other services to help provide useful information and understand what features are most popular; this aggregated data is treated as non-personal. We may collect and store details of service usage, such as search queries, to improve result relevancy, except in limited instances to ensure quality, where this information will not be associated with your IP address. With your explicit consent, we may collect data on how you use your device and applications to help app developers improve their apps. If we combine non-personal information with personal information, the combined data will be treated as personal information for as long as it remains combined.
+
+Rewrite B:
+We collect non-personal information that cannot identify you on its own, such as occupation, location, device identifiers, and website activity. We use this data to understand customer behavior, improve our products and services, and enhance advertising. We may also collect details of how you use our services, like search queries, to make results more relevant, though this information will not be linked to your IP address except in limited cases to ensure service quality. With your explicit consent, we can collect data about your device and app usage to help developers improve their apps. If we combine non-personal information with personal information, the result is treated as personal information until the two are separated.
+
+Rewrite C:
+We collect data that does not, on its own, identify a specific person, and we may use, transfer, or disclose this non-personal information for any purpose. Examples include occupation, language, zip code, device identifiers, referrer URLs, location, and time zone, which we use to understand customer behavior and improve products, services, and advertising. We also collect aggregated data about activities on websites, iCloud, iTunes, App Store, and other services to help provide useful information and understand what features are most popular; this aggregated data is treated as non-personal. We may collect and store details of service usage, such as search queries, to improve result relevancy, except in limited instances to ensure quality, where this information will not be associated with your IP address. With your explicit consent, we may collect data on how you use your device and applications to help app developers improve their apps. If we combine non-personal information with personal information, the combined data will be treated as personal information for as long as it remains combined.
+
+Rewrite D:
+We collect non-personal information that cannot identify you on its own, such as occupation, location, device identifiers, and website activity. We use this data to understand customer behavior, improve our products and services, and enhance advertising. We may also collect details of how you use our services, like search queries, to make results more relevant, though this information will not be linked to your IP address except in limited cases to ensure service quality. With your explicit consent, we can collect data about your device and app usage to help developers improve their apps. If we combine non-personal information with personal information, the result is treated as personal information until the two are separated.
+
+Rewrite E:
+We collect data that cannot identify a specific person on its own, such as occupation, location, device identifiers, and website activity. We use this non-personal information to understand customer behavior, improve our products and services, and enhance advertising. We may also collect details like search queries to make our results more relevant, but we will not link this to your IP address except in limited cases to ensure service quality. With your explicit consent, we can collect data about how you use your device and apps to help developers improve them. If we combine non-personal information with personal information, the result is treated as personal information until the two are separated.
+
+Rewrite F:
+We collect data that cannot identify a specific person on its own, such as occupation, location, device identifiers, and website activity. We use this non-personal information to understand customer behavior, improve our products and services, and enhance advertising. We may also collect details like search queries to make results more relevant, but we will not link this to your IP address except in limited cases to ensure service quality. With your explicit consent, we can collect data about how you use your device and apps to help developers improve them. If we combine non-personal information with personal information, the result is treated as personal information until the two are separated.

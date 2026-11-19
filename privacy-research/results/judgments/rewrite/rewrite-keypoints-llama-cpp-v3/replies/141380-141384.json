@@ -1,0 +1,8 @@
+{"rewrites": [
+{"label": "A", "verdicts": {"1": "kept", "2": "partial", "3": "kept", "4": "partial", "5": "kept"}, "evidence": {"2": "its free mobile game app", "4": "The company may update this policy from time to time by changing the date at the top"}, "unsupported": []},
+{"label": "B", "verdicts": {"1": "kept", "2": "partial", "3": "kept", "4": "partial", "5": "kept"}, "evidence": {"2": "its free mobile game app", "4": "The company may update this policy from time to time by changing the date at the top"}, "unsupported": []},
+{"label": "C", "verdicts": {"1": "kept", "2": "partial", "3": "kept", "4": "partial", "5": "kept"}, "evidence": {"2": "its free mobile game, SayGames", "4": "SayGames may update this policy from time to time by changing the date at the top"}, "unsupported": [{"quote": "its free mobile game, SayGames", "claim": "Names the game SayGames; the passage names only the company and calls its mobile applications the App", "severity": "minor"}]},
+{"label": "D", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "E", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "F", "verdicts": {"1": "kept", "2": "partial", "3": "kept", "4": "partial", "5": "kept"}, "evidence": {"2": "its free mobile game app", "4": "The company may update this policy from time to time by changing the date at the top"}, "unsupported": []}
+]}

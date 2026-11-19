@@ -1,0 +1,51 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+When you access or leave YouVersion websites, we receive the URL of both the site you came from and the one you go to next. We also get information about your proxy server, operating system, web browser and add-ons, device identifier and features, and/or your ISP or mobile carrier when you use YouVersion. We also receive data from your devices and networks, including your IP address. We use the IP addresses we collect from our users to process them with public latitude and longitude information related to your Internet Service Provider or mobile service provider in order to determine, and in some instances depict in an aggregate and de-identified manner, the approximate geographic region for each instance of YouVersion use. This latitude and longitude information is stored by us for approximately seven days for troubleshooting and diagnostic purposes, but is never associated with any information about you or that would identify you personally. We also collect and use the wireless (or “WiFi”) permissions of your mobile device to determine if you are connected to a WiFi or cellular network. This information is used to provide an optimized user experience by providing higher resolution media to a user who is on a high-speed WiFi connection rather than a cellular network. WiFi permissions are also used for casting content with Chromecast and similar devices. This information is not stored or shared by YouVersion.
+
+Key points:
+1. YouVersion receives the URLs of the sites you come from and go to next.
+2. It receives your proxy server, operating system, browser and add-ons, device identifier and features, ISP or mobile carrier, and IP address.
+3. (critical) It matches IP addresses with public latitude and longitude data for your ISP to find your approximate region, sometimes shown in aggregate, de-identified form.
+4. (critical) This latitude and longitude data is stored for about seven days for troubleshooting and diagnostics, and is never associated with information that identifies you.
+5. It uses your device's WiFi permissions to tell whether you are on WiFi or a cellular network, to send higher-resolution media on WiFi, and to cast content to Chromecast and similar devices.
+6. (critical) This WiFi information is not stored or shared.
+
+Rewrite A:
+When you use YouVersion, we collect the websites you visit before and after, along with details about your device, browser, operating system, and network provider. We also gather your IP address and check your device's WiFi permissions to see if you are on a WiFi or cellular network. We use your IP address to find your approximate geographic region and may display this in an aggregate, de-identified way for about seven days to help with troubleshooting, but this data is never linked to your personal information. We use WiFi and cellular connection details to provide better media quality and to enable content casting with devices like Chromecast, but this information is not stored or shared.
+
+Rewrite B:
+When you use YouVersion websites, we collect the URL of the site you came from and the one you go to next, along with details about your proxy server, operating system, browser, add-ons, device identifier, features, ISP, or mobile carrier. We also receive your IP address from your device or network. We use your IP address to match it with public latitude and longitude data from your ISP or mobile carrier to determine your approximate geographic region for each use; this data is stored for about seven days for troubleshooting and diagnostics but is never linked to personal information about you. We also collect your mobile device's wireless or WiFi permissions to check if you are connected to a WiFi or cellular network. This helps us provide a better experience by serving higher resolution media on high-speed WiFi connections instead of cellular networks, and it allows content casting to devices like Chromecast. YouVersion does not store or share this WiFi permission information.
+
+Rewrite C:
+When you use YouVersion websites, we collect the URL of the site you came from and the one you go to next, along with details about your proxy server, operating system, browser, add-ons, device identifier, features, ISP, or mobile carrier. We also receive your IP address from your device or network. We use your IP address to match it with public latitude and longitude data from your ISP or mobile carrier to determine your approximate geographic region for each use; this data is stored for about seven days for troubleshooting and diagnostics but is never linked to personal information about you. We also collect your mobile device's wireless or WiFi permissions to check if you are connected to a WiFi or cellular network. This information helps provide an optimized experience by delivering higher resolution media on high-speed WiFi connections and enables content casting to devices like Chromecast. YouVersion does not store or share your WiFi permissions.
+
+Rewrite D:
+When you use YouVersion, we collect the websites you visit before and after, along with details about your device, browser, operating system, and network provider. We also gather your IP address and check your device's WiFi permissions to see if you are on a WiFi or cellular network. We use your IP address to find your approximate geographic region and may display this in an aggregate, de-identified way for about seven days to help with troubleshooting, but this data is never linked to your personal information. We use WiFi and cellular connection details to provide better media quality and to enable content casting with Chromecast and similar devices. This information is not stored or shared by YouVersion.
+
+Rewrite E:
+When you use YouVersion websites, we collect the URL of the site you came from and the one you go to next, along with details about your proxy server, operating system, browser, device features, ISP, and mobile carrier. We also receive your IP address. We use your IP address to match it with public location data from your provider to determine your approximate geographic region, which we may display in an aggregate, de-identified way. This location data is stored for about seven days for troubleshooting and diagnostics but is never linked to your personal identity. We also collect your device's WiFi permissions to check if you are on a WiFi or cellular network; this helps us provide higher-quality media on fast connections and enables content casting to devices like Chromecast. This WiFi information is not stored or shared.
+
+Rewrite F:
+When you use YouVersion websites, we collect the URL of the site you came from and the one you go to next, along with details about your proxy server, operating system, browser, add-ons, device identifier, features, and internet service provider or mobile carrier. We also receive your IP address from your device or network. We use your IP address to match it with public latitude and longitude data from your provider to determine your approximate geographic region, which we may depict in an aggregate and de-identified manner. This location data is stored for about seven days for troubleshooting and diagnostics but is never linked to any personal information about you. We also collect your mobile device's wireless or WiFi permissions to check if you are connected to a WiFi or cellular network. This information helps us provide an optimized experience by serving higher resolution media on high-speed WiFi connections and allows us to cast content to Chromecast or similar devices. YouVersion does not store or share this WiFi permission information.

@@ -1,0 +1,8 @@
+{"rewrites": [
+{"label": "A", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {"1": "We may update this Privacy Statement from time to time."}, "unsupported": []},
+{"label": "B", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {"1": "We may update this Privacy Statement from time to time."}, "unsupported": []},
+{"label": "C", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {"1": "We may update this Privacy Statement periodically."}, "unsupported": []},
+{"label": "D", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {"1": "We may update this Privacy Statement periodically."}, "unsupported": []},
+{"label": "E", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {"1": "We may update this Privacy Statement periodically."}, "unsupported": []},
+{"label": "F", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {"1": "We may update this Privacy Statement from time to time."}, "unsupported": []}
+]}

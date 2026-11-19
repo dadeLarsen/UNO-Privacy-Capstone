@@ -1,0 +1,8 @@
+{"rewrites": [
+{"label": "A", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {"1": "we may automatically collect or receive information about you or your devices"}, "unsupported": []},
+{"label": "B", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {"1": "we may automatically collect or receive information about you or your devices"}, "unsupported": []},
+{"label": "C", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {"1": "we may automatically collect or receive information about you or your devices"}, "unsupported": []},
+{"label": "D", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {"1": "we may automatically collect or receive information about you or your devices"}, "unsupported": []},
+{"label": "E", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {"1": "we may automatically collect or receive information about you or your devices"}, "unsupported": []},
+{"label": "F", "verdicts": {"1": "partial", "2": "kept", "3": "partial", "4": "kept"}, "evidence": {"1": "we may automatically collect or receive information about you or your devices", "3": "device identifiers like your IP address, advertising ID, cookie ID, MAC address, and other unique identifiers"}, "unsupported": []}
+]}

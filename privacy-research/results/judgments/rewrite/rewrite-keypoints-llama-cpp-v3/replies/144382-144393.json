@@ -1,0 +1,62 @@
+{"rewrites": [
+{"label": "A",
+ "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "kept", "5": "kept", "6": "kept", "7": "kept", "8": "kept"},
+ "evidence": {
+  "3": "list of friends who play similar apps"
+ },
+ "unsupported": [
+  {"quote": "We store all information received from these services along with other data we collect about you.", "claim": "Extends the storing of received information alongside other data to all sign-in services, including Apple; the passage says this only of information received from Facebook.", "severity": "minor"}
+ ]},
+{"label": "B",
+ "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "kept", "5": "kept", "6": "kept", "7": "kept", "8": "kept"},
+ "evidence": {
+  "3": "list of friends who play similar apps"
+ },
+ "unsupported": [
+  {"quote": "We store all information received from these services along with other data we collect about you.", "claim": "Extends the storing of received information alongside other data to all sign-in services, including Apple; the passage says this only of information received from Facebook.", "severity": "minor"}
+ ]},
+{"label": "C",
+ "verdicts": {"1": "kept", "2": "partial", "3": "kept", "4": "kept", "5": "kept", "6": "kept", "7": "kept", "8": "kept"},
+ "evidence": {
+  "2": "Facebook controls the information it collects during the login process, while PLAYSTUDIOS controls the information it collects from you."
+ },
+ "unsupported": [
+  {"quote": "while PLAYSTUDIOS controls the information it collects from you", "claim": "Replaces the statement that PLAYSTUDIOS does not control what Facebook collects with a claim that PLAYSTUDIOS controls the information collected from you.", "severity": "minor"},
+  {"quote": "When you sign in using a Third-Party Service like Facebook or Apple, you will be asked to enter your email address and password.", "claim": "Says signing in with Apple also asks for an email address and password; the passage says this of Facebook, and Apple asks for an Apple ID and email address.", "severity": "minor"},
+  {"quote": "For information about how Apple may disclose your information, including any information you make public, please consult the Apple Privacy Policy.", "claim": "Refers readers to an Apple Privacy Policy, which the passage does not mention.", "severity": "minor"},
+  {"quote": "We store the information we receive from Apple along with other information we collect from you or receive about you.", "claim": "Says information received from Apple is stored alongside other information; the passage says this only of information received from Facebook.", "severity": "minor"}
+ ]},
+{"label": "D",
+ "verdicts": {"1": "kept", "2": "partial", "3": "kept", "4": "kept", "5": "kept", "6": "kept", "7": "kept", "8": "kept"},
+ "evidence": {
+  "2": "Facebook controls the information it collects during the login process, while PLAYSTUDIOS controls the information it collects from you."
+ },
+ "unsupported": [
+  {"quote": "while PLAYSTUDIOS controls the information it collects from you", "claim": "Replaces the statement that PLAYSTUDIOS does not control what Facebook collects with a claim that PLAYSTUDIOS controls the information collected from you.", "severity": "minor"},
+  {"quote": "When you sign in using a Third-Party Service like Facebook or Apple, you will be asked to enter your email address and password.", "claim": "Says signing in with Apple also asks for an email address and password; the passage says this of Facebook, and Apple asks for an Apple ID and email address.", "severity": "minor"},
+  {"quote": "For information about how Apple may disclose your information, including any information you make public, please consult the Apple Privacy Policy.", "claim": "Refers readers to an Apple Privacy Policy, which the passage does not mention.", "severity": "minor"},
+  {"quote": "We store the information we receive from Apple along with other information we collect from you or receive about you.", "claim": "Says information received from Apple is stored alongside other information; the passage says this only of information received from Facebook.", "severity": "minor"}
+ ]},
+{"label": "E",
+ "verdicts": {"1": "kept", "2": "partial", "3": "partial", "4": "partial", "5": "partial", "6": "partial", "7": "kept", "8": "kept"},
+ "evidence": {
+  "2": "you must enter your email and password, which Facebook controls",
+  "3": "friends who play similar games",
+  "4": "personalize your experience",
+  "5": "If you make a purchase or submit a dispute through Facebook, we also collect your country, dispute email, and comments.",
+  "6": "We store this information along with other data we collect from you."
+ },
+ "unsupported": [
+  {"quote": "When you sign in using Apple, you enter your Apple ID and email, though you can choose to hide your email address on first sign-in. We store this information along with other data we collect from you.", "claim": "Says information from Sign in with Apple is stored alongside other data; the passage says this only of information received from Facebook.", "severity": "minor"}
+ ]},
+{"label": "F",
+ "verdicts": {"1": "kept", "2": "missing", "3": "partial", "4": "contradicted", "5": "kept", "6": "partial", "7": "kept", "8": "kept"},
+ "evidence": {
+  "3": "list of friends who play similar apps",
+  "4": "We use this information to send emails, facilitate logins, personalize your experience based on gender, and display your name and avatar in-game.",
+  "6": "We store this data along with other information we collect from you."
+ },
+ "unsupported": [
+  {"quote": "When you sign in using Apple, we collect your Apple ID and email address, though you can choose to hide your email address on first sign-in. We store this information along with other data we collect from you.", "claim": "Says information from Sign in with Apple is stored alongside other data; the passage says this only of information received from Facebook.", "severity": "minor"}
+ ]}
+]}

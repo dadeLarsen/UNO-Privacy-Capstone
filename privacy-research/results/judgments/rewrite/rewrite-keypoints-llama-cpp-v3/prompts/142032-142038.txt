@@ -1,0 +1,52 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+The Service is not directed to children under the age of 13. We do not knowingly collect or solicit personally identifiable information from children under 13. If you are under 13, please do not attempt to register for an Account on the Service or send any information about yourself to Super Free Games. If we become aware that a child under 13 has provided us with personal information (as defined by the United States Children’s Online Privacy Protection Act), we will delete such information from our files as required by applicable law. We do not knowingly process data of EU residents under the age of 16 without parental consent. If we become aware that we have collected data from an EU resident under the age of 16 without parental consent, we will take reasonable steps to delete it as soon as possible. We also comply with other age restrictions and requirements in accordance with applicable local laws.
+
+Key points:
+1. (critical) The Service is not directed to children under 13.
+2. (critical) The company does not knowingly collect or solicit personal information from children under 13.
+3. Children under 13 should not register for an account or send any information about themselves.
+4. (critical) If the company learns that a child under 13 gave it personal information, it will delete it as required by law.
+5. (critical) The company does not knowingly process data of EU residents under 16 without parental consent.
+6. (critical) If it learns it collected such data without parental consent, it will take reasonable steps to delete it as soon as possible.
+7. The company also follows other age restrictions under local laws.
+
+Rewrite A:
+The Service is not for children under 13. We do not knowingly collect personal information from them. If you are under 13, do not register or send any personal data to Super Free Games. If we learn a child under 13 shared their information, we will delete it as required by law. We also do not knowingly process data from EU residents under 16 without parental consent. If we discover such data was collected without consent, we will take reasonable steps to delete it as soon as possible. We also follow other age restrictions required by local laws.
+
+Rewrite B:
+The Service is not directed to children under 13. We do not knowingly collect or solicit personally identifiable information from children under 13. If you are under 13, please do not attempt to register for an Account on the Service or send any information about yourself to Super Free Games. If we become aware that a child under 13 has provided us with personal information, we will delete such information from our files as required by applicable law. We do not knowingly process data of EU residents under the age of 16 without parental consent. If we become aware that we have collected data from an EU resident under the age of 16 without parental consent, we will take reasonable steps to delete it as soon as possible. We also comply with other age restrictions and requirements in accordance with applicable local laws.
+
+Rewrite C:
+The Service is not for children under 13. We do not knowingly collect personal information from them. If you are under 13, do not register or send any personal data to Super Free Games. If we learn a child under 13 shared their information, we will delete it as required by law. We also do not knowingly process data from EU residents under 16 without parental consent. If we discover such data was collected without consent, we will take reasonable steps to delete it as soon as possible. We follow other age restrictions required by local laws.
+
+Rewrite D:
+The Service is not for children under 13. We do not knowingly collect personal information from them. If you are under 13, do not register or send any personal data to Super Free Games. If we learn a child under 13 shared their information, we will delete it as required by law. We also do not knowingly process data from EU residents under 16 without parental consent. If we discover such data was collected without consent, we will take reasonable steps to delete it as soon as possible. We follow other age restrictions required by local laws.
+
+Rewrite E:
+The Service is not directed to children under 13, and the company does not knowingly collect or ask for personal information from them. If you are under 13, you should not register for an Account or send any information to Super Free Games. If the company learns that a child under 13 has provided personal information, they will delete it as required by law. The company also does not knowingly process data from EU residents under 16 without parental consent. If they discover such data was collected without consent, they will take reasonable steps to delete it as soon as possible. The company complies with other age restrictions and requirements under applicable local laws.
+
+Rewrite F:
+The Service is not for children under 13. We do not knowingly collect personal information from them. If you are under 13, do not register or send any personal data to Super Free Games. If we learn a child under 13 shared their information, we will delete it as required by law. We also do not knowingly process data from EU residents under 16 without parental consent. If we discover such data was collected without consent, we will take reasonable steps to delete it as soon as possible. We follow other age restrictions and local laws as well.

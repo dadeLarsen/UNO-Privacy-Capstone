@@ -1,0 +1,14 @@
+task = "rewrite"
+title = "Qwen3.5-4B through bitsandbytes and through llama.cpp, judged against key points, summary-v3"
+# A judging set: `pbench judge prepare` reads it, so one judge grades all six rewrites of a passage side by
+# side. `pbench compare` refuses it, because the two NF4 runs share a model, precision, device, and prompt,
+# and so do the desktop's and the MacBook's runs of each Q4_K_M condition. Its -desktop and -macbook twins
+# score three of the runs each from this judgment.
+runs = [
+    "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",       # bitsandbytes, as judged in October on torch 2.8.0
+    "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",       # bitsandbytes, repeated on torch 2.15.0
+    "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",  # llama.cpp on the desktop's CPU
+    "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",  # llama.cpp on the desktop's GPU
+    "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",  # llama.cpp on an M4 Pro MacBook's CPU
+    "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",  # llama.cpp on the MacBook's GPU
+]

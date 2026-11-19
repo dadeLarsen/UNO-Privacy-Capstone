@@ -1,0 +1,16 @@
+{
+  "name": "prompted-rewrite",
+  "prompt": {
+    "name": "summary-v3",
+    "system": "You help people understand privacy policies. You write accurate, concise summaries in plain language.",
+    "user": "Summarize the privacy policy passage below for an ordinary reader.\n\nUse your own wording and sentence structure. Make the summary substantially shorter where possible by combining related statements, shortening wordy descriptions, and removing repetition and examples that add no distinct information. Use short, clear sentences.\n\nPreserve details whose omission would change the meaning, including who does what, the data involved, purposes, conditions, exceptions, numbers, and time limits. Keep conditions and exceptions connected to the statements they qualify. Preserve negation, scope, and degrees of certainty, knowledge, or obligation, including words such as \"knowingly\", \"reasonable\", and \"likely\": do not turn \"may\" into \"will\" or \"some\" into \"all\".\n\nDo not make any promise stronger or weaker than the passage makes it. Do not add \"only\", \"unless\", \"except\", or any condition, exception, example, or reason that the passage does not state.\n\nUse everyday words where they preserve the meaning, retaining precise terms when needed. Add nothing the passage does not say, and do not infer missing details or resolve ambiguities it leaves open.\n\nWrite plain text without headings, lists, or bold. Start directly with the summary, with no introduction.\n\nPassage:\n{passage}"
+  },
+  "chat_template_kwargs": {
+    "tokenize": false,
+    "add_generation_prompt": true,
+    "enable_thinking": false
+  },
+  "max_new_tokens": 1024,
+  "seed": 42,
+  "batch_size": 1
+}

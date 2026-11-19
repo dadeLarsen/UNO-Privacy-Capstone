@@ -1,0 +1,8 @@
+{"rewrites": [
+{"label": "A", "verdicts": {"1": "kept", "2": "kept", "3": "contradicted", "4": "kept", "5": "kept"}, "evidence": {"3": "We also collect Sensitive Human Resources Data such as health and disability details"}, "unsupported": []},
+{"label": "B", "verdicts": {"1": "kept", "2": "kept", "3": "contradicted", "4": "kept", "5": "kept"}, "evidence": {"3": "We also collect Sensitive Human Resources Data such as health and disability details"}, "unsupported": []},
+{"label": "C", "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "partial", "5": "kept"}, "evidence": {"3": "We also collect Sensitive Human Resources Data regarding health, disability, national origin, veteran or immigration status", "4": "optional demographic information like race"}, "unsupported": []},
+{"label": "D", "verdicts": {"1": "kept", "2": "kept", "3": "contradicted", "4": "kept", "5": "kept"}, "evidence": {"3": "We also collect Sensitive Human Resources Data such as health and disability details"}, "unsupported": []},
+{"label": "E", "verdicts": {"1": "kept", "2": "kept", "3": "contradicted", "4": "kept", "5": "kept"}, "evidence": {"3": "We also collect Sensitive Human Resources Data such as health and disability details"}, "unsupported": []},
+{"label": "F", "verdicts": {"1": "kept", "2": "kept", "3": "contradicted", "4": "kept", "5": "kept"}, "evidence": {"3": "We also collect Sensitive Human Resources Data such as health and disability details"}, "unsupported": []}
+]}

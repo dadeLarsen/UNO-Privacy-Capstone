@@ -1,0 +1,52 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+We use the information we collect to provide, maintain, and improve our Services, which includes publishing and distributing user-generated content, personalizing the posts you see and operating our metered paywall. We also use the information we collect to: * Create and maintain your Medium account; * Process transactions and send related information, such as confirmations, receipts, and user experience surveys; * Send you technical notices, security alerts, and support and administrative messages; * Respond to your comments and questions and provide customer service; * Communicate with you about new content, products, services, and features offered by Medium and provide other news and information we think will interest you (see Your Choices below for information about how to opt out of these communications at any time); * Monitor and analyze trends, usage, and activities in connection with our Services; * Detect, investigate, and prevent security incidents and other malicious, deceptive, fraudulent, or illegal activity and protect the rights and property of Medium and others; * Debug to identify and repair errors in our Services; * Comply with our legal and financial obligations; and * Carry out any other purpose described to you at the time the information was collected.
+
+Key points:
+1. Medium uses the information to provide, maintain, and improve its Services, including publishing user content, personalizing the posts you see, and running its metered paywall.
+2. It uses information to create and maintain your account, process transactions, and send confirmations, receipts, and surveys.
+3. It sends technical notices, security alerts, and support and administrative messages, and responds to your questions.
+4. (critical) It sends you news about its content, products, and features, and you can opt out of these at any time.
+5. It monitors and analyzes usage trends and activity.
+6. It uses information to detect and prevent security incidents, fraud, and illegal activity, to protect rights and property, and to fix errors.
+7. (critical) It uses information to meet legal and financial obligations, and for any other purpose described to you when the information was collected.
+
+Rewrite A:
+We use the information we collect to provide, maintain, and improve our Services, including publishing and distributing user-generated content, personalizing posts, and managing our paywall. We also use this data to create and maintain your account, process transactions and send related information like confirmations and receipts, send technical notices and support messages, respond to your comments and questions, and communicate about new content or features that we believe will interest you. We may also use the information to monitor and analyze trends and usage, detect and prevent security incidents or illegal activity, debug errors, comply with legal obligations, and carry out other purposes described to you at the time of collection. You can opt out of certain communications at any time as described in Your Choices.
+
+Rewrite B:
+We use the information we collect to provide, maintain, and improve our Services, which includes publishing and distributing user-generated content, personalizing posts, and operating our metered paywall. We also use the information to create and maintain your Medium account, process transactions and send related messages like confirmations and surveys, send technical notices and support messages, respond to comments and questions, communicate about new content and features, monitor and analyze usage trends, detect and prevent security incidents and illegal activity, debug errors, comply with legal obligations, and carry out any other purpose described to you at the time the information was collected.
+
+Rewrite C:
+We use the information we collect to provide, maintain, and improve our Services, which includes publishing and distributing user-generated content, personalizing the posts you see, and operating our metered paywall. We also use the information to create and maintain your Medium account, process transactions and send related information like confirmations, receipts, and surveys, send technical notices, security alerts, and support messages, respond to your comments and questions, communicate about new content, products, services, and features you might be interested in, monitor and analyze trends and activities, detect and prevent security incidents and malicious activity, debug to identify and repair errors, comply with legal and financial obligations, and carry out any other purpose described to you at the time the information was collected.
+
+Rewrite D:
+We use the information we collect to provide, maintain, and improve our Services, including publishing and distributing user-generated content, personalizing posts, and managing our paywall. We also use this data to create and maintain your account, process transactions and send related information like confirmations and receipts, send technical notices and support messages, respond to your comments and questions, and communicate about new content or features that we believe will interest you. We may also use the information to monitor and analyze trends and usage, detect and prevent security incidents or illegal activity, debug errors, comply with legal obligations, and carry out any other purpose described to you at the time the information was collected.
+
+Rewrite E:
+We use the information we collect to provide, maintain, and improve our Services, including publishing and distributing user-generated content, personalizing posts, and managing our paywall. We also use this information to create and maintain your Medium account, process transactions and send related messages like confirmations and receipts, send technical notices and support messages, respond to your comments and questions, and communicate with you about new content, products, and features. We may also use the information to monitor and analyze trends and usage, detect and prevent security incidents or illegal activity, debug errors, comply with legal obligations, and carry out other purposes described to you at the time the information was collected.
+
+Rewrite F:
+We use the information we collect to provide, maintain, and improve our Services, including publishing and distributing user-generated content, personalizing posts, and operating our paywall. We also use this information to create and maintain your account, process transactions and send related messages like confirmations and surveys, send technical notices and support messages, respond to your comments and questions, and communicate about new content, products, and features that we believe will interest you. We may opt you out of these communications at any time. Additionally, we use the information to monitor and analyze trends and usage, detect and prevent security incidents and illegal activity, debug errors, comply with legal obligations, and carry out any other purpose described to you at the time the information was collected.

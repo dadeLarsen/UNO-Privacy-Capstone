@@ -1,0 +1,40 @@
+{"rewrites": [
+{"label": "A",
+ "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept", "5": "kept", "6": "partial"},
+ "evidence": {
+  "1": "We provide our App to users worldwide and may transfer automatically processed information across borders",
+  "6": "we use hosting organizations that we have checked for security and reliability"
+ },
+ "unsupported": []},
+{"label": "B",
+ "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept", "5": "kept", "6": "kept"},
+ "evidence": {
+  "1": "We provide our App to users worldwide and may transfer automatically processed information across borders"
+ },
+ "unsupported": []},
+{"label": "C",
+ "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept", "5": "kept", "6": "kept"},
+ "evidence": {
+  "1": "We provide our App to users worldwide and may transfer automatically processed information across borders"
+ },
+ "unsupported": []},
+{"label": "D",
+ "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept", "5": "kept", "6": "kept"},
+ "evidence": {
+  "1": "We provide our App to users worldwide and may transfer automatically processed information across borders"
+ },
+ "unsupported": []},
+{"label": "E",
+ "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept", "5": "kept", "6": "kept"},
+ "evidence": {
+  "1": "We provide our App to users worldwide and may transfer automatically processed information across borders"
+ },
+ "unsupported": []},
+{"label": "F",
+ "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept", "5": "kept", "6": "partial"},
+ "evidence": {
+  "1": "We provide our App to users worldwide and may transfer automatically processed information across borders",
+  "6": "we use hosting organizations that we have checked for security and reliability"
+ },
+ "unsupported": []}
+]}

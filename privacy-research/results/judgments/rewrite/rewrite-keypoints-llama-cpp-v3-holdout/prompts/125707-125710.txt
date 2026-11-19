@@ -1,0 +1,51 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+Depending on whether you’re a Rider or a Driver, Lyft may share the following categories of your personal information to provide you with a variety of the Lyft Platform’s features and services: * Personal identifiers, such as your name, address, email address, phone number, date of birth, government identification number (such as social security number), driver’s license information, vehicle information, and car insurance information; * Financial information, such as bank routing numbers, tax information, and any other payment information you provide us; * Commercial information, such as ride information, Driver/Rider statistics and feedback, and Driver/Rider transaction history; * Internet or other electronic network activity information, such as your IP address, type of browser, version of operating system, carrier and/or manufacturer, device identifiers, and mobile advertising identifiers; * Location data; and * This and other information you may direct us to share with other parties, such as when you choose to link your Lyft account with a separate travel rewards program or when you choose to engage with an offering from another company through the Lyft Platform, such as a vehicle service. We disclose those categories of personal information to these other parties and service providers to fulfill the following purposes: * Maintaining and servicing your Lyft account; * Processing or fulfilling rides or other offerings of the Lyft Platform; * Providing you customer service; * Processing transactions and payments; * Processing Driver applications; * Verifying the identity of users; * Detecting and preventing fraud and unsafe activity; * Processing insurance claims; * Providing Driver loyalty and promotional programs; * Providing marketing and advertising services to Lyft, including to provide targeted and cross-contextual behavioral advertising personalized to you; * Providing financing; * Providing requested emergency services; * Providing analytics services to Lyft; and * Undertaking research to develop and improve the Lyft Platform.
+
+Key points:
+1. Depending on whether you are a Rider or a Driver, Lyft may share categories of your personal information to provide Lyft Platform features and services.
+2. (critical) These include identifiers (name, address, contact details, date of birth, government ID such as a Social Security number, driver's license, vehicle, and insurance information) and financial information (bank routing numbers, tax and payment information).
+3. (critical) They also include ride and transaction history, Driver and Rider statistics and feedback, device and network information such as IP address and advertising identifiers, and location data.
+4. Lyft also shares information you direct it to share, such as when you link a travel rewards program or use another company's offering through Lyft.
+5. The purposes include running your account and rides, customer service, payments, Driver applications, identity checks, fraud and safety, insurance claims, financing, emergency services, analytics, and research.
+6. (critical) Lyft also shares it to provide marketing and advertising services to Lyft, including targeted and cross-context behavioral advertising personalized to you.
+
+Rewrite A:
+Lyft may share your personal information, including identifiers, financial details, ride history, device data, and location, with other parties and service providers. This sharing happens when you link your account to other programs or engage with third-party offerings. Lyft shares this data to maintain your account, process rides and payments, provide customer service, verify identities, prevent fraud, handle insurance claims, run loyalty programs, deliver targeted advertising, offer financing, provide emergency services, and conduct research to improve the platform.
+
+Rewrite B:
+Lyft may share your personal information with other parties and service providers to maintain your account, process rides and payments, provide customer service, verify identities, prevent fraud, handle insurance claims, run loyalty programs, offer marketing and advertising, provide financing, deliver emergency services, and conduct research to improve the platform. The specific data shared depends on whether you are a Rider or a Driver and includes personal identifiers like your name, address, phone number, and government ID; financial details like bank routing numbers and tax info; commercial data like ride history and feedback; internet activity like your IP address and device info; location data; and any other information you choose to share.
+
+Rewrite C:
+Lyft may share your personal information with other parties and service providers to maintain your account, process rides and payments, provide customer service, verify your identity, prevent fraud, handle insurance claims, run loyalty programs, offer marketing and advertising, provide financing, deliver emergency services, and improve the platform. The information shared includes personal identifiers like your name, address, phone number, and government ID; financial details such as bank routing numbers and tax info; commercial data like ride history and feedback; internet activity such as your IP address and device type; location data; and any other information you choose to direct them to share.
+
+Rewrite D:
+Lyft may share your personal information, including identifiers, financial details, ride history, device data, and location, with other parties and service providers to maintain your account, process rides and payments, verify identities, prevent fraud, provide customer service, handle insurance claims, run loyalty programs, deliver marketing and advertising, offer financing, provide emergency services, and conduct research to improve the platform.
+
+Rewrite E:
+Lyft may share your personal information, including identifiers, financial details, ride history, device data, and location, with other parties and service providers. This sharing happens when you link your account to other programs or engage with third-party offerings. Lyft shares this data to maintain your account, process rides and payments, provide customer service, verify identities, prevent fraud, handle insurance claims, run loyalty programs, deliver marketing and advertising, offer financing, provide emergency services, and conduct research to improve the platform.
+
+Rewrite F:
+Lyft may share your personal information with other parties and service providers to maintain your account, process rides and payments, provide customer service, verify identities, prevent fraud, handle insurance claims, run loyalty programs, offer marketing and advertising, provide financing, deliver emergency services, and conduct research to improve the platform. The specific data shared depends on whether you are a Rider or a Driver and includes personal identifiers like your name, address, phone number, and government ID; financial details like bank routing numbers and tax info; commercial data such as ride history and feedback; internet activity like your IP address and device info; location data; and any information you choose to share by linking your account to other programs or services.

@@ -8,6 +8,7 @@ dependencies = [
     "bitsandbytes==0.50.2",
     "huggingface-hub==1.33.0",
     "jinja2==3.1.6",
+    "llama-cpp-python==0.3.36",
     "matplotlib==3.11.2",
     "numpy==2.5.3",
     "peft==0.21.0",
@@ -52,6 +53,7 @@ constraint-dependencies = [
     "colorama==0.4.6",
     "contourpy==1.4.0",
     "cycler==0.12.1",
+    "diskcache==5.6.3",
     "filelock==3.32.3",
     "fonttools==4.65.0",
     "fsspec==2026.7.0",
@@ -92,6 +94,14 @@ constraint-dependencies = [
 [tool.uv.sources]
 torch = [{ index = "pytorch-cu132", group = "cu132" }, { index = "pytorch-cpu", group = "cpu" }]
 torchvision = [{ index = "pytorch-cu132", group = "cu132" }, { index = "pytorch-cpu", group = "cpu" }]
+# PyPI has only the source of llama-cpp-python. Windows and Linux on x64 take the project's built CPU wheel
+# by its URL, so that uv.lock records its hash: the project's wheel index publishes none. Every other
+# platform builds from source. A Mac's build includes llama.cpp's Metal GPU backend; the built Mac wheels of
+# 0.3.35 and 0.3.36 are damaged archives.
+llama-cpp-python = [
+    { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36/llama_cpp_python-0.3.36-py3-none-win_amd64.whl", marker = "sys_platform == 'win32' and platform_machine == 'AMD64'" },
+    { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36/llama_cpp_python-0.3.36-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", marker = "sys_platform == 'linux' and platform_machine == 'x86_64'" },
+]
 
 [[tool.uv.index]]
 name = "pytorch-cu132"

@@ -1,0 +1,66 @@
+{"rewrites": [
+{"label": "A",
+ "verdicts": {"1": "partial", "2": "partial", "3": "partial", "4": "partial", "5": "partial", "6": "kept"},
+ "evidence": {
+  "1": "Lyft may share your personal information, including identifiers",
+  "2": "including identifiers, financial details",
+  "3": "ride history, device data, and location",
+  "4": "This sharing happens when you link your account to other programs or engage with third-party offerings.",
+  "5": "maintain your account, process rides and payments, provide customer service, verify identities, prevent fraud, handle insurance claims"
+ },
+ "unsupported": [
+  {"quote": "This sharing happens when you link your account to other programs or engage with third-party offerings.", "claim": "Says the sharing of all the listed categories happens when you link your account or use third-party offerings, a condition the passage does not make; the passage lets Lyft share these categories for its own listed purposes regardless.", "severity": "major"}
+ ]},
+{"label": "B",
+ "verdicts": {"1": "kept", "2": "partial", "3": "partial", "4": "partial", "5": "partial", "6": "partial"},
+ "evidence": {
+  "2": "personal identifiers like your name, address, phone number, and government ID; financial details like bank routing numbers and tax info",
+  "3": "commercial data like ride history and feedback; internet activity like your IP address and device info",
+  "4": "any other information you choose to share",
+  "5": "maintain your account, process rides and payments, provide customer service, verify identities, prevent fraud",
+  "6": "offer marketing and advertising"
+ },
+ "unsupported": []},
+{"label": "C",
+ "verdicts": {"1": "partial", "2": "partial", "3": "partial", "4": "kept", "5": "partial", "6": "partial"},
+ "evidence": {
+  "1": "Lyft may share your personal information with other parties and service providers",
+  "2": "personal identifiers like your name, address, phone number, and government ID; financial details such as bank routing numbers and tax info",
+  "3": "commercial data like ride history and feedback; internet activity such as your IP address and device type",
+  "5": "maintain your account, process rides and payments, provide customer service, verify your identity, prevent fraud",
+  "6": "offer marketing and advertising"
+ },
+ "unsupported": []},
+{"label": "D",
+ "verdicts": {"1": "partial", "2": "partial", "3": "partial", "4": "missing", "5": "partial", "6": "partial"},
+ "evidence": {
+  "1": "Lyft may share your personal information, including identifiers",
+  "2": "including identifiers, financial details",
+  "3": "ride history, device data, and location",
+  "5": "maintain your account, process rides and payments, verify identities, prevent fraud, provide customer service",
+  "6": "deliver marketing and advertising"
+ },
+ "unsupported": []},
+{"label": "E",
+ "verdicts": {"1": "partial", "2": "partial", "3": "partial", "4": "partial", "5": "partial", "6": "partial"},
+ "evidence": {
+  "1": "Lyft may share your personal information, including identifiers",
+  "2": "including identifiers, financial details",
+  "3": "ride history, device data, and location",
+  "4": "This sharing happens when you link your account to other programs or engage with third-party offerings.",
+  "5": "maintain your account, process rides and payments, provide customer service, verify identities, prevent fraud, handle insurance claims",
+  "6": "deliver marketing and advertising"
+ },
+ "unsupported": [
+  {"quote": "This sharing happens when you link your account to other programs or engage with third-party offerings.", "claim": "Says the sharing of all the listed categories happens when you link your account or use third-party offerings, a condition the passage does not make; the passage lets Lyft share these categories for its own listed purposes regardless.", "severity": "major"}
+ ]},
+{"label": "F",
+ "verdicts": {"1": "kept", "2": "partial", "3": "partial", "4": "kept", "5": "partial", "6": "partial"},
+ "evidence": {
+  "2": "personal identifiers like your name, address, phone number, and government ID; financial details like bank routing numbers and tax info",
+  "3": "commercial data such as ride history and feedback; internet activity like your IP address and device info",
+  "5": "maintain your account, process rides and payments, provide customer service, verify identities, prevent fraud",
+  "6": "offer marketing and advertising"
+ },
+ "unsupported": []}
+]}

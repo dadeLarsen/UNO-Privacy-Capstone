@@ -1,0 +1,42 @@
+{"rewrites": [
+{"label": "A",
+ "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "contradicted", "6": "kept", "7": "kept"},
+ "evidence": {
+  "5": "except in limited instances to ensure quality, where this information will not be associated with your IP address"
+ },
+ "unsupported": []},
+{"label": "B",
+ "verdicts": {"1": "kept", "2": "missing", "3": "partial", "4": "partial", "5": "kept", "6": "kept", "7": "kept"},
+ "evidence": {
+  "3": "such as occupation, location, device identifiers, and website activity",
+  "4": "We collect non-personal information that cannot identify you on its own, such as occupation, location, device identifiers, and website activity."
+ },
+ "unsupported": []},
+{"label": "C",
+ "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "contradicted", "6": "kept", "7": "kept"},
+ "evidence": {
+  "5": "except in limited instances to ensure quality, where this information will not be associated with your IP address"
+ },
+ "unsupported": []},
+{"label": "D",
+ "verdicts": {"1": "kept", "2": "missing", "3": "partial", "4": "partial", "5": "kept", "6": "kept", "7": "kept"},
+ "evidence": {
+  "3": "such as occupation, location, device identifiers, and website activity",
+  "4": "We collect non-personal information that cannot identify you on its own, such as occupation, location, device identifiers, and website activity."
+ },
+ "unsupported": []},
+{"label": "E",
+ "verdicts": {"1": "kept", "2": "missing", "3": "partial", "4": "partial", "5": "kept", "6": "kept", "7": "kept"},
+ "evidence": {
+  "3": "such as occupation, location, device identifiers, and website activity",
+  "4": "We collect data that cannot identify a specific person on its own, such as occupation, location, device identifiers, and website activity."
+ },
+ "unsupported": []},
+{"label": "F",
+ "verdicts": {"1": "kept", "2": "missing", "3": "partial", "4": "partial", "5": "kept", "6": "kept", "7": "kept"},
+ "evidence": {
+  "3": "such as occupation, location, device identifiers, and website activity",
+  "4": "We collect data that cannot identify a specific person on its own, such as occupation, location, device identifiers, and website activity."
+ },
+ "unsupported": []}
+]}

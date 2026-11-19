@@ -1,0 +1,50 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+Your information, including Personal Data, is processed at the Company’s operating offices and in any other places where the parties involved in the processing are located. It means that this information may be transferred to â€” and maintained on â€” computers located outside of Your state, province, country or other governmental jurisdiction where the data protection laws may differ than those from Your jurisdiction. Your consent to this Privacy Policy followed by Your submission of such information represents Your agreement to that transfer. The Company will take all steps reasonably necessary to ensure that Your data is treated securely and in accordance with this Privacy Policy and no transfer of Your Personal Data will take place to an organization or a country unless there are adequate controls in place including the security of Your data and other personal information.
+
+Key points:
+1. Your information is processed at the Company's offices and wherever the parties involved in processing are located.
+2. (critical) It may be transferred to and kept on computers outside your jurisdiction, where data protection laws may differ.
+3. (critical) Agreeing to the Privacy Policy and then submitting information means you agree to that transfer.
+4. The Company will take all steps reasonably necessary to treat your data securely and in line with the Privacy Policy.
+5. (critical) No transfer will take place to an organization or country unless adequate controls, including for the security of your data, are in place.
+
+Rewrite A:
+Your information is processed at the Company's offices and in other locations where the parties involved are located. This means your data may be transferred to and stored on computers outside your state, province, country, or other governmental jurisdiction where data protection laws may differ. Your consent to this Privacy Policy and your submission of such information represent your agreement to that transfer. The Company will take all steps reasonably necessary to ensure your data is treated securely and in accordance with this Privacy Policy, and no transfer of your Personal Data will take place to an organization or a country unless there are adequate controls in place including the security of your data and other personal information.
+
+Rewrite B:
+Your information is processed at the Company's offices and in other locations where the processing parties are based. This means your data may be transferred to and stored on computers outside your state, province, country, or other jurisdiction, where data protection laws may differ from yours. By consenting to this Privacy Policy and submitting your information, you agree to this transfer. The Company will take all reasonable steps to ensure your data is treated securely and in accordance with this policy. No transfer of your Personal Data will occur to an organization or country unless adequate controls are in place to protect your data and other personal information.
+
+Rewrite C:
+Your information is processed at the Company's offices and in other locations where the parties involved are located. This means your data may be transferred to and stored on computers outside your state, province, country, or other jurisdiction where data protection laws may differ. By consenting to this Privacy Policy and submitting your information, you agree to that transfer. The Company will take all reasonable steps to ensure your data is treated securely and in accordance with this policy. No transfer of your Personal Data will occur to an organization or country unless adequate controls are in place, including the security of your data and other personal information.
+
+Rewrite D:
+Your information is processed at the Company's offices and in other locations where the processing parties are based. This means your data may be transferred to and stored on computers outside your state, province, country, or other jurisdiction, where data protection laws may differ from yours. By consenting to this Privacy Policy and submitting your information, you agree to this transfer. The Company will take all reasonable steps to ensure your data is treated securely and in accordance with this policy. No transfer of your Personal Data will occur to an organization or country unless adequate controls are in place to protect your data and other personal information.
+
+Rewrite E:
+Your information is processed at the Company's offices and in other locations where the processing parties are based. This means your data may be transferred to and stored on computers outside your state, province, country, or other jurisdiction, where data protection laws may differ from yours. By consenting to this Privacy Policy and submitting your information, you agree to this transfer. The Company will take all reasonable steps to ensure your data is treated securely and in accordance with this policy. No transfer of your Personal Data will occur to an organization or country unless adequate controls are in place to protect your data and other personal information.
+
+Rewrite F:
+Your information is processed at the Company's offices and in other locations where the parties involved are based. This means your data may be transferred to and stored on computers outside your state, province, country, or other jurisdiction, where data protection laws may differ from yours. By consenting to this Privacy Policy and submitting your information, you agree to this transfer. The Company will take all reasonable steps to ensure your data is treated securely and in accordance with this policy. No transfer of your Personal Data will occur to an organization or country unless adequate controls are in place to protect your data and other personal information.

@@ -57,25 +57,30 @@ def require_exact_load(loading) -> dict:
     return loading
 
 
-def resolve_snapshot(repo_id: str, revision: str) -> Path:
-    """Find a cached snapshot without touching the network."""
+def resolve_snapshot(repo_id: str, revision: str, filename: str = "config.json") -> Path:
+    """Find a cached snapshot by one file at its top level, without touching the network."""
     require_commit(repo_id, revision)
     try:
         # One cached file locates the snapshot without requiring every repository file.
-        config = hf_hub_download(repo_id, "config.json", revision=revision, local_files_only=True)
+        found = hf_hub_download(repo_id, filename, revision=revision, local_files_only=True)
     except Exception as exc:
         raise RuntimeError(f"{repo_id} at {revision} is not in the local Hugging Face cache. "
                            f"Run `pbench download` while online first. Original error: {exc}") from exc
-    return Path(config).parent.resolve()
+    return Path(found).parent.resolve()
 
 
-def download_snapshot(repo_id: str, revision: str) -> Path:
-    """Download one pinned commit's standard config, tokenizer, and weight files."""
+def download_snapshot(repo_id: str, revision: str, only: str | None = None) -> Path:
+    """Download one pinned commit's standard config, tokenizer, and weight files, or only the file named."""
     require_commit(repo_id, revision)
     info = HfApi().model_info(repo_id, revision=revision)
     if info.sha != revision:
         raise ValueError(f"Hugging Face resolved {repo_id} {revision} to a different commit: {info.sha}")
     names = {item.rfilename for item in info.siblings}
+    if only is not None:
+        # A GGUF repository holds one file per precision, each several GiB.
+        if only not in names:
+            raise ValueError(f"{repo_id} at {revision} has no file {only!r}")
+        return Path(snapshot_download(repo_id, revision=revision, allow_patterns=[only])).resolve()
     safetensors = "model.safetensors" in names or "model.safetensors.index.json" in names
     # Prefer safetensors so repositories that also publish .bin files are not cached twice, and skip
     # Mistral's consolidated.safetensors, a second copy of the sharded weights in Mistral's own format.

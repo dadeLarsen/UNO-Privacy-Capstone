@@ -1,0 +1,682 @@
+{
+  "schema_version": 1,
+  "task": "rewrite",
+  "name": "rewrite-keypoints-llama-cpp-v3-holdout",
+  "status": "recorded",
+  "created_utc": "2026-11-19T14:27:09.948898+00:00",
+  "code": {
+    "commit": "10505f8e4025806906d6336c46d1bf90ba2a3d1d",
+    "dirty": false,
+    "uncommitted_paths": [],
+    "uncommitted_diff_sha256": null
+  },
+  "judge": "claude-opus-5-5, in six fresh Claude Code subagent sessions of six or seven passages each, mixing both passage sets",
+  "runs": [
+    {
+      "path": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+      "condition_sha256": "f98bc849a192b3a7000b2313aec07745ac2a7bb14cabb49d6c64d388438f552c"
+    },
+    {
+      "path": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+      "condition_sha256": "f98bc849a192b3a7000b2313aec07745ac2a7bb14cabb49d6c64d388438f552c"
+    },
+    {
+      "path": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+      "condition_sha256": "d9aa16e82e475de804a7f33cfb2b2c238eb91a084cf25dd1d3645a3e14a1b486"
+    },
+    {
+      "path": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-135612Z",
+      "condition_sha256": "bbc0c757c4666ab7767c30e2dfa3632b4daac952fd71666fdc9803a6e0c046ec"
+    },
+    {
+      "path": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261119-140917Z",
+      "condition_sha256": "d9aa16e82e475de804a7f33cfb2b2c238eb91a084cf25dd1d3645a3e14a1b486"
+    },
+    {
+      "path": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-141347Z",
+      "condition_sha256": "bbc0c757c4666ab7767c30e2dfa3632b4daac952fd71666fdc9803a6e0c046ec"
+    }
+  ],
+  "items": {
+    "passages": {
+      "name": "appsi139-sections-20-holdout",
+      "sha256": "c01a76aced12af91278f348ad32415b3015f9965027507faea25dea30bbf80c8",
+      "n": 20
+    }
+  },
+  "checklist": {
+    "name": "appsi139-sections-20-holdout",
+    "sha256": "2ebf8d9dbfd0e035a047dff47a5def972f2009c00db6ec5fa657a4934d94ca9d",
+    "reviewed_by": null
+  },
+  "instructions": {
+    "name": "keypoints",
+    "sha256": "21226f0642995eec57bc2701cf56bf9bab7af4863aeb8c41cf9b0c3e3d60a69b",
+    "text": "You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.\n\nFor every rewrite and every key point, choose one verdict:\n- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as \"may\", \"only\", \"unless\", \"knowingly\", \"reasonable\", or \"at least 30 days\". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.\n- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.\n- missing: the rewrite does not convey the point.\n- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning \"may\" into \"will\" or \"does not knowingly\" into an absolute promise, or adding an exception or condition the passage does not make.\n\nWhere a point has a note, the note says how to treat an ambiguity in the passage; follow it.\n\nThen list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:\n- major: a reader who believed it would be wrong about their data, their rights, or their risks.\n- minor: it is unsupported, but it would not mislead a reader about those things.\nDo not list fair paraphrases, and do not list a claim you already counted as a contradicted point.\n\nJudge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.\n\nFor every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.\n\nReply with JSON only, in this form:\n{\"rewrites\": [{\"label\": \"A\", \"verdicts\": {\"1\": \"kept\", \"2\": \"partial\"}, \"evidence\": {\"2\": \"quoted words\"}, \"unsupported\": [{\"quote\": \"quoted words\", \"claim\": \"what the rewrite adds\", \"severity\": \"major\"}]}]}\nGive every rewrite a verdict for every point."
+  },
+  "passages": {
+    "153863-153865": {
+      "prompt_sha256": "f9decc959c258d91df2d37e6bbab444d61d87a1115beb08e42926ad9c1c0a4db",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261119-140917Z",
+          "rewrite_sha256": "bc07ebaec6c082fa34450c14e9920b09cbc39711410168a1c378705fe78cb062"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "b3fa14b0f328ff9abd2a8ba2f3d7d9460d47aa35866832f3976352f02f50ab3d"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+          "rewrite_sha256": "b3fa14b0f328ff9abd2a8ba2f3d7d9460d47aa35866832f3976352f02f50ab3d"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+          "rewrite_sha256": "bd7a579894ac23e57de2f211295c456f068dba2699262ad32b8eafcd13398416"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-135612Z",
+          "rewrite_sha256": "bd7a579894ac23e57de2f211295c456f068dba2699262ad32b8eafcd13398416"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-141347Z",
+          "rewrite_sha256": "bd7a579894ac23e57de2f211295c456f068dba2699262ad32b8eafcd13398416"
+        }
+      },
+      "not_judged": {}
+    },
+    "138537-138545": {
+      "prompt_sha256": "73e75257e8adfc0631b872c25bd7e632be19f9e317c4f9eee3ec4b26a64fcaf3",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+          "rewrite_sha256": "ffe3ed1819e3e4b716c1e8ca9f9a17b03940afcbf8e66bb91f3b0aba3b9bc575"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "ffe3ed1819e3e4b716c1e8ca9f9a17b03940afcbf8e66bb91f3b0aba3b9bc575"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261119-140917Z",
+          "rewrite_sha256": "17a088b8832f2a184dc6b83f8eadc7acc1adb5287509e46e3d45bdde817f7498"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+          "rewrite_sha256": "6a2740f4d8549d80f3bd40ef44b7d9e1a75a31b3814b190031ff182305368822"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-141347Z",
+          "rewrite_sha256": "df98c19687e712820c3b918ad5c6cc94960ec48f1baea33ec48ce351ec6612ac"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-135612Z",
+          "rewrite_sha256": "bc626bd592d3b446b8a1e4c045af99d5bcdefd9a6792607e743944879cd5b154"
+        }
+      },
+      "not_judged": {}
+    },
+    "145918-145922": {
+      "prompt_sha256": "eaacee16e277dc2dc5505c6fda2eeb4527781e0557fdc4551745f95ba59c3bc5",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-135612Z",
+          "rewrite_sha256": "9d968e958e04a62d8927d66f99d5e46c81c62ba196c2e8e7c25f8a819d85e19f"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261119-140917Z",
+          "rewrite_sha256": "0db1d902405bec15316f46324c1f58b674c89ae2a9fceb8db39c74fc5676b5e5"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "98ad530e8588bcb691ab2b78cb4a446cd67214ebfd4c7d9aa11cc034e270dd72"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+          "rewrite_sha256": "0db1d902405bec15316f46324c1f58b674c89ae2a9fceb8db39c74fc5676b5e5"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-141347Z",
+          "rewrite_sha256": "0db1d902405bec15316f46324c1f58b674c89ae2a9fceb8db39c74fc5676b5e5"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+          "rewrite_sha256": "98ad530e8588bcb691ab2b78cb4a446cd67214ebfd4c7d9aa11cc034e270dd72"
+        }
+      },
+      "not_judged": {}
+    },
+    "127522-127526": {
+      "prompt_sha256": "ab41531493f2accbdbbaae960a830fe17387b251dea0a0fecbfb16e04ee19f4f",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+          "rewrite_sha256": "b178cdb3eee1a994988ea1eeb0a769b64423736a0e53e8363d5aa52901a26e81"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+          "rewrite_sha256": "5e79594a1807593c3e315185561fd43ddab1e4e248c06e4b4f8e2e7efe923144"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "b178cdb3eee1a994988ea1eeb0a769b64423736a0e53e8363d5aa52901a26e81"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-141347Z",
+          "rewrite_sha256": "e04d1856a59b62d1743413b63c22dab044ebfeeb7d203b65bc2915c0c7906197"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261119-140917Z",
+          "rewrite_sha256": "036746d5a7b3042e73b6c9f2166f02ec44419b5d15937610bbc38c1368113116"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-135612Z",
+          "rewrite_sha256": "e04d1856a59b62d1743413b63c22dab044ebfeeb7d203b65bc2915c0c7906197"
+        }
+      },
+      "not_judged": {}
+    },
+    "175498-175504": {
+      "prompt_sha256": "cd5f19f476096443ccfe978ae81753262cb862028acbced8787c718ecb191617",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+          "rewrite_sha256": "6e005679439c93ccae5cf2111964b54962ace4f7616beb8edc7f25022be50210"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-135612Z",
+          "rewrite_sha256": "88b62991ec0bf6904344af051a4ab8dc07cd61c323fb2acc51ae34676582f6fe"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-141347Z",
+          "rewrite_sha256": "5b99a7422d8e028614fb07b94f07b727a4306b6e1d1a3f761f70cb0d96292ca6"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "6e005679439c93ccae5cf2111964b54962ace4f7616beb8edc7f25022be50210"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261119-140917Z",
+          "rewrite_sha256": "88b62991ec0bf6904344af051a4ab8dc07cd61c323fb2acc51ae34676582f6fe"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+          "rewrite_sha256": "4f131b4437d4778961d115c9ed82d9fea824892af91d05ce0efd7a102dafb021"
+        }
+      },
+      "not_judged": {}
+    },
+    "183961-183964": {
+      "prompt_sha256": "213ab3abc30c9e3fd1120977f3f70307892db67c48c36b94c0dd58c58494f84c",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+          "rewrite_sha256": "38a29da9a8bed6e7af3d86e1005218b32a13f6c5bb2ea0dc4c83001fce751363"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-141347Z",
+          "rewrite_sha256": "694cf302e812e79264c1f6ab08afb6a56cf22e0746d5348d7b370201686d9c2a"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "7d7bda4f4faab287fd59861066e8e1565578284493c7babdbc907652db62a03c"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261119-140917Z",
+          "rewrite_sha256": "694cf302e812e79264c1f6ab08afb6a56cf22e0746d5348d7b370201686d9c2a"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+          "rewrite_sha256": "694cf302e812e79264c1f6ab08afb6a56cf22e0746d5348d7b370201686d9c2a"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-135612Z",
+          "rewrite_sha256": "f0b66715fa7054fd154103e411028175fa28cf1ec601fc5efd23bc16a34d0528"
+        }
+      },
+      "not_judged": {}
+    },
+    "130997-131003": {
+      "prompt_sha256": "9617e814f1a6f47cf9281da275a7161492c72679acdc92aaf2e8a4034047f886",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261119-140917Z",
+          "rewrite_sha256": "39b0bfe3188b191b0844bdec1b27f4dc10ad3440ec20c6da802724f3f93a1fc5"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+          "rewrite_sha256": "39b0bfe3188b191b0844bdec1b27f4dc10ad3440ec20c6da802724f3f93a1fc5"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-141347Z",
+          "rewrite_sha256": "39b0bfe3188b191b0844bdec1b27f4dc10ad3440ec20c6da802724f3f93a1fc5"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+          "rewrite_sha256": "2d2a9fad97b48aa48d0ad55e84490005f47b1187bfaaaa17f1387416ea3d2fca"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "2d2a9fad97b48aa48d0ad55e84490005f47b1187bfaaaa17f1387416ea3d2fca"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-135612Z",
+          "rewrite_sha256": "39b0bfe3188b191b0844bdec1b27f4dc10ad3440ec20c6da802724f3f93a1fc5"
+        }
+      },
+      "not_judged": {}
+    },
+    "174125-174130": {
+      "prompt_sha256": "9cfd351460dfb974b4bba1dac89bf4bfea34542810576306a4ae6ae5638a739f",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+          "rewrite_sha256": "5b70a3de5de7be5917e46c2907884ff8e691602ac3914b2d3ce690aa0a4fd882"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261119-140917Z",
+          "rewrite_sha256": "0a227ffe489667e13fff1ebcd50a13e862baa938521f0c5e7f8ef6d10885e54f"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+          "rewrite_sha256": "8ec886b6a561c27cd1546a26469bd04579429279ec5c241186ce0acc161cd8b9"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-141347Z",
+          "rewrite_sha256": "a254e1fb779228a532f5d30a38c65270bc0e895d75e5c38180a7e94da7b16254"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-135612Z",
+          "rewrite_sha256": "d949243ff3554b9881a727a5a2ff1138c7d788520f9ed97b0ad5daa0c12a577f"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "a60d6b1f110a412b33160a7fa35666d0be38b65e1e94c0f8ef160c4e1347a5db"
+        }
+      },
+      "not_judged": {}
+    },
+    "126639-126641": {
+      "prompt_sha256": "6a12f7c5728c2445217f89e8737a769c2249820aad228b43d1c721cbebd701db",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261119-140917Z",
+          "rewrite_sha256": "62f5d1ae453aafbc3f2635e148d5b5d47159d2ca59ef5d06e9a98e0609a96b23"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "0c8c196bebd195486e29d9b58a3c6a37383fad454a262cec0fb8d2e88ea7be44"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+          "rewrite_sha256": "d0ad40a439347d61faef92c571daf8aa8ce2866185c57a1bdf47276bf6fb213b"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-141347Z",
+          "rewrite_sha256": "d33d2527b5669796bef9eef619f1c08f742e3aa8ea5e8c3f134eb7ed47467e66"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-135612Z",
+          "rewrite_sha256": "110c90b5c36b63b302b831e04bb7c572627f8e7049dbb14d60eea3057e399895"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+          "rewrite_sha256": "31d2d242f27410f2aa7284a50d78a56ddf76c2ce46feffcfe3e967d370ff5622"
+        }
+      },
+      "not_judged": {}
+    },
+    "133007-133016": {
+      "prompt_sha256": "0452f6b720453312d7c0c3f219224a38ef8996a1882843b57b549e579838feb6",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-135612Z",
+          "rewrite_sha256": "58e998e62ab9fdae2e1819d9fb495e0a6b7fa93f102de76d9bd8a7a20929e907"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261119-140917Z",
+          "rewrite_sha256": "335d9ac72b17cf0359d5268e49dbca59a5a46cfdc0c7973d3170b6c86c7a7f65"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-141347Z",
+          "rewrite_sha256": "091ee8dc7d409ce75cda4a00857a904b3c9fade0e8e4d462186668daefb77f60"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+          "rewrite_sha256": "f238e533200c13b183a9e6f9095d0e617afe27631068a52bbd3cd08c085749e7"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+          "rewrite_sha256": "d301345d7d1ceb1f4b05f3de579ef46d9d9866f963dd9571df4adf2477bcf0f6"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "f238e533200c13b183a9e6f9095d0e617afe27631068a52bbd3cd08c085749e7"
+        }
+      },
+      "not_judged": {}
+    },
+    "151754-151759": {
+      "prompt_sha256": "be1179693e33992b3e2eaff97384800a36693f7640469fe5184faee629ee6250",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-141347Z",
+          "rewrite_sha256": "aab7e43e7f504afe75039c19a705de366e4cd105cc45974b2f82c8a17b5a0957"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-135612Z",
+          "rewrite_sha256": "9069a4c7955d6832d42fedf2d474a05125ce697bdb632f460f7dc128bf59ed2d"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+          "rewrite_sha256": "905dd65c2701652e8f8fc528a375dc1d2faedd980ae35dbd598a5ac7f2c78ec2"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "905dd65c2701652e8f8fc528a375dc1d2faedd980ae35dbd598a5ac7f2c78ec2"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+          "rewrite_sha256": "52740d0f40726738a881c2693c97ae3afb0452eca0fe3f2885a1291f05ade05b"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261119-140917Z",
+          "rewrite_sha256": "2fda07a7c465afcc214d4457d5928d0a1eca6a561d81a0980192917c11a002e1"
+        }
+      },
+      "not_judged": {}
+    },
+    "146092-146097": {
+      "prompt_sha256": "095950c7a3e0bb02fb884b9111418ab3b479075ab38589d97671f69678014463",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-141347Z",
+          "rewrite_sha256": "c7c13f30ffb1df0c9e82ad649d69cfc135608a6f748544f1bd1395fa62dc6cb9"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+          "rewrite_sha256": "3fef4744acf9c86cdd603dee8d40805ff972b7a92777b7fabf33c3c4748416cb"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261119-140917Z",
+          "rewrite_sha256": "510ec55c5f825fdb881791c9084941a4c3577159943695a47d0faef449001944"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-135612Z",
+          "rewrite_sha256": "c7c13f30ffb1df0c9e82ad649d69cfc135608a6f748544f1bd1395fa62dc6cb9"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "092ff4936fcf633736eeb36c4b045a85ee8ddab32b753c7c9b9cff581b519d7f"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+          "rewrite_sha256": "1d9dbef413ebbd5d186cd7207b84972776ee014a82706018d2e28aa75c3195da"
+        }
+      },
+      "not_judged": {}
+    },
+    "158575-158585": {
+      "prompt_sha256": "53e2499604a7a2107347f5c12227e7f3bc57820e96fb4ef32674da1bbe34db52",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "ef26cf6abdcb809f82b50a2174e07a00775ec66fcc896d54025c0e5496b458be"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-141347Z",
+          "rewrite_sha256": "f29746828b959f17aa7ee8ef17e024ffd7ab3b6450f2d4fb833d4ff6fff1e302"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+          "rewrite_sha256": "107cf0ad968bd1c0595ea23c8cf499eca91d16c93a3c34e118dfa6cf3507818f"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-135612Z",
+          "rewrite_sha256": "80c6f057b347451729af9b2118af77be52f09ecbfd19a4894758aeaf651d1413"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+          "rewrite_sha256": "bf42c1513b7ffe05e739f390d9395aa9801cf75aae56ab1f94329b8928a47490"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261119-140917Z",
+          "rewrite_sha256": "81b81a14079b8e0f05460c832a83f6274424d8e2c283c9b71f05a463e9b6192d"
+        }
+      },
+      "not_judged": {}
+    },
+    "154033-154041": {
+      "prompt_sha256": "38f77e45f7f399be55459865b586c37af6df72d6720f4bb5c709cc79f9a21143",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+          "rewrite_sha256": "7d08878fc943599e3a5d1017239332da938c8c5b7591c9e95024e22d2cbcc934"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261119-140917Z",
+          "rewrite_sha256": "f4c0ba33d7f511f4b97a398ecf27a299caa333a5ae8b6a4c45cb8f84f522dd36"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-141347Z",
+          "rewrite_sha256": "465462d6f67dbceb35a83a83e0a09f2a83feb6211f2265aa3d4ff878e0ba1e63"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "ae2c2f7363439a8b2112812dacb3ff24b1ccf6104574e9f3c9f464e12afc3056"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-135612Z",
+          "rewrite_sha256": "3bd44f7a4a61571d342d5768ff26377edba6b01eb6dde95c3cfba2d8e4cb3a98"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+          "rewrite_sha256": "26c9563b31f9f4f5445076adeb7070421967120997107c606b4cd7207c5c3055"
+        }
+      },
+      "not_judged": {}
+    },
+    "124839-124848": {
+      "prompt_sha256": "bee573f4a70c92d9751b8e686f11376c34586a7bd98a462db94426815475da8d",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+          "rewrite_sha256": "ddff6f93196448cd1e6cb644b1fee6bec2a5115f47e936ad992c0b7489e755b6"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "ddff6f93196448cd1e6cb644b1fee6bec2a5115f47e936ad992c0b7489e755b6"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-135612Z",
+          "rewrite_sha256": "62686d95a6947f2d8214a05d720a76257e16511df015c18d76fc73354cfc6bd6"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261119-140917Z",
+          "rewrite_sha256": "8db25b730ec5c1fee4ea70df1534500408b284b419e50b41a8dc8d04496588c4"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-141347Z",
+          "rewrite_sha256": "b8bb77586f1e3959103c01a3c9fee34b10ad3504af33cee22d46771ac53b8d23"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+          "rewrite_sha256": "b3fab9fd16fd16e65806beecec432707589011c7ddb5ffea66e61dbf2263966d"
+        }
+      },
+      "not_judged": {}
+    },
+    "134424-134431": {
+      "prompt_sha256": "e1ab87dea5ce40fd33c3d01a910e32af397239974239a6e37e3f42ba6845368b",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-135612Z",
+          "rewrite_sha256": "bdab663dfee6834aec65aa6721f796071b923e3da54245f8916256085dd16377"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-141347Z",
+          "rewrite_sha256": "ffddc817d79a020238797a4c225ce5f1a2b0622affb37d43c4fea947929590ca"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "6164ca57a1a222dfc2847907d97eaff57595fefb2fd83eb497b526a81c8393e8"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+          "rewrite_sha256": "88e854f50c8869d94edb33bf8fa4193223d22cc2ee17c65bfb49c9e1caa58f6f"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261119-140917Z",
+          "rewrite_sha256": "3ac869475d7c79edab95196ea80acea626ea2b7f105ea62b1066e473c62c7aef"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+          "rewrite_sha256": "8086b210e70d6f0edbd269eb7ee6ce14946923d842f4b6f8eb453e32d56a1d6c"
+        }
+      },
+      "not_judged": {}
+    },
+    "166926-166932": {
+      "prompt_sha256": "174ac4fa998c6fda6e202eedcb9e154069933ae2fbbf02c8e8f79ba1d9812d7d",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-135612Z",
+          "rewrite_sha256": "144d5d2d4322e1446f0ab204d1d393e1d459ba68912fdb32f27ef56bb396e2e0"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-141347Z",
+          "rewrite_sha256": "319a57a1e09f3853c08a0d9a4b752072741143bc8a8e5d23d0c91077be93e651"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "39612015e8a763db3090bd1dd14bbbb53b0f3694d51b29222ee4cd60eb664339"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+          "rewrite_sha256": "8c1715470a82ef974c9eecc9e40a9e33b1e35a0cb45e4f684d8f5a0609f05f23"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261119-140917Z",
+          "rewrite_sha256": "34313244754db9ccefa67dc755af5061850c91aceb84b5f24d99af5a9e4d3b14"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+          "rewrite_sha256": "8dc1e4cfa4acc2a39bd943c212fc25aea20b7e6e7acd1a635f897f6ea34ef98c"
+        }
+      },
+      "not_judged": {}
+    },
+    "134609-134616": {
+      "prompt_sha256": "78853fa3c5ee3165521543571feed0fd0d53789cbdaa4dbe291d6917405553cf",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "434c81b3ac6583591caca470cd3bb0251b722596b0df221cd970f0a04329c7bc"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261119-140917Z",
+          "rewrite_sha256": "173a5081ca8341381558db18f427fb6e4d5d48eb849a0fe9c7767595b1cb4502"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-135612Z",
+          "rewrite_sha256": "7cf18e9b9033c25fcac6383e33b35088e54053057d79750e40a2d8b15dc08177"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+          "rewrite_sha256": "c9c7573c69ddbf9025c2d912ffdd34e1394f2dc207e5bc2daeb36d7e8d762db5"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-141347Z",
+          "rewrite_sha256": "3134476a6e2faed027de09a598ec2708efb9c57d635f94c15da28b28f3e30d56"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+          "rewrite_sha256": "03dcad134b0e121feecafdc5f38a260c85ae29b81c9f7e5607d599334afee5fe"
+        }
+      },
+      "not_judged": {}
+    },
+    "130910-130918": {
+      "prompt_sha256": "9bb9644931bfd554a4ab28cebfd9ef131865492890814de22737d41c85eb3d8f",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-141347Z",
+          "rewrite_sha256": "5c9ccc1224b0dadffade625744b44a7038502d08f1f3973328768460522dafaa"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-135612Z",
+          "rewrite_sha256": "0d7ea5f83ef510870be9ec176739bb14c1fe5504e3e5601e102bcb4f1dc49744"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+          "rewrite_sha256": "53ed5c467d167586c66d56008300c7ba0ef8b77753b69e35b57a1b8a976d631d"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "53ed5c467d167586c66d56008300c7ba0ef8b77753b69e35b57a1b8a976d631d"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261119-140917Z",
+          "rewrite_sha256": "880fc501cb90c3480419f95fac6d667559d5c011f764c932fdb0782356fe9299"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+          "rewrite_sha256": "c5ad6b7d2f1b3349c738434c5210cb2b4ed6f35d29f0539244cc33a138a91dc8"
+        }
+      },
+      "not_judged": {}
+    },
+    "125707-125710": {
+      "prompt_sha256": "345fd8737130e04a6926fa5c0a0b07ad50ba8abf31ba20d39d9b9cf7bd3610ed",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-141347Z",
+          "rewrite_sha256": "65769758dd048396fd19ed6eb60ab8db902e42dc38a4fe079a5cff7affb3894f"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261026-162959Z",
+          "rewrite_sha256": "1befe22589e1f2f08717e5b57457934b45133bf7216e6ff763ceffa9535acdc5"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3-holdout/20261119-135612Z",
+          "rewrite_sha256": "7b4ea0d761f0f9d643157b9187c48c40bdd63e80a5d12036d25d57d8c281e47c"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261119-140917Z",
+          "rewrite_sha256": "95157eb75dbb245f38ebe51f76a8f5b9d9e33410b5118b23c33b036a4959e773"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3-holdout/20261118-215438Z",
+          "rewrite_sha256": "d35b2f1cd93a506fd184121043787e3fb77929e2be08f2d963babc5587df03f6"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3-holdout/20261118-225545Z",
+          "rewrite_sha256": "fabffbf60c51fe53f80c0f55e5720f2686396bd5a80e00c9d0cf8393460ae947"
+        }
+      },
+      "not_judged": {}
+    }
+  },
+  "recorded_utc": "2026-11-19T14:36:14.909914+00:00",
+  "replies": {
+    "153863-153865": "0a246e18d95626da25faac379fb9606ceb9baedd1946d59e3a72074584615f0d",
+    "138537-138545": "719a573f0829998dd03b82ea7204afb055ebb837f7fb323d0c7f05b79898491e",
+    "145918-145922": "57e629e74173dea69aff542e8d58088e8f826a067e988a8f83325973fa01eb15",
+    "127522-127526": "7fc97a66ae3857a600d113ed4b8f4646a9f851dd3cc5586d6535bc3da3c5908c",
+    "175498-175504": "e5e7135acbd4aa0b06915a000924d9b968ebb93114c15aee8de14fc4cba44a19",
+    "183961-183964": "286324e73b3d25398ef89c3199cc7f57d2a1371cc17b98490e034243b324cb0c",
+    "130997-131003": "7441241dec75636105954cd9d2140cef35a255dd9cbb00f61690ecc090c1aabb",
+    "174125-174130": "03d31c3ff1e3f65f1c0e441607a30ec6fe86d02d9db0135e1bf0dd8f398f8e45",
+    "126639-126641": "5e5d2258a139c0ba4156bb774c423f3ee8cbc385b18ce9a86ab37f5d7b551278",
+    "133007-133016": "8e07a00d51c29ea0f5597367df0dc46cdba6d0d12c316aab2c54f683bbf4e03b",
+    "151754-151759": "2069e4feeba732ca1f83a683dd5be8de0b3c0a778750bfc7f6b16c83a21cbc6b",
+    "146092-146097": "4c071f78373cee867ffb126381c5e164117ef0390a6bef60d373eedc0612fe78",
+    "158575-158585": "7790ff17a690c834cd68a47d5f0a8d65c857caf7a7338ba3d3a1e7f47f903b52",
+    "154033-154041": "09f25e39b703ccd09557365cc911d48d31b45e9d3de63566af45418ace7e92d1",
+    "124839-124848": "e5bed18b789861033e26231429fe4e8547b20f734fb7bb2a5052abde60ded31e",
+    "134424-134431": "0fe410ca20ed5ddad555643edb4df36f74e1448c43bb58207652e28f34738568",
+    "166926-166932": "a4b81bd33143ca038fa0f57f9dc82ca9f2a03910e1dc2d3d5b7f53dae03bc2b4",
+    "134609-134616": "940cf6b2be7acf02dedd4e9a3cc2b92b60bbe5a1e294f66522681ca8cb4a8bcc",
+    "130910-130918": "32fa6fe2e3e99a1ef60579c574268a80d4d78c07540b4c8959b0bfba31c0fdff",
+    "125707-125710": "47302f14a1989ff5a893b4e50e701a1452ae6324361b2cf1a597be651294e86b"
+  }
+}

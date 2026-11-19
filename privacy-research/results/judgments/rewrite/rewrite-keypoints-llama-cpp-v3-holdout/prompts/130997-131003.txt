@@ -1,0 +1,50 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+We collect information within any messages and feedback you send to us (such as feedback, surveys, and questions sent to customer support) or publicly post (such as in product reviews). You may also elect to receive emails or text messages from us. When you sign up to receive text or email messages, we will send you information about promotional offers and more. These messages may use information automatically collected based on your actions while on our sites and may prompt messaging such as cart abandon messages. To the extent you voluntarily opt to have text notifications sent directly to your mobile phone, we receive and store the information you provide, including your telephone number or when you read a text message. You may opt out of receiving text messages at any time by texting “STOP” to our text messages. For more information about text messages, see our Terms and Conditions.
+
+Key points:
+1. The company collects information in messages and feedback you send it, such as surveys and customer support questions, and in what you post publicly, such as product reviews.
+2. If you sign up for email or text messages, it sends you promotional offers and more.
+3. (critical) These messages may use information collected automatically from your actions on its sites, for example to send cart-abandonment messages.
+4. (critical) If you opt into text notifications, it receives and stores the information you provide, including your phone number and when you read a text.
+5. (critical) You can opt out of text messages at any time by texting "STOP".
+
+Rewrite A:
+We collect information from messages, feedback, surveys, questions sent to customer support, and public posts like product reviews. If you choose to receive emails or text messages from us, we will send you promotional offers and other information. These messages may use data we automatically collect about your actions on our sites and might include prompts like cart abandon messages. If you voluntarily opt in to receive text notifications on your mobile phone, we receive and store the information you provide, including your telephone number or when you read a text message. You may opt out of receiving text messages at any time by texting "STOP" to our text messages. For more information about text messages, see our Terms and Conditions.
+
+Rewrite B:
+We collect information from messages, feedback, surveys, questions sent to customer support, and public posts like product reviews. If you choose to receive emails or text messages from us, we will send you promotional offers and other information. These messages may use data we automatically collect about your actions on our sites and might include prompts like cart abandon messages. If you voluntarily opt in to receive text notifications on your mobile phone, we receive and store the information you provide, including your telephone number or when you read a text message. You may opt out of receiving text messages at any time by texting "STOP" to our text messages. For more information about text messages, see our Terms and Conditions.
+
+Rewrite C:
+We collect information from messages, feedback, surveys, questions sent to customer support, and public posts like product reviews. If you choose to receive emails or text messages from us, we will send you promotional offers and other information. These messages may use data we automatically collect about your actions on our sites and might include prompts like cart abandon messages. If you voluntarily opt in to receive text notifications on your mobile phone, we receive and store the information you provide, including your telephone number or when you read a text message. You may opt out of receiving text messages at any time by texting "STOP" to our text messages. For more information about text messages, see our Terms and Conditions.
+
+Rewrite D:
+We collect information from messages and feedback you send us, such as surveys, support questions, and public posts like product reviews. You can also choose to receive emails or text messages from us. When you sign up for these, we send you promotional offers and other information, which may include details about your actions on our sites or prompts like cart abandon messages. If you opt in to text notifications on your mobile phone, we receive and store the information you provide, including your phone number and when you read a text message. You can stop receiving text messages at any time by texting "STOP" to our messages. For more information about text messages, see our Terms and Conditions.
+
+Rewrite E:
+We collect information from messages and feedback you send us, such as surveys, support questions, and public posts like product reviews. You can also choose to receive emails or text messages from us. When you sign up for these, we send you promotional offers and other information, which may include details about your actions on our sites or prompts like cart abandon messages. If you opt in to text notifications on your mobile phone, we receive and store the information you provide, including your phone number and when you read a text message. You can stop receiving text messages at any time by texting "STOP" to our messages. For more information about text messages, see our Terms and Conditions.
+
+Rewrite F:
+We collect information from messages, feedback, surveys, questions sent to customer support, and public posts like product reviews. If you choose to receive emails or text messages from us, we will send you promotional offers and other information. These messages may use data we automatically collect about your actions on our sites and might include prompts like cart abandon messages. If you voluntarily opt in to receive text notifications on your mobile phone, we receive and store the information you provide, including your telephone number or when you read a text message. You may opt out of receiving text messages at any time by texting "STOP" to our text messages. For more information about text messages, see our Terms and Conditions.

@@ -86,6 +86,25 @@ def test_download_prefers_safetensors_and_refuses_a_moved_commit():
     download.assert_not_called()
 
 
+def test_a_snapshot_is_located_by_the_file_named(tmp_path):
+    found = tmp_path / "snapshots" / COMMIT / "model-Q4_K_M.gguf"
+    with patch.object(hub, "hf_hub_download", return_value=str(found)) as cached:
+        assert hub.resolve_snapshot("o/m", COMMIT, "model-Q4_K_M.gguf") == found.parent.resolve()
+    assert cached.call_args.args == ("o/m", "model-Q4_K_M.gguf") and cached.call_args.kwargs["local_files_only"] is True
+
+
+def test_download_of_one_named_file_fetches_only_that_file():
+    info = SimpleNamespace(sha=COMMIT, siblings=[SimpleNamespace(rfilename=name) for name in (
+        "model-Q4_K_M.gguf", "model-Q8_0.gguf")])
+    with patch.object(hub, "HfApi") as api, patch.object(hub, "snapshot_download", return_value="snap") as download:
+        api.return_value.model_info.return_value = info
+        hub.download_snapshot("o/m", COMMIT, only="model-Q4_K_M.gguf")
+        assert download.call_args.kwargs == {"revision": COMMIT, "allow_patterns": ["model-Q4_K_M.gguf"]}
+        with pytest.raises(ValueError, match="has no file 'model-Q2_K.gguf'"):
+            hub.download_snapshot("o/m", COMMIT, only="model-Q2_K.gguf")
+    assert download.call_count == 1
+
+
 def test_prequantized_checkpoints_are_rejected(tmp_path):
     (tmp_path / "config.json").write_text(json.dumps({"quantization_config": {"bits": 4}}))
     with pytest.raises(ValueError, match="already has quantized"):

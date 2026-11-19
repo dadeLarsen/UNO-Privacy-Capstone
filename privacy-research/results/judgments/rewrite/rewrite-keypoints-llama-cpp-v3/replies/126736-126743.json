@@ -1,0 +1,8 @@
+{"rewrites": [
+{"label": "A", "verdicts": {"1": "missing", "2": "partial", "3": "kept", "4": "kept", "5": "kept", "6": "kept", "7": "kept"}, "evidence": {"2": "are data controllers for personal data collected when users of their apps"}, "unsupported": []},
+{"label": "B", "verdicts": {"1": "missing", "2": "partial", "3": "kept", "4": "kept", "5": "kept", "6": "kept", "7": "kept"}, "evidence": {"2": "are responsible for how they handle your personal data when you use their apps"}, "unsupported": []},
+{"label": "C", "verdicts": {"1": "missing", "2": "partial", "3": "kept", "4": "kept", "5": "kept", "6": "kept", "7": "kept"}, "evidence": {"2": "are data controllers for personal data collected when users of their apps"}, "unsupported": []},
+{"label": "D", "verdicts": {"1": "kept", "2": "missing", "3": "kept", "4": "kept", "5": "kept", "6": "kept", "7": "kept"}, "evidence": {}, "unsupported": [{"quote": "They gather information only when you use their apps", "claim": "Promises that data is collected only during app use; the passage says data is collected during use but sets no such limit.", "severity": "major"}, {"quote": "when they collect data from your apps", "claim": "Calls the apps the user's own rather than the companies' apps.", "severity": "minor"}]},
+{"label": "E", "verdicts": {"1": "missing", "2": "partial", "3": "kept", "4": "kept", "5": "kept", "6": "kept", "7": "kept"}, "evidence": {"2": "are responsible for how they handle your personal data when you use their apps"}, "unsupported": []},
+{"label": "F", "verdicts": {"1": "kept", "2": "partial", "3": "kept", "4": "kept", "5": "kept", "6": "kept", "7": "kept"}, "evidence": {"2": "act as the data controllers for your personal information"}, "unsupported": []}
+]}
