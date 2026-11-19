@@ -22,6 +22,17 @@ FILE_TYPES = {"q4_k_m": "15"}
 CONTEXT_TOKENS = 4096
 
 
+def placement(device: str) -> dict:
+    """The model parameters that put every layer on the GPU backend, or the whole model on the CPU."""
+    if device == "gpu":
+        if not llama_cpp.llama_supports_gpu_offload():
+            raise RuntimeError("The installed llama.cpp build has no GPU backend; run a condition with device cpu")
+        return {"n_gpu_layers": -1}
+    # With zero layers on the GPU, a build that has a GPU backend still sends large prompt batches to it.
+    # Naming no GPU device takes that backend out of the model, so a cpu run computes only on the CPU.
+    return {"n_gpu_layers": 0, "split_mode": llama_cpp.LLAMA_SPLIT_MODE_NONE, "main_gpu": -1}
+
+
 class GgufChatModel:
     def __init__(self, path: Path, *, precision: str, device: str, max_new_tokens: int, seed: int):
         if (device, precision) not in MODES:
@@ -36,17 +47,12 @@ class GgufChatModel:
         self._llm = self._vocab = self._template = self._context = None
 
     def load(self) -> dict:
-        if self.device == "gpu" and not llama_cpp.llama_supports_gpu_offload():
-            raise RuntimeError("The installed llama.cpp build has no GPU backend; run a condition with device cpu")
+        placed = placement(self.device)
         if not self.path.is_file():
             raise ValueError(f"No GGUF file at {self.path}. Run `pbench download` to cache it.")
-        # With zero layers on the GPU, a build that has a GPU backend still sends large prompt batches to it.
-        # Naming no GPU device takes that backend out of the model, so a cpu run computes only on the CPU.
-        placement = ({"n_gpu_layers": -1} if self.device == "gpu" else
-                     {"n_gpu_layers": 0, "split_mode": llama_cpp.LLAMA_SPLIT_MODE_NONE, "main_gpu": -1})
         started = time.perf_counter()
         llm = llama_cpp.Llama(model_path=str(self.path), n_ctx=CONTEXT_TOKENS, seed=self.seed, verbose=False,
-                              **placement)
+                              **placed)
         load_seconds = time.perf_counter() - started
         described = dict(llm.metadata)
         template = described.pop("tokenizer.chat_template", None)

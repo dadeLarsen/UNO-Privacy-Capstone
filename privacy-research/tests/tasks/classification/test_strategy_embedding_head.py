@@ -2,6 +2,7 @@
 
 import functools
 import json
+from pathlib import Path
 from unittest.mock import patch
 
 import numpy as np
@@ -18,6 +19,9 @@ from privacy_bench.tasks.classification.taxonomy import LABELS
 COMMIT = "a" * 40
 PREFIX = "task: classification | query: "
 MODEL = {"id": "o/m", "revision": COMMIT, "precision": "bf16", "text_only": True}
+GGUF_COMMIT = "c" * 40
+GGUF_MODEL = {"id": "o/m-GGUF", "revision": GGUF_COMMIT, "precision": "q8_0", "file": "m-Q8_0.gguf", "device": "cpu",
+              "converted_from": "o/m", "converted_from_revision": COMMIT}
 FIT_SPEC = (f'task = "classification"\nkind = "embedding-heads"\n[model]\nid = "o/m"\nrevision = "{COMMIT}"\n'
             'precision = "bf16"\ntext_only = true\n')
 REFERENCE = "classification/toy-heads/20261012-000000Z"
@@ -92,11 +96,34 @@ def test_fp32_inference_on_a_bf16_fit_builds(make_condition, fits_root):
     assert strategy.input_spec["fit"]["reference"] == REFERENCE
 
 
-def test_bf16_inference_on_an_fp32_fit_is_refused(make_condition, fits_root):
+@pytest.mark.parametrize("model", [MODEL, GGUF_MODEL])
+def test_bf16_and_gguf_inference_on_an_fp32_fit_are_refused(make_condition, fits_root, model):
     fits_root(FIT_SPEC.replace('"bf16"', '"fp32"'), name="fp32-heads")
     with pytest.raises(ValueError, match="used: precision"):
-        EmbeddingHeadStrategy(make_condition("embedding-head", MODEL,
+        EmbeddingHeadStrategy(make_condition("embedding-head", model,
                                              options(fit="classification/fp32-heads/20261012-000000Z")))
+
+
+@pytest.mark.parametrize("precision", ["bf16", "q8_0"])
+def test_a_gguf_file_uses_the_bf16_fit_of_the_checkpoint_it_was_converted_from(make_condition, fits_root, precision):
+    strategy = EmbeddingHeadStrategy(make_condition("embedding-head", {**GGUF_MODEL, "precision": precision}, options()))
+    assert strategy.model["file"] == "m-Q8_0.gguf"
+    # Only [model] differs from the torch condition, so both runs record the same input.
+    assert strategy.input_spec == EmbeddingHeadStrategy(make_condition("embedding-head", MODEL, options())).input_spec
+
+
+@pytest.mark.parametrize("model, message", [
+    ({**GGUF_MODEL, "converted_from": "o/other"}, "differs from the model .* used: converted_from$"),
+    ({**GGUF_MODEL, "converted_from_revision": "b" * 40}, "used: converted_from_revision$"),
+    ({**GGUF_MODEL, "precision": "q4_k_m"}, "used: precision"),
+    ({**GGUF_MODEL, "converted_from_revision": "main"}, "full 40-character commit"),
+    ({key: value for key, value in GGUF_MODEL.items() if key != "converted_from"}, "missing: converted_from"),
+    ({key: value for key, value in GGUF_MODEL.items() if key != "device"}, "missing: device"),
+    ({**GGUF_MODEL, "text_only": True}, "unknown keys: text_only"),
+])
+def test_a_gguf_condition_is_refused_unless_it_names_the_fitted_checkpoint(make_condition, fits_root, model, message):
+    with pytest.raises(ValueError, match=message):
+        EmbeddingHeadStrategy(make_condition("embedding-head", model, options()))
 
 
 def test_fits_of_another_kind_are_refused(make_condition, fits_root):
@@ -109,8 +136,8 @@ def test_fits_of_another_kind_are_refused(make_condition, fits_root):
 class FakeEmbedder:
     VECTORS = {"third": [2.0, 0, 0, 0], "neither": [0, 0, 3.0, 0], "tie": [1.0, 1.0, 0, 0]}
 
-    def __init__(self):
-        self.prompts = []
+    def __init__(self, array=torch.tensor):
+        self.prompts, self.array = [], array
 
     def load(self):
         return {"backend": "fake", "load_seconds": 0.1}
@@ -120,7 +147,7 @@ class FakeEmbedder:
         return {"text": text, "input_ids": [1, 2, 3]}
 
     def embed(self, encoded):
-        return {"embedding": torch.tensor(self.VECTORS[encoded["text"]]), "input_tokens": 3, "seconds": 0.01}
+        return {"embedding": self.array(self.VECTORS[encoded["text"]]), "input_tokens": 3, "seconds": 0.01}
 
 
 @pytest.mark.parametrize("text, expected", [("third", 3), ("neither", 9), ("tie", 3)])
@@ -148,4 +175,25 @@ def test_download_caches_the_pinned_commit(make_condition, fits_root, tmp_path):
     snapshot = tmp_path / "models--o--m" / "snapshots" / COMMIT
     with patch.object(embedding_head, "download_snapshot", return_value=snapshot) as download:
         assert strategy.download()["resolved_revision"] == COMMIT
-    download.assert_called_once_with("o/m", COMMIT)
+    download.assert_called_once_with("o/m", COMMIT, only=None)
+
+
+def test_a_gguf_condition_downloads_and_loads_its_one_file_through_llama_cpp(make_condition, fits_root, tmp_path):
+    strategy = EmbeddingHeadStrategy(make_condition("embedding-head", GGUF_MODEL, options()))
+    snapshot = tmp_path / "models--o--m-GGUF" / "snapshots" / GGUF_COMMIT
+    with patch.object(embedding_head, "download_snapshot", return_value=snapshot) as download:
+        assert strategy.download()["resolved_revision"] == GGUF_COMMIT
+    download.assert_called_once_with("o/m-GGUF", GGUF_COMMIT, only="m-Q8_0.gguf")
+    fake = FakeEmbedder(array=functools.partial(np.array, dtype=np.float32))
+    with patch.object(embedding_head, "resolve_snapshot", return_value=snapshot) as located, \
+            patch.object(embedding_head, "SentenceEmbedder") as torch_backend, \
+            patch.object(embedding_head, "GgufSentenceEmbedder", return_value=fake) as constructor:
+        metadata = strategy.load()
+    located.assert_called_once_with("o/m-GGUF", GGUF_COMMIT, "m-Q8_0.gguf")
+    constructor.assert_called_once_with(snapshot / "m-Q8_0.gguf", precision="q8_0", device="cpu", max_input_tokens=8192)
+    torch_backend.assert_not_called()
+    assert (metadata["model"], metadata["backend"], metadata["head"]) == ("o/m-GGUF", "fake", "linear")
+    # llama.cpp gives a numpy embedding; the head scores it as it scores a tensor.
+    response = strategy.predict(strategy.prepare(Row("x", "third", (3,))))
+    assert fake.prompts == [PREFIX] and response["model_label_id"] == 3
+    assert response["scores"][3] == pytest.approx(1.0) and "embedding" not in response

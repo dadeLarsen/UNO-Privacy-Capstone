@@ -87,7 +87,12 @@ The `embedding-heads` fit embeds every example once with a sentence embedder, af
 
 `fit.json` reports each head's cross-validated balanced accuracy, and for logistic heads the score at every C. These scores come from OPP-115 examples only, so they say nothing about the test samples.
 
-A condition that uses a head names the checkpoint, revision, and precision its fit embedded with, and the strategy refuses any other. The one exception is fp32 inference on a head fitted in bf16: the embedder runs on the CPU only in fp32, so this is how a bf16 head runs there. The `fp32-cpu` conditions under `conditions/classification/appsi139/` use it.
+A condition that uses a head names the checkpoint, revision, and precision its fit embedded with, and the strategy refuses any other. There are two exceptions.
+
+- **fp32 inference on a head fitted in bf16.** The embedder runs on the CPU only in fp32, so this is how a bf16 head runs there. The `fp32-cpu` conditions under `conditions/classification/appsi139/` use it.
+- **A GGUF file on a head fitted on the torch checkpoint.** A condition whose `[model]` names a `file` embeds with that GGUF file through llama.cpp. `id` and `revision` then pin the repository that holds the file, so the condition also names the checkpoint the file was converted from, as `converted_from` and `converted_from_revision`. The strategy accepts that checkpoint's bf16 fit for a `bf16` or `q8_0` file and refuses every other pair. The eight `gguf` conditions under `conditions/classification/appsi139/` use it. With either file, on the GPU and on the CPU, their runs are not significantly less accurate than the torch runs or than privacy-model, so the head was not refit; the research README gives the numbers from `appsi139-test-half-llama-cpp` and `appsi139-balanced-50-llama-cpp`.
+
+A GGUF condition takes `device = "cpu"` or `"gpu"` and no `text_only`: the file holds the text encoder alone. The backend sizes the llama.cpp context for `max_input_tokens`, so that no input is ever truncated. On Windows llama.cpp commits about 1.3 MiB of memory per token of that limit without touching it: 11.5 GiB at 8,192 tokens and 1.7 GiB at 512, measured by hand on the desktop. A condition for a small computer should name the longest input it must accept, not the model's limit.
 
 ### Prior shift
 

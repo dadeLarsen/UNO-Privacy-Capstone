@@ -10,6 +10,18 @@ The condition names a fit record and one of its heads::
 The instruction prefix comes from the fit, so sentences are embedded exactly as its examples were. A
 ``prior-shift`` fit reshapes the heads of an ``embedding-heads`` fit, its base; the model and prefix then
 come from the base fit, whose hashes must match the ones the prior-shift fit recorded.
+
+A condition whose ``[model]`` names a ``file`` embeds with that GGUF file through llama.cpp. It also names
+the checkpoint the file was converted from, which must be the one the fit embedded with::
+
+    [model]
+    id = "ggml-org/embeddinggemma-2-GGUF"
+    revision = "6ea3e3a309d12a4779cfda98b8c19800d2d5da71"
+    precision = "q8_0"
+    file = "embeddinggemma-2-Q8_0.gguf"
+    device = "cpu"
+    converted_from = "google/embeddinggemma-2"
+    converted_from_revision = "914f7f89142e33e77833254d9c9b90c3cef7303b"
 """
 
 import json
@@ -19,7 +31,8 @@ import torch
 from ....core.conditions import Condition
 from ....core.files import digest_bytes, digest_text
 from ....core.fits import load_fit, resolve_fit
-from ....models.hub import download_snapshot, resolve_snapshot, snapshot_identity
+from ....models.gguf_sentence_embedder import GgufSentenceEmbedder
+from ....models.hub import download_snapshot, require_commit, resolve_snapshot, snapshot_identity
 from ....models.sentence_embedder import SentenceEmbedder
 from ..taxonomy import LABELS
 from .settings import first_argmax, model_settings, option_settings
@@ -29,10 +42,29 @@ PRIOR_SHIFT_KIND = "prior-shift"
 FIT_KINDS = (EMBEDDING_FIT_KIND, PRIOR_SHIFT_KIND)
 # The fit's embeddings are only valid for the same checkpoint at the same precision and module set.
 MATCHED_MODEL_KEYS = {"id": None, "revision": None, "precision": None, "text_only": False}
-# The one precision mismatch allowed, as (fit, condition): fp32 is the only precision the CPU runs, and it
-# computes unrounded the embeddings a bf16 fit saw rounded. No other pair has been tested.
+# The one precision mismatch allowed on the fit's own checkpoint, as (fit, condition): fp32 is the only
+# precision the CPU runs, and it computes unrounded the embeddings a bf16 fit saw rounded. No other pair has
+# been tested.
 FP32_ON_BF16_FIT = ("bf16", "fp32")
+# The one fit a GGUF file may use, as fit precision: file precisions. The head was fitted on the bf16
+# embeddings of the torch checkpoint the file was converted from; llama.cpp computes them again from the
+# file. The file holds the text encoder alone, so the fit's text_only is not compared.
+TORCH_FIT_FOR_GGUF = {"bf16": ("bf16", "q8_0")}
 HEAD_KEYS = ("method", "class_weight", "c", "base_head", "strength")
+
+
+def differing_settings(fitted: dict, model: dict) -> list:
+    """The [model] keys of a condition that keep it from using the heads of a fit made with `fitted`."""
+    if "file" in model:
+        differing = [key for key, fitted_key in (("converted_from", "id"), ("converted_from_revision", "revision"))
+                     if fitted.get(fitted_key) != model[key]]
+        if model["precision"] not in TORCH_FIT_FOR_GGUF.get(fitted.get("precision"), ()):
+            differing.append("precision")
+        return differing
+    differing = [key for key, default in MATCHED_MODEL_KEYS.items() if fitted.get(key, default) != model[key]]
+    if (fitted.get("precision"), model["precision"]) == FP32_ON_BF16_FIT:
+        differing.remove("precision")
+    return differing
 
 
 def base_fit(fit):
@@ -63,18 +95,20 @@ class EmbeddingHeadStrategy:
         return "Embedding\nhead\n" + head["name"]
 
     def __init__(self, condition: Condition):
-        self.model = model_settings(condition, optional={"device": "cuda", "text_only": False})
+        if "file" in condition.model:
+            # llama.cpp has no default device, and a GGUF file is not the checkpoint a fit names.
+            self.model = model_settings(condition, required=("file", "device", "converted_from",
+                                                             "converted_from_revision"))
+            require_commit(self.model["converted_from"], self.model["converted_from_revision"])
+        else:
+            self.model = model_settings(condition, optional={"device": "cuda", "text_only": False})
         self.options = option_settings(condition, required=("fit", "head", "max_input_tokens"))
         fit = load_fit(resolve_fit(self.options["fit"]))
         if fit.record["kind"] not in FIT_KINDS:
             raise ValueError(f"Fit {self.options['fit']!r} is a {fit.record['kind']!r} fit, "
                              f"not {' or '.join(map(repr, FIT_KINDS))}")
         embedding_fit = fit if fit.record["kind"] == EMBEDDING_FIT_KIND else base_fit(fit)
-        fitted_model = embedding_fit.record["fit"]["model"]
-        differing = [key for key, default in MATCHED_MODEL_KEYS.items()
-                     if fitted_model.get(key, default) != self.model[key]]
-        if (fitted_model.get("precision"), self.model["precision"]) == FP32_ON_BF16_FIT:
-            differing.remove("precision")
+        differing = differing_settings(embedding_fit.record["fit"]["model"], self.model)
         if differing:
             raise ValueError(f"Condition [model] differs from the model fit {embedding_fit.reference!r} used: "
                              f"{', '.join(differing)}")
@@ -111,13 +145,18 @@ class EmbeddingHeadStrategy:
         }
 
     def download(self) -> dict:
-        snapshot = download_snapshot(self.model["id"], self.model["revision"])
+        snapshot = download_snapshot(self.model["id"], self.model["revision"], only=self.model.get("file"))
         return snapshot_identity(self.model["id"], self.model["revision"], snapshot)
 
     def load(self) -> dict:
-        snapshot = resolve_snapshot(self.model["id"], self.model["revision"])
-        backend = SentenceEmbedder(snapshot, precision=self.model["precision"], device=self.model["device"],
-                                   max_input_tokens=self.options["max_input_tokens"], text_only=self.model["text_only"])
+        settings = {"precision": self.model["precision"], "device": self.model["device"],
+                    "max_input_tokens": self.options["max_input_tokens"]}
+        if "file" in self.model:
+            snapshot = resolve_snapshot(self.model["id"], self.model["revision"], self.model["file"])
+            backend = GgufSentenceEmbedder(snapshot / self.model["file"], **settings)
+        else:
+            snapshot = resolve_snapshot(self.model["id"], self.model["revision"])
+            backend = SentenceEmbedder(snapshot, text_only=self.model["text_only"], **settings)
         metadata = backend.load()
         self._backend = backend
         return {**snapshot_identity(self.model["id"], self.model["revision"], snapshot), **metadata,
@@ -133,7 +172,8 @@ class EmbeddingHeadStrategy:
 
     def predict(self, prepared) -> dict:
         output = self._backend.embed(prepared["encoded"])
-        embedding = torch.nn.functional.normalize(output.pop("embedding"), dim=0)
+        # The llama.cpp backend gives a numpy array, the sentence-transformers one a tensor.
+        embedding = torch.nn.functional.normalize(torch.as_tensor(output.pop("embedding")), dim=0)
         scores = (self._weight @ embedding + self._bias).tolist()
         label_id = first_argmax(scores)
         return {"input_text_sha256": prepared["text_sha256"],

@@ -1,0 +1,26 @@
+task = "classification"
+title = "APPSI-139, up to 50 per category: the tuned balanced head on a MacBook"
+# Accepted labels are the original mapped labels plus every label ChatGPT Astra marked.
+# The two llama.cpp runs are an M4 Pro MacBook's: the Q8_0 GGUF file through llama-cpp-python 0.3.37, built
+# from source there, on its CPU and on its GPU through Metal. They use the shifted head of the torch runs,
+# fitted on the torch checkpoint's BF16 embeddings. The desktop's runs of the same two conditions are in
+# appsi139-balanced-50-llama-cpp; one comparison cannot hold two runs of one model, precision, device, and
+# condition. The torch runs and privacy-model's run are the desktop's. The head tuned on APPSI-139's tuning
+# half, which holds 272 of these 460 sentences.
+runs = [
+    "classification/privacy-model-fp32-appsi139-balanced-50/20261012-014228Z",
+    "classification/embeddinggemma2-bf16-head-linear-balanced-tuned-appsi139-balanced-50/20261116-034743Z",
+    "classification/embeddinggemma2-fp32-cpu-head-linear-balanced-tuned-appsi139-balanced-50/20261116-035208Z",
+    "classification/embeddinggemma2-gguf-q8-gpu-head-linear-balanced-tuned-appsi139-balanced-50/20261119-193435Z",
+    "classification/embeddinggemma2-gguf-q8-cpu-head-linear-balanced-tuned-appsi139-balanced-50/20261119-193112Z",
+]
+
+[scoring]
+gold = "appsi139-astra"
+
+[labels]
+"classification/privacy-model-fp32-appsi139-balanced-50/20261012-014228Z" = "skythrone/privacy-model · FP32, desktop GPU · torch 2.8.0"
+"classification/embeddinggemma2-bf16-head-linear-balanced-tuned-appsi139-balanced-50/20261116-034743Z" = "google/embeddinggemma-2 · BF16, desktop GPU · torch 2.15.0"
+"classification/embeddinggemma2-fp32-cpu-head-linear-balanced-tuned-appsi139-balanced-50/20261116-035208Z" = "google/embeddinggemma-2 · FP32, desktop CPU · torch 2.15.0"
+"classification/embeddinggemma2-gguf-q8-gpu-head-linear-balanced-tuned-appsi139-balanced-50/20261119-193435Z" = "EmbeddingGemma 2 GGUF · Q8_0, MacBook GPU · llama.cpp"
+"classification/embeddinggemma2-gguf-q8-cpu-head-linear-balanced-tuned-appsi139-balanced-50/20261119-193112Z" = "EmbeddingGemma 2 GGUF · Q8_0, MacBook CPU · llama.cpp"
