@@ -39,9 +39,13 @@ class GgufChatModel:
             raise RuntimeError("The installed llama.cpp build has no GPU backend; run a condition with device cpu")
         if not self.path.is_file():
             raise ValueError(f"No GGUF file at {self.path}. Run `pbench download` to cache it.")
+        # With zero layers on the GPU, a build that has a GPU backend still sends large prompt batches to it.
+        # Naming no GPU device takes that backend out of the model, so a cpu run computes only on the CPU.
+        placement = ({"n_gpu_layers": -1} if self.device == "gpu" else
+                     {"n_gpu_layers": 0, "split_mode": llama_cpp.LLAMA_SPLIT_MODE_NONE, "main_gpu": -1})
         started = time.perf_counter()
-        llm = llama_cpp.Llama(model_path=str(self.path), n_gpu_layers=-1 if self.device == "gpu" else 0,
-                              n_ctx=CONTEXT_TOKENS, seed=self.seed, verbose=False)
+        llm = llama_cpp.Llama(model_path=str(self.path), n_ctx=CONTEXT_TOKENS, seed=self.seed, verbose=False,
+                              **placement)
         load_seconds = time.perf_counter() - started
         described = dict(llm.metadata)
         template = described.pop("tokenizer.chat_template", None)

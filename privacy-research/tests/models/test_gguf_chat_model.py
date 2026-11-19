@@ -108,7 +108,12 @@ def test_a_gpu_condition_is_refused_by_a_build_without_a_gpu_backend(tmp_path, m
 
 
 def test_tiny_file_loads_on_the_cpu_and_records_what_ran(repeater):
-    metadata = GgufChatModel(repeater, **SETTINGS).load()
+    model = GgufChatModel(repeater, **SETTINGS)
+    metadata = model.load()
+    # No GPU device, so a build with a GPU backend cannot take a cpu run's prompt batches.
+    placement = model._llm.model_params
+    assert (placement.n_gpu_layers, placement.split_mode, placement.main_gpu) == (0, llama_cpp.LLAMA_SPLIT_MODE_NONE,
+                                                                                  -1)
     assert (metadata["backend"], metadata["device"], metadata["precision"]) == ("llama-cpp-chat-generation", "cpu",
                                                                                 "q4_k_m")
     assert (metadata["file"], metadata["file_bytes"]) == ("repeater.gguf", repeater.stat().st_size)
