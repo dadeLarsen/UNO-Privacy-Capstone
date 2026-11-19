@@ -1,0 +1,53 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+* name, role and personal contact details at the company and personal information in communications with you; * corporate contact, and employer or affiliation (e.g., employer name, title, contact details, and contract information); * user ID, password and log-in credentials when using our corporate travel online tool(s). We use this information to: * conduct our business dealings with our suppliers, customers, partners, and other businesses including for sales and purchases, and enabling use of our corporate travel online tool(s); * tailor our products and services for you based on this information alone and in combination with other information we have about you; * administer your company’s SkyMiles for Business program and other corporate travel benefits; * send you or your company marketing communications, offers, and invitations to events, which may be based on segmentation and modelling of your personal information; * recognize your role when administering our corporate traveler program to generate appropriate training, support and promotional content within the tool or by email; * maintain the operational availability and reliability of our IT systems with infrastructure backups and testing (which may use a copy of live data where test data is not practical). We use this information because: * it is necessary to enter into or to perform a contract with you to provide flights or other products or services; * you have given consent, for example, to us using information to send you marketing communications; * the information is publicly available; or * we have a legitimate business interest, for example, in performing our contracts with our corporate customers, suppliers and other business, developing our business with our corporate customers, and ensuring that our technical systems operate properly.
+
+Key points:
+1. For business travelers and representatives of companies it deals with, the company collects name, role, contact details, employer or affiliation, contract information, and communications. Note: The passage does not name the company.
+2. It also collects user IDs, passwords, and log-in credentials for its corporate travel tools.
+3. It uses this information for its business dealings, including sales, purchases, and its travel tools.
+4. (critical) It tailors its products and services using this information alone and combined with other information it has about you.
+5. (critical) It sends you or your company marketing, offers, and event invitations, which may be based on segmentation and modelling of your personal information.
+6. It uses the information to run SkyMiles for Business and other corporate travel benefits, and for training, support, and promotional content in its tool or by email.
+7. IT backups and testing may use a copy of live data where test data is not practical.
+8. (critical) Its legal bases are a contract with you, your consent (for example, to marketing), the information being publicly available, or its legitimate business interests.
+
+Rewrite A:
+We collect your name, role, contact details, employer information, and login credentials for our corporate travel tools. We use this data to run our business with partners and customers, provide and customize our travel services, manage your company's SkyMiles for Business program, send you marketing offers and event invitations, recognize your role for training and support, and keep our IT systems running. We collect this information because it is necessary to provide our services, you have consented to receive marketing, the data is publicly available, or we have a legitimate business interest in operating our contracts and systems.
+
+Rewrite B:
+We collect your name, role, contact details, corporate affiliation, login credentials, and information from communications to run our business, provide travel tools, tailor services, manage your SkyMiles for Business program, send marketing offers, recognize your role for training and support, and maintain IT system reliability. We use this information to fulfill contracts, because you consented, if it is publicly available, or due to legitimate business interests like performing contracts, developing our business, and ensuring technical systems work properly.
+
+Rewrite C:
+We collect your name, role, contact details, employer information, and login credentials. We use this data to run our business, provide and improve our travel tools, manage your company's SkyMiles for Business program, send you marketing offers and event invitations, recognize your role for training and support, and keep our IT systems running. We collect this information because it is necessary to provide our services, you have consented to receive marketing, the data is publicly available, or we have a legitimate business interest in operating our contracts and systems.
+
+Rewrite D:
+We collect your name, role, contact details, employer information, and login credentials for our corporate travel tools. We use this data to conduct business with partners, tailor products and services, manage your company's SkyMiles for Business program, send marketing communications and event invitations, recognize your role for training and support, and maintain our IT systems. We process this information because it is necessary to provide flights and services, you have consented to marketing, the data is publicly available, or we have a legitimate business interest in performing contracts, developing our business, and ensuring technical systems work properly.
+
+Rewrite E:
+We collect your name, role, contact details, corporate affiliation, login credentials, and information from communications to run our business, provide travel tools, tailor services, manage your SkyMiles for Business program, send marketing offers, recognize your role for training and support, and maintain IT system reliability. We use this data to fulfill contracts, because you consented to marketing, if it is publicly available, or due to legitimate business interests like performing contracts with partners, developing our business, and ensuring technical systems work properly.
+
+Rewrite F:
+We collect your name, role, contact details, employer information, and login credentials. We use this data to conduct business with partners, tailor products and services, manage your company's travel benefits, send marketing communications, recognize your role for training and support, and maintain our IT systems. We process this information because it is necessary to provide services, you have consented to marketing, the data is publicly available, or we have a legitimate business interest in performing contracts, developing our business, or ensuring system reliability.

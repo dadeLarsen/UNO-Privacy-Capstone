@@ -1,0 +1,8 @@
+{"rewrites": [
+{"label": "A", "verdicts": {"1": "kept", "2": "partial", "3": "partial", "4": "kept", "5": "kept", "6": "kept", "7": "kept"}, "evidence": {"2": "Miniclip SA, a Swiss company, is the data controller.", "3": "Information includes any data about you from using their mobile games"}, "unsupported": []},
+{"label": "B", "verdicts": {"1": "kept", "2": "partial", "3": "kept", "4": "kept", "5": "kept", "6": "kept", "7": "kept"}, "evidence": {"2": "is the data controller for your information when you use their mobile games"}, "unsupported": []},
+{"label": "C", "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "kept", "5": "kept", "6": "kept", "7": "kept"}, "evidence": {"3": "Your information includes any details about you related to your use of these games"}, "unsupported": []},
+{"label": "D", "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "kept", "5": "kept", "6": "kept", "7": "kept"}, "evidence": {"3": "Your information includes details about your use of these games"}, "unsupported": []},
+{"label": "E", "verdicts": {"1": "kept", "2": "partial", "3": "partial", "4": "kept", "5": "kept", "6": "kept", "7": "kept"}, "evidence": {"2": "is the data controller for your information when you use its mobile games", "3": "Information includes any data about you related to these games"}, "unsupported": []},
+{"label": "F", "verdicts": {"1": "kept", "2": "partial", "3": "partial", "4": "kept", "5": "kept", "6": "kept", "7": "kept"}, "evidence": {"2": "is the data controller for your information when you use its mobile games", "3": "Information includes any data about you related to these games"}, "unsupported": []}
+]}

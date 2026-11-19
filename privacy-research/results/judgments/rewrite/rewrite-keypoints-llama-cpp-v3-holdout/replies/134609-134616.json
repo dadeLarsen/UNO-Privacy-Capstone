@@ -1,0 +1,46 @@
+{"rewrites": [
+{"label": "A",
+ "verdicts": {"1": "partial", "2": "partial", "3": "kept", "4": "kept", "5": "missing", "6": "kept", "7": "partial"},
+ "evidence": {
+  "1": "This Application collects Personal Data such as usage information, device identifiers, email, location, language, personal details like name and gender, and academic or professional background.",
+  "2": "Data is collected either by the User providing it freely or automatically when using the Application.",
+  "7": "Users are responsible for any third-party data shared through the Application"
+ },
+ "unsupported": []},
+{"label": "B",
+ "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept", "5": "missing", "6": "kept", "7": "partial"},
+ "evidence": {
+  "1": "This application collects personal data such as your email, location, device ID, name, age, gender, academic background, field of activity, password, and various other data points.",
+  "7": "You are responsible for any third-party data you share through the app"
+ },
+ "unsupported": []},
+{"label": "C",
+ "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept", "5": "missing", "6": "kept", "7": "partial"},
+ "evidence": {
+  "1": "This application collects personal data such as your email, location, device ID, name, age, gender, academic background, field of activity, password, and various other data types.",
+  "7": "You are responsible for any third-party data you share through the application"
+ },
+ "unsupported": []},
+{"label": "D",
+ "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept", "5": "missing", "6": "kept", "7": "partial"},
+ "evidence": {
+  "1": "This application collects personal data such as your email, name, location, device ID, usage habits, and various other details",
+  "7": "You are responsible for any third-party data you share through the application"
+ },
+ "unsupported": []},
+{"label": "E",
+ "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept", "5": "missing", "6": "kept", "7": "partial"},
+ "evidence": {
+  "1": "This application collects personal data such as your email, location, device ID, name, age, gender, academic background, field of activity, password, and various other data points.",
+  "7": "You are responsible for any third-party data you share through the application"
+ },
+ "unsupported": []},
+{"label": "F",
+ "verdicts": {"1": "partial", "2": "partial", "3": "kept", "4": "kept", "5": "missing", "6": "kept", "7": "partial"},
+ "evidence": {
+  "1": "This Application collects Personal Data such as usage information, device identifiers, email, location, language, personal details like name and gender, and academic or professional background.",
+  "2": "Data is collected either by the User providing it or automatically when using the Application.",
+  "7": "Users are responsible for any third-party data shared through the Application"
+ },
+ "unsupported": []}
+]}

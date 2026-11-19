@@ -1,0 +1,52 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+In addition to any other rights set out in this Privacy Policy (except as set out in the Candidate Privacy Addendum), you at any time may direct that Moon Active delete your Personal Data by accessing the “Account Deletion” button in the applicable Game and following the instructions. Selection of this option will result in closure of your Account and deletion of all of your playing history, purchase information, social media log-in and other information associated with you in connection with the Game. Deletion is irreversible. If you maintain Accounts with multiple Games, you should request closure of each. Upon receipt of your request, we will comply promptly but please allow some time for processing. We also reserve the right to retain a copy of any Personal Data that we are required by applicable law to retain.
+
+Key points:
+1. (critical) You may ask Moon Active to delete your personal data at any time, using the "Account Deletion" button in the game and following its instructions.
+2. This is in addition to the policy's other rights, except as set out in the Candidate Privacy Addendum.
+3. (critical) Deletion closes your account and deletes your playing history, purchase information, social media log-in, and other information connected with the game.
+4. (critical) Deletion is irreversible.
+5. (critical) If you have accounts in several games, you should request closure of each one.
+6. Moon Active will act promptly, but processing may take some time.
+7. (critical) Moon Active may keep a copy of any personal data the law requires it to keep.
+
+Rewrite A:
+You can ask Moon Active to delete your personal data at any time by using the "Account Deletion" button in the Game. This will close your account and remove all your playing history, purchase information, social media logins, and other related data. Deletion is permanent. If you have accounts in multiple Games, you must request deletion for each one. Moon Active will process your request promptly but may take some time. They may keep a copy of your data if the law requires them to.
+
+Rewrite B:
+You can request Moon Active delete your Personal Data at any time by using the "Account Deletion" button in the Game and following the instructions. This will close your Account and delete your playing history, purchase information, social media log-ins, and other related data. Deletion is irreversible. If you have Accounts with multiple Games, you must request closure for each one. Upon receiving your request, Moon Active will comply promptly, though some time is needed for processing. We may keep a copy of any Personal Data if the law requires us to do so.
+
+Rewrite C:
+You can request Moon Active delete your Personal Data at any time by using the "Account Deletion" button in the Game. This action closes your Account and permanently removes all your playing history, purchase information, social media log-ins, and other related data. Deletion is irreversible. If you have accounts in multiple Games, you must request deletion for each one separately. Upon receiving your request, Moon Active will comply promptly, though some time is needed for processing. The company may keep a copy of your data if required by applicable law.
+
+Rewrite D:
+You can request Moon Active delete your personal data at any time by using the "Account Deletion" button in the Game. This action closes your account and permanently removes your playing history, purchase information, social media logins, and other related data. Deletion is irreversible. If you have accounts in multiple Games, you must request deletion for each one separately. Moon Active will process your request promptly but may take some time. The company may keep a copy of your data if required by applicable law.
+
+Rewrite E:
+You can request Moon Active delete your personal data at any time by using the "Account Deletion" button in the Game. This action closes your account and permanently removes your playing history, purchase information, social media logins, and other related data. Deletion is irreversible. If you have accounts in multiple Games, you must request deletion for each one separately. Moon Active will process your request promptly but may take some time. The company may keep a copy of your data if required by applicable law.
+
+Rewrite F:
+You can request Moon Active delete your Personal Data at any time by using the "Account Deletion" button in the Game and following the instructions. This will close your Account and delete your playing history, purchase information, social media log-ins, and other related data. Deletion is irreversible. If you have Accounts with multiple Games, you must request closure for each one. Upon receiving your request, Moon Active will comply promptly, though some time is needed for processing. We may keep a copy of any Personal Data if the law requires us to do so.

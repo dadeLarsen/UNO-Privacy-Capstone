@@ -1,0 +1,51 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+Costco is committed to protecting the privacy of its customers. We have and will take measures that protect the privacy of personal information and personal health information held by us. This Privacy Policy provides you with details regarding: * why we collect personal information and personal health information; * what we do with that information; * what steps we take to ensure that the information is secure; * who you should contact if you have questions or concerns about our policies or practices. Since we regularly review our policies and practices, your comments are always welcome. We reserve the right to change this Privacy Policy at any time; however, any changes or additions to Section 5 regarding the reasons we use personal information will not apply to you unless you consent to them. We will alert you that changes have been made by indicating at the top of the Privacy Policy the date that it was last updated. We encourage you to review our Privacy Policy carefully to make sure that you understand how information that you provide will be used or disclosed. Children: We encourage parents to take an active interest in their children’s use of the Internet. We do not intend to collect information from children who are under 18 years of age. If you are under 18, please do not provide information on our Sites.
+
+Key points:
+1. Costco says it is committed to protecting its customers' privacy, including personal health information.
+2. The policy explains why Costco collects personal and health information, what it does with it, how it secures it, and whom to contact with questions.
+3. Costco may change the Privacy Policy at any time.
+4. (critical) Changes to Section 5, about the reasons Costco uses personal information, will not apply to you unless you consent to them.
+5. Costco signals changes by updating the "last updated" date at the top of the policy.
+6. (critical) Costco does not intend to collect information from children under 18; if you are under 18, you should not provide information on its Sites.
+
+Rewrite A:
+Costco protects the privacy of personal and health information it holds. This policy explains why it collects data, what it does with it, how it secures the data, and who to contact for questions. Costco may change this policy at any time, but changes to Section 5 regarding data use require your consent and will not apply to you until you agree. Costco will show the last update date at the top of the policy. Costco does not intend to collect information from children under 18 and asks those under 18 not to provide information on its sites.
+
+Rewrite B:
+Costco collects personal and health information to explain why it gathers data, how it uses it, how it secures it, and who to contact with questions. The company regularly reviews its policies and may change them at any time, but changes to Section 5 regarding how personal information is used will not apply to you unless you agree. Costco will note the last update date at the top of the policy and encourages you to read it carefully. The company does not intend to collect information from children under 18 and asks that if you are under 18, you do not provide information on its sites.
+
+Rewrite C:
+Costco collects personal and health information to explain why it gathers data, how it uses it, how it secures it, and who to contact with questions. Costco may change this policy at any time, but changes to Section 5 regarding how it uses personal information only apply if you agree. It will note the last update date at the top of the policy. Costco does not intend to collect information from children under 18 and encourages parents to monitor their children's internet use. If you are under 18, you should not provide information on Costco's sites.
+
+Rewrite D:
+Costco collects personal and health information to explain why it gathers data, what it does with it, how it keeps it secure, and who to contact with questions. Costco may change this policy at any time, but changes to Section 5 regarding how it uses personal information will not apply to you unless you agree. Costco will show the last update date at the top of the policy and encourages you to read it carefully. Costco does not intend to collect information from children under 18 and asks that you do not provide such information.
+
+Rewrite E:
+Costco protects the privacy of personal and health information it holds. This policy explains why it collects data, what it does with it, how it secures the data, and who to contact for questions. Costco may change this policy at any time, but changes to Section 5 regarding data use require your consent and will not apply to you until you agree. Costco will show the last update date at the top of the policy. Costco does not intend to collect information from children under 18 and encourages parents to monitor their children's internet use. If you are under 18, you should not provide information on Costco's sites.
+
+Rewrite F:
+Costco collects personal and health information to explain why it gathers data, what it does with it, how it keeps it secure, and who to contact with questions. The company regularly reviews its policies and may change them at any time, but changes to Section 5 regarding how it uses personal information only apply if you agree. Costco will show the last update date at the top of the policy and encourages you to read it carefully. The company does not intend to collect information from children under 18 and asks that parents monitor their children's internet use. If you are under 18, you should not provide information on Costco's sites.

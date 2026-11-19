@@ -1,0 +1,8 @@
+{"rewrites": [
+{"label": "A", "verdicts": {"1": "partial", "2": "partial", "3": "kept", "4": "missing", "5": "kept"}, "evidence": {"1": "Nike and its partners collect data from your browser, device, or app", "2": "This data includes your IP address"}, "unsupported": []},
+{"label": "B", "verdicts": {"1": "partial", "2": "partial", "3": "kept", "4": "kept", "5": "kept"}, "evidence": {"1": "Nike and its partners collect data from your browser, device, or app", "2": "This data includes your IP address"}, "unsupported": []},
+{"label": "C", "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "kept", "5": "kept"}, "evidence": {"3": "We use this information to analyze and understand how you access and interact with our Platform, to assess and secure our services, and to optimize and improve performance."}, "unsupported": []},
+{"label": "D", "verdicts": {"1": "partial", "2": "partial", "3": "kept", "4": "kept", "5": "kept"}, "evidence": {"1": "Nike and its partners collect data from your browser, device, or app using cookies, pixel tags, and other technologies.", "2": "This data includes your IP address, device ID, browser type, operating system"}, "unsupported": []},
+{"label": "E", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept", "5": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "F", "verdicts": {"1": "partial", "2": "partial", "3": "kept", "4": "kept", "5": "kept"}, "evidence": {"1": "Nike and its partners collect data from your browser, device, or app using cookies, pixel tags, and other technologies.", "2": "This data includes your IP address, device ID, browser type, operating system"}, "unsupported": []}
+]}

@@ -1,0 +1,682 @@
+{
+  "schema_version": 1,
+  "task": "rewrite",
+  "name": "rewrite-keypoints-llama-cpp-v3",
+  "status": "recorded",
+  "created_utc": "2026-11-19T14:27:01.788419+00:00",
+  "code": {
+    "commit": "10505f8e4025806906d6336c46d1bf90ba2a3d1d",
+    "dirty": false,
+    "uncommitted_paths": [],
+    "uncommitted_diff_sha256": null
+  },
+  "judge": "claude-opus-5-5, in six fresh Claude Code subagent sessions of six or seven passages each, mixing both passage sets",
+  "runs": [
+    {
+      "path": "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+      "condition_sha256": "0b0ec49f5a7a0e3243c319598d5aba515c5769bf47c6c880c147cd213939b3fd"
+    },
+    {
+      "path": "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+      "condition_sha256": "0b0ec49f5a7a0e3243c319598d5aba515c5769bf47c6c880c147cd213939b3fd"
+    },
+    {
+      "path": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+      "condition_sha256": "baa65c55e3429f9faaf794d645131194fb78c43cb4a7fb36870bb6d94c13a5e3"
+    },
+    {
+      "path": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+      "condition_sha256": "f60ede2a2276d95f03997d8948dfb33ae545fc23f6ce69fdb0ba1a08ad87fd89"
+    },
+    {
+      "path": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+      "condition_sha256": "baa65c55e3429f9faaf794d645131194fb78c43cb4a7fb36870bb6d94c13a5e3"
+    },
+    {
+      "path": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+      "condition_sha256": "f60ede2a2276d95f03997d8948dfb33ae545fc23f6ce69fdb0ba1a08ad87fd89"
+    }
+  ],
+  "items": {
+    "passages": {
+      "name": "appsi139-sections-20",
+      "sha256": "30aa156eed4775719fa80e4eb902bf7398bf40ecd0cbc1f1f96f84545cf8b51d",
+      "n": 20
+    }
+  },
+  "checklist": {
+    "name": "appsi139-sections-20",
+    "sha256": "aaca5b482c09d5207890fe51da89effe8273939f2196cf1032eb988906f927d1",
+    "reviewed_by": null
+  },
+  "instructions": {
+    "name": "keypoints",
+    "sha256": "21226f0642995eec57bc2701cf56bf9bab7af4863aeb8c41cf9b0c3e3d60a69b",
+    "text": "You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.\n\nFor every rewrite and every key point, choose one verdict:\n- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as \"may\", \"only\", \"unless\", \"knowingly\", \"reasonable\", or \"at least 30 days\". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.\n- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.\n- missing: the rewrite does not convey the point.\n- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning \"may\" into \"will\" or \"does not knowingly\" into an absolute promise, or adding an exception or condition the passage does not make.\n\nWhere a point has a note, the note says how to treat an ambiguity in the passage; follow it.\n\nThen list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:\n- major: a reader who believed it would be wrong about their data, their rights, or their risks.\n- minor: it is unsupported, but it would not mislead a reader about those things.\nDo not list fair paraphrases, and do not list a claim you already counted as a contradicted point.\n\nJudge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.\n\nFor every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.\n\nReply with JSON only, in this form:\n{\"rewrites\": [{\"label\": \"A\", \"verdicts\": {\"1\": \"kept\", \"2\": \"partial\"}, \"evidence\": {\"2\": \"quoted words\"}, \"unsupported\": [{\"quote\": \"quoted words\", \"claim\": \"what the rewrite adds\", \"severity\": \"major\"}]}]}\nGive every rewrite a verdict for every point."
+  },
+  "passages": {
+    "128683-128686": {
+      "prompt_sha256": "de7ed45bc7b663670ced4ee9eaf7eefb78ae2a8a37ce718eb60a9d30a3083d8a",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+          "rewrite_sha256": "7ac64928b76ae49c67cf7b531334d0c59faf982f6270dee80d72cbd00af16867"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+          "rewrite_sha256": "8965fbf52103b32ba27c5fd4c3e3fbe3270f0cdaa074398b4bcbe4d30a70a180"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+          "rewrite_sha256": "937dab2ebe92c74a243c097b535b252ce7b7eefd366298506bd2d3d3cba11dfb"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+          "rewrite_sha256": "a18d6211f3e7a81231162f25d5c5427781e31987e41a23ad41849282cd98911e"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+          "rewrite_sha256": "8965fbf52103b32ba27c5fd4c3e3fbe3270f0cdaa074398b4bcbe4d30a70a180"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+          "rewrite_sha256": "7ac64928b76ae49c67cf7b531334d0c59faf982f6270dee80d72cbd00af16867"
+        }
+      },
+      "not_judged": {}
+    },
+    "150511-150514": {
+      "prompt_sha256": "c2d0c59ed0a541e73ccca2acb71de9433dac24dcace52ac0ee6e0e6dc1c6e6e5",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+          "rewrite_sha256": "6d81e7b9eeb9eb9637f4313bde2c8c80f4d20bffc328eadfbfbf61fbc64ec89e"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+          "rewrite_sha256": "cd8ef018924b8e55062cf83a004c9cca3b808991ecbef4c303ed82739327b0b8"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+          "rewrite_sha256": "4596f19eff7f82da0c5189f0eeda127cd3070f3751cf9f3108b12d65dfd27a4d"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+          "rewrite_sha256": "766fe3754d1d09faf33c14532f5d5945abd44c88e9254ba2bd9cf2d8f462abb4"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+          "rewrite_sha256": "83166f0029432ef6ffa11fb57052293a9d9458af8c132af51bf39f56a1e46162"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+          "rewrite_sha256": "ec2e87118e206fd21be8e55ff3fd727aae0d60ce71c332aaedcf3eea80d48ce7"
+        }
+      },
+      "not_judged": {}
+    },
+    "171794-171797": {
+      "prompt_sha256": "ab6e91c30f4c5e33d0cb75a7b82f4928e1b335fc7aa36d26a8127855c836b41d",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+          "rewrite_sha256": "211dea018d037abc0822a77711aab8f5f9c07237a745eeab0a17bbbfca2acad5"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+          "rewrite_sha256": "cc638661bf55e3a31ce893d89730736566635283f7a153ea2bad2fe329a1cfec"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+          "rewrite_sha256": "b186aaf7e372dd6cfe9a1fb9e1aec3ddae6718f8fa80ca02394c3ff2b4ce5037"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+          "rewrite_sha256": "148fb54da07c191e1c091224476d17d716d053d41d86797451efaa92fb8f0fe9"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+          "rewrite_sha256": "148fb54da07c191e1c091224476d17d716d053d41d86797451efaa92fb8f0fe9"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+          "rewrite_sha256": "08241f2c76a2ef1cfc0e4ead5fef5357d6fdc2c6d95b791c83d44d94ee039802"
+        }
+      },
+      "not_judged": {}
+    },
+    "127798-127802": {
+      "prompt_sha256": "7e38bbcb15fa5785c7ad95e34c0d9fff6273f96c18f52b6d7cff2c63b731dcca",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+          "rewrite_sha256": "8d79073b94c883d8670fb96b8b3491685fdcd949dbc3bccde1a13320de0a4119"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+          "rewrite_sha256": "d88a10d20067daa27accd81bff049c1020177f343a0e581220425e04d6237455"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+          "rewrite_sha256": "d88a10d20067daa27accd81bff049c1020177f343a0e581220425e04d6237455"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+          "rewrite_sha256": "8d79073b94c883d8670fb96b8b3491685fdcd949dbc3bccde1a13320de0a4119"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+          "rewrite_sha256": "d88a10d20067daa27accd81bff049c1020177f343a0e581220425e04d6237455"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+          "rewrite_sha256": "d196c6225ffa179a68d2a0716872a9f0b176dd0c15ede2d9ef5a649968fb3a15"
+        }
+      },
+      "not_judged": {}
+    },
+    "141380-141384": {
+      "prompt_sha256": "25a8f2ba3dcc468b31e179dc202ea11a854117b955b19b54543bf00bc98056e8",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+          "rewrite_sha256": "48235cecfc20c6f6d790b8ef5874c8eb05f80c0666a104da578a0cb9be1e2f68"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+          "rewrite_sha256": "48235cecfc20c6f6d790b8ef5874c8eb05f80c0666a104da578a0cb9be1e2f68"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+          "rewrite_sha256": "cc075050ff8725411339bf934c55b6250c430512c552af5db72c48a0d18e94b5"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+          "rewrite_sha256": "a44ab86fc7b4fb44eace39808b4d22ee0ee6172ccffcfa54398757b329f3d8b1"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+          "rewrite_sha256": "38041162814dcdfb14de9f1b102c89be0c0ab37f96c6c7340b42e6908a091605"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+          "rewrite_sha256": "48235cecfc20c6f6d790b8ef5874c8eb05f80c0666a104da578a0cb9be1e2f68"
+        }
+      },
+      "not_judged": {}
+    },
+    "135095-135100": {
+      "prompt_sha256": "b00e2ad910cac5c75b6c1eaeb6722b89a8837cfb0901395c4a70d054d7120591",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+          "rewrite_sha256": "fa9c1a4df0e792c35e08d5e6ff71112e1e9083ffb150520f472f8b9c0cf0da9e"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+          "rewrite_sha256": "19857774226bb193d0c28543af36b45ab175a08c06483ae83907cedf96b2c8e0"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+          "rewrite_sha256": "66930dd0310af0ba5fc37111db383198db15f6daed5935f9ed845f9038de4039"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+          "rewrite_sha256": "9aaa64090a681f90af69fdb39e18a327209fdbaa038e9de90f91bef76d11c2b8"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+          "rewrite_sha256": "9aaa64090a681f90af69fdb39e18a327209fdbaa038e9de90f91bef76d11c2b8"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+          "rewrite_sha256": "19857774226bb193d0c28543af36b45ab175a08c06483ae83907cedf96b2c8e0"
+        }
+      },
+      "not_judged": {}
+    },
+    "142032-142038": {
+      "prompt_sha256": "65cdee68c128cb01b230fe6e7f0addc91ea86c901acae6944b4c2d5e1452ceb5",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+          "rewrite_sha256": "231ba9d5c0d54341c055b6f11511ff26d547a2212961b67c3536e0cad066dd0b"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+          "rewrite_sha256": "2b259977e54ef17febacba3610691819289edebe4f1aab406f3fec34fde58fd0"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+          "rewrite_sha256": "f954f47b4bd7031dd17b91a2dd12e0d5f79339b066f29c09f282f7ff5f7213bb"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+          "rewrite_sha256": "f954f47b4bd7031dd17b91a2dd12e0d5f79339b066f29c09f282f7ff5f7213bb"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+          "rewrite_sha256": "a17a1f68ea746f1ae2f6f0801671e51776eba475cc9926aa64927c9cdbe58d4b"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+          "rewrite_sha256": "c5bbb03255e78c0e462702845adc42e696e26d54c7cda4086abb82f42f6482cf"
+        }
+      },
+      "not_judged": {}
+    },
+    "182196-182200": {
+      "prompt_sha256": "f4d28534175a5e709fe37fa1ab163896f09805a336415a4ca1a07b8e2202eaf4",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+          "rewrite_sha256": "de4cf00254c8bd2452506a37b2f15db307e3022ef5c0f36ca4b5b3393631e1c2"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+          "rewrite_sha256": "d4a0b1ef62b5b13ad5fc8c9ddecdae4f34e6ced96ba3f5d74c6e4d8e3600f57c"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+          "rewrite_sha256": "de4cf00254c8bd2452506a37b2f15db307e3022ef5c0f36ca4b5b3393631e1c2"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+          "rewrite_sha256": "43d2b4bd1ed3323ca096381c9282a8daef76ec5f4d095874ddc2ab5f22d3b3b4"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+          "rewrite_sha256": "de4cf00254c8bd2452506a37b2f15db307e3022ef5c0f36ca4b5b3393631e1c2"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+          "rewrite_sha256": "9401bf8bf3fc682c223245f148fa2630d201fbfa27a21a0cf61ff959dbebf33e"
+        }
+      },
+      "not_judged": {}
+    },
+    "175061-175066": {
+      "prompt_sha256": "132049a3b0b91f76c80de26912668694386fde6be3364caecb423b5f75515cc4",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+          "rewrite_sha256": "fda3e9a22e86e201bf7e40dac58741e7dfa7c1473409dc312e1f199f6a64d506"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+          "rewrite_sha256": "3f0e786f4f1c5e9ba2175744f1089b76beaa2fc4a384a92feea6fe51ca3a5ff3"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+          "rewrite_sha256": "2934668f9ec748265b961c30493ede9ae2028777ed1e3303490e1767874fe263"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+          "rewrite_sha256": "184436043c0f0f1a30ce79b5f09fd4033fe064a98336be96989fb9f38ca9ecd7"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+          "rewrite_sha256": "fca0f88cb6fcc467c155bf3e7635c2a1f7310fcdccd0cb0b775b781370f46f60"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+          "rewrite_sha256": "fda3e9a22e86e201bf7e40dac58741e7dfa7c1473409dc312e1f199f6a64d506"
+        }
+      },
+      "not_judged": {}
+    },
+    "126736-126743": {
+      "prompt_sha256": "60767af4b30c0b22931a3e358eab9f89efbc42a20016f82de6de5d526151c3ce",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+          "rewrite_sha256": "9771158b0aafc81d88739efd93cf920536f98b2e5207b3d8df56898315f2d19f"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+          "rewrite_sha256": "2ef65e91f286746dcc434566ab273f1238a149a437ef54dd368411426a25be54"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+          "rewrite_sha256": "42073f2041ac7dc30ae1c63217c2da3a63300e7b8981762580fca41ecda878e0"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+          "rewrite_sha256": "800c67f705928c00428187b90e452e3ccd67358fbcf98a05dfad06af06058e39"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+          "rewrite_sha256": "699a55a0a2a141d765eda17c7cceba0485e4fae26ad8511f7af393c2e1a50809"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+          "rewrite_sha256": "c22cbaab6ee914f0f9d79284805857a279d1e957d87a8dd3ab18bcf527ad6cb2"
+        }
+      },
+      "not_judged": {}
+    },
+    "176631-176636": {
+      "prompt_sha256": "ae5d016c2d80bf2502c35183d01dfa5ed0d27dbcf8a13e0e844b0cd730def9bc",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+          "rewrite_sha256": "f1c55f40d7f00ed64b7094c841ef087eadfe7629d84bd03fb4e8cafd5e4e93b2"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+          "rewrite_sha256": "a361b8c3a692b8bd62d0e12d1e653d7451e441f0b6cf47d262c5df9a5b7cb9fb"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+          "rewrite_sha256": "945e7721de984c83680762c2e5322543eec8f22697391ddd3115248349c4efd7"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+          "rewrite_sha256": "5c5883b9c12e11bdf21783979ee6fe11d8f9d300758fc8e223e5ffb9aa47c70d"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+          "rewrite_sha256": "a361b8c3a692b8bd62d0e12d1e653d7451e441f0b6cf47d262c5df9a5b7cb9fb"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+          "rewrite_sha256": "6ed8787e9eb7ffbb20c6cffa6dd14f9a67bac78cda5a9d72be3127a41b7d1f26"
+        }
+      },
+      "not_judged": {}
+    },
+    "168902-168910": {
+      "prompt_sha256": "b6284ed861b44785a7df19477b06201750731a99c8dc0e31c311a80f7456922d",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+          "rewrite_sha256": "fc4cdb806f43e700ae53f3e0bd76b4fdcfa132665102df1a96fcdd0070d69855"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+          "rewrite_sha256": "e17beceadd7134fb4221a9ed27b39f47a0551c6d218370698943b0fe41155725"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+          "rewrite_sha256": "e17beceadd7134fb4221a9ed27b39f47a0551c6d218370698943b0fe41155725"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+          "rewrite_sha256": "d2635170d6248b2d08b56bd6a2bc2103da1180d776d4be46b3797359ad3fa04d"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+          "rewrite_sha256": "2934b722f168e181f371b34943f2249bdfda87efeabdb9e7c7b19262e34e13b6"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+          "rewrite_sha256": "afce23a1dc37e7da67ebfc47f05ad92e2d4249cb87887ce61446da44a025148e"
+        }
+      },
+      "not_judged": {}
+    },
+    "181685-181690": {
+      "prompt_sha256": "fac0c931df3af9fb0147cb5312a7c363643b712f1359caee4a5e4d5e01550d7f",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+          "rewrite_sha256": "a5e438b269d44d52b44c87f2f83e63ad2c9b94243ec9f8790c51a117684a65f5"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+          "rewrite_sha256": "f1a1c7b607e5311965b02767c245ea02bffeb0ac39dad6d308fe5980384330f6"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+          "rewrite_sha256": "3dbefd51bd09ce76aa5cce8e7dbf3c9447b27d7016571b256add2ba43eecefd0"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+          "rewrite_sha256": "9999b41f96e7a86dfc959fd07dadd18482a9436a1cd8c4a6592a75749796ddb3"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+          "rewrite_sha256": "75a99104b26cbe1e16d73a1cb3e6df17654a7ec740b6992d0f5521a06fc21708"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+          "rewrite_sha256": "9999b41f96e7a86dfc959fd07dadd18482a9436a1cd8c4a6592a75749796ddb3"
+        }
+      },
+      "not_judged": {}
+    },
+    "135531-135539": {
+      "prompt_sha256": "035a92efa680e0efb7a20db18e5c6fbdaba0bd198d799e1a67f2214e1512b430",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+          "rewrite_sha256": "9f12a41370ead2c72046315450574fad0e75476f31d3b9492805594a5afa856f"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+          "rewrite_sha256": "a5c39484a5275e5cd435fcf822dd8ea5b9987f1f89d521d43604e06d36a13f2c"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+          "rewrite_sha256": "9f12a41370ead2c72046315450574fad0e75476f31d3b9492805594a5afa856f"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+          "rewrite_sha256": "e188e5f75a3e991a71da2be1a7baf94198d7e9bdba387c44914f0ae1591c0cd6"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+          "rewrite_sha256": "96ce74dfd4913f82311d4147f983860a745c1cb677115dddab3815e5956045f2"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+          "rewrite_sha256": "6c5a73a1bef0be67ce0a36d8614fdaf9c6794f9f9b084898ee7af3d9e7646816"
+        }
+      },
+      "not_judged": {}
+    },
+    "134810-134817": {
+      "prompt_sha256": "273919e9adc46aff32bbd4d6d081ca56e994851a6656027b5f2e3255fb195d3c",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+          "rewrite_sha256": "7760695c7358b3483f3041d9dc177c9e38953bd7ca233e53933c60ae75798f1a"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+          "rewrite_sha256": "ef10c3e7ff83ead61d17a6817a61fef4e61e7148f96dfee6eaf1237b19c39ddb"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+          "rewrite_sha256": "8ad1a469be47f5e8beb71c8e357e176e3585807c870185bec950d972c1f96090"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+          "rewrite_sha256": "a39d6273053cf75236087a2d12cce0de4bad368e0789f09f780700e605a02e16"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+          "rewrite_sha256": "0e27d064c4a7b94c39a9674480835bb20d8fbe8ce9486640eaada08865164971"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+          "rewrite_sha256": "e95c39c55cc6b0be9ed9c8003280d7bc32de20cf062299acfdac52f176f00527"
+        }
+      },
+      "not_judged": {}
+    },
+    "138072-138082": {
+      "prompt_sha256": "4f5c11b56c61b533dc765b3c9472a9b211592517a467f61aa2369a4b2c3a8bc6",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+          "rewrite_sha256": "ef632a5c399f0832f5f092c72df6309c7a403484347d3dc16e21f329ad008e98"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+          "rewrite_sha256": "f3a4b7aa38f87560870bc16b6a042ccdc50cf54331439853ca762e37adea184c"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+          "rewrite_sha256": "d2c7f72056d13b65fad344ca8b4e26dfc143370909ae5a319899eb775daae29f"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+          "rewrite_sha256": "404f1a641e52075ca8bdfcbb13990806fade9e044c88974d8a629d2a0e716072"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+          "rewrite_sha256": "02c6bde214958dd3c89bdb686068d5101f311c64fd37f8eb52898ace6f2604e1"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+          "rewrite_sha256": "da6053db570a3770e50d07f14beede2bc604ab6d6c350f2b94b06715272db232"
+        }
+      },
+      "not_judged": {}
+    },
+    "162746-162749": {
+      "prompt_sha256": "a6e6ea5b9c40b01b03bead51b12f70540736b2c3be362bceea12265edd4c3259",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+          "rewrite_sha256": "53ed7eb97372ea708e99e0ba0319b5a361188d1ef911d1f112b1a529b907a4c1"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+          "rewrite_sha256": "b8a706c4b9e009d0edc6734d31e50d237fb145ac83139d8544c31b130406a9a9"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+          "rewrite_sha256": "38c4454895b477e6e6add5484184218a13dbfd3e02120c60b019fc23999a6b85"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+          "rewrite_sha256": "7e4cdc2f1b0fa64b3147a1d19edfe598b0ff4ce8f3de892a2d37e143616cc57c"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+          "rewrite_sha256": "f22fa4d572a35810a1b2973f689e534d2fbfdb12972606c8ffed39b8a285547f"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+          "rewrite_sha256": "c6fa049b554e6ef084069ec724d956ab4bae99aeade70202fecbd6df360e0729"
+        }
+      },
+      "not_judged": {}
+    },
+    "181306-181317": {
+      "prompt_sha256": "928064fab27dc4841d5bdb40af2828c85be7a824ea4718684d93bd355c12abd3",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+          "rewrite_sha256": "4c2dbbf3c3f397e4551421d793e171ec2c3036a8a77c1dca36487c3f5cd726d5"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+          "rewrite_sha256": "24c9c9523a01f06366ec11d6646fc8e3c923a6ca4f4c33d5470a466a8175dd9d"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+          "rewrite_sha256": "4c2dbbf3c3f397e4551421d793e171ec2c3036a8a77c1dca36487c3f5cd726d5"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+          "rewrite_sha256": "24c9c9523a01f06366ec11d6646fc8e3c923a6ca4f4c33d5470a466a8175dd9d"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+          "rewrite_sha256": "e4be1cd265106ce1f8b4917df7c207fb5f885456b36ca16f2767643f993ae030"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+          "rewrite_sha256": "4762d6d4021f7a10be12981380c4998265fdce85ccef5b42376ced192c45b78c"
+        }
+      },
+      "not_judged": {}
+    },
+    "133334-133338": {
+      "prompt_sha256": "e85b9919fd840eeae5b52b6d8b2814edb07d3204566a8ee426ab809761e95c66",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+          "rewrite_sha256": "a206bb5f86cb2664950184cc981aa623ced3e4b5fc447a8d3dd2916b7830c10c"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+          "rewrite_sha256": "c60c68f0a785984f73ced6b23f0d3a6854dd8bbe79ed2e07a3f11062980188a0"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+          "rewrite_sha256": "a688fea634da9cfafae5c7692294bc0492ec784a7765c7858b35f6bfc75a214d"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+          "rewrite_sha256": "993a2e4c31ea921f853415f9a3419e5a80569d9bcf93b4f7e58e5707141243dd"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+          "rewrite_sha256": "469259c5c9a56dfd09d28e70a9b3643f4552c5a6de01573995af15cc206fed4d"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+          "rewrite_sha256": "59cb477165f4d9c34635b0ae23bcf31cf0a37708bbf658cb3aaaac90be9c06f5"
+        }
+      },
+      "not_judged": {}
+    },
+    "144382-144393": {
+      "prompt_sha256": "4bf7e8588d52219f9e56c5b062679ff3ebcabf7c6c1107f52ebfc962e84ecf0c",
+      "labels": {
+        "A": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261118-215035Z",
+          "rewrite_sha256": "0da79ee2985bb9aa88742ec3a42944a52af5c1ffb972101278e43c9195708790"
+        },
+        "B": {
+          "run": "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261119-140609Z",
+          "rewrite_sha256": "e66e37cd131afebc68b1bebf69f158e8b99ab69e3a205fa011a940af439a6afe"
+        },
+        "C": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261026-160942Z",
+          "rewrite_sha256": "57395bd1b64c5106cf306422a33d8e573ab57e1bf7b0f3ee23af428bd0839257"
+        },
+        "D": {
+          "run": "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+          "rewrite_sha256": "57395bd1b64c5106cf306422a33d8e573ab57e1bf7b0f3ee23af428bd0839257"
+        },
+        "E": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-135539Z",
+          "rewrite_sha256": "b1e01f2112fa815dbf07a49d6abc32426fc7184e65b73545fe802d9b71e91ca1"
+        },
+        "F": {
+          "run": "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261119-141231Z",
+          "rewrite_sha256": "d3a007744edf5c56d41d46220a254b428f9b8ea6aee0770fa7f9a8dc586d9382"
+        }
+      },
+      "not_judged": {}
+    }
+  },
+  "recorded_utc": "2026-11-19T14:36:06.847219+00:00",
+  "replies": {
+    "128683-128686": "aa2a7eff81207d0c38fc10d3c267742ce43b93ead904dfa39382234df3dcde12",
+    "150511-150514": "00fa186e22d158b04fd36a2d42a381ad05862c4a85efc36dcb89ec3a85e68292",
+    "171794-171797": "42347d4c8e526598321d8960b249ec544c5427140ba14c8c579d5ffcdd218f72",
+    "127798-127802": "f79cdabe9f090ec824ff5d8a909fdd798537570e2ea8a74f8792aedb045755e8",
+    "141380-141384": "20ca69a96896897e582625e4836dd8cb288ae7bd44de88de0cb92eb9390a29bc",
+    "135095-135100": "2cf86a53e07f554b6a1abcbbef41d37d1fe7f3d5bc32620005fbc604027e6056",
+    "142032-142038": "6a6d4e60ee1cf1ba36aedda2e132f052e02f08c51f061d468f1847c997b74d13",
+    "182196-182200": "68efb7c635ed1a084592d8133b1abda02fdc98db5a7405efe953edece69f6eb1",
+    "175061-175066": "419ee0d9e3f47d1822ee6054a4eaa50255602117de3aeee1dd5616ca575428b4",
+    "126736-126743": "e387b54452d55e150b64557af11dd0cfdab4e5e0d0c8a9eb51a195a9b4ca4b28",
+    "176631-176636": "3501cb044d8400115efb4a3115561f8825013ebe1767a025f3120d0f966031a3",
+    "168902-168910": "0f10ee0ea89726b00f148c8119c5008f4638459e62336725f35aba37fbc75c8e",
+    "181685-181690": "8e5786729342656cb166cafb7cc28d94de26904a9db8994552960654917849ed",
+    "135531-135539": "9f2105d173263104f82e7b3a198298de305da2ce57fa00d87e1a4c29f487e9c6",
+    "134810-134817": "da95c017d3423b938e8b8b2335856cb19ceeb78f6ea4285bf351fcb5d5d836a0",
+    "138072-138082": "c4bc24e8498ebe44ed15861bf92e01a01e0c8a3b81d2cd062d86be1b6f5d8f79",
+    "162746-162749": "3b1c3f28259e2c03c3682e2a81f2d7dfe8391145cdb4f772c80d44a70e032e35",
+    "181306-181317": "c1c6219465973d17096c268725cc2a064eb80857ca0e33ad930f2dcb8c337395",
+    "133334-133338": "13653925fb30354e8aebf83b26195da5f83fbf8bf0d0db10a3574e930f27bb36",
+    "144382-144393": "cb27e8a799aaa9543dc62f4919a23e0bfa920a4597eaa90119a9f4d1bab2eaa5"
+  }
+}

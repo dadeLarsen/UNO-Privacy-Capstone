@@ -68,7 +68,7 @@ Findings:
 - **The instruction prefix helps EmbeddingGemma 2 only a little.** Against 0.575 with its classification instruction, sentence similarity scores 0.610 and search mode 0.605 with the sentence as the query or 0.655 with each category description as the query. Only the 0.655 gain is beyond chance on 200 sentences, and it was picked from three tries on the same pilot. Each instruction mostly changes which categories collect too many sentences; User Choice sentences go to Do Not Track under all four. Source: [comparisons/embeddinggemma2-instructions.toml](comparisons/embeddinggemma2-instructions.toml).
 - **Library versions matter for JEV-9B.** Moving from transformers 5.16.1 to 5.19.0 made JEV 1.6–2.3× faster and shifted its logits slightly; two INT8 near-ties flipped in opposite directions. Qwen3-14B and privacy-model were unaffected. The original JEV runs are kept for comparison in [comparisons/qwen-privacy-jev.toml](comparisons/qwen-privacy-jev.toml).
 - **Quantization barely changes accuracy.** Qwen3-14B: 0.890 INT8, 0.885 NF4 (0.900 BF16 with CPU offload, in the AirLLM archive). JEV-9B: 0.860, 0.860, 0.855. NF4 roughly halves memory.
-- **Rewriting is reported in its own document.** Every measurement here is classification. [docs/rewriting-findings.md](docs/rewriting-findings.md) gives the judged rewriting results, and how fast the recommended rewriter runs through bitsandbytes and through llama.cpp.
+- **Rewriting is reported in its own document.** Every measurement here is classification. [docs/rewriting-findings.md](docs/rewriting-findings.md) gives the judged rewriting results, how fast the recommended rewriter runs through bitsandbytes and through llama.cpp, and how the judge graded its rewrites from each.
 
 ### Shifting the heads toward APPSI-139's category mix
 
@@ -235,6 +235,8 @@ uv run pbench judge record results/judgments/rewrite/rewrite-keypoints-v3
 [scoring]
 judgments = "rewrite-keypoints-v3"
 ```
+
+`pbench judge prepare` reads only the file's `runs`, so the file may name runs that `pbench compare` refuses to put together, such as two runs of one model, precision, device, and prompt. `comparisons/rewrite-keypoints-llama-cpp-v3.toml` is such a judging set: one judge grades all six runs side by side, and its `-desktop` and `-macbook` twins each score three of them from that one judgment.
 
 ## Extending
 

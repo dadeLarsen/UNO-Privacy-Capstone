@@ -1,0 +1,8 @@
+{"rewrites": [
+{"label": "A", "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "kept"}, "evidence": {"3": "sometimes your location or route data if it can be linked to you"}, "unsupported": []},
+{"label": "B", "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "kept"}, "evidence": {"3": "sometimes your location or route if it can be reasonably linked to you"}, "unsupported": []},
+{"label": "C", "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "kept"}, "evidence": {"3": "sometimes your location or route if it can be reasonably linked to your identity"}, "unsupported": []},
+{"label": "D", "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "kept"}, "evidence": {"3": "in some cases, location or route data that Waze can reasonably link to that information"}, "unsupported": []},
+{"label": "E", "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "kept"}, "evidence": {"3": "sometimes your location or route if it can be linked to your identity"}, "unsupported": []},
+{"label": "F", "verdicts": {"1": "kept", "2": "kept", "3": "partial", "4": "kept"}, "evidence": {"3": "in some cases, location or route data that Waze can reasonably link to you"}, "unsupported": []}
+]}

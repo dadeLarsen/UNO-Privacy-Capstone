@@ -1,0 +1,8 @@
+{"rewrites": [
+{"label": "A", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept", "5": "kept", "6": "kept"}, "evidence": {"1": "You can request your personal data in a structured, commonly used, and machine-readable format."}, "unsupported": []},
+{"label": "B", "verdicts": {"1": "partial", "2": "kept", "3": "contradicted", "4": "kept", "5": "kept", "6": "kept"}, "evidence": {"1": "You can request your personal data in a structured, machine-readable format.", "3": "provided the processing is based on your consent, a contract, or is done automatically"}, "unsupported": []},
+{"label": "C", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept", "5": "kept", "6": "kept"}, "evidence": {"1": "You can request your personal data in a structured, machine-readable format."}, "unsupported": []},
+{"label": "D", "verdicts": {"1": "partial", "2": "partial", "3": "contradicted", "4": "partial", "5": "kept", "6": "kept"}, "evidence": {"1": "You can request your personal data in a structured, machine-readable format.", "2": "You may also send that data directly to another controller", "3": "if the processing is based on your consent, a contract, or is carried out by automated means", "4": "send that data directly to another controller"}, "unsupported": []},
+{"label": "E", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept", "5": "kept", "6": "kept"}, "evidence": {"1": "You can request your personal data in a structured, machine-readable format."}, "unsupported": []},
+{"label": "F", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "kept", "5": "kept", "6": "kept"}, "evidence": {"1": "You can request your personal data in a structured, commonly used, and machine-readable format."}, "unsupported": []}
+]}

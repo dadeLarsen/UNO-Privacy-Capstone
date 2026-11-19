@@ -1,0 +1,57 @@
+{"rewrites": [
+{"label": "A",
+ "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "partial", "5": "partial", "6": "partial", "7": "missing", "8": "kept"},
+ "evidence": {
+  "1": "We collect your name, role, contact details, employer information",
+  "4": "provide and customize our travel services",
+  "5": "send you marketing offers and event invitations",
+  "6": "manage your company's SkyMiles for Business program, send you marketing offers and event invitations, recognize your role for training and support"
+ },
+ "unsupported": []},
+{"label": "B",
+ "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "partial", "5": "partial", "6": "partial", "7": "missing", "8": "kept"},
+ "evidence": {
+  "4": "tailor services",
+  "5": "send marketing offers",
+  "6": "manage your SkyMiles for Business program, send marketing offers, recognize your role for training and support"
+ },
+ "unsupported": []},
+{"label": "C",
+ "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "missing", "5": "partial", "6": "partial", "7": "missing", "8": "kept"},
+ "evidence": {
+  "1": "We collect your name, role, contact details, employer information, and login credentials.",
+  "5": "send you marketing offers and event invitations",
+  "6": "manage your company's SkyMiles for Business program, send you marketing offers and event invitations, recognize your role for training and support"
+ },
+ "unsupported": [
+  {"quote": "provide and improve our travel tools", "claim": "Says the information is used to improve the travel tools, a purpose the passage does not state; the passage speaks of enabling use of the tools and tailoring products for you.", "severity": "minor"}
+ ]},
+{"label": "D",
+ "verdicts": {"1": "partial", "2": "kept", "3": "partial", "4": "partial", "5": "partial", "6": "partial", "7": "missing", "8": "kept"},
+ "evidence": {
+  "1": "We collect your name, role, contact details, employer information",
+  "3": "conduct business with partners",
+  "4": "tailor products and services",
+  "5": "send marketing communications and event invitations",
+  "6": "manage your company's SkyMiles for Business program, send marketing communications and event invitations, recognize your role for training and support"
+ },
+ "unsupported": []},
+{"label": "E",
+ "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "partial", "5": "partial", "6": "partial", "7": "missing", "8": "kept"},
+ "evidence": {
+  "4": "tailor services",
+  "5": "send marketing offers",
+  "6": "manage your SkyMiles for Business program, send marketing offers, recognize your role for training and support"
+ },
+ "unsupported": []},
+{"label": "F",
+ "verdicts": {"1": "partial", "2": "kept", "3": "partial", "4": "partial", "5": "partial", "6": "partial", "7": "missing", "8": "kept"},
+ "evidence": {
+  "1": "We collect your name, role, contact details, employer information, and login credentials.",
+  "3": "conduct business with partners",
+  "4": "tailor products and services",
+  "5": "send marketing communications",
+  "6": "manage your company's travel benefits, send marketing communications, recognize your role for training and support"
+ },
+ "unsupported": []}
+]}

@@ -1,0 +1,8 @@
+{"rewrites": [
+{"label": "A", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "partial", "5": "kept"}, "evidence": {"4": "automated scanning for known vulnerabilities or malware, to assist with support matters"}, "unsupported": []},
+{"label": "B", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "partial", "5": "kept"}, "evidence": {"4": "detecting malware or Terms of Service violations, supporting you, maintaining service integrity, complying with the law if content is illegal"}, "unsupported": []},
+{"label": "C", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "partial", "5": "kept"}, "evidence": {"4": "to comply with legal obligations if the content violates the law"}, "unsupported": []},
+{"label": "D", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "partial", "5": "kept"}, "evidence": {"4": "to comply with legal obligations if the content violates the law"}, "unsupported": []},
+{"label": "E", "verdicts": {"1": "partial", "2": "kept", "3": "kept", "4": "partial", "5": "kept"}, "evidence": {"1": "protect your personal data from unauthorized access, changes, or loss, and to keep it accurate.", "4": "detecting malware or Terms of Service violations, supporting you, maintaining service integrity, complying with the law if content is illegal"}, "unsupported": []},
+{"label": "F", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "partial", "5": "kept"}, "evidence": {"4": "automated scanning for known vulnerabilities or malware, to assist with support"}, "unsupported": []}
+]}

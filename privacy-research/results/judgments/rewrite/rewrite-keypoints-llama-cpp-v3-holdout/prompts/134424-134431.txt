@@ -1,0 +1,51 @@
+You check plain-language rewrites of one privacy policy passage against a checklist of the key points that passage makes. You are given the passage, its numbered key points (some marked critical, some with a note), and several rewrites labelled with letters. You do not know which model wrote each rewrite; judge each one on its own, against the passage.
+
+For every rewrite and every key point, choose one verdict:
+- kept: the rewrite conveys the point, with the conditions, exceptions, and scope words that change its meaning, such as "may", "only", "unless", "knowingly", "reasonable", or "at least 30 days". Different wording is fine, and so is a shorter form that loses nothing a reader would act on.
+- partial: the rewrite conveys the point but loses or blurs a part that matters: a condition, an exception, a scope word, who does it, or a significant item from a list.
+- missing: the rewrite does not convey the point.
+- contradicted: the rewrite says something the point rules out, for example reversing a promise, turning "may" into "will" or "does not knowingly" into an absolute promise, or adding an exception or condition the passage does not make.
+
+Where a point has a note, the note says how to treat an ambiguity in the passage; follow it.
+
+Then list each claim in the rewrite that the passage does not support: an invented fact, example, guarantee, condition, exception, or purpose, or a statement that makes a promise stronger or weaker than the passage does. Rate each one:
+- major: a reader who believed it would be wrong about their data, their rights, or their risks.
+- minor: it is unsupported, but it would not mislead a reader about those things.
+Do not list fair paraphrases, and do not list a claim you already counted as a contradicted point.
+
+Judge meaning only, not style, length, or formatting. Do not reward a rewrite for copying the passage, and do not penalize it for leaving out something the checklist does not include.
+
+For every partial or contradicted verdict and every unsupported claim, quote the words from the rewrite that show it.
+
+Reply with JSON only, in this form:
+{"rewrites": [{"label": "A", "verdicts": {"1": "kept", "2": "partial"}, "evidence": {"2": "quoted words"}, "unsupported": [{"quote": "quoted words", "claim": "what the rewrite adds", "severity": "major"}]}]}
+Give every rewrite a verdict for every point.
+
+Passage:
+The laws in some jurisdictions require companies to tell you about the legal ground they rely on to use or disclose your “personal data” as such term is defined under applicable law. To the extent that those laws apply, our legal grounds are as follows: * To honor our contractual commitments to you: Much of our processing of personal data is to meet our contractual obligations to our customers, or to take steps at customers’ requests in anticipation of entering into a contract with them. For example, we handle personal data on this basis to provide you with tickets to events. * Consent: Where required by law, and in some other cases, we handle personal data on the basis of your implied or express consent. * Legitimate interests: In many cases, we handle personal data on the ground that it furthers our legitimate interests in ways that are not overridden by the interests or fundamental rights and freedoms of the affected individuals: * Customer service * Marketing * Protecting our customers, personnel, and property * Analyzing and improving our business * Managing legal issues * We may also process personal data for the legitimate interests of our business partners, such as to assist with marketing. * Legal compliance: We need to use and disclose personal data in certain ways to comply with our legal obligations. * To protect the vital interests of the individual or others: For example, we may collect or disclose personal data to help resolve an urgent medical situation.
+
+Key points:
+1. Some laws require the company to state its legal grounds for using your personal data; where those laws apply, its grounds are as follows.
+2. Contract: much of its processing is to meet its contractual obligations to customers or to take steps toward a contract, such as providing event tickets.
+3. (critical) Consent: where the law requires it, and in some other cases, it relies on your implied or express consent.
+4. (critical) Legitimate interests: in many cases it relies on its legitimate interests where your interests or fundamental rights and freedoms do not override them, such as customer service, marketing, protecting people and property, improving its business, and managing legal issues.
+5. (critical) It may also process personal data for its business partners' legitimate interests, such as marketing.
+6. It also processes data to comply with the law, and to protect someone's vital interests, such as in an urgent medical situation.
+
+Rewrite A:
+Some laws require us to explain the legal reasons we use or share your personal data. When those laws apply, our grounds are: honoring our contractual commitments to you, such as providing event tickets; obtaining your consent where required or appropriate; pursuing our legitimate interests like customer service, marketing, protecting people and property, improving our business, managing legal issues, or assisting business partners, provided these do not override your rights; complying with legal obligations; and protecting vital interests, such as resolving urgent medical situations.
+
+Rewrite B:
+We process your personal data based on several legal grounds. First, we use your data to fulfill our contractual obligations to you, such as providing event tickets. Second, where required by law or in some cases, we rely on your consent, either express or implied. Third, we process data to pursue our legitimate interests, including customer service, marketing, protecting people and property, analyzing our business, managing legal issues, and assisting our business partners, provided these interests are not overridden by your rights. Fourth, we use your data to comply with legal obligations. Finally, we may process your data to protect vital interests, such as resolving urgent medical situations.
+
+Rewrite C:
+In some jurisdictions, laws require us to explain the legal grounds for using or disclosing your personal data. When those laws apply, we rely on several bases: first, to honor our contractual commitments to you, such as providing event tickets or taking steps to fulfill your requests. Second, where required by law or in other cases, we use your implied or express consent. Third, in many cases, we process data to further our legitimate interests, including customer service, marketing, protecting people and property, analyzing our business, managing legal issues, and assisting business partners with marketing, provided these interests are not overridden by your rights. Fourth, we use and disclose data to comply with legal obligations. Finally, we may process data to protect the vital interests of you or others, such as resolving urgent medical situations.
+
+Rewrite D:
+We process your personal data based on several legal grounds. We use your data to fulfill our contractual obligations to you, such as providing event tickets. We also process your data when you give us consent, either explicitly or implicitly, where required by law. In many cases, we process your data to pursue our legitimate interests, including customer service, marketing, protecting people and property, analyzing our business, managing legal issues, and assisting our business partners. We may also process your data to comply with legal obligations. Finally, we may process your data to protect vital interests, such as resolving urgent medical situations.
+
+Rewrite E:
+Some laws require us to explain the legal reasons we use or share your personal data. When those laws apply, our grounds are: honoring our contractual commitments to you, such as providing event tickets; obtaining your consent where required or implied; pursuing our legitimate interests like customer service, marketing, protecting people and property, analyzing our business, managing legal issues, or assisting business partners; complying with legal obligations; and protecting vital interests, such as resolving urgent medical situations.
+
+Rewrite F:
+In some jurisdictions, laws require us to explain the legal grounds for using or disclosing your personal data. When those laws apply, we rely on several bases: first, to honor our contractual commitments to you, such as providing event tickets or taking steps to fulfill your requests. Second, where required by law or in other cases, we use your implied or express consent. Third, in many cases, we process data to further our legitimate interests, including customer service, marketing, protecting people and property, analyzing our business, managing legal issues, and assisting business partners with marketing, provided these do not override your rights. Fourth, we use data to comply with legal obligations. Finally, we may process data to protect the vital interests of you or others, such as resolving urgent medical situations.

@@ -1,0 +1,8 @@
+{"rewrites": [
+{"label": "A", "verdicts": {"1": "kept", "2": "partial", "3": "kept", "4": "kept"}, "evidence": {"2": "you might still receive emails already sent"}, "unsupported": []},
+{"label": "B", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "C", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "D", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "E", "verdicts": {"1": "kept", "2": "kept", "3": "kept", "4": "kept"}, "evidence": {}, "unsupported": []},
+{"label": "F", "verdicts": {"1": "kept", "2": "partial", "3": "kept", "4": "kept"}, "evidence": {"2": "you might still receive emails already sent"}, "unsupported": []}
+]}
