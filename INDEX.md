@@ -41,7 +41,7 @@ chooses between them at startup.
 | File | Status | Contents |
 | --- | --- | --- |
 | [README.md](modelService/README.md) | Current | Setup, run, API examples, configuration, and what is not implemented |
-| [pyproject.toml](modelService/pyproject.toml) | Current | Dependencies, CUDA/CPU torch groups, and the `model-service` command |
+| [pyproject.toml](modelService/pyproject.toml) | Current | Dependencies, the CUDA and CPU groups for torch and llama-cpp-python, and the `model-service` command |
 | [src/model_service/](modelService/src/model_service/) | Current | `app.py` routes, `classifier.py` benchmark adapter, `idle.py` idle GPU release, `sentences.py` splitter, `settings.py` configuration and the GPU or CPU choice, and `taxonomy.py` with `taxonomy.json`, the benchmark's ten categories plus each one's display name, definition, and color |
 | [tests/](modelService/tests/) | Current | API and idle-release tests with a fake classifier, and classifier, splitter, settings, and taxonomy tests; no model or GPU needed |
 
@@ -171,6 +171,6 @@ One-time scripts that froze data files or imported runs. Each refuses to overwri
 
 | File | Contents |
 | --- | --- |
-| [pyproject.toml](privacy-research/pyproject.toml), [uv.lock](privacy-research/uv.lock), [.python-version](privacy-research/.python-version) | Python 3.12 and every package pinned, transitive ones included; torch comes from the CUDA 13.2 index, and llama-cpp-python from its built CPU wheel on Windows and Linux x64, pinned by hash, or from source elsewhere. |
+| [pyproject.toml](privacy-research/pyproject.toml), [uv.lock](privacy-research/uv.lock), [.python-version](privacy-research/.python-version) | Python 3.12 and every package pinned, transitive ones included; torch comes from the CUDA 13.2 index, and llama-cpp-python 0.3.37 from its built CUDA 13.2 wheel on Windows and Linux x64, pinned by hash, or from source with the `cpu` group and on every other platform. |
 | [.gitattributes](privacy-research/.gitattributes) | LF line endings, and no line-ending conversion under `data/` and `results/`, whose bytes are hashed. |
 | [.gitignore](privacy-research/.gitignore) | The environment, caches, and the generated `results/` folders. |

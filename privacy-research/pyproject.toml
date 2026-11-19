@@ -8,7 +8,7 @@ dependencies = [
     "bitsandbytes==0.50.2",
     "huggingface-hub==1.33.0",
     "jinja2==3.1.6",
-    "llama-cpp-python==0.3.36",
+    "llama-cpp-python==0.3.37",
     "matplotlib==3.11.2",
     "numpy==2.5.3",
     "peft==0.21.0",
@@ -27,8 +27,8 @@ pbench = "privacy_bench.cli:main"
 
 [dependency-groups]
 dev = ["pytest==9.1.1"]
-# Which torch build to install; see Setup in README.md.
-cu132 = ["torch==2.15.0", "torchvision==0.29.2"]
+# Which torch build to install, and with it which llama.cpp build; see Setup in README.md.
+cu132 = ["torch==2.15.0", "torchvision==0.29.2", "llama-cpp-python==0.3.37"]
 cpu = ["torch==2.15.0", "torchvision==0.29.2"]
 
 [build-system]
@@ -94,13 +94,15 @@ constraint-dependencies = [
 [tool.uv.sources]
 torch = [{ index = "pytorch-cu132", group = "cu132" }, { index = "pytorch-cpu", group = "cpu" }]
 torchvision = [{ index = "pytorch-cu132", group = "cu132" }, { index = "pytorch-cpu", group = "cpu" }]
-# PyPI has only the source of llama-cpp-python. Windows and Linux on x64 take the project's built CPU wheel
-# by its URL, so that uv.lock records its hash: the project's wheel index publishes none. Every other
-# platform builds from source. A Mac's build includes llama.cpp's Metal GPU backend; the built Mac wheels of
-# 0.3.35 and 0.3.36 are damaged archives.
+# PyPI has only the source of llama-cpp-python. With the cu132 group, Windows and Linux on x64 take the
+# project's built CUDA 13.2 wheel by its URL, so that uv.lock records its hash. That wheel computes on the
+# GPU or on the CPU. It needs cuBLAS 13 and ships none: on Windows `import llama_cpp` works only after
+# `import torch`, whose CUDA build holds cublas64_13.dll, and privacy_bench imports torch first. Everything
+# else builds from source: the cpu group, because 0.3.37 has no built CPU wheel, and every other platform.
+# A Mac's build includes llama.cpp's Metal GPU backend.
 llama-cpp-python = [
-    { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36/llama_cpp_python-0.3.36-py3-none-win_amd64.whl", marker = "sys_platform == 'win32' and platform_machine == 'AMD64'" },
-    { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36/llama_cpp_python-0.3.36-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", marker = "sys_platform == 'linux' and platform_machine == 'x86_64'" },
+    { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.37-cu132/llama_cpp_python-0.3.37-py3-none-win_amd64.whl", marker = "sys_platform == 'win32' and platform_machine == 'AMD64'", group = "cu132" },
+    { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.37-cu132/llama_cpp_python-0.3.37-py3-none-manylinux_2_35_x86_64.whl", marker = "sys_platform == 'linux' and platform_machine == 'x86_64'", group = "cu132" },
 ]
 
 [[tool.uv.index]]

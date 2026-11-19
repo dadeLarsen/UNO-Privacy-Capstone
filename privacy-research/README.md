@@ -148,7 +148,11 @@ uv run pytest
 
 Set `UV_NO_SYNC` before any other `uv` command. After pulling a change to `uv.lock`, rerun the `uv sync` line.
 
-Both setups also install `llama-cpp-python`, which runs GGUF models through llama.cpp. Windows and Linux on x64 get a built wheel that uses only the CPU, pinned by its hash in `uv.lock`. Every other platform compiles the package during `uv sync`. On a Mac that needs the Xcode command line tools, and the build includes llama.cpp's Metal GPU backend.
+Both setups also install `llama-cpp-python` 0.3.37, which runs GGUF models through llama.cpp. The rewrite runs through llama.cpp recorded so far used 0.3.36, and each run's `run.json` names its version.
+
+- **With an NVIDIA GPU**, Windows and Linux on x64 get the package's built CUDA 13.2 wheel, pinned by its hash in `uv.lock`. It runs a model on the GPU or on the CPU. On Windows it loads only after torch, whose CUDA build holds the cuBLAS library it needs; `privacy_bench.models` imports torch first for that reason.
+- **Without one**, `uv sync` compiles the package, because 0.3.37 has no built CPU wheel. That needs CMake and a C++ compiler, which on Windows come with the Visual Studio build tools, and it took about four minutes on the desktop. The build uses only the CPU.
+- **Every other platform** compiles it too. On a Mac that needs the Xcode command line tools, and the build includes llama.cpp's Metal GPU backend.
 
 Models resolve from the standard Hugging Face cache (`~/.cache/huggingface/hub`), and every condition pins a full commit. Runs never download, so fetch a condition's model once while online:
 
@@ -206,7 +210,7 @@ $env:CUDA_VISIBLE_DEVICES = "-1"
 uv run pbench run conditions/rewrite/qwen3.5-4b-nf4-cpu-summary-v3.toml
 ```
 
-A condition whose `[model]` table names a `file` runs that GGUF file through llama.cpp instead of transformers. `id` and `revision` pin the repository that holds the file, and `pbench download` fetches only that file. `precision` must match the file's type; `q4_k_m` is the one accepted. `device` is `cpu`, or `gpu` to put the whole model on the GPU backend of the installed llama.cpp build; the CPU wheel has none, and a `gpu` run stops there before it loads the model. A `cpu` run loads the model with no GPU device, so a build that has a GPU backend, such as a Mac's, still computes everything on the CPU. The prompt comes from the chat template stored in the file, and each response records the same hashes of the rendered prompt and its token IDs as a transformers run, so two runs show whether they read the same input. Every passage starts from an empty context, so the time includes the whole prompt.
+A condition whose `[model]` table names a `file` runs that GGUF file through llama.cpp instead of transformers. `id` and `revision` pin the repository that holds the file, and `pbench download` fetches only that file. `precision` must match the file's type; `q4_k_m` is the one accepted. `device` is `cpu`, or `gpu` to put the whole model on the GPU backend of the installed llama.cpp build; a build compiled without an NVIDIA GPU has none, and a `gpu` run stops there before it loads the model. A `cpu` run loads the model with no GPU device, so a build that has a GPU backend, such as the CUDA wheel or a Mac's, still computes everything on the CPU. The prompt comes from the chat template stored in the file, and each response records the same hashes of the rendered prompt and its token IDs as a transformers run, so two runs show whether they read the same input. Every passage starts from an empty context, so the time includes the whole prompt.
 
 ```powershell
 uv run pbench download conditions/rewrite/qwen3.5-4b-q4km-cpu-summary-v3.toml
