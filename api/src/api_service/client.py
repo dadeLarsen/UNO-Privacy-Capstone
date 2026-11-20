@@ -34,16 +34,8 @@ class ModelServiceClient:
     def analyze(self, text: str, include_scores: bool = False) -> dict:
         return self._request("POST", "/analyze", json={"text": text, "include_scores": include_scores})
 
-    def rewrite(self, text: str, style: str, source_sentence_ids: list[int]) -> dict:
-        return self._request(
-            "POST",
-            "/rewrite",
-            json={
-                "text": text,
-                "style": style,
-                "source_sentence_ids": source_sentence_ids,
-            },
-        )
+    def rewrite(self, text: str) -> dict:
+        return self._request("POST", "/rewrite", json={"text": text})
 
     def _request(self, method: str, path: str, **kwargs: object) -> dict:
         try:

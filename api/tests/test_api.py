@@ -1,3 +1,4 @@
+import json
 import time
 from uuid import UUID
 
@@ -108,25 +109,81 @@ def test_summaries_require_classification_first(client: TestClient) -> None:
     assert response.json()["detail"]["code"] == "classification_required"
 
 
-def test_rewrite_job_returns_source_linked_text_and_warnings(client: TestClient) -> None:
+def rewrite_job(client: TestClient, body: dict) -> tuple[str, dict]:
     policy_id = new_policy(client)
     assert client.post(f"/api/v1/policies/{policy_id}/classification").status_code == 200
-    started = client.post(
-        f"/api/v1/policies/{policy_id}/rewrites",
-        json={"style": "simplify_for_kids", "sentence_ids": [1]},
-    )
+    started = client.post(f"/api/v1/policies/{policy_id}/rewrites", json=body)
     assert started.status_code == 202, started.text
-    job = wait_for_job(client, started.json()["id"])
+    return policy_id, wait_for_job(client, started.json()["id"])
+
+
+def with_rewrite(default_handler, **changes):
+    """The fake modelService, with some fields of its /rewrite answer replaced."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        response = default_handler(request)
+        if request.url.path != "/rewrite":
+            return response
+        return httpx.Response(200, json={**response.json(), **changes})
+
+    return handler
+
+
+def test_rewrite_job_returns_source_linked_text_and_warnings(
+    default_model_service_handler,
+    model_client_factory,
+) -> None:
+    sent = []
+
+    def recording(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/rewrite":
+            sent.append(json.loads(request.content))
+        return default_model_service_handler(request)
+
+    app = create_app(Settings(), client=model_client_factory(recording))
+    with TestClient(app) as client:
+        policy_id, job = rewrite_job(client, {"style": "simplify_for_kids", "sentence_ids": [1]})
+        snapshot = client.get(f"/api/v1/policies/{policy_id}/results").json()
+
+    assert sent == [{"text": "We share it with marketing partners."}]
     assert job["status"] == "succeeded", job
     result = job["result"]
     assert result["kind"] == "rewrite"
     assert result["style"] == "simplify_for_kids"
     assert result["model"]["prompt"] == "summary-v3"
+    assert result["model"]["taxonomy_id"] is None
     assert result["rewrites"][0]["source_sentence_ids"] == [1]
-    assert result["rewrites"][0]["warnings"]
-
-    snapshot = client.get(f"/api/v1/policies/{policy_id}/results").json()
+    [warning] = result["rewrites"][0]["warnings"]
+    assert "summary-v3" in warning and "simplify_for_kids" in warning
     assert snapshot["rewrites"][0]["text"] == "We use your email for promotions."
+
+
+@pytest.mark.parametrize("status", ["truncated", "reasoning"])
+def test_rewrite_status_adds_a_warning(
+    status: str,
+    default_model_service_handler,
+    model_client_factory,
+) -> None:
+    handler = with_rewrite(default_model_service_handler, status=status)
+    app = create_app(Settings(), client=model_client_factory(handler))
+    with TestClient(app) as client:
+        _, job = rewrite_job(client, {"style": "paraphrase"})
+    assert job["status"] == "succeeded", job
+    assert len(job["result"]["rewrites"][0]["warnings"]) == 2
+
+
+@pytest.mark.parametrize("changes", [{"status": "empty", "rewrite": ""}, {"status": "missing"}])
+def test_empty_or_unknown_rewrite_fails_the_job(
+    changes: dict,
+    default_model_service_handler,
+    model_client_factory,
+) -> None:
+    handler = with_rewrite(default_model_service_handler, **changes)
+    app = create_app(Settings(), client=model_client_factory(handler))
+    with TestClient(app) as client:
+        _, job = rewrite_job(client, {"style": "paraphrase"})
+    assert job["status"] == "failed"
+    assert job["error"]["code"] == "generation_failed"
 
 
 def test_rewrite_requires_classification_first(client: TestClient) -> None:
@@ -186,36 +243,28 @@ def test_model_service_outage_returns_structured_error() -> None:
         assert detail["retryable"] is True
 
 
-def test_rewrite_job_preserves_rewriter_setup_error(
+def test_rewrite_job_reports_a_missing_rewriter_file(
     default_model_service_handler,
     model_client_factory,
 ) -> None:
     def missing_model(request: httpx.Request) -> httpx.Response:
         if request.url.path == "/rewrite":
+            # modelService's answer when the rewriter's GGUF file is not in the local cache.
             return httpx.Response(
                 503,
                 json={
-                    "detail": {
-                        "code": "rewriter_model_not_downloaded",
-                        "message": "Run `uv run pbench download ...` once.",
-                        "retryable": False,
-                    }
+                    "detail": "Rewriter model unavailable: unsloth/Qwen3.5-4B-GGUF at "
+                    "e87f176479d0855a907a41277aca2f8ee7a09523 is not in the local Hugging Face cache. "
+                    "Run `pbench download` while online first."
                 },
             )
         return default_model_service_handler(request)
 
     app = create_app(Settings(), client=model_client_factory(missing_model))
     with TestClient(app) as client:
-        policy_id = new_policy(client)
-        assert client.post(f"/api/v1/policies/{policy_id}/classification").status_code == 200
-        started = client.post(
-            f"/api/v1/policies/{policy_id}/rewrites",
-            json={"style": "paraphrase"},
-        )
-        job = wait_for_job(client, started.json()["id"])
+        _, job = rewrite_job(client, {"style": "paraphrase"})
     assert job["status"] == "failed"
-    assert job["error"]["code"] == "rewriter_model_not_downloaded"
-    assert job["error"]["retryable"] is False
+    assert job["error"]["code"] == "model_service_error"
     assert "pbench download" in job["error"]["message"]
 
 

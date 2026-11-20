@@ -9,24 +9,29 @@ from api_service.app import create_app
 from api_service.client import ModelServiceClient
 from api_service.settings import Settings
 
+# The fakes return exactly the keys of modelService's classifier and rewriter metadata.
 MODEL = {
-    "id": "google/embeddinggemma-2",
-    "revision": "914f7f89142e33e77833254d9c9b90c3cef7303b",
-    "precision": "fp32",
+    "id": "ggml-org/embeddinggemma-2-GGUF",
+    "revision": "6ea3e3a309d12a4779cfda98b8c19800d2d5da71",
+    "resolved_revision": "6ea3e3a309d12a4779cfda98b8c19800d2d5da71",
+    "precision": "q8_0",
     "device": "cpu",
     "strategy": "embedding-head",
     "head": "linear-balanced-tuned",
+    "fit": "classification/embeddinggemma2-appsi139-prior-shift/20261012-043915Z",
     "taxonomy_id": "opp115-10-other",
     "taxonomy_version": 1,
 }
 
 REWRITE_MODEL = {
-    **MODEL,
     "id": "unsloth/Qwen3.5-4B-GGUF",
     "revision": "e87f176479d0855a907a41277aca2f8ee7a09523",
+    "resolved_revision": "e87f176479d0855a907a41277aca2f8ee7a09523",
     "precision": "q4_k_m",
+    "device": "cpu",
     "strategy": "prompted",
     "prompt": "summary-v3",
+    "max_new_tokens": 1024,
 }
 
 NAMES = {
@@ -61,7 +66,7 @@ CATEGORIES = {
 def model_service_handler(request: httpx.Request) -> httpx.Response:
     path = request.url.path
     if path == "/health":
-        return httpx.Response(200, json={"status": "ok", "ready": True, "model": MODEL})
+        return httpx.Response(200, json={"status": "ok", "ready": True, "model": MODEL, "rewriter": None})
     if path == "/categories":
         return httpx.Response(200, json=CATEGORIES)
     if path == "/analyze":
@@ -100,13 +105,10 @@ def model_service_handler(request: httpx.Request) -> httpx.Response:
             200,
             json={
                 "text_sha256": "1" * 64,
-                "rewrites": [
-                    {
-                        "text": "We use your email for promotions.",
-                        "source_sentence_ids": payload["source_sentence_ids"],
-                        "warnings": ["Check conditions from the source that are missing here."],
-                    }
-                ],
+                "characters": len(payload["text"]),
+                "rewrite": "We use your email for promotions.",
+                "status": "valid",
+                "output_tokens": 8,
                 "model": REWRITE_MODEL,
             },
         )
