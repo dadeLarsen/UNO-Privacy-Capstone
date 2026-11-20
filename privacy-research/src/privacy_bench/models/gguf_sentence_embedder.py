@@ -5,11 +5,22 @@ from pathlib import Path
 import platform
 import time
 
-import llama_cpp
 import numpy as np
 
 from ..core.files import digest_json
 from .gguf_chat_model import placement
+
+_llama_cpp = None
+
+
+def _llama():
+    """Import llama.cpp only when a GGUF backend is actually used."""
+    global _llama_cpp
+    if _llama_cpp is None:
+        import llama_cpp
+        _llama_cpp = llama_cpp
+    return _llama_cpp
+
 
 # Device and precision. gpu puts every layer on the GPU backend of the installed llama.cpp build.
 MODES = tuple((device, precision) for device in ("cpu", "gpu") for precision in ("bf16", "q8_0"))
@@ -35,7 +46,7 @@ class GgufSentenceEmbedder:
         limit = self.max_input_tokens
         started = time.perf_counter()
         # An embedding model reads its whole input in one batch, so the batch gets room for the limit too.
-        llm = llama_cpp.Llama(model_path=str(self.path), embedding=True, n_ctx=limit, n_batch=limit, n_ubatch=limit,
+        llm = _llama().Llama(model_path=str(self.path), embedding=True, n_ctx=limit, n_batch=limit, n_ubatch=limit,
                               verbose=False, **placed)
         load_seconds = time.perf_counter() - started
         described = dict(llm.metadata)
@@ -51,18 +62,18 @@ class GgufSentenceEmbedder:
         # The context takes its pooling from the file. A fitted head is only valid for the pooling its
         # examples were embedded with, and the sentence-transformers backend accepts the mean alone.
         pooling = llm.pooling_type()
-        if pooling != llama_cpp.LLAMA_POOLING_TYPE_MEAN:
+        if pooling != _llama().LLAMA_POOLING_TYPE_MEAN:
             raise ValueError(f"{self.path.name} pools with llama.cpp pooling type {pooling}, not the mean "
-                             f"({llama_cpp.LLAMA_POOLING_TYPE_MEAN})")
-        self._llm, self._size = llm, llama_cpp.llama_model_n_embd_out(llm.model)
+                             f"({_llama().LLAMA_POOLING_TYPE_MEAN})")
+        self._llm, self._size = llm, _llama().llama_model_n_embd_out(llm.model)
         metadata = {
             "backend": "llama-cpp-embedding", "load_seconds": load_seconds,
             "precision": self.precision, "file": self.path.name, "file_bytes": self.path.stat().st_size,
             "gguf_metadata": described, "architecture": architecture, "pooling": "mean",
             "embedding_dimension": self._size, "device": self.device,
-            "gpu_offload_supported": llama_cpp.llama_supports_gpu_offload(),
-            "llama_cpp_python_version": llama_cpp.__version__,
-            "llama_cpp_system_info": llama_cpp.llama_print_system_info().decode("utf-8").strip(),
+            "gpu_offload_supported": _llama().llama_supports_gpu_offload(),
+            "llama_cpp_python_version": _llama().__version__,
+            "llama_cpp_system_info": _llama().llama_print_system_info().decode("utf-8").strip(),
             "threads": llm.n_threads, "threads_batch": llm.n_threads_batch,
             "context_limit": limit, "model_context_limit": model_limit,
             "tokenizer_settings": {"processing": "llama.cpp tokenizer; adds the special tokens the file asks for "
@@ -98,7 +109,7 @@ class GgufSentenceEmbedder:
         started = time.perf_counter()
         context.decode(batch)
         # Reading the pooled embedding waits for a GPU backend to finish.
-        pooled = llama_cpp.llama_get_embeddings_seq(context.ctx, 0)
+        pooled = _llama().llama_get_embeddings_seq(context.ctx, 0)
         embedding = np.array(pooled[:self._size], dtype=np.float32)
         embedding /= np.linalg.norm(embedding)
         seconds = time.perf_counter() - started

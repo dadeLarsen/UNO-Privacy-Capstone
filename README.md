@@ -21,7 +21,7 @@ Not planned for the first version: chat about a policy, PDF or DOCX import, lang
 
 ## Status
 
-The interface is still a scaffold. [`modelService/`](modelService/) now runs the chosen classifier on a pasted or uploaded policy and returns one category per sentence; the browser UI does not call it yet, and rewriting is not built. The work so far also chooses the models:
+The interface now calls [`api/`](api/), which forwards policies to [`modelService/`](modelService/) and returns one category per sentence plus source-linked category summaries. Classification and summaries work locally; rewriting waits on a chosen model. The work so far also chooses the models:
 
 - **Classifier:** a linear head on EmbeddingGemma 2 embeddings leads, at about 0.04 s per sentence and 0.6 GiB, with accuracy close to much larger models. It has not yet been timed on a computer without a GPU.
 - **Rewriter:** not chosen; no rewriting has been evaluated.
@@ -29,11 +29,28 @@ The interface is still a scaffold. [`modelService/`](modelService/) now runs the
 
 Results and their caveats are in the [model research README](privacy-research/README.md).
 
+## Run locally
+
+After the one-time setup in [`modelService/README.md`](modelService/README.md) and [`api/README.md`](api/README.md), start the whole app from this folder with:
+
+```bash
+python3 run.py
+```
+
+On Windows, use `python run.py`. The launcher starts the model service on `127.0.0.1:8002`, the API on `127.0.0.1:8001`, and Vite on `127.0.0.1:5173`, wires their URLs together, prefixes their logs, and stops all three when you press Ctrl+C. The first model start can take a while; classification works once the model log says it is ready.
+
+Override any port with an environment variable:
+
+```bash
+MODEL_SERVICE_PORT=8100 API_PORT=8101 FRONTEND_PORT=5174 python3 run.py
+```
+
 ## Repository
 
 | Path | Contents |
 | --- | --- |
 | [docs/](docs/) | The [requirements](docs/Requirements-Document.md): goal model, functional and nonfunctional requirements, wireframes, object model, and the analyses that choose the models. The draft of Chapter 2 of the final report. |
+| [api/](api/) | The localhost-only FastAPI layer the browser calls: uploads, classifications, summaries, and cancellation. Calls `modelService/`. Has its own setup. |
 | [modelService/](modelService/) | The localhost-only Python service that classifies a policy and returns one category per sentence. Reuses the benchmark's pinned models. Has its own setup. |
 | [privacy-research/](privacy-research/) | The model benchmark (`pbench`): run conditions, datasets, tracked run records, and results. Has its own setup. |
 

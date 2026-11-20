@@ -21,12 +21,17 @@ def main(argv=None) -> None:
         "--condition", type=Path, help="Classification condition TOML to run instead of a default one."
     )
     parser.add_argument(
+        "--rewrite-condition",
+        type=Path,
+        help="GGUF rewrite condition TOML to use instead of the default for the selected device.",
+    )
+    parser.add_argument(
         "--device",
         choices=("cuda", "cpu"),
         help="Run the default GPU or CPU condition (default: detected). Cannot be combined with a condition.",
     )
     parser.add_argument("--host", help="Loopback address to bind (default: 127.0.0.1).")
-    parser.add_argument("--port", type=int, help="Port to bind (default: 8000).")
+    parser.add_argument("--port", type=int, help="Port to bind (default: 8002).")
     parser.add_argument("--no-preload", action="store_true", help="Load the model on the first request instead.")
     args = parser.parse_args(argv)
 
@@ -34,6 +39,8 @@ def main(argv=None) -> None:
     changes = {}
     if args.condition is not None:
         changes["condition"] = args.condition
+    if args.rewrite_condition is not None:
+        changes["rewrite_condition"] = args.rewrite_condition
     if args.device is not None:
         changes["device"] = args.device
     if args.host is not None:

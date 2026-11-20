@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 
 from model_service.app import create_app
 from model_service.classifier import Classification
+from model_service.rewriter import RewrittenPassage
 from model_service.settings import Settings
 from model_service.taxonomy import LABELS, TAXONOMY
 
@@ -176,3 +177,40 @@ def test_an_idle_gpu_model_is_released_and_the_next_request_loads_it_again():
         assert (health["status"], health["ready"]) == ("ok", True)
         assert test_client.post("/analyze", json={"text": "We collect data."}).status_code == 200
         assert classifier.loaded
+
+
+class FakeRewriter:
+    def load(self):
+        return {
+            "id": "fake/rewriter",
+            "revision": "1" * 40,
+            "precision": "q4_k_m",
+            "device": "cpu",
+            "strategy": "prompted",
+            "prompt": "summary-v3",
+            "taxonomy_id": TAXONOMY["taxonomy_id"],
+            "taxonomy_version": TAXONOMY["version"],
+        }
+
+    def metadata(self):
+        return self.load()
+
+    def rewrite(self, text, style):
+        return RewrittenPassage("We use your email for promotions.", ("Check numbers from the source.",))
+
+
+def test_rewrite_returns_source_linked_text_and_warnings(classifier):
+    with TestClient(create_app(Settings(), classifier, FakeRewriter())) as test_client:
+        response = test_client.post(
+            "/rewrite",
+            json={
+                "text": "We may share your email address with partners.",
+                "style": "simplify_for_adults",
+                "source_sentence_ids": [3],
+            },
+        )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["rewrites"][0]["source_sentence_ids"] == [3]
+    assert body["rewrites"][0]["warnings"]
+    assert body["model"]["prompt"] == "summary-v3"

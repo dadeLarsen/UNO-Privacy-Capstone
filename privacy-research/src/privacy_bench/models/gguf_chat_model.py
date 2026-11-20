@@ -8,9 +8,20 @@ import time
 
 import jinja2
 from jinja2.sandbox import ImmutableSandboxedEnvironment
-import llama_cpp
 
 from ..core.files import digest_json, digest_text
+
+_llama_cpp = None
+
+
+def _llama():
+    """Import llama.cpp only when a GGUF backend is actually used."""
+    global _llama_cpp
+    if _llama_cpp is None:
+        import llama_cpp
+        _llama_cpp = llama_cpp
+    return _llama_cpp
+
 
 # Device and precision. gpu puts every layer on the GPU backend of the installed llama.cpp build.
 MODES = (("cpu", "q4_k_m"), ("gpu", "q4_k_m"))
@@ -34,12 +45,12 @@ def chat_messages(prompt: str, system: str | None) -> list:
 def placement(device: str) -> dict:
     """The model parameters that put every layer on the GPU backend, or the whole model on the CPU."""
     if device == "gpu":
-        if not llama_cpp.llama_supports_gpu_offload():
+        if not _llama().llama_supports_gpu_offload():
             raise RuntimeError("The installed llama.cpp build has no GPU backend; run a condition with device cpu")
         return {"n_gpu_layers": -1}
     # With zero layers on the GPU, a build that has a GPU backend still sends large prompt batches to it.
     # Naming no GPU device takes that backend out of the model, so a cpu run computes only on the CPU.
-    return {"n_gpu_layers": 0, "split_mode": llama_cpp.LLAMA_SPLIT_MODE_NONE, "main_gpu": -1}
+    return {"n_gpu_layers": 0, "split_mode": _llama().LLAMA_SPLIT_MODE_NONE, "main_gpu": -1}
 
 
 class GgufChatModel:
@@ -60,7 +71,7 @@ class GgufChatModel:
         if not self.path.is_file():
             raise ValueError(f"No GGUF file at {self.path}. Run `pbench download` to cache it.")
         started = time.perf_counter()
-        llm = llama_cpp.Llama(model_path=str(self.path), n_ctx=CONTEXT_TOKENS, seed=self.seed, verbose=False,
+        llm = _llama().Llama(model_path=str(self.path), n_ctx=CONTEXT_TOKENS, seed=self.seed, verbose=False,
                               **placed)
         load_seconds = time.perf_counter() - started
         described = dict(llm.metadata)
@@ -75,16 +86,16 @@ class GgufChatModel:
                                                     extensions=["jinja2.ext.loopcontrols"],
                                                     undefined=jinja2.StrictUndefined)
         self._llm, self._template = llm, environment.from_string(template)
-        self._vocab = llama_cpp.llama_model_get_vocab(llm.model)
+        self._vocab = _llama().llama_model_get_vocab(llm.model)
         trained = int(described[f"{described['general.architecture']}.context_length"])
         self._context = min(llm.n_ctx(), trained)
         metadata = {
             "backend": "llama-cpp-chat-generation", "load_seconds": load_seconds,
             "precision": self.precision, "file": self.path.name, "file_bytes": self.path.stat().st_size,
             "gguf_metadata": described, "device": self.device,
-            "gpu_offload_supported": llama_cpp.llama_supports_gpu_offload(),
-            "llama_cpp_python_version": llama_cpp.__version__,
-            "llama_cpp_system_info": llama_cpp.llama_print_system_info().decode("utf-8").strip(),
+            "gpu_offload_supported": _llama().llama_supports_gpu_offload(),
+            "llama_cpp_python_version": _llama().__version__,
+            "llama_cpp_system_info": _llama().llama_print_system_info().decode("utf-8").strip(),
             "threads": llm.n_threads, "threads_batch": llm.n_threads_batch,
             "chat_template_sha256": digest_text(template), "chat_template_kwargs": CHAT_TEMPLATE_KWARGS,
             "context_tokens": self._context,
@@ -135,7 +146,7 @@ class GgufChatModel:
         }
 
     def _ends(self, token: int) -> bool:
-        return llama_cpp.llama_vocab_is_eog(self._vocab, token)
+        return _llama().llama_vocab_is_eog(self._vocab, token)
 
     def _decode(self, ids: list) -> str:
         # Llama.detokenize drops every token whose text is longer than its 32-byte buffer. llama.cpp answers
@@ -143,10 +154,10 @@ class GgufChatModel:
         text = b""
         for token in ids:
             buffer = ctypes.create_string_buffer(32)
-            length = llama_cpp.llama_token_to_piece(self._vocab, token, buffer, len(buffer), 0, True)
+            length = _llama().llama_token_to_piece(self._vocab, token, buffer, len(buffer), 0, True)
             if length < 0:
                 buffer = ctypes.create_string_buffer(-length)
-                length = llama_cpp.llama_token_to_piece(self._vocab, token, buffer, len(buffer), 0, True)
+                length = _llama().llama_token_to_piece(self._vocab, token, buffer, len(buffer), 0, True)
             if length < 0:
                 raise RuntimeError(f"llama.cpp could not give the text of token {token}")
             text += buffer.raw[:length]

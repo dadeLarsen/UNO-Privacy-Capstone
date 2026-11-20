@@ -91,7 +91,10 @@ uv run model-service
 # or: uv run python -m model_service
 ```
 
-The service listens on `http://127.0.0.1:8000`. At startup it runs the GPU condition
+From the repository root, `python3 run.py` starts this service together with the API
+and the frontend, then stops all three on Ctrl+C.
+
+The service listens on `http://127.0.0.1:8002`. At startup it runs the GPU condition
 when torch finds an NVIDIA GPU with native bf16 (the RTX 30 series and newer), and
 the CPU condition on every other computer. `/health` reports the device in use.
 
@@ -107,18 +110,18 @@ These examples work in Windows PowerShell 5.1 and in PowerShell 7. They call
 JSON in because 5.1 strips the double quotes inside a program's arguments.
 
 ```powershell
-curl.exe http://127.0.0.1:8000/health
+curl.exe http://127.0.0.1:8002/health
 
 '{"text":"We collect your email address. We share it with marketing partners."}' |
-  curl.exe -X POST http://127.0.0.1:8000/analyze -H "Content-Type: application/json" -d "@-"
+  curl.exe -X POST http://127.0.0.1:8002/analyze -H "Content-Type: application/json" -d "@-"
 
-curl.exe -X POST "http://127.0.0.1:8000/analyze/upload?include_scores=true" -F "file=@policy.txt"
+curl.exe -X POST "http://127.0.0.1:8002/analyze/upload?include_scores=true" -F "file=@policy.txt"
 ```
 
 In cmd, the first and last commands work as written. Escape the JSON's quotes instead:
 
 ```bat
-curl -X POST http://127.0.0.1:8000/analyze -H "Content-Type: application/json" -d "{\"text\":\"We collect your email address. We share it with marketing partners.\"}"
+curl -X POST http://127.0.0.1:8002/analyze -H "Content-Type: application/json" -d "{\"text\":\"We collect your email address. We share it with marketing partners.\"}"
 ```
 
 Example response (abridged):
@@ -157,7 +160,7 @@ Example response (abridged):
 | `MODEL_SERVICE_CONDITION` | unset | Condition TOML to run instead of a default condition. It names its own device, so it cannot be combined with a device |
 | `MODEL_SERVICE_DEVICE` | the detected hardware | `cuda` or `cpu`: which of the two default conditions to run. Cannot be combined with a condition |
 | `MODEL_SERVICE_HOST` | `127.0.0.1` | Must be a loopback address |
-| `MODEL_SERVICE_PORT` | `8000` | Listening port |
+| `MODEL_SERVICE_PORT` | `8002` | Listening port |
 | `MODEL_SERVICE_MAX_CHARACTERS` | `200000` | Maximum policy length |
 | `MODEL_SERVICE_CACHE_SIZE` | `4096` | Sentences kept in the in-memory cache |
 | `MODEL_SERVICE_PRELOAD` | `true` | Load the model at startup |

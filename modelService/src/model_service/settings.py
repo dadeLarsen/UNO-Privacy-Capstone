@@ -22,6 +22,11 @@ DEFAULT_CONDITIONS = {
     "cuda": CONDITIONS / "embeddinggemma2-bf16-head-linear-balanced-tuned-appsi139-test-half.toml",
     "cpu": CONDITIONS / "embeddinggemma2-fp32-cpu-head-linear-balanced-tuned-appsi139-test-half.toml",
 }
+REWRITE_CONDITIONS = REPO_ROOT / "privacy-research" / "conditions" / "rewrite"
+DEFAULT_REWRITE_CONDITIONS = {
+    "gpu": REWRITE_CONDITIONS / "qwen3.5-4b-q4km-gpu-summary-v3.toml",
+    "cpu": REWRITE_CONDITIONS / "qwen3.5-4b-q4km-cpu-summary-v3.toml",
+}
 LOOPBACK_HOSTS = frozenset({"127.0.0.1", "::1", "localhost"})
 DEFAULT_CORS_ORIGINS = (
     "http://localhost:5173",
@@ -71,8 +76,9 @@ class Settings:
     # default stored here would then look like a condition given together with a device.
     condition: Path | None = None
     device: str | None = None
+    rewrite_condition: Path | None = None
     host: str = "127.0.0.1"
-    port: int = 8000
+    port: int = 8002
     max_characters: int = 200_000
     cache_size: int = 4096
     preload: bool = True
@@ -83,6 +89,8 @@ class Settings:
     def __post_init__(self):
         if self.condition is not None and not isinstance(self.condition, Path):
             object.__setattr__(self, "condition", Path(self.condition))
+        if self.rewrite_condition is not None and not isinstance(self.rewrite_condition, Path):
+            object.__setattr__(self, "rewrite_condition", Path(self.rewrite_condition))
         if self.device not in (None, "cuda", "cpu"):
             raise ValueError(f"device must be cuda, cpu, or unset, not {self.device!r}")
         if self.condition is not None and self.device is not None:
@@ -94,6 +102,8 @@ class Settings:
             )
         if not self.condition_path.is_file():
             raise ValueError(f"Condition file does not exist: {self.condition_path}")
+        if not self.rewrite_condition_path.is_file():
+            raise ValueError(f"Rewrite condition file does not exist: {self.rewrite_condition_path}")
         if self.host not in LOOPBACK_HOSTS:
             raise ValueError(f"The service only listens on localhost; refusing host {self.host!r}")
         if not 1 <= self.port <= 65535:
@@ -112,16 +122,28 @@ class Settings:
         """The condition to run: the one given, else the default for the device, detected when unset."""
         return self.condition or DEFAULT_CONDITIONS[self.device or detect_device()]
 
+    @property
+    def rewrite_device(self) -> str:
+        """The llama.cpp device name that matches the classifier's CUDA or CPU choice."""
+        return "gpu" if (self.device or detect_device()) == "cuda" else "cpu"
+
+    @property
+    def rewrite_condition_path(self) -> Path:
+        """The pinned GGUF rewrite condition for the selected device."""
+        return self.rewrite_condition or DEFAULT_REWRITE_CONDITIONS[self.rewrite_device]
+
     @classmethod
     def from_env(cls) -> "Settings":
         condition = os.environ.get("MODEL_SERVICE_CONDITION")
+        rewrite_condition = os.environ.get("MODEL_SERVICE_REWRITE_CONDITION")
         device = os.environ.get("MODEL_SERVICE_DEVICE")
         origins = os.environ.get("MODEL_SERVICE_CORS_ORIGINS")
         return cls(
             condition=Path(condition) if condition else None,
+            rewrite_condition=Path(rewrite_condition) if rewrite_condition else None,
             device=(device or "").strip().lower() or None,
             host=os.environ.get("MODEL_SERVICE_HOST", "127.0.0.1").strip(),
-            port=_env_int("MODEL_SERVICE_PORT", 8000, minimum=1),
+            port=_env_int("MODEL_SERVICE_PORT", 8002, minimum=1),
             max_characters=_env_int("MODEL_SERVICE_MAX_CHARACTERS", 200_000, minimum=1),
             cache_size=_env_int("MODEL_SERVICE_CACHE_SIZE", 4096, minimum=0),
             preload=_env_bool("MODEL_SERVICE_PRELOAD", True),

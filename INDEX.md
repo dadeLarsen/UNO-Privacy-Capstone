@@ -24,12 +24,29 @@ Data, configuration, and results entries have a status:
 | Path | Contents |
 | --- | --- |
 | [docs/](docs/) | Requirements and design for the app |
+| [run.py](run.py) | One-command localhost launcher for the model service, API, and Vite frontend |
+| [api/](api/) | The localhost-only frontend-facing API: uploads, classifications, summaries, and jobs |
 | [modelService/](modelService/) | The localhost-only model service: classifies a policy and returns one category per sentence |
 | [privacy-research/](privacy-research/) | The model benchmark: a self-contained Python project with its own environment |
 | [.gitignore](.gitignore) | Ignores for the whole repository; `privacy-research/` adds its own |
 
-The browser interface is still a scaffold. `modelService/` is the first app code; the
-UI does not call it yet, and rewriting is not implemented.
+The browser interface now calls `api/`, which calls `modelService/`. Classification
+and extractive category summaries work; rewriting waits on a chosen model (AR-02).
+
+## Frontend-facing API: [api/](api/)
+
+A small FastAPI service in its own folder. The browser talks only to this API; it
+forwards text to `modelService/`, returns classifications first, and later returns
+source-linked summaries through pollable jobs. Policies and jobs live in memory and
+expire after an hour. The rewriter route is part of the contract but reports that no
+rewriter has been chosen (AR-02); summaries are extractive for now.
+
+| File | Status | Contents |
+| --- | --- | --- |
+| [README.md](api/README.md) | Current | Setup, run, routes, configuration, tests, and what is not implemented |
+| [pyproject.toml](api/pyproject.toml) | Current | Dependencies and test configuration |
+| [src/api_service/](api/src/api_service/) | Current | `app.py` routes and jobs, `schemas.py` Pydantic contract, `client.py` modelService adapter, `store.py` in-memory state, `generation.py`, `errors.py`, `settings.py`, and `__main__.py` |
+| [tests/](api/tests/) | Current | Contract tests with a fake modelService; no model or GPU needed |
 
 ## Model service: [modelService/](modelService/)
 

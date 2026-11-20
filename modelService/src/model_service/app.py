@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 import hashlib
 import logging
 from pathlib import Path
+from typing import Literal
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,6 +13,7 @@ from pydantic import BaseModel, Field
 
 from .classifier import Classifier, PrivacyBenchClassifier
 from .idle import IdleRelease
+from .rewriter import PrivacyBenchRewriter, Rewriter
 from .sentences import split_sentences
 from .settings import Settings
 from .taxonomy import TAXONOMY
@@ -24,9 +26,20 @@ class AnalyzeRequest(BaseModel):
     include_scores: bool = Field(False, description="Include the ten per-category scores for each sentence.")
 
 
-def create_app(settings: Settings | None = None, classifier: Classifier | None = None) -> FastAPI:
+class RewriteRequest(BaseModel):
+    text: str = Field(..., min_length=1, description="The exact passage to rewrite.")
+    style: Literal["paraphrase", "simplify_for_kids", "simplify_for_adults"] = "simplify_for_adults"
+    source_sentence_ids: list[int] = Field(..., min_length=1, description="IDs of the sentences in the passage.")
+
+
+def create_app(
+    settings: Settings | None = None,
+    classifier: Classifier | None = None,
+    rewriter: Rewriter | None = None,
+) -> FastAPI:
     settings = settings or Settings.from_env()
     service = classifier or PrivacyBenchClassifier(settings.condition_path, cache_size=settings.cache_size)
+    rewrite_service = rewriter or PrivacyBenchRewriter(settings.rewrite_condition_path)
     idle = IdleRelease(service, settings.idle_release_seconds)
 
     @asynccontextmanager
@@ -43,6 +56,7 @@ def create_app(settings: Settings | None = None, classifier: Classifier | None =
     app = FastAPI(title="Privacy Policy Reader model service", version="0.1.0", lifespan=lifespan)
     app.state.settings = settings
     app.state.classifier = service
+    app.state.rewriter = rewrite_service
     app.add_middleware(
         CORSMiddleware,
         allow_origins=list(settings.cors_origins),
@@ -92,6 +106,46 @@ def create_app(settings: Settings | None = None, classifier: Classifier | None =
         except UnicodeDecodeError:
             raise HTTPException(status_code=400, detail="The file is not valid UTF-8 text.") from None
         return analyze_text(text, include_scores)
+
+    @app.post("/rewrite")
+    def rewrite(request: RewriteRequest):
+        if len(request.text) > settings.max_characters:
+            raise HTTPException(
+                status_code=413,
+                detail=f"Passage is longer than {settings.max_characters} characters.",
+            )
+        if any(sentence_id < 0 for sentence_id in request.source_sentence_ids):
+            raise HTTPException(status_code=422, detail="source_sentence_ids must be nonnegative.")
+        try:
+            metadata = rewrite_service.load()
+        except Exception as exc:
+            logger.exception("Rewriter failed to load")
+            raise HTTPException(
+                status_code=503,
+                detail=(
+                    f"Rewriter model unavailable: {exc}. Download it once with "
+                    "`uv run pbench download ../privacy-research/conditions/rewrite/"
+                    "qwen3.5-4b-q4km-cpu-summary-v3.toml`."
+                ),
+            ) from exc
+        try:
+            rewritten = rewrite_service.rewrite(request.text, request.style)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        except Exception as exc:
+            logger.exception("Rewrite failed")
+            raise HTTPException(status_code=500, detail="Rewrite failed.") from exc
+        return {
+            "text_sha256": hashlib.sha256(request.text.encode("utf-8")).hexdigest(),
+            "rewrites": [
+                {
+                    "text": rewritten.text,
+                    "source_sentence_ids": request.source_sentence_ids,
+                    "warnings": list(rewritten.warnings),
+                }
+            ],
+            "model": metadata,
+        }
 
     return app
 
