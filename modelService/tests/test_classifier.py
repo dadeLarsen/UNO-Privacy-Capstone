@@ -1,3 +1,6 @@
+from threading import Event, Thread
+import time
+
 import pytest
 
 from model_service.classifier import PrivacyBenchClassifier
@@ -21,6 +24,18 @@ class FakeStrategy:
 
     def predict(self, prepared):
         return {"raw_output": '{"label_id": 8}', "model_label_id": 8, "scores": SCORES}
+
+
+class SlowStrategy(FakeStrategy):
+    """Embeds until the test lets it finish."""
+
+    def __init__(self):
+        self.embedding, self.finish = Event(), Event()
+
+    def predict(self, prepared):
+        self.embedding.set()
+        self.finish.wait(5)
+        return super().predict(prepared)
 
 
 @pytest.mark.parametrize("device", ["gpu", "cpu"])
@@ -72,3 +87,20 @@ def test_a_release_drops_the_loaded_strategy_keeps_the_metadata_and_the_next_use
     monkeypatch.setattr(classifier, "_strategy", reloaded)
     assert classifier.classify("We collect your email address.").label_id == 8
     assert (loaded.loads, reloaded.loads) == (1, 1)
+
+
+def test_the_metadata_does_not_wait_for_a_sentence_under_way(monkeypatch):
+    classifier = PrivacyBenchClassifier(DEFAULT_CONDITIONS["cpu"], cache_size=0)
+    strategy = SlowStrategy()
+    monkeypatch.setattr(classifier, "_strategy", strategy)
+    metadata = classifier.load()
+    classifying = Thread(target=classifier.classify, args=("We collect your email address.",))
+    classifying.start()
+    assert strategy.embedding.wait(5)
+    # /health reads the metadata, so it must answer while a request holds the model.
+    started = time.monotonic()
+    assert classifier.metadata() == metadata
+    waited = time.monotonic() - started
+    strategy.finish.set()
+    classifying.join(5)
+    assert waited < 1

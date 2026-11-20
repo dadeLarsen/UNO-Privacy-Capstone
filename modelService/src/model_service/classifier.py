@@ -32,7 +32,7 @@ class Classifier(Protocol):
         """Load the model unless it is loaded and return its safe provenance metadata."""
 
     def metadata(self) -> dict | None:
-        """Return the model's metadata, or None before its first load. A release keeps it."""
+        """Return the model's metadata, or None before its first load. A release keeps it, and it never waits."""
 
     def classify(self, sentence: str) -> Classification:
         """Classify one sentence."""
@@ -83,8 +83,9 @@ class PrivacyBenchClassifier:
             return dict(self._metadata)
 
     def metadata(self) -> dict | None:
-        with self._lock:
-            return dict(self._metadata) if self._metadata is not None else None
+        # No lock, so /health never waits for a request: load() sets the dict in one step and release() keeps it.
+        metadata = self._metadata
+        return dict(metadata) if metadata is not None else None
 
     def release(self) -> None:
         with self._lock:
