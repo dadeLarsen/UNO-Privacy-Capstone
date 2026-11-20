@@ -6,17 +6,11 @@ requires-python = ">=3.12,<3.13"
 dependencies = [
     "huggingface-hub==1.33.0",
     "jinja2==3.1.6",
-    "llama-cpp-python==0.3.36",
+    "llama-cpp-python==0.3.37",
     "matplotlib==3.11.2",
     "numpy==2.5.3",
     "pyphen==0.18.1",
     "safetensors==0.8.0",
-    "scikit-learn==1.9.1",
-    "sentence-transformers==6.1.0",
-    "tokenizers==0.23.2",
-    "torch==2.15.0",
-    "torchvision==0.29.2",
-    "transformers==5.19.0",
 ]
 
 [project.scripts]
@@ -24,9 +18,15 @@ pbench = "privacy_bench.cli:main"
 
 [dependency-groups]
 dev = ["pytest==9.1.1"]
-# Which torch and llama.cpp builds to install; CPU is the default; see Setup in README.md.
-cu132 = ["torch==2.15.0", "torchvision==0.29.2", "llama-cpp-python==0.3.36"]
-cpu = ["torch==2.15.0", "torchvision==0.29.2", "llama-cpp-python==0.3.36"]
+# Which llama.cpp build to install; see Setup in README.md. The CUDA build needs NVIDIA's cuBLAS, and on Linux
+# its CUDA runtime, and ships neither. privacy_bench.models loads them before llama_cpp.
+cu132 = [
+    "llama-cpp-python==0.3.37",
+    "nvidia-cublas==13.4.1.3; (sys_platform == 'win32' and platform_machine == 'AMD64') or (sys_platform == 'linux' and platform_machine == 'x86_64')",
+    "nvidia-cuda-runtime==13.2.86; sys_platform == 'linux' and platform_machine == 'x86_64'",
+]
+# Empty: it is the choice against cu132, and with it llama-cpp-python builds from source.
+cpu = []
 
 [build-system]
 requires = ["hatchling==1.32.4"]
@@ -36,17 +36,14 @@ build-backend = "hatchling.build"
 packages = ["src/privacy_bench"]
 
 [tool.uv]
-default-groups = ["dev", "cpu"]
+default-groups = ["dev", "cu132"]
 conflicts = [[{ group = "cu132" }, { group = "cpu" }]]
 # Transitive packages stay pinned, so a library change is always a deliberate edit here.
 # Each run records the full package list it ran with.
 constraint-dependencies = [
-    "annotated-doc==0.0.5",
     "anyio==4.15.1",
     "certifi==2026.7.22",
-    "charset-normalizer==3.5.1",
     "click==8.5.0",
-    "cloudpickle==3.1.2",
     "colorama==0.4.6",
     "contourpy==1.4.0",
     "cycler==0.12.1",
@@ -59,62 +56,29 @@ constraint-dependencies = [
     "httpcore==1.0.9",
     "httpx==0.28.1",
     "idna==3.19",
-    "joblib==1.6.0",
     "kiwisolver==1.5.1",
-    "markdown-it-py==4.2.0",
     "markupsafe==3.0.3",
-    "mdurl==0.1.2",
-    "mpmath==1.3.0",
-    "narwhals==2.27.1",
-    "networkx==3.6.1",
+    "nvidia-cuda-nvrtc==13.2.86",
     "packaging==26.3",
     "pillow==12.3.0",
     "pygments==2.21.0",
     "pyparsing==3.3.2",
     "python-dateutil==2.9.0.post0",
     "pyyaml==6.0.3",
-    "regex==2026.9.10",
-    "requests==2.34.2",
-    "rich==15.0.0",
-    "scipy==1.18.1",
-    "shellingham==1.5.4",
     "six==1.17.0",
-    "sympy==1.14.0",
-    "threadpoolctl==3.7.0",
     "tqdm==4.70.1",
-    "typer==0.27.2",
     "typing-extensions==4.16.0",
-    "urllib3==2.7.0",
 ]
 
 [tool.uv.sources]
-torch = [{ index = "pytorch-cu132", group = "cu132" }, { index = "pytorch-cpu", group = "cpu" }]
-torchvision = [{ index = "pytorch-cu132", group = "cu132" }, { index = "pytorch-cpu", group = "cpu" }]
-# PyPI has only the source of llama-cpp-python. The default cpu group takes the 0.3.36 CPU wheel by URL,
-# so uv.lock records its hash and a machine with no NVIDIA driver can import llama_cpp. The cu132 group
-# takes the CUDA 13.2 wheel instead; it needs an NVIDIA driver even when every layer is placed on the CPU.
-# On Windows the CUDA wheel also needs cuBLAS 13, which the CUDA torch build provides; privacy_bench imports
-# torch first for that reason. Other platforms still build from source.
-# macOS wheel URLs, kept for reference but not active: upstream's 0.3.36 assets currently fail zip
-# validation, so macOS builds from source until they are repaired:
-#   https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36/llama_cpp_python-0.3.36-py3-none-macosx_11_0_arm64.whl
-#   https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36-metal/llama_cpp_python-0.3.36-py3-none-macosx_11_0_arm64.whl
+# PyPI has only the source of llama-cpp-python. With the cu132 group, Windows and Linux on x64 take the
+# project's built CUDA 13.2 wheel by its URL, so that uv.lock records its hash. That wheel computes on the
+# GPU or on the CPU. Everything else builds from source: the cpu group, because 0.3.37 has no built CPU
+# wheel, and every other platform. A Mac's build includes llama.cpp's Metal GPU backend.
 llama-cpp-python = [
-    { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36/llama_cpp_python-0.3.36-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", marker = "sys_platform == 'linux' and platform_machine == 'x86_64'", group = "cpu" },
-    { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36/llama_cpp_python-0.3.36-py3-none-win_amd64.whl", marker = "sys_platform == 'win32' and platform_machine == 'AMD64'", group = "cpu" },
-    { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36-cu132/llama_cpp_python-0.3.36-py3-none-win_amd64.whl", marker = "sys_platform == 'win32' and platform_machine == 'AMD64'", group = "cu132" },
-    { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36-cu132/llama_cpp_python-0.3.36-py3-none-manylinux_2_35_x86_64.whl", marker = "sys_platform == 'linux' and platform_machine == 'x86_64'", group = "cu132" },
+    { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.37-cu132/llama_cpp_python-0.3.37-py3-none-win_amd64.whl", marker = "sys_platform == 'win32' and platform_machine == 'AMD64'", group = "cu132" },
+    { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.37-cu132/llama_cpp_python-0.3.37-py3-none-manylinux_2_35_x86_64.whl", marker = "sys_platform == 'linux' and platform_machine == 'x86_64'", group = "cu132" },
 ]
-
-[[tool.uv.index]]
-name = "pytorch-cu132"
-url = "https://download.pytorch.org/whl/cu132"
-explicit = true
-
-[[tool.uv.index]]
-name = "pytorch-cpu"
-url = "https://download.pytorch.org/whl/cpu"
-explicit = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

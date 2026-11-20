@@ -1,58 +1,75 @@
-"""Free the model's GPU memory once the service has been idle (NFR-03).
+"""Keep one model in memory at a time, and none once the service has been idle (NFR-03).
 
-A loaded model holds GPU memory that other programs could use. After the idle time with no
-request, the model is released, and the next request loads it again. On the CPU the model
-stays loaded: NFR-03 names GPU memory, and a computer without a GPU has the least time to
-spare for a reload. A release there returns system RAM only when it runs on the thread that
-loaded the model, and check() runs on another. On one thread, six load and release cycles
-of the default CPU condition took the process from about 1.47 GiB above its start to 0.16
-to 0.20 GiB after each release.
+The classifier and the rewriter never share memory. Before a request uses one model, the
+other is released, and a request waits while the other model still has a request under
+way, so that no model is released in the middle of one. After the idle time with no
+request, the loaded model is released too, and the next request loads it again.
+
+A release runs on another thread than the one that loaded the model, and through
+llama.cpp that returns the memory all the same: in eight load and release cycles of each
+model, two of them with the load on a thread that had ended, the process stayed within
+40 MiB of its level after the first release.
 """
 
 from contextlib import contextmanager
 import logging
-from threading import Lock
+from threading import Condition
 import time
-
-from .classifier import Classifier
+from typing import Protocol
 
 logger = logging.getLogger(__name__)
 
 
+class Releasable(Protocol):
+    def release(self) -> None:
+        """Free the model's memory. The next load brings the model back."""
+
+
 class IdleRelease:
-    def __init__(self, classifier: Classifier, idle_seconds: float, *, clock=time.monotonic):
+    def __init__(self, models, idle_seconds: float, *, clock=time.monotonic):
         self.idle_seconds = idle_seconds
-        self._classifier = classifier
         self._clock = clock
-        self._lock = Lock()
-        self._in_use = 0
-        # When the model was last in use, or None once check() has acted on that.
-        self._idle_since: float | None = clock()
+        # One lock over every model's count: a request starts only while no other model is in use.
+        self._changed = Condition()
+        self._in_use = {model: 0 for model in models}
+        # The one model that a request has used since the last release. Every load happens inside in_use().
+        self._loaded: Releasable | None = None
+        self._idle_since = clock()
 
     @contextmanager
-    def in_use(self):
-        """Keep the model loaded for the length of the block; the idle time starts over when it ends."""
-        with self._lock:
-            self._in_use += 1
+    def in_use(self, model: Releasable):
+        """Keep the model loaded for the length of the block, after the other model has been released.
+
+        The idle time starts over when the block ends.
+        """
+        with self._changed:
+            # shortcut: a waiting request is not served in order of arrival, so a steady stream of requests for
+            # one model can keep the other waiting; add a queue if the service ever gets more than one user.
+            while any(count for other, count in self._in_use.items() if other is not model):
+                self._changed.wait()
+            if self._loaded is not None and self._loaded is not model:
+                self._loaded.release()
+                logger.info("Released %s before a request for %s", type(self._loaded).__name__, type(model).__name__)
+            self._loaded = model
+            self._in_use[model] += 1
         try:
             yield
         finally:
-            with self._lock:
-                self._in_use -= 1
+            with self._changed:
+                self._in_use[model] -= 1
                 self._idle_since = self._clock()
+                self._changed.notify_all()
 
     def check(self) -> float:
-        """Release the model if its idle time has passed. Returns the seconds until the next check is due."""
+        """Release the loaded model if its idle time has passed. Returns the seconds until the next check is due."""
         # The lock is held throughout, so no request is under way and none can start before the release ends.
-        with self._lock:
-            if self._in_use or self._idle_since is None:
+        with self._changed:
+            if self._loaded is None or any(self._in_use.values()):
                 return self.idle_seconds
             remaining = self._idle_since + self.idle_seconds - self._clock()
             if remaining > 0:
                 return remaining
-            self._idle_since = None
-            metadata = self._classifier.metadata()
-            if metadata is not None and str(metadata.get("device")).startswith("cuda"):
-                self._classifier.release()
-                logger.info("Released the model's GPU memory after %s s without a request", self.idle_seconds)
+            self._loaded.release()
+            self._loaded = None
+            logger.info("Released the model after %s s without a request", self.idle_seconds)
             return self.idle_seconds

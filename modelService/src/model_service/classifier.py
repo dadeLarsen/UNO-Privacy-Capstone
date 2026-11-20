@@ -1,24 +1,21 @@
 """Adapter between the HTTP service and the benchmark's classification strategies.
 
 The service deliberately reuses ``privacy_bench`` instead of loading a model itself:
-the condition pins the checkpoint, the fitted head, the instruction prefix, and the
+the condition pins the GGUF file, the fitted head, the instruction prefix, and the
 label order, and the strategy checks the fitted weight hashes before inference.
 """
 
 from collections import OrderedDict
 from dataclasses import dataclass
 import gc
-import os
 from pathlib import Path
 from threading import RLock
-import time
 from types import SimpleNamespace
 from typing import Protocol
 
 from privacy_bench.core.conditions import load_condition
 from privacy_bench.tasks import get_task
 from privacy_bench.tasks.classification.scoring import parse_response
-import torch
 
 from .taxonomy import LABELS, TAXONOMY
 
@@ -35,7 +32,7 @@ class Classifier(Protocol):
         """Load the model unless it is loaded and return its safe provenance metadata."""
 
     def metadata(self) -> dict | None:
-        """Return the model's metadata, or None before its first load. A release keeps it."""
+        """Return the model's metadata, or None before its first load. A release keeps it, and it never waits."""
 
     def classify(self, sentence: str) -> Classification:
         """Classify one sentence."""
@@ -54,15 +51,12 @@ class PrivacyBenchClassifier:
                 f"modelService needs a classification condition, not {condition.task!r}: {condition_path}"
             )
         self._condition = condition
-        # Weights loaded by worker threads that then exit can never give their memory back after a release.
-        os.environ.setdefault("HF_DEACTIVATE_ASYNC_LOAD", "1")
         self._strategy = get_task(condition.task).build_strategy(condition)
         self._cache_size = cache_size
         self._cache: OrderedDict[str, Classification] = OrderedDict()
         self._lock = RLock()
         self._loaded = False
         self._metadata: dict | None = None
-        self._score_order: list[int] | None = None
 
     @property
     def condition(self):
@@ -73,11 +67,6 @@ class PrivacyBenchClassifier:
             if self._loaded:
                 return dict(self._metadata)
             loaded = self._strategy.load()
-            # A classifier-head checkpoint has its own label order, and its logits follow that order.
-            mapping = loaded.get("label_mapping")
-            if mapping is not None:
-                by_label = {item["label_id"]: item["model_label_id"] for item in mapping}
-                self._score_order = [by_label[label_id] for label_id in range(len(LABELS))]
             self._metadata = {
                 "id": loaded.get("model"),
                 "revision": loaded.get("revision"),
@@ -94,24 +83,18 @@ class PrivacyBenchClassifier:
             return dict(self._metadata)
 
     def metadata(self) -> dict | None:
-        with self._lock:
-            return dict(self._metadata) if self._metadata is not None else None
+        # No lock, so /health never waits for a request: load() sets the dict in one step and release() keeps it.
+        metadata = self._metadata
+        return dict(metadata) if metadata is not None else None
 
     def release(self) -> None:
         with self._lock:
             # Building a strategy loads no model, so a fresh one replaces the one that holds the model.
             self._strategy = get_task(self._condition.task).build_strategy(self._condition)
             self._loaded = False
-            # The dropped model sits in reference cycles, so only a collection frees it, and torch keeps
-            # the freed blocks for itself until empty_cache() hands them back to the GPU.
+            # The collection makes sure the dropped model is freed now, even if something holds it in a
+            # reference cycle. llama.cpp then returns its memory, whichever thread releases.
             gc.collect()
-            torch.cuda.empty_cache()
-            # torch's CPU allocator hands freed memory back to the system only while it frees another large
-            # block, and not within 0.1 s of the first free, so one short-lived block makes it return the model.
-            # After a GPU release it returned no host memory, so the GPU skips the wait.
-            if self._metadata is not None and self._metadata["device"] == "cpu":
-                time.sleep(0.1)
-                torch.empty(32 * 2**20, dtype=torch.uint8)
 
     def classify(self, sentence: str) -> Classification:
         if not isinstance(sentence, str) or not sentence.strip():
@@ -124,22 +107,10 @@ class PrivacyBenchClassifier:
                 return cached
             prepared = self._strategy.prepare(SimpleNamespace(text=sentence))
             response = self._strategy.predict(prepared)
-            # Every strategy answers in raw_output, and the benchmark scores that answer with this parser.
-            # model_label_id is the checkpoint's own index, which is not always the benchmark's label_id.
+            # The benchmark scores the answer in raw_output with this parser, so the service reads it the same way.
             label_id = parse_response(response.get("raw_output"))
-            scores = response.get("scores")
-            if scores is None:
-                for key in ("similarities", "logits"):
-                    if key in response:
-                        scores = response[key]
-                        break
-            if scores is not None and self._score_order is not None:
-                scores = [scores[index] for index in self._score_order]
-            result = Classification(
-                label_id=label_id,
-                label=LABELS[label_id],
-                scores=tuple(float(score) for score in scores) if scores is not None else None,
-            )
+            # The fitted head scores the ten categories in the benchmark's order.
+            result = Classification(label_id=label_id, label=LABELS[label_id], scores=tuple(response["scores"]))
             if self._cache_size:
                 self._cache[sentence] = result
                 if len(self._cache) > self._cache_size:

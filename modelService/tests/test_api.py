@@ -5,9 +5,12 @@ from fastapi.testclient import TestClient
 
 from model_service.app import create_app
 from model_service.classifier import Classification
-from model_service.rewriter import RewriterUnavailable, RewrittenPassage
+from model_service.rewriter import Rewrite
 from model_service.settings import Settings
 from model_service.taxonomy import LABELS, TAXONOMY
+
+DOES_NOT_FIT = ("Input has 5000 tokens; plus 1024 requested output tokens exceeds the 4096-token context. "
+                "Input was not truncated.")
 
 
 class FakeClassifier:
@@ -46,14 +49,41 @@ class FakeClassifier:
         return Classification(label_id, LABELS[label_id], tuple([0.0] * len(LABELS)))
 
 
+class FakeRewriter:
+    def __init__(self):
+        self._metadata = None
+        self.loaded = False
+
+    def load(self):
+        self._metadata = {"id": "fake/rewriter", "device": "cpu", "prompt": "fake-prompt"}
+        self.loaded = True
+        return dict(self._metadata)
+
+    def metadata(self):
+        return dict(self._metadata) if self._metadata is not None else None
+
+    def release(self):
+        self.loaded = False
+
+    def rewrite(self, text):
+        if "endless" in text:
+            raise ValueError(DOES_NOT_FIT)
+        return Rewrite(text="In short: " + text.split(".")[0] + ".", status="valid", output_tokens=7)
+
+
 @pytest.fixture
 def classifier():
     return FakeClassifier()
 
 
 @pytest.fixture
-def client(classifier):
-    with TestClient(create_app(Settings(), classifier)) as test_client:
+def rewriter():
+    return FakeRewriter()
+
+
+@pytest.fixture
+def client(classifier, rewriter):
+    with TestClient(create_app(Settings(), classifier, rewriter)) as test_client:
         yield test_client
 
 
@@ -106,7 +136,7 @@ class RefusesOneSentence(FakeClassifier):
 
 def test_a_sentence_the_model_refuses_does_not_fail_the_policy():
     text = "We collect your email. This endless sentence is refused. We share it with partners."
-    with TestClient(create_app(Settings(), RefusesOneSentence())) as test_client:
+    with TestClient(create_app(Settings(), RefusesOneSentence(), FakeRewriter())) as test_client:
         response = test_client.post("/analyze", json={"text": text, "include_scores": True})
     assert response.status_code == 200
     first, refused, last = response.json()["sentences"]
@@ -124,11 +154,12 @@ def test_empty_policy_is_rejected(client):
     assert client.post("/analyze", json={"text": "   \n\n "}).status_code == 422
 
 
-def test_too_long_policy_is_rejected(classifier):
+def test_too_long_policy_is_rejected(classifier, rewriter):
     settings = Settings(max_characters=10)
-    with TestClient(create_app(settings, classifier)) as test_client:
+    with TestClient(create_app(settings, classifier, rewriter)) as test_client:
         response = test_client.post("/analyze", json={"text": "This policy is definitely too long."})
-    assert response.status_code == 413
+        assert response.status_code == 413
+        assert test_client.post("/rewrite", json={"text": "This passage is too long as well."}).status_code == 413
 
 
 def test_upload_txt_file(client):
@@ -156,17 +187,53 @@ def test_upload_rejects_invalid_utf8(client):
     assert response.status_code == 400
 
 
-def test_lazy_mode_reports_not_ready_until_the_first_request(classifier):
+def test_lazy_mode_reports_not_ready_until_the_first_request(classifier, rewriter):
     settings = Settings(preload=False)
-    with TestClient(create_app(settings, classifier)) as test_client:
+    with TestClient(create_app(settings, classifier, rewriter)) as test_client:
         assert test_client.get("/health").json()["ready"] is False
         assert test_client.post("/analyze", json={"text": "We collect data."}).status_code == 200
         assert test_client.get("/health").json()["ready"] is True
 
 
-def test_an_idle_gpu_model_is_released_and_the_next_request_loads_it_again():
-    classifier = FakeClassifier(device="cuda:0")
-    with TestClient(create_app(Settings(idle_release_seconds=1), classifier)) as test_client:
+def test_rewrite_returns_the_text_and_the_model_that_wrote_it(client):
+    text = "We collect your email. We share it with partners."
+    response = client.post("/rewrite", json={"text": text})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["rewrite"] == "In short: We collect your email."
+    assert (body["status"], body["output_tokens"], body["characters"]) == ("valid", 7, len(text))
+    assert body["model"] == {"id": "fake/rewriter", "device": "cpu", "prompt": "fake-prompt"}
+
+
+def test_a_passage_that_does_not_fit_the_context_is_refused_with_the_reason(client):
+    response = client.post("/rewrite", json={"text": "This endless passage does not fit."})
+    assert response.status_code == 413
+    assert response.json()["detail"] == DOES_NOT_FIT
+
+
+def test_an_empty_passage_is_rejected(client):
+    assert client.post("/rewrite", json={"text": ""}).status_code == 422
+    assert client.post("/rewrite", json={"text": "   \n\n "}).status_code == 422
+
+
+def test_only_the_model_of_the_last_request_stays_loaded(client, classifier, rewriter):
+    # The classifier loads at startup, and the rewriter on its first request.
+    assert (classifier.loaded, rewriter.loaded) == (True, False)
+    assert client.get("/health").json()["rewriter"] is None
+
+    assert client.post("/rewrite", json={"text": "We collect your email."}).status_code == 200
+    assert (classifier.loaded, rewriter.loaded) == (False, True)
+    health = client.get("/health").json()
+    # A released classifier still answers, so /health must not tell a caller to wait.
+    assert (health["ready"], health["rewriter"]["id"]) == (True, "fake/rewriter")
+
+    assert client.post("/analyze", json={"text": "We collect data."}).status_code == 200
+    assert (classifier.loaded, rewriter.loaded) == (True, False)
+
+
+def test_an_idle_model_is_released_and_the_next_request_loads_it_again(rewriter):
+    classifier = FakeClassifier()
+    with TestClient(create_app(Settings(idle_release_seconds=1), classifier, rewriter)) as test_client:
         assert classifier.loaded
         deadline = time.monotonic() + 10
         while classifier.loaded and time.monotonic() < deadline:
@@ -177,61 +244,3 @@ def test_an_idle_gpu_model_is_released_and_the_next_request_loads_it_again():
         assert (health["status"], health["ready"]) == ("ok", True)
         assert test_client.post("/analyze", json={"text": "We collect data."}).status_code == 200
         assert classifier.loaded
-
-
-class FakeRewriter:
-    def load(self):
-        return {
-            "id": "fake/rewriter",
-            "revision": "1" * 40,
-            "precision": "q4_k_m",
-            "device": "cpu",
-            "strategy": "prompted",
-            "prompt": "summary-v3",
-            "taxonomy_id": TAXONOMY["taxonomy_id"],
-            "taxonomy_version": TAXONOMY["version"],
-        }
-
-    def metadata(self):
-        return self.load()
-
-    def status(self):
-        return {"status": "ready", "available": True, "ready": True, "model": self.load(), "setup": None}
-
-    def rewrite(self, text, style):
-        return RewrittenPassage("We use your email for promotions.", ("Check numbers from the source.",))
-
-
-def test_rewrite_returns_source_linked_text_and_warnings(classifier):
-    with TestClient(create_app(Settings(), classifier, FakeRewriter())) as test_client:
-        response = test_client.post(
-            "/rewrite",
-            json={
-                "text": "We may share your email address with partners.",
-                "style": "simplify_for_adults",
-                "source_sentence_ids": [3],
-            },
-        )
-    assert response.status_code == 200, response.text
-    body = response.json()
-    assert body["rewrites"][0]["source_sentence_ids"] == [3]
-    assert body["rewrites"][0]["warnings"]
-    assert body["model"]["prompt"] == "summary-v3"
-
-
-class MissingRewriter(FakeRewriter):
-    def load(self):
-        raise RewriterUnavailable("Run `uv run pbench download ...` once.")
-
-
-def test_missing_rewrite_model_returns_actionable_setup_error(classifier):
-    with TestClient(create_app(Settings(), classifier, MissingRewriter())) as test_client:
-        response = test_client.post(
-            "/rewrite",
-            json={"text": "We share your email.", "source_sentence_ids": [1]},
-        )
-    assert response.status_code == 503
-    detail = response.json()["detail"]
-    assert detail["code"] == "rewriter_model_not_downloaded"
-    assert detail["retryable"] is False
-    assert "pbench download" in detail["message"]

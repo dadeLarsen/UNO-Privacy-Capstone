@@ -1,31 +1,20 @@
-"""Fit files and fit records: parsing, references, writing, and hash-checked loading."""
+"""Fit files and fit records: parsing, references, and hash-checked loading."""
 
 import numpy as np
 import pytest
 
-from privacy_bench.core.fits import (
-    FIT_SCHEMA_VERSION, WEIGHTS_FILE, execute_fit, fit_directory, load_fit, parse_fit_spec, resolve_fit,
-)
+from privacy_bench.cli import main
+from privacy_bench.core.fits import WEIGHTS_FILE, load_fit, parse_fit_spec, resolve_fit
 from privacy_bench.core.files import read_json, write_json
+from privacy_bench.core.paths import FITS_DIR
 
 SPEC = 'task = "toy"\nkind = "lines"\n[options]\nslope = 2\n[heads.a]\nmethod = "x"\n'
 
 
-class LineTask:
-    """Fits y = slope * x on a fixed grid, or fails on request."""
-
-    name = "toy"
-
-    def __init__(self, fail=False, dtype=np.float32):
-        self.fail, self.dtype = fail, dtype
-
-    def fit(self, spec):
-        if self.fail:
-            raise RuntimeError("fit exploded")
-        slope = spec.tables["options"]["slope"]
-        return {"report": {"slope": slope},
-                "tensors": {"line.weight": np.full((2, 3), slope, dtype=self.dtype),
-                            "line.bias": np.zeros(2, dtype=self.dtype)}}
+@pytest.fixture
+def toy_fit(tmp_path, write_fit):
+    return write_fit(tmp_path / "toy" / "toy-fit" / "20261012-000000Z", "toy-fit", SPEC, {"slope": 2},
+                     {"line.weight": np.full((2, 3), 2, dtype=np.float32), "line.bias": np.zeros(2, dtype=np.float32)})
 
 
 def test_fit_files_keep_task_kind_and_tables():
@@ -54,19 +43,10 @@ def test_fit_references_resolve_under_the_fits_folder(tmp_path):
             resolve_fit(reference, root=tmp_path)
 
 
-def test_a_fit_record_round_trips_with_its_hashes(tmp_path):
-    spec = parse_fit_spec("toy-fit", SPEC)
-    output = fit_directory("toy", "toy-fit", root=tmp_path)
-    record = execute_fit(LineTask(), spec, output)
-    assert record["status"] == "complete" and record["schema_version"] == FIT_SCHEMA_VERSION
-    assert record["tensors"] == {"line.bias": [2], "line.weight": [2, 3]} and record["report"] == {"slope": 2}
-    assert (output / "fit.toml").read_text(encoding="utf-8") == SPEC
-    assert record["environment"]["code"]["commit"]
-    fit = load_fit(output)
-    assert fit.reference == f"toy/toy-fit/{output.name}"
+def test_a_fit_record_loads_with_its_reference_and_tensors(toy_fit):
+    fit = load_fit(toy_fit)
+    assert fit.reference == "toy/toy-fit/20261012-000000Z" and fit.record["report"] == {"slope": 2}
     np.testing.assert_array_equal(fit.tensors["line.weight"], np.full((2, 3), 2, dtype=np.float32))
-    with pytest.raises(ValueError, match="already exists"):
-        execute_fit(LineTask(), spec, output)
 
 
 @pytest.mark.parametrize("tamper, message", [
@@ -77,39 +57,19 @@ def test_a_fit_record_round_trips_with_its_hashes(tmp_path):
     (lambda path: write_json(path / "fit.json", {**read_json(path / "fit.json"), "tensors": {"line.weight": [2, 3]}}),
      "names and shapes"),
 ])
-def test_loading_refuses_a_changed_or_unfinished_record(tmp_path, tamper, message):
-    output = tmp_path / "fit"
-    execute_fit(LineTask(), parse_fit_spec("toy-fit", SPEC), output)
-    tamper(output)
+def test_loading_refuses_a_changed_or_unfinished_record(toy_fit, tamper, message):
+    tamper(toy_fit)
     with pytest.raises(ValueError, match=message):
-        load_fit(output)
+        load_fit(toy_fit)
 
 
-def test_column_major_tensors_load_back_unchanged(tmp_path):
-    """scikit-learn returns coef_ column-major; a raw buffer write would transpose-scramble it."""
-    weight = np.asfortranarray(np.arange(12, dtype=np.float32).reshape(3, 4))
-    assert not weight.flags["C_CONTIGUOUS"]
-
-    class ColumnMajorTask(LineTask):
-        def fit(self, spec):
-            return {"report": {}, "tensors": {"head.weight": weight}}
-
-    execute_fit(ColumnMajorTask(), parse_fit_spec("toy-fit", SPEC), tmp_path / "fit")
-    np.testing.assert_array_equal(load_fit(tmp_path / "fit").tensors["head.weight"], weight)
+def test_every_recorded_fit_still_loads():
+    records = sorted(path.parent for path in FITS_DIR.glob("*/*/*/fit.json"))
+    assert len(records) >= 2
+    for record in records:
+        assert load_fit(record).tensors
 
 
-def test_a_failed_fit_is_recorded_and_raised(tmp_path):
-    output = tmp_path / "fit"
-    with pytest.raises(RuntimeError, match="fit exploded"):
-        execute_fit(LineTask(fail=True), parse_fit_spec("toy-fit", SPEC), output)
-    record = read_json(output / "fit.json")
-    assert record["status"] == "failed" and record["error"] == "RuntimeError: fit exploded"
-    assert not (output / WEIGHTS_FILE).exists()
-
-
-def test_fits_must_return_float32_tensors_for_their_own_task(tmp_path):
-    with pytest.raises(ValueError, match="float32"):
-        execute_fit(LineTask(dtype=np.float64), parse_fit_spec("toy-fit", SPEC), tmp_path / "fit")
-    other = parse_fit_spec("toy-fit", SPEC.replace('task = "toy"', 'task = "other"'))
-    with pytest.raises(ValueError, match="is for task 'other'"):
-        execute_fit(LineTask(), other, tmp_path / "other")
+def test_the_fit_command_refuses_and_points_to_the_history():
+    with pytest.raises(SystemExit, match="pbench fit is retired.*History in README.md"):
+        main(["fit", "fits/classification/embeddinggemma2-opp115-heads.toml"])

@@ -15,23 +15,21 @@ from .settings import Settings
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(
         prog="model-service",
-        description="Classify uploaded privacy policies with the pinned local classifier.",
+        description="Classify and rewrite privacy policies with the pinned local models.",
     )
     parser.add_argument(
         "--condition", type=Path, help="Classification condition TOML to run instead of a default one."
     )
     parser.add_argument(
-        "--rewrite-condition",
-        type=Path,
-        help="GGUF rewrite condition TOML to use instead of the default for the selected device.",
+        "--rewrite-condition", type=Path, help="Rewrite condition TOML to run instead of a default one."
     )
     parser.add_argument(
         "--device",
-        choices=("cuda", "cpu"),
-        help="Run the default GPU or CPU condition (default: detected). Cannot be combined with a condition.",
+        choices=("gpu", "cpu"),
+        help="Run the default GPU or CPU conditions (default: detected). Cannot be combined with --condition.",
     )
     parser.add_argument("--host", help="Loopback address to bind (default: 127.0.0.1).")
-    parser.add_argument("--port", type=int, help="Port to bind (default: 8002).")
+    parser.add_argument("--port", type=int, help="Port to bind (default: 8000).")
     parser.add_argument("--no-preload", action="store_true", help="Load the model on the first request instead.")
     args = parser.parse_args(argv)
 

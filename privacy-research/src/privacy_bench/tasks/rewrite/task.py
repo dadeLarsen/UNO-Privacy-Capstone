@@ -181,6 +181,3 @@ class RewriteTask:
         return [path, *draw_keypoints(rows, output, title="What the judge found in each model's rewrites",
                                       context=f"{rows[0]['n']} passages ({selection.identity['passages']['name']})  "
                                               f"|  prompts: {prompts}", footnotes=notes)]
-
-    def fit(self, spec) -> dict:
-        raise ValueError("The rewrite task has nothing to fit")
