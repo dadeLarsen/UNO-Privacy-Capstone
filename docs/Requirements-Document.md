@@ -52,7 +52,7 @@ IDs: A actor, G goal, Q quality, T task, R resource, D dependum.
 | G5 | Rewrite shown | A rewrite appears next to the passage it came from. |
 | T5 | Split text into sentences | Keep the original text unchanged and give each sentence a stable ID and position. |
 | T6 | Classify sentences | Give each sentence one of the ten categories (R1). |
-| T6a | Embedding model + fitted head | A small sentence-embedding model with a linear head trained on labeled sentences. The current lead: EmbeddingGemma 2, about 0.04 s per sentence and 0.6 GiB. |
+| T6a | Embedding model + fitted head | A small sentence-embedding model with a linear head trained on labeled sentences. The current lead: EmbeddingGemma 2 as a 296 MiB file through llama.cpp, about 0.01 s per sentence on a GPU, 0.02 s on a CPU, and 0.7 GiB of memory. |
 | T6b | Prompt a large LLM | Ask a chat model such as Qwen3-14B for the category. Similar accuracy, but 10–30× slower and 10–16 GiB. |
 | T7 | Generate rewrite | Produce the requested rewrite with a local generative model. |
 | T7a | Small LLM kept in memory | A model small enough to stay loaded between requests. Not chosen yet (AR-02). |
@@ -373,7 +373,7 @@ Policies and results are processed on the user's computer. Nothing is saved unle
 - **Goal:** Analyze the app's classifier to accept or reject it, with respect to label accuracy, from the client's and user's point of view, on policies it was not tuned on.
 - **Questions:** How often does its label match one a reviewer accepts? How does it do on each category, including rare ones? Is it at least as good as the best small baseline?
 - **Metrics:** accuracy against accepted labels on the APPSI-139 test half (natural category mix) and the 460-sentence balanced sample; macro accuracy, weighting each category equally; per-category accuracy; share of valid outputs.
-- **Target:** not significantly less accurate than skythrone/privacy-model on either sample (exact McNemar test, p < 0.05), with every output valid. The prior-shifted EmbeddingGemma 2 head meets this, tying privacy-model on both; no head yet beats it on both (AR-01). Run on the CPU in fp32, the same head still meets it: 0.857 against privacy-model's 0.858 on the test half (p = 0.75), and 0.815 against 0.824 on the balanced sample (p = 0.74).
+- **Target:** not significantly less accurate than skythrone/privacy-model on either sample (exact McNemar test, p < 0.05), with every output valid. The prior-shifted EmbeddingGemma 2 head meets this, tying privacy-model on both; no head yet beats it on both (AR-01). The app runs this head on a GGUF build of EmbeddingGemma 2 through llama.cpp, on a GPU or on the CPU, and there it still meets the target: 0.857 against privacy-model's 0.858 on the test half (p = 0.79 to 0.87 over four runs), and 0.815 to 0.822 against 0.824 on the balanced sample (p = 0.74 to 1.00).
 
 **NFR-06 [Must] Faithful, readable rewrites.** *(Q4, Q2, Q8)*
 
@@ -403,14 +403,14 @@ These are the evaluations the team runs to choose models and settings. Each uses
 - **Goal:** Analyze candidate sentence classifiers to choose the app's classifier, with respect to accuracy, speed, and memory, from the team's and client's point of view, on policies they were not tuned on.
 - **Questions:** Which candidates are most accurate on a balanced sample, and on a natural mix? Do results carry over from OPP-115 to APPSI-139? What does each cost per sentence in time and memory? Which categories does each confuse?
 - **Metrics:** accuracy and macro accuracy against accepted labels; macro-F1; exact McNemar tests between pairs; seconds per sentence; peak GPU memory; share of valid outputs; per-category confusion.
-- **Status:** In progress. On the balanced APPSI-139 sample, a linear head on EmbeddingGemma 2 ties Qwen3-14B and JEV-9B (0.867 against 0.883–0.891, not significant) at 0.04 s per sentence and about 0.6 GiB. Shifted toward APPSI-139's category mix, it ties privacy-model on the test half (0.858 each) but loses its balanced lead. No head leads on both yet, and nothing has been timed on a computer without a GPU.
+- **Status:** In progress. On the balanced APPSI-139 sample, a linear head on EmbeddingGemma 2 ties Qwen3-14B and JEV-9B (0.867 against 0.883–0.891, not significant). Shifted toward APPSI-139's category mix, it ties privacy-model on the test half (0.858 each) but loses its balanced lead. No head leads on both yet. The shifted head now runs through llama.cpp at about 0.01 s per sentence on a GPU and 0.02 s on a CPU, timed on the desktop and on a MacBook; nothing has been timed on a computer of the 8–12 GB tier.
 
 **AR-02 [Must] Choose the rewriter.** *(G9, T12, Q4, Q2)*
 
 - **Goal:** Analyze candidate local generative models and prompts to choose the rewriter, with respect to faithfulness, readability, speed, and memory, from the reader's and client's point of view, on 8–12 GB computers.
 - **Questions:** Which candidates keep the meaning (NFR-06)? Is the output readable for each audience? Does it run in the 8–12 GB tier at an acceptable speed? Can JEV-9B's base model, with its adapter off, rewrite well enough to serve both tasks?
 - **Metrics:** the NFR-06 metrics on a fixed review set of passages; time to first token and total time; peak memory.
-- **Status:** Not started.
+- **Status:** In progress. A judge graded nine candidate models on 40 passages for the key facts each rewrite keeps (`privacy-research/docs/rewriting-findings.md`). The model service runs Qwen3.5-4B in a 4-bit GGUF file through llama.cpp with one summary prompt for now. The rewriter is not chosen, the prompt is still being tuned, and the three styles and their reading targets are not set.
 
 **AR-04 [Could] Check that readers understand more.** *(G1, G6)*
 
@@ -427,26 +427,25 @@ The app calls no web services and needs no API keys. Its external interfaces are
 
 | Library | Used for | Calls | In → out |
 | --- | --- | --- | --- |
-| sentence-transformers | Sentence embeddings for the classifier | `SentenceTransformer(path, local_files_only=True)`, `encode` | Sentences, with the fitted head's prefix → embedding vectors |
-| Transformers (PyTorch) | Sequence classifiers, chat models, tokenizers | `AutoTokenizer` / `AutoModelFor…` `.from_pretrained(path, local_files_only=True, trust_remote_code=False)`, `generate` | Token IDs → logits or generated tokens |
-| bitsandbytes, Accelerate | INT8 and NF4 quantization, device placement | `quantization_config`, `device_map` | — |
-| PEFT | JEV-9B's LoRA adapter | `PeftModel.from_pretrained` | — |
-| PyTorch, psutil (to add) | Hardware detection (FR-19) | `torch.cuda.mem_get_info()`, `psutil.virtual_memory()` | → free and total VRAM, available RAM |
+| llama.cpp (llama-cpp-python) | Sentence embeddings for the classifier | `Llama(model_path, embedding=True)`, `tokenize`, `llama_get_embeddings_seq` | Sentences, with the fitted head's prefix → embedding vectors |
+| llama.cpp (llama-cpp-python) | Text generation for the rewriter | `Llama(model_path)`, `tokenize`, `generate` | Token IDs of the rendered chat prompt → generated tokens |
+| NumPy, safetensors | The fitted head on the embeddings | `load_file`, `weight @ embedding + bias` | Embedding vector → one score per category |
+| llama.cpp, psutil (to add) | Hardware detection (FR-19) | `llama_supports_gpu_offload()`, `psutil.virtual_memory()` | → whether a GPU backend has a device, available RAM. A call for free VRAM is not chosen. |
 
-Setup: set `HF_HUB_OFFLINE=1` and `HF_HUB_DISABLE_TELEMETRY=1` before importing these libraries. Every version is pinned (currently transformers 5.19.0 and torch 2.15.0). A transformers upgrade made JEV-9B 1.6–2.3× faster and shifted its logits, so library versions belong in each model profile.
+Setup: set `HF_HUB_OFFLINE=1` and `HF_HUB_DISABLE_TELEMETRY=1` before importing these libraries. Every version is pinned (currently llama-cpp-python 0.3.37). Library versions belong in each model profile, because an upgrade can change a model's output: a transformers upgrade made JEV-9B 1.6–2.3× faster and shifted its logits, and llama-cpp-python 0.3.37 words 65 of 80 rewrites differently from 0.3.36. The models that the benchmark only compared against ran through Transformers, sentence-transformers, bitsandbytes, and PEFT; those libraries are no longer installed.
 
 ### 7.2 Model files
 
-Models use the Hugging Face snapshot layout (`config.json`, tokenizer files, `*.safetensors` weights) and are pinned by commit.
+Each of the app's two models is one GGUF file in the Hugging Face cache, pinned by its repository's commit. The models that the benchmark only compared against used the snapshot layout (`config.json`, tokenizer files, `*.safetensors` weights).
 
 | Model | Role | Commit |
 | --- | --- | --- |
-| google/embeddinggemma-2 | Classifier backbone (current lead) | `914f7f8` |
+| ggml-org/embeddinggemma-2-GGUF, `embeddinggemma-2-Q8_0.gguf` | Classifier backbone (current lead): a GGUF build of google/embeddinggemma-2 at `914f7f8`, the checkpoint the head was fitted on | `6ea3e3a` |
 | Fitted head | Linear head: `weights.safetensors`, plus `fit.json` with the SHA-256 a run checks before loading | — |
 | skythrone/privacy-model | Baseline classifier | `7b478b5` |
 | Qwen/Qwen3-14B | Prompted classifier (comparison) | `40c0698` |
 | autotrust/JEV-9B | Qwen3.5-9B base with a LoRA judge adapter (one-model option) | `4ab5dfb` |
-| Rewriter | To be chosen (AR-02) | — |
+| unsloth/Qwen3.5-4B-GGUF, `Qwen3.5-4B-Q4_K_M.gguf` | Rewriter in the model service for now; the choice is open (AR-02) | `e87f176` |
 
 Setup downloads each model from Hugging Face rather than the team redistributing it, but each license must still allow this use; EmbeddingGemma 2, for example, is under the Gemma Terms of Use.
 
@@ -469,4 +468,4 @@ Setup downloads each model from Hugging Face rather than the team redistributing
 
 **One offline installer per platform** *(G10, T14, NFR-08)*. The first design shipped the UI, Python runtime, and model files as one installer or portable bundle per platform, so that installing the app needed no network and no separate Python install. Not implemented: the client asked the team to put its effort into choosing models (AR-01, AR-02) rather than packaging, and doesn't need an executable. The app runs from the repository after a one-time setup instead (NFR-08), so setup needs the internet once (NFR-01).
 
-**AR-03: Compare runtimes and memory strategies** *(T13)*. This analysis compared inference runtimes (Transformers with quantization, llama.cpp, and AirLLM layer streaming) for speed, memory, and accuracy on each hardware tier. Dropped so that the analyses focus on choosing the models (AR-01, AR-02). Models run with Transformers and bitsandbytes (Section 7.1), and speed and memory on each tier are measured against NFR-03 and NFR-04. Its findings before it was dropped: AirLLM was far too slow (above), and on the pilot, INT8 and NF4 stayed within 1.5 points of BF16 (Qwen3-14B 0.900, 0.890, 0.885; JEV-9B 0.860, 0.860, 0.855), with NF4 roughly halving memory. Every measurement came from one PC with an RTX 4090 and 64 GB of RAM.
+**AR-03: Compare runtimes and memory strategies** *(T13)*. This analysis compared inference runtimes (Transformers with quantization, llama.cpp, and AirLLM layer streaming) for speed, memory, and accuracy on each hardware tier. Dropped so that the analyses focus on choosing the models (AR-01, AR-02). Models now run through llama.cpp (Section 7.1), and speed and memory on each tier are measured against NFR-03 and NFR-04. Its findings before it was dropped: AirLLM was far too slow (above), and on the pilot, INT8 and NF4 stayed within 1.5 points of BF16 (Qwen3-14B 0.900, 0.890, 0.885; JEV-9B 0.860, 0.860, 0.855), with NF4 roughly halving memory. Every measurement came from one PC with an RTX 4090 and 64 GB of RAM.

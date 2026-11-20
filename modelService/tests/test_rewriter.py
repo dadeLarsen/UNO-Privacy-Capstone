@@ -1,3 +1,6 @@
+from threading import Event, Thread
+import time
+
 import pytest
 
 from model_service.rewriter import PrivacyBenchRewriter
@@ -24,6 +27,18 @@ class FakeStrategy:
     def predict(self, prepared):
         return {"raw_output": f"  Short: {prepared}\n", "output_tokens": 9,
                 "reached_output_token_limit": "cut" in prepared}
+
+
+class SlowStrategy(FakeStrategy):
+    """Generates until the test lets it finish, as a long rewrite on the CPU does."""
+
+    def __init__(self):
+        self.generating, self.finish = Event(), Event()
+
+    def predict(self, prepared):
+        self.generating.set()
+        self.finish.wait(5)
+        return super().predict(prepared)
 
 
 @pytest.mark.parametrize("device", ["gpu", "cpu"])
@@ -78,3 +93,20 @@ def test_a_release_drops_the_loaded_strategy_keeps_the_metadata_and_the_next_use
     monkeypatch.setattr(rewriter, "_strategy", reloaded)
     assert rewriter.rewrite("We keep data.").text == "Short: We keep data."
     assert (loaded.loads, reloaded.loads) == (1, 1)
+
+
+def test_the_metadata_does_not_wait_for_a_rewrite_under_way(monkeypatch):
+    rewriter = PrivacyBenchRewriter(DEFAULT_REWRITE_CONDITIONS["cpu"])
+    strategy = SlowStrategy()
+    monkeypatch.setattr(rewriter, "_strategy", strategy)
+    metadata = rewriter.load()
+    rewriting = Thread(target=rewriter.rewrite, args=("We keep data.",))
+    rewriting.start()
+    assert strategy.generating.wait(5)
+    # /health reads the metadata, so it must answer while a rewrite holds the model.
+    started = time.monotonic()
+    assert rewriter.metadata() == metadata
+    waited = time.monotonic() - started
+    strategy.finish.set()
+    rewriting.join(5)
+    assert waited < 1

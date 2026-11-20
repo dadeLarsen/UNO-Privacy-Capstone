@@ -1,6 +1,5 @@
-"""Pinned Hugging Face checkpoints: explicit download, then offline resolution only."""
+"""Pinned Hugging Face model files: explicit download, then offline resolution only."""
 
-import json
 from pathlib import Path
 import re
 
@@ -10,11 +9,6 @@ from huggingface_hub import HfApi, constants, hf_hub_download, snapshot_download
 constants.HF_HUB_DISABLE_TELEMETRY = True
 
 COMMIT_PATTERN = re.compile(r"[0-9a-f]{40}")
-WEIGHT_FILES = (("model.safetensors.index.json", "model.safetensors"),
-                ("pytorch_model.bin.index.json", "pytorch_model.bin"))
-STANDARD_PATTERNS = ("*.json", "*.model", "*.txt", "*.jinja", "*.tiktoken", "tokenizer*", "vocab*")
-# The output_loading_info fields that must all be empty for a checkpoint to have loaded exactly.
-LOADING_CHECKS = ("missing_keys", "unexpected_keys", "mismatched_keys", "error_msgs")
 
 
 def require_commit(repo_id, revision) -> str:
@@ -25,39 +19,7 @@ def require_commit(repo_id, revision) -> str:
     return revision
 
 
-def validate_weights(snapshot: Path):
-    """Accept standard single-file and sharded checkpoints, without loading weights."""
-    if not (snapshot / "config.json").is_file():
-        raise ValueError(f"Checkpoint has no config.json: {snapshot}")
-    for index_name, single_name in WEIGHT_FILES:
-        index_path = snapshot / index_name
-        if index_path.is_file():
-            index = json.loads(index_path.read_text(encoding="utf-8"))
-            shards = set(index.get("weight_map", {}).values())
-            if not shards:
-                raise ValueError(f"Checkpoint has an empty weight index: {index_path}")
-            missing = [name for name in sorted(shards) if not (snapshot / name).is_file()]
-            if missing:
-                raise ValueError(f"Checkpoint is missing weight shards: {', '.join(missing)}. "
-                                 "Run `pbench download` to finish caching it.")
-            return
-        if (snapshot / single_name).is_file():
-            return
-    raise ValueError(f"No standard Transformers weights found in {snapshot}")
-
-
-def require_exact_load(loading) -> dict:
-    """Refuse a load whose output_loading_info lists missing, unused, or mismatched weights."""
-    if not isinstance(loading, dict) or any(key not in loading for key in LOADING_CHECKS):
-        raise RuntimeError(f"Checkpoint loading diagnostics are incomplete: {loading!r}")
-    loading = {name: sorted(values) if isinstance(values, set) else values for name, values in loading.items()}
-    if any(loading[key] for key in LOADING_CHECKS):
-        raise RuntimeError("Checkpoint did not load exactly; refusing missing or unused weights: "
-                           f"{json.dumps(loading, ensure_ascii=False, default=str)}")
-    return loading
-
-
-def resolve_snapshot(repo_id: str, revision: str, filename: str = "config.json") -> Path:
+def resolve_snapshot(repo_id: str, revision: str, filename: str) -> Path:
     """Find a cached snapshot by one file at its top level, without touching the network."""
     require_commit(repo_id, revision)
     try:
@@ -69,24 +31,15 @@ def resolve_snapshot(repo_id: str, revision: str, filename: str = "config.json")
     return Path(found).parent.resolve()
 
 
-def download_snapshot(repo_id: str, revision: str, only: str | None = None) -> Path:
-    """Download one pinned commit's standard config, tokenizer, and weight files, or only the file named."""
+def download_snapshot(repo_id: str, revision: str, only: str) -> Path:
+    """Download the one file named from a pinned commit. A GGUF repository holds one file per precision."""
     require_commit(repo_id, revision)
     info = HfApi().model_info(repo_id, revision=revision)
     if info.sha != revision:
         raise ValueError(f"Hugging Face resolved {repo_id} {revision} to a different commit: {info.sha}")
-    names = {item.rfilename for item in info.siblings}
-    if only is not None:
-        # A GGUF repository holds one file per precision, each several GiB.
-        if only not in names:
-            raise ValueError(f"{repo_id} at {revision} has no file {only!r}")
-        return Path(snapshot_download(repo_id, revision=revision, allow_patterns=[only])).resolve()
-    safetensors = "model.safetensors" in names or "model.safetensors.index.json" in names
-    # Prefer safetensors so repositories that also publish .bin files are not cached twice, and skip
-    # Mistral's consolidated.safetensors, a second copy of the sharded weights in Mistral's own format.
-    patterns = [*STANDARD_PATTERNS, "*.safetensors" if safetensors else "pytorch_model*.bin"]
-    return Path(snapshot_download(repo_id, revision=revision, allow_patterns=patterns,
-                                  ignore_patterns=["consolidated*.safetensors"])).resolve()
+    if only not in {item.rfilename for item in info.siblings}:
+        raise ValueError(f"{repo_id} at {revision} has no file {only!r}")
+    return Path(snapshot_download(repo_id, revision=revision, allow_patterns=[only])).resolve()
 
 
 def snapshot_identity(repo_id: str, revision: str, snapshot: Path) -> dict:
@@ -94,27 +47,3 @@ def snapshot_identity(repo_id: str, revision: str, snapshot: Path) -> dict:
     if resolved != revision:
         raise ValueError(f"Snapshot {snapshot} is not commit {revision} of {repo_id}")
     return {"model": repo_id, "revision": revision, "resolved_revision": resolved, "local_snapshot": str(snapshot)}
-
-
-def context_limit(model_config, tokenizer):
-    """The smallest positive context length declared by the config or tokenizer."""
-    config = model_config.get_text_config() if hasattr(model_config, "get_text_config") else model_config
-    candidates = {}
-    for key in ("max_position_embeddings", "n_positions", "n_ctx"):
-        value = getattr(config, key, None)
-        if isinstance(value, int) and 0 < value < 10**12:
-            candidates[f"model.{key}"] = value
-    value = getattr(tokenizer, "model_max_length", None)
-    if isinstance(value, int) and 0 < value < 10**12:
-        candidates["tokenizer.model_max_length"] = value
-    if not candidates:
-        raise ValueError("Cannot establish this model's context limit from its config or tokenizer")
-    return min(candidates.values()), candidates
-
-
-def reject_prequantized(snapshot: Path):
-    config = json.loads((snapshot / "config.json").read_text(encoding="utf-8"))
-    if any(config.get(key) for key in ("quantization_config", "compression_config", "load_in_4bit", "load_in_8bit")):
-        raise ValueError("This checkpoint already has quantized or compressed weights. Use the original "
-                         "unquantized checkpoint; precision is applied at load time.")
-    return config

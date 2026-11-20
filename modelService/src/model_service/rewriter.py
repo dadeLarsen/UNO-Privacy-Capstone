@@ -30,7 +30,7 @@ class Rewriter(Protocol):
         """Load the model unless it is loaded and return its safe provenance metadata."""
 
     def metadata(self) -> dict | None:
-        """Return the model's metadata, or None before its first load. A release keeps it."""
+        """Return the model's metadata, or None before its first load. A release keeps it, and it never waits."""
 
     def rewrite(self, text: str) -> Rewrite:
         """Rewrite one passage. Raises ValueError for a passage that does not fit the model's context."""
@@ -75,8 +75,9 @@ class PrivacyBenchRewriter:
             return dict(self._metadata)
 
     def metadata(self) -> dict | None:
-        with self._lock:
-            return dict(self._metadata) if self._metadata is not None else None
+        # No lock, so /health never waits for a rewrite: load() sets the dict in one step and release() keeps it.
+        metadata = self._metadata
+        return dict(metadata) if metadata is not None else None
 
     def release(self) -> None:
         with self._lock:

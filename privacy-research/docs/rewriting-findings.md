@@ -208,12 +208,12 @@ Average seconds for one passage, fastest first:
 - **All 20 passages** are the first set. On the 20 held-out passages the first five rows took about the same: 0.7, 2.8, 5.1, 7.1, and 10.9 seconds.
 - **Tokens per second.** A token is a word or a piece of one. The rate counts the rewrite's tokens over the whole time for the three passages, which includes reading the passage.
 - **float32.** On a processor, bitsandbytes calculates in one of two number formats. The faster one needs a processor feature that the desktop has and many laptops lack. float32 works everywhere, and it is the only one the MacBook ran.
-- **Which rows are saved runs.** All but the last: the MacBook's bitsandbytes run is not saved in this repository. The desktop's llama.cpp run on the graphics card used a build of llama.cpp that the project's setup does not install yet.
+- **Which rows are saved runs.** All but the last: the MacBook's bitsandbytes run is not saved in this repository. The desktop's llama.cpp run on the graphics card used the build of llama.cpp for NVIDIA graphics cards from version 0.3.36, which the project's setup never installed. The setup now installs that build from version 0.3.37.
 
 What we found:
 
 - **llama.cpp was faster in every case we could compare:** about 12 times on the desktop's graphics card, 8 to 17 times on its processor, and about 200 times on the MacBook's processor.
-- **With bitsandbytes, a laptop processor is too slow to use.** A passage took 10 to 13 minutes on the MacBook. On a processor, bitsandbytes unpacks the whole compressed model again for every token it writes. We did not try bitsandbytes on the MacBook's graphics chip: our setup for it runs on NVIDIA graphics cards and on processors only.
+- **With bitsandbytes, a laptop processor is too slow to use.** A passage took 10 to 13 minutes on the MacBook. On a processor, bitsandbytes unpacks the whole compressed model again for every token it writes. We did not try bitsandbytes on the MacBook's graphics chip: our setup ran it on NVIDIA graphics cards and on processors only, and the project no longer installs it.
 - **With llama.cpp, the MacBook rewrote a passage in under 3 seconds on its graphics chip and in about 5 on its processor alone.** Both beat the desktop's graphics card running bitsandbytes.
 - **Memory.** On the MacBook, llama.cpp peaked at 5.7 GiB on the processor and 3.4 GiB on the graphics chip over 20 passages, against 6.9 GiB for bitsandbytes on three (1 GiB is about 1.07 GB). The requirements allow the app 6 GiB on an 8–12 GB computer, so the processor run fits with little room to spare, before the rest of the app is counted. macOS's own measure of an app's memory, which leaves out file contents it can drop and read again, was lower: 3.5, 0.9, and 5.4 GiB. On the desktop's processor, llama.cpp peaked at 4.2 GiB in one trial, and bitsandbytes at 4.5 GiB, or 5.6 GiB in float32, on one passage each.
 - **The MacBook is not one of our target laptops.** It has at least twice the memory and a fast processor. An 8–12 GB laptop still needs a timing.
@@ -225,7 +225,7 @@ What we found:
 A different 4-bit version of the model writes different text, so the scores in [Results](#results) do not carry over to llama.cpp. The same judge, Claude Opus 5.5, has now graded six sets of Qwen3.5-4B's rewrites of all 40 passages:
 
 - the bitsandbytes rewrites it judged in October;
-- the same model run through bitsandbytes again, on the library version the project uses now;
+- the same model run through bitsandbytes again, on a newer library version, torch 2.15.0;
 - llama.cpp's rewrites from four runs: the desktop's processor and graphics card, and the MacBook's processor and graphics chip.
 
 For each passage the judge read all six rewrites side by side, with their sources hidden and their order shuffled, under the same instructions as in October.
@@ -235,7 +235,7 @@ Both passage sets combined, 231 key facts and 40 rewrites in each row:
 | Rewrites of Qwen3.5-4B | Facts kept | Partly kept | Left out | Contradicted | Rewrites that could mislead |
 | --- | --- | --- | --- | --- | --- |
 | bitsandbytes, the October rewrites | 78% | 18% | 3% | 1% | 3 of 40 |
-| bitsandbytes, current library version | 78% | 18% | 3% | 1% | 3 of 40 |
+| bitsandbytes, torch 2.15.0 | 78% | 18% | 3% | 1% | 3 of 40 |
 | llama.cpp, desktop processor | 68% | 28% | 3% | 1% | 5 of 40 |
 | llama.cpp, desktop graphics card | 68% | 27% | 3% | 1% | 4 of 40 |
 | llama.cpp, MacBook processor | 71% | 24% | 4% | 0% | 2 of 40 |
@@ -246,7 +246,7 @@ Both passage sets combined, 231 key facts and 40 rewrites in each row:
 - **llama.cpp's version shortens more.** Its rewrites average about 100 words against 114, read at grade 12 to 13 against 13 to 14, and copy much less of the passage (a copying score of 3 to 5 against 6 to 11). The bitsandbytes rewrites stay close to the passage's own sentences, which keeps details but simplifies less (see "Copying is not simplifying" under [Limits](#limits-of-this-evaluation)).
 - **We cannot yet say which version is at fault.** In the word checks below, llama.cpp's version behaves like the full-size model, and the full-size model has not been judged. So llama.cpp's file may lose facts, or the bitsandbytes version may keep them only because it copies.
 - **The judge was stricter than in October.** It gave the October rewrites 78% now and 82% then, and found 3 that could mislead, against 2. It gave the same verdict on 217 of the 231 facts; 11 moved from kept to partly kept. So compare the rows of this table with each other, not with the table in [Results](#results).
-- **The current library version did not change the score.** Run through bitsandbytes on torch 2.15.0, the model wrote a different rewrite for 20 of the 40 passages and scored the same.
+- **A newer library version did not change the score.** Run through bitsandbytes on torch 2.15.0, the model wrote a different rewrite for 20 of the 40 passages and scored the same.
 - **The computer changes the wording, not the picture.** Any two of the four llama.cpp runs wrote exactly the same rewrite for only 3 to 7 of the 40 passages, yet their scores lie within 4 points of each other. That spread shows how far a score moves by chance alone.
 - **The judge was consistent within a passage.** Where two of a passage's six rewrites were word for word the same (52 pairs), it gave both the same verdict on every fact.
 
@@ -292,7 +292,7 @@ In these checks the llama.cpp version behaves like the full-size model, not like
 - **Copying is not simplifying.** A rewrite that copies the passage keeps every fact but helps no one. Compressed Qwen3.5-4B copied two passages almost word for word and leaned heavily on the original wording in a few others. Its rewrites read at grade 13, the hardest of the medium models. This helped its score and is worth watching.
 - **Short passages only.** The passages are 86–340 words. Users can paste any length.
 - **Speed on a target laptop is unknown.** The judged tests ran on a desktop graphics card. The one laptop timed since, a 24 GB MacBook, is larger and faster than the 8–12 GB laptops the app targets (see [How fast does it run?](#how-fast-does-it-run)).
-- **The rewrites came from an older library version.** They were generated with torch 2.8.0. The project now uses torch 2.15.0, which makes the same model write different text for some passages. In a hand check, compressed Qwen3.5-4B wrote exactly its judged rewrite for 10 of the first 20 passages; the rest change partway through, from a few words to most of the rewrite. The scores in [Results](#results) describe the torch 2.8.0 rewrites. Qwen3.5-4B's new rewrites have since been judged and scored the same; the other eight models' have not.
+- **The rewrites came from an older library version.** They were generated with torch 2.8.0. Under torch 2.15.0, which the project used next, the same model writes different text for some passages. In a hand check, compressed Qwen3.5-4B wrote exactly its judged rewrite for 10 of the first 20 passages; the rest change partway through, from a few words to most of the rewrite. The scores in [Results](#results) describe the torch 2.8.0 rewrites. Qwen3.5-4B's new rewrites have since been judged and scored the same; the other eight models' have not. The project now runs every model through llama.cpp and no longer installs torch, so these rewrites cannot be made again from this repository.
 - **The llama.cpp rewrites came from an older version too.** They were generated with version 0.3.36 of the llama-cpp-python library. The project now installs 0.3.37, which words 65 of the desktop's 80 rewrites differently. The desktop's four runs are saved again under 0.3.37: a passage took 9.7 to 9.8 seconds on the processor and 0.6 to 0.7 on the graphics card, every rewrite was valid, and 8 to 10 of 17 numbers were kept on the first 20 passages. The judge's scores above describe the 0.3.36 rewrites. In a trial that is not saved, the same judge gave these exact 0.3.37 rewrites 69% and 70% of key facts kept in full, against 68% for the 0.3.36 rewrites of the same two runs.
 
 ## Next steps
