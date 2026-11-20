@@ -23,6 +23,12 @@ from .schemas import (
 )
 
 MAX_SENTENCES_PER_SUMMARY = 2
+# modelService's `status` is the benchmark's verdict on a rewrite; `empty` fails the job instead.
+STATUS_WARNINGS = {
+    "valid": None,
+    "truncated": "The rewrite reached the output token limit and may be incomplete.",
+    "reasoning": "The rewrite contains reasoning tags; review it before using it.",
+}
 
 
 class JobCancelled(Exception):
@@ -106,30 +112,34 @@ def rewritten_passage(
         raise ValueError("No classified sentences were selected for rewriting.")
 
     passage = " ".join(sentence.text for sentence in selected)
-    body = model_client.rewrite(passage, request.style.value, [sentence.id for sentence in selected])
+    body = model_client.rewrite(passage)
     if cancel.is_set():
         raise JobCancelled
 
     model = ModelProfile.model_validate(body["model"])
-    items = body.get("rewrites") or []
-    if not isinstance(items, list) or not items:
-        raise ValueError("The model service returned no rewrites.")
-    rewrites = [
-        Rewrite(
-            id=uuid4(),
-            text=str(item["text"]),
-            source_sentence_ids=[int(value) for value in item.get("source_sentence_ids", [])] or [sentence.id for sentence in selected],
-            warnings=[str(warning) for warning in item.get("warnings", [])],
-        )
-        for item in items
-        if isinstance(item, dict) and item.get("text")
-    ]
-    if not rewrites:
+    status = body["status"]
+    if status == "empty":
         raise ValueError("The model service returned an empty rewrite.")
+    if status not in STATUS_WARNINGS:
+        raise ValueError(f"The model service returned an unknown rewrite status: {status!r}.")
+    # modelService runs one prompt, so the style changes nothing yet; say so rather than imply otherwise.
+    warnings = [
+        f"Every style uses the evaluated {model.prompt} prompt, including {request.style.value}; "
+        "style-specific prompts have not been evaluated."
+    ]
+    if STATUS_WARNINGS[status]:
+        warnings.append(STATUS_WARNINGS[status])
 
     return RewriteResult(
         policy_id=policy_id,
         model=model,
         style=request.style,
-        rewrites=rewrites,
+        rewrites=[
+            Rewrite(
+                id=uuid4(),
+                text=body["rewrite"],
+                source_sentence_ids=[sentence.id for sentence in selected],
+                warnings=warnings,
+            )
+        ],
     )

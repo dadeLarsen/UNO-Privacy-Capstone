@@ -1,0 +1,16 @@
+task = "rewrite"
+title = "Qwen3.5-4B at 4-bit through llama-cpp-python 0.3.37 on the CPU and on the GPU, against NF4 on the GPU on torch 2.15.0, summary-v3"
+# The two Q4_K_M runs repeat the runs of 2026-11-18 and 2026-11-19 under llama-cpp-python 0.3.37, the version
+# in uv.lock. Those were made under 0.3.36, which words about four rewrites in five differently. Both runs here
+# use the CUDA wheel; the CPU run had the GPU hidden. The NF4 run quantized the original checkpoint with
+# bitsandbytes.
+runs = [
+    "rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z",
+    "rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261120-044139Z",
+    "rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261120-044048Z",
+]
+
+[labels]
+"rewrite/qwen3.5-4b-nf4-summary-v3/20261118-225300Z" = "Qwen3.5-4B · NF4 on the GPU · torch 2.15.0"
+"rewrite/qwen3.5-4b-q4km-cpu-summary-v3/20261120-044139Z" = "Qwen3.5-4B · Q4_K_M on the CPU, llama.cpp"
+"rewrite/qwen3.5-4b-q4km-gpu-summary-v3/20261120-044048Z" = "Qwen3.5-4B · Q4_K_M on the GPU, llama.cpp"

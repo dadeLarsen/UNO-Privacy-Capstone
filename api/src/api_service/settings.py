@@ -23,7 +23,7 @@ def _loopback(value: str, label: str) -> str:
 
 @dataclass(frozen=True)
 class Settings:
-    model_service_url: str = "http://127.0.0.1:8002"
+    model_service_url: str = "http://127.0.0.1:8000"
     host: str = "127.0.0.1"
     port: int = 8001
     cors_origins: tuple[str, ...] = DEFAULT_ORIGINS

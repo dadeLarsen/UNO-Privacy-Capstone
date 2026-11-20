@@ -1,49 +1,28 @@
-"""Adapter between the HTTP service and the benchmark's GGUF rewrite strategy.
+"""Adapter between the HTTP service and the benchmark's rewrite strategy.
 
-The classifier and the rewriter are separate models, so this adapter has its own
-condition and loads lazily on the first rewrite request. The prompt is the pinned
-``summary-v3`` prompt from the benchmark; the service does not invent style-specific
-prompts that were never evaluated.
+Like the classifier, the rewriter is a pinned ``privacy_bench`` condition: it names the
+GGUF file, the prompt file, the seed, and the output limit, so the service rewrites a
+passage exactly as a benchmark run of that condition does.
 """
 
-from __future__ import annotations
-
 from dataclasses import dataclass
+import gc
 from pathlib import Path
-import re
 from threading import RLock
 from types import SimpleNamespace
 from typing import Protocol
 
 from privacy_bench.core.conditions import load_condition
-from privacy_bench.models.hub import resolve_snapshot
 from privacy_bench.tasks import get_task
-
-from .settings import REPO_ROOT
-from .taxonomy import TAXONOMY
-
-NUMBER = re.compile(r"\b\d+(?:[.,]\d+)?\b")
-WORD = re.compile(r"[a-z]+")
-# Words whose loss could change a promise. This is a flag for review, not a verdict.
-SENSITIVE = (
-    "not", "no", "never", "only", "unless", "except", "may", "might", "could",
-    "likely", "reasonable", "knowingly", "some", "all",
-)
-REASONING_TAG = re.compile(r"</?think|</?reasoning", re.IGNORECASE)
+from privacy_bench.tasks.rewrite.scoring import output_text, status
 
 
 @dataclass(frozen=True)
-class RewrittenPassage:
+class Rewrite:
     text: str
-    warnings: tuple[str, ...]
-
-
-class RewriterUnavailable(Exception):
-    """The rewriter is integrated, but its pinned model file is not cached locally."""
-
-    def __init__(self, message: str) -> None:
-        super().__init__(message)
-        self.message = message
+    # The benchmark's verdict on the output: valid, truncated (the output limit cut it), empty, or reasoning.
+    status: str
+    output_tokens: int
 
 
 class Rewriter(Protocol):
@@ -51,13 +30,13 @@ class Rewriter(Protocol):
         """Load the model unless it is loaded and return its safe provenance metadata."""
 
     def metadata(self) -> dict | None:
-        """Return the model's metadata, or None before its first load."""
+        """Return the model's metadata, or None before its first load. A release keeps it, and it never waits."""
 
-    def status(self) -> dict:
-        """Report whether the pinned model is cached and whether it is loaded."""
+    def rewrite(self, text: str) -> Rewrite:
+        """Rewrite one passage. Raises ValueError for a passage that does not fit the model's context."""
 
-    def rewrite(self, text: str, style: str) -> RewrittenPassage:
-        """Rewrite one passage and flag details a human should check."""
+    def release(self) -> None:
+        """Free the model's memory. The next load brings the model back."""
 
 
 class PrivacyBenchRewriter:
@@ -66,27 +45,22 @@ class PrivacyBenchRewriter:
     def __init__(self, condition_path: Path):
         condition = load_condition(condition_path)
         if condition.task != "rewrite":
-            raise ValueError(
-                f"modelService needs a rewrite condition, not {condition.task!r}: {condition_path}"
-            )
-        self._condition_path = Path(condition_path).resolve()
+            raise ValueError(f"The rewrite route needs a rewrite condition, not {condition.task!r}: {condition_path}")
         self._condition = condition
         self._strategy = get_task(condition.task).build_strategy(condition)
         self._lock = RLock()
         self._loaded = False
         self._metadata: dict | None = None
 
+    @property
+    def condition(self):
+        return self._condition
+
     def load(self) -> dict:
         with self._lock:
             if self._loaded:
                 return dict(self._metadata)
-            try:
-                loaded = self._strategy.load()
-            except Exception as exc:
-                if _is_missing_model(exc):
-                    raise RewriterUnavailable(self._setup_message(exc)) from exc
-                raise
-            prompt = getattr(self._strategy, "prompt", None)
+            loaded = self._strategy.load()
             self._metadata = {
                 "id": loaded.get("model"),
                 "revision": loaded.get("revision"),
@@ -94,97 +68,32 @@ class PrivacyBenchRewriter:
                 "precision": loaded.get("precision"),
                 "device": loaded.get("device"),
                 "strategy": self._strategy.name,
-                "prompt": prompt.get("name") if isinstance(prompt, dict) else None,
-                "taxonomy_id": TAXONOMY["taxonomy_id"],
-                "taxonomy_version": TAXONOMY["version"],
+                "prompt": self._strategy.prompt["name"],
+                "max_new_tokens": loaded.get("max_new_tokens"),
             }
             self._loaded = True
             return dict(self._metadata)
 
     def metadata(self) -> dict | None:
+        # No lock, so /health never waits for a rewrite: load() sets the dict in one step and release() keeps it.
+        metadata = self._metadata
+        return dict(metadata) if metadata is not None else None
+
+    def release(self) -> None:
         with self._lock:
-            return dict(self._metadata) if self._metadata is not None else None
+            # Building a strategy loads no model, so a fresh one replaces the one that holds the model.
+            self._strategy = get_task(self._condition.task).build_strategy(self._condition)
+            self._loaded = False
+            # The collection makes sure the dropped model is freed now, even if something holds it in a
+            # reference cycle. llama.cpp then returns its memory, whichever thread releases.
+            gc.collect()
 
-    def status(self) -> dict:
-        """Check the local cache without loading the model or touching the network."""
-        metadata = self.metadata()
-        try:
-            self._resolve_cached_file()
-            available = True
-            setup = None
-        except Exception as exc:
-            available = False
-            setup = self._setup_message(exc)
-        if metadata is not None:
-            state = "ready"
-        elif not available:
-            state = "not_downloaded"
-        else:
-            state = "available"
-        return {
-            "status": state,
-            "available": available,
-            "ready": metadata is not None,
-            "model": metadata,
-            "setup": setup,
-        }
-
-    def _resolve_cached_file(self) -> Path:
-        model = self._condition.model
-        return resolve_snapshot(model["id"], model["revision"], model["file"])
-
-    def _setup_message(self, exc: Exception) -> str:
-        try:
-            relative = self._condition_path.relative_to(REPO_ROOT / "privacy-research")
-            download = f"cd privacy-research && uv run pbench download {relative.as_posix()}"
-        except ValueError:
-            download = f"uv run pbench download {self._condition_path}"
-        return (
-            "The rewriter is wired into the app, but its pinned GGUF file is not in the local "
-            f"Hugging Face cache. Download it once with `{download}`. Classification and category "
-            "summaries keep working without it."
-        )
-
-    def rewrite(self, text: str, style: str) -> RewrittenPassage:
+    def rewrite(self, text: str) -> Rewrite:
         if not isinstance(text, str) or not text.strip():
             raise ValueError("text must be a nonempty string")
         with self._lock:
             self.load()
-            prepared = self._strategy.prepare(SimpleNamespace(text=text))
-            response = self._strategy.predict(prepared)
-        rewritten = str(response.get("raw_output") or "").strip()
-        if not rewritten:
-            raise RuntimeError("The rewriter returned an empty response.")
-        return RewrittenPassage(
-            text=rewritten,
-            warnings=_warnings(text, rewritten, response, style),
-        )
-
-
-def _is_missing_model(exc: Exception) -> bool:
-    """Recognise the benchmark's offline cache miss without importing hub internals."""
-    text = str(exc)
-    return "not in the local Hugging Face cache" in text or "Cannot find the requested files" in text
-
-
-def _warnings(source: str, rewritten: str, response: dict, style: str) -> tuple[str, ...]:
-    warnings = [
-        f"The evaluated summary-v3 prompt is used for all styles, including {style}; "
-        "style-specific prompts have not been evaluated."
-    ]
-    source_numbers = set(NUMBER.findall(source))
-    missing_numbers = sorted(source_numbers - set(NUMBER.findall(rewritten)))
-    if missing_numbers:
-        warnings.append("Check numbers from the source that are missing here: " + ", ".join(missing_numbers))
-
-    source_words = set(WORD.findall(source.lower()))
-    rewritten_words = set(WORD.findall(rewritten.lower()))
-    missing_terms = [word for word in SENSITIVE if word in source_words and word not in rewritten_words]
-    if missing_terms:
-        warnings.append("Check conditions or hedges from the source that are missing here: " + ", ".join(missing_terms))
-
-    if REASONING_TAG.search(rewritten):
-        warnings.append("The response contains reasoning tags; review it before using it.")
-    if response.get("reached_output_token_limit"):
-        warnings.append("The response hit the token limit and may be incomplete.")
-    return tuple(warnings)
+            # prepare() refuses a passage whose prompt and output do not fit the context; nothing is truncated.
+            response = self._strategy.predict(self._strategy.prepare(SimpleNamespace(text=text)))
+            return Rewrite(text=output_text(response), status=status(response),
+                           output_tokens=response["output_tokens"])

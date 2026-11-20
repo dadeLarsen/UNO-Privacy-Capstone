@@ -93,6 +93,8 @@ class ModelProfile(BaseModel):
 
     Mirrors ``modelService``'s ``model`` object. ``prompt`` and ``prompt_version``
     are only set for summary/rewrite results and are not part of classifier metadata.
+    The rewriter has no taxonomy, so ``taxonomy_id`` and ``taxonomy_version`` are
+    unset for rewrite results.
     """
 
     id: str
@@ -102,8 +104,8 @@ class ModelProfile(BaseModel):
     strategy: str
     head: str | None = None
     fit: str | None = None
-    taxonomy_id: str
-    taxonomy_version: int
+    taxonomy_id: str | None = None
+    taxonomy_version: int | None = None
     prompt: str | None = None
     prompt_version: int | None = None
 

@@ -25,8 +25,8 @@ export type ModelProfile = {
   strategy: string
   head?: string | null
   fit?: string | null
-  taxonomy_id: string
-  taxonomy_version: number
+  taxonomy_id?: string | null
+  taxonomy_version?: number | null
   prompt?: string | null
   prompt_version?: number | null
 }

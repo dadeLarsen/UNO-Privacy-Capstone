@@ -1,4 +1,4 @@
-"""pbench: run conditions, fit heads, cache models, rescore saved runs, compare them, and judge rewrites."""
+"""pbench: run conditions, cache models, rescore saved runs, compare them, and judge rewrites."""
 
 import argparse
 import json
@@ -6,7 +6,6 @@ from pathlib import Path
 import sys
 
 from .core.conditions import load_condition
-from .core.fits import execute_fit, fit_directory, load_fit_spec
 from .core.harness import evaluate_run, execute
 from .core.files import read_json
 from .core.paths import COMPARISONS_DIR, REPO_ROOT
@@ -26,10 +25,9 @@ def run(args):
 
 
 def fit(args):
-    spec = load_fit_spec(args.fit)
-    task = get_task(spec.task)
-    record = execute_fit(task, spec, args.output or fit_directory(task.name, spec.name))
-    print(f"Fitted {', '.join(record['tensors'])}")
+    raise ValueError("pbench fit is retired. A fit embedded its examples with the torch build of EmbeddingGemma 2, "
+                     "and that backend is gone. The fit records under results/fits/ still load, and History in "
+                     "README.md names the last commit that fits")
 
 
 def download(args):
@@ -98,9 +96,8 @@ def main(argv=None):
     command.add_argument("--output", type=Path, help="New run directory (default: results/runs/<task>/<condition>/<UTC start>)")
     command.add_argument("--limit", type=int, help="Stop after this many items; no comparison accepts the run")
     command.set_defaults(handler=run)
-    command = commands.add_parser("fit", help="Fit what a fit file describes into a new fit record")
-    command.add_argument("fit", type=Path)
-    command.add_argument("--output", type=Path, help="New fit directory (default: results/fits/<task>/<fit>/<UTC start>)")
+    command = commands.add_parser("fit", help="Retired: says why, and where the code that fitted is")
+    command.add_argument("fit", nargs="*")
     command.set_defaults(handler=fit)
     command = commands.add_parser("download", help="Cache a condition's pinned model while online")
     command.add_argument("condition", type=Path)

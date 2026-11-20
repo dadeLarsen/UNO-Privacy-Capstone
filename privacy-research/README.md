@@ -2,15 +2,15 @@
 
 Experiments and measurements that decide which models the [Privacy Policy Reader](../README.md) should use, and the evidence behind each choice. The app needs two: a classifier that puts each sentence of a policy into one of ten categories, and a rewriter for its three actions (**Paraphrase**, **Simplify for Kids**, and **Simplify for Adults**). Both must run offline on a computer with **8–12 GB of total memory**. This work answers analysis requirements AR-01 and AR-02 in the [requirements](../docs/Requirements-Document.md#6-analysis-requirements).
 
-All measurements so far used one Windows PC with an **RTX 4090 (24 GiB) and 64 GB RAM**.
+Unless a result says otherwise, the measurements used one Windows PC with an **RTX 4090 (24 GiB) and 64 GB RAM**. Some llama.cpp runs also ran on an M4 Pro MacBook with 24 GB.
 
 ## Current direction
 
 | | **A. Classifier + separate rewriter** | **B. One base model with adapters** |
 | --- | --- | --- |
 | Shape | A small model labels sentences; a separate generative model rewrites. | One backbone; a task adapter classifies, and the same backbone rewrites. |
-| Tested so far | `skythrone/privacy-model`, and EmbeddingGemma 2 with and without a fitted head. No rewriter tested. | `autotrust/JEV-9B`: a Qwen3.5-9B base with an unmerged LoRA judge adapter and a decision head. Classification only. |
-| Open question | A fitted head on EmbeddingGemma 2 ties the large models when every category counts equally. Shifted toward APPSI-139's category mix, it ties privacy-model on that mix instead, but no head yet leads on both (below). | Whether the base model, with the adapter disabled, rewrites well enough. |
+| Tested so far | `skythrone/privacy-model`, and EmbeddingGemma 2 with and without a fitted head. Nine rewriters, judged on 40 policy sections ([rewriting findings](docs/rewriting-findings.md)). The model service runs EmbeddingGemma 2 with a fitted head and Qwen3.5-4B at 4-bit, both through llama.cpp. | `autotrust/JEV-9B`: a Qwen3.5-9B base with an unmerged LoRA judge adapter and a decision head. Classification only. Its backend is retired ([History](#history)), so this checkout cannot run it. |
+| Open question | A fitted head on EmbeddingGemma 2 ties the large models when every category counts equally. Shifted toward APPSI-139's category mix, it ties privacy-model on that mix instead, but no head yet leads on both (below). Which rewriter and prompt the app ships (AR-02). | Whether the base model, with the adapter disabled, rewrites well enough. |
 
 Other working decisions: hardware tiers (roughly 2–4, 8–12, and 16+ GB of RAM) may use different models; AirLLM layer streaming is tentative because it is very slow; and the app classifies one category per sentence for now, while the method should be able to return several later.
 
@@ -90,8 +90,8 @@ A logistic head expects the category mix it trained on: an even mix for the bala
 - **The shift gives up the balanced lead.** On the balanced sample the tuned balanced head fell from 0.867 to 0.817 (p = 0.003), level with privacy-model (p = 0.82) and behind Qwen3-14B and JEV-9B (p ≤ 0.001). Rarer categories lose: Policy Change fell from 0.92 to 0.76, Data Retention from 0.92 to 0.82, and Do Not Track from 10 of 10 to 5 of 10, while First Party Collection/Use rose from 0.78 to 0.90. No head here leads on both mixes. On the tuning half, macro accuracy peaked near strength 0.3–0.4, a possible compromise that the test half has not checked.
 - **Strengths near 1 differ little.** Strength 0.9 and 1 disagree on 65 test-half sentences, split 36 to 29 (p = 0.46). The frequency head also tuned to full strength and finished at 0.850, behind the balanced head (p = 0.03).
 - **The tuned balanced head keeps its accuracy on the CPU.** The head was fitted on bf16 embeddings. These runs embed in fp32 on the same PC's CPU, a Ryzen 9 7950X3D, at 0.058 s per sentence against 0.040 s on the GPU. On the test half the CPU run scored 0.8566 and gave the GPU run's label on 6,029 of 6,058 sentences: 13 were right only on the GPU and 7 only on the CPU (exact McNemar p = 0.26). Against privacy-model's 0.8584, 480 were right only for privacy-model and 469 only for the head (p = 0.75). Source: [comparisons/appsi139-test-half-cpu.toml](comparisons/appsi139-test-half-cpu.toml). On the balanced sample it scored 0.815 and changed one label, on a sentence the GPU run had right (1 to 0, p = 1). Against privacy-model's 0.824 the split was 42 to 38 (p = 0.74). Source: [comparisons/appsi139-balanced-50-cpu.toml](comparisons/appsi139-balanced-50-cpu.toml). Runs record memory only on CUDA, so these have no peak RAM.
-- **The upgrade to torch 2.15.0 changed no CPU label and 22 GPU labels.** Both projects moved from torch 2.8.0 to torch 2.15.0 on CUDA 13.2, whose allocator can hand a released model's system RAM back to Windows; the service does not release on the CPU yet. Only the tuned balanced head ran again, on both samples, on the GPU and on the CPU, so every other result here is from torch 2.8.0. On the CPU every sentence kept the label of its torch 2.8.0 run, 6,058 of 6,058 on the test half and 460 of 460 on the balanced sample, and no score moved by more than 0.00002. On the GPU the bf16 scores moved by up to 0.19. The balanced sample kept all 460 labels and the test half 6,036 of 6,058. The 22 that changed were near ties, with the top two scores within 0.10 of each other on torch 2.8.0: 9 were right only on torch 2.8.0 and 5 only on 2.15.0 (exact McNemar p = 0.42). On the test half the head now scores 0.8569 on the GPU and 0.8566 on the CPU against privacy-model's 0.8584, with splits of 477 to 468 (p = 0.79) and 480 to 469 (p = 0.75); the GPU and CPU runs split 8 to 6 (p = 0.79). Source: [comparisons/appsi139-test-half-torch215.toml](comparisons/appsi139-test-half-torch215.toml). On the balanced sample it scores 0.817 and 0.815 against 0.824, as before (p = 0.82 and 0.74). Source: [comparisons/appsi139-balanced-50-torch215.toml](comparisons/appsi139-balanced-50-torch215.toml). A sentence took 0.037–0.038 s on the GPU and 0.060–0.061 s on the CPU. Three unrecorded repeats of the balanced run on each version, taken in turn, put torch 2.15.0 about a tenth faster on the GPU and no slower on the CPU.
-- **The tuned balanced head keeps its accuracy when llama.cpp makes the embeddings, so it was not refit.** The same head scored two GGUF builds of EmbeddingGemma 2 through llama-cpp-python 0.3.37: the BF16 file (532 MiB) and the Q8_0 file (296 MiB), each on the GPU and on the CPU. Every sentence has the token IDs of its torch run. On the test half the four runs scored 0.8569 to 0.8574. Against the torch 2.15.0 run on the same device, BF16 kept 6,036 of 6,058 labels on the GPU and 6,046 on the CPU, and Q8_0 kept 6,012 and 6,009; scores moved by up to 0.14 with BF16 and 0.37 with Q8_0. No run is significantly less accurate than its torch twin: the splits of sentences right only through llama.cpp to right only through torch are 7 to 7, 5 to 2, 17 to 14, and 19 to 16 (exact McNemar p = 1.00, 0.45, 0.72, 0.74). None is behind privacy-model's 0.8584 either (p = 0.79 to 0.87). Source: [comparisons/appsi139-test-half-llama-cpp.toml](comparisons/appsi139-test-half-llama-cpp.toml). On the balanced sample the runs scored 0.815 to 0.822 and kept 457 to 459 of 460 labels (p = 0.25 to 1.00 against torch, 0.74 to 1.00 against privacy-model's 0.824). Source: [comparisons/appsi139-balanced-50-llama-cpp.toml](comparisons/appsi139-balanced-50-llama-cpp.toml). A sentence took 0.009 s on the GPU and 0.021–0.028 s on the CPU, against 0.037 s and 0.061 s through torch, and a file loads in 0.4–0.6 s against 1.8–2.0 s. All eight runs use llama.cpp's CUDA wheel, the CPU runs with no GPU device. Measured by hand and not recorded: one CPU run of the balanced sample peaked at 1.55 GiB of working set with Q8_0 and 1.67 GiB with BF16, against 2.32 GiB through torch; with llama.cpp alone and no torch in the process it was 0.64 and 0.76 GiB. The llama.cpp context is sized for the condition's 8,192-token limit, and on Windows it commits 11.5 GiB for that without touching it (1.7 GiB at 512 tokens). On an M4 Pro MacBook, where llama.cpp is built from source, the Q8_0 file scored 0.820 on the balanced sample on its CPU and on its GPU through Metal, again with the token IDs of the torch run for every sentence. Against the desktop's Q8_0 run on the same kind of device it kept 457 and 456 of 460 labels, and it is level with the desktop's torch runs (splits of 3 to 1 and 2 to 1, p = 0.63 and 1.00) and with privacy-model (p = 0.91 for both). A sentence took 0.024 s on its CPU and 0.010 s on its GPU, and the file loads in 0.5–0.6 s. Source: [comparisons/appsi139-balanced-50-llama-cpp-macbook.toml](comparisons/appsi139-balanced-50-llama-cpp-macbook.toml). Not recorded: `time -l` gave a maximum resident set of 1.46 GiB for the CPU run and 1.20 GiB for the GPU run.
+- **The upgrade to torch 2.15.0 changed no CPU label and 22 GPU labels.** Both projects moved from torch 2.8.0 to torch 2.15.0 on CUDA 13.2, whose allocator can hand a released model's system RAM back to Windows. Torch has since left both projects ([History](#history)). Only the tuned balanced head ran again, on both samples, on the GPU and on the CPU, so every other result here is from torch 2.8.0. On the CPU every sentence kept the label of its torch 2.8.0 run, 6,058 of 6,058 on the test half and 460 of 460 on the balanced sample, and no score moved by more than 0.00002. On the GPU the bf16 scores moved by up to 0.19. The balanced sample kept all 460 labels and the test half 6,036 of 6,058. The 22 that changed were near ties, with the top two scores within 0.10 of each other on torch 2.8.0: 9 were right only on torch 2.8.0 and 5 only on 2.15.0 (exact McNemar p = 0.42). On the test half the head now scores 0.8569 on the GPU and 0.8566 on the CPU against privacy-model's 0.8584, with splits of 477 to 468 (p = 0.79) and 480 to 469 (p = 0.75); the GPU and CPU runs split 8 to 6 (p = 0.79). Source: [comparisons/appsi139-test-half-torch215.toml](comparisons/appsi139-test-half-torch215.toml). On the balanced sample it scores 0.817 and 0.815 against 0.824, as before (p = 0.82 and 0.74). Source: [comparisons/appsi139-balanced-50-torch215.toml](comparisons/appsi139-balanced-50-torch215.toml). A sentence took 0.037–0.038 s on the GPU and 0.060–0.061 s on the CPU. Three unrecorded repeats of the balanced run on each version, taken in turn, put torch 2.15.0 about a tenth faster on the GPU and no slower on the CPU.
+- **The tuned balanced head keeps its accuracy when llama.cpp makes the embeddings, so it was not refit.** The same head scored two GGUF builds of EmbeddingGemma 2 through llama-cpp-python 0.3.37: the BF16 file (532 MiB) and the Q8_0 file (296 MiB), each on the GPU and on the CPU. Every sentence has the token IDs of its torch run. On the test half the four runs scored 0.8569 to 0.8574. Against the torch 2.15.0 run on the same device, BF16 kept 6,036 of 6,058 labels on the GPU and 6,046 on the CPU, and Q8_0 kept 6,012 and 6,009; scores moved by up to 0.14 with BF16 and 0.37 with Q8_0. No run is significantly less accurate than its torch twin: the splits of sentences right only through llama.cpp to right only through torch are 7 to 7, 5 to 2, 17 to 14, and 19 to 16 (exact McNemar p = 1.00, 0.45, 0.72, 0.74). None is behind privacy-model's 0.8584 either (p = 0.79 to 0.87). Source: [comparisons/appsi139-test-half-llama-cpp.toml](comparisons/appsi139-test-half-llama-cpp.toml). On the balanced sample the runs scored 0.815 to 0.822 and kept 457 to 459 of 460 labels (p = 0.25 to 1.00 against torch, 0.74 to 1.00 against privacy-model's 0.824). Source: [comparisons/appsi139-balanced-50-llama-cpp.toml](comparisons/appsi139-balanced-50-llama-cpp.toml). A sentence took 0.009 s on the GPU and 0.021–0.028 s on the CPU, against 0.037 s and 0.061 s through torch, and a file loads in 0.4–0.6 s against 1.8–2.0 s. All eight runs use llama.cpp's CUDA wheel, the CPU runs with no GPU device. Measured by hand and not recorded: one CPU run of the balanced sample peaked at 1.55 GiB of working set with Q8_0 and 1.67 GiB with BF16, against 2.32 GiB through torch; with llama.cpp alone and no torch in the process it was 0.64 and 0.76 GiB. The llama.cpp context is sized for the condition's 8,192-token limit. When these runs were made, the process committed 11.5 GiB on Windows for that without touching it (1.7 GiB at 512 tokens). Three quarters of it was a score array that llama-cpp-python allocates and embedding never reads; the backend now drops it, and a load adds 2.8 GiB at 8,192 tokens and 0.5 GiB at 512. On an M4 Pro MacBook, where llama.cpp is built from source, the Q8_0 file scored 0.820 on the balanced sample on its CPU and on its GPU through Metal, again with the token IDs of the torch run for every sentence. Against the desktop's Q8_0 run on the same kind of device it kept 457 and 456 of 460 labels, and it is level with the desktop's torch runs (splits of 3 to 1 and 2 to 1, p = 0.63 and 1.00) and with privacy-model (p = 0.91 for both). A sentence took 0.024 s on its CPU and 0.010 s on its GPU, and the file loads in 0.5–0.6 s. Source: [comparisons/appsi139-balanced-50-llama-cpp-macbook.toml](comparisons/appsi139-balanced-50-llama-cpp-macbook.toml). Not recorded: `time -l` gave a maximum resident set of 1.46 GiB for the CPU run and 1.20 GiB for the GPU run.
 
 Earlier findings kept in the AirLLM archive (`C:\Projects\AirLLM`), from runners not carried over:
 
@@ -107,17 +107,15 @@ Earlier findings kept in the AirLLM archive (`C:\Projects\AirLLM`), from runners
 ```
 conditions/<task>/*.toml     one file per run condition: task, strategy, items, model, options
 conditions/<task>/<corpus>/  conditions for another test corpus, such as appsi139/
-fits/<task>/*.toml           one file per fit: what to learn from, the model, and the heads to fit
 comparisons/*.toml           which saved runs to put side by side, and how to score them
 prompts/<task>/*.toml        editable prompt files; each run copies the text it used into its input.json
 data/                        source datasets, plus each task's samples, passages, gold labels, examples, and prompts
 results/runs/<task>/<condition>/<UTC start>/   tracked run records
 results/fits/<task>/<fit>/<UTC start>/         tracked fit records, with the fitted weights
-results/comparisons/<name>/  summaries and plots from pbench compare; five are committed for reading
+results/comparisons/<name>/  summaries and plots from pbench compare; seventeen are committed for reading
 src/privacy_bench/
-  core/       condition and fit files, run and fit records, the run loop, provenance
-  models/     backends: chat generation and sentence embeddings through llama.cpp, and sequence
-              classifiers and sentence embeddings through torch
+  core/       condition files, run and fit records, the run loop, provenance
+  models/     backends: chat generation and sentence embeddings through llama.cpp
   tasks/      one package per task: classification and rewrite
   report/     task-agnostic summaries and plots
   cli.py      the pbench command
@@ -125,39 +123,41 @@ tools/        one-time code that imported runs and froze data files
 docs/         each task in detail; classification.md today
 ```
 
-A **model backend** loads a pinned checkpoint and runs one input without knowing what the output means. A **task** owns its items, reference answers, evaluation, and how its runs appear in comparisons. A **strategy** is one way to perform a task with one backend. `tests/test_architecture.py` enforces the layering: `core`, `models`, and `report` never import a task, and a task never imports another task.
+A **model backend** loads a pinned GGUF file and runs one input without knowing what the output means. A **task** owns its items, reference answers, evaluation, and how its runs appear in comparisons. A **strategy** is one way to perform a task with one backend. `tests/test_architecture.py` enforces the layering: `core`, `models`, and `report` never import a task, and a task never imports another task.
 
 ## Setup
 
 [uv](https://docs.astral.sh/uv/) manages the environment; every package, including transitive ones, is pinned in `pyproject.toml` and `uv.lock`. Run every command below from this folder. The tests run offline and build tiny models on the CPU.
 
-The default setup is CPU-only. It installs CPU builds of torch 2.15.0 and `llama-cpp-python` 0.3.36. The tests pass on it, but runs with `device = "cuda"` will not start:
+Choose one of the two setups.
+
+**With an NVIDIA GPU.** This installs the CUDA 13.2 build of llama.cpp and the NVIDIA libraries it needs. CUDA 13.2 needs a recent NVIDIA driver: NVIDIA names 595.45.04 as the oldest for Linux and gives no number for Windows, where it was checked on driver 610.88:
 
 ```powershell
 uv sync
 uv run pytest
 ```
 
-**With an NVIDIA GPU.** Opt into the CUDA 13.2 builds. This needs a newer NVIDIA driver than the CUDA 12.8 build did: NVIDIA names 595.45.04 as the oldest for Linux and gives no number for Windows, where it was checked on driver 610.88. Runs that started before `20261116` used torch 2.8.0 on CUDA 12.8, and each run's `run.json` lists its packages:
+**Without an NVIDIA GPU.** This compiles llama.cpp for the CPU alone and installs none of NVIDIA's libraries. The tests pass on it, but a run with `device = "gpu"` will not start:
 
 ```powershell
-$env:UV_NO_SYNC = "1"    # keep `uv run` from reinstalling the CPU default; set it in your profile
-uv sync --no-group cpu --group cu132
+$env:UV_NO_SYNC = "1"    # keep `uv run` from installing the CUDA build; set it in your profile
+uv sync --no-group cu132 --group cpu
 uv run pytest
 ```
 
 Set `UV_NO_SYNC` before any other `uv` command. After pulling a change to `uv.lock`, rerun the `uv sync` line.
 
-Both setups install `llama-cpp-python` 0.3.36, the version used by the rewrite runs recorded so far; each run's `run.json` names its version.
+Both setups install `llama-cpp-python` 0.3.37, which runs every model here as a GGUF file through llama.cpp. It is the only model library in the environment. The first rewrite runs through llama.cpp used 0.3.36, and each run's `run.json` names its version and lists its packages.
 
-- **CPU default**: Windows and Linux on x64 get the package's prebuilt CPU wheel, pinned by its hash in `uv.lock`. It needs no NVIDIA driver or CUDA library and computes on the CPU, which is what the app's rewrite condition does.
-- **CUDA opt-in**: Windows and Linux on x64 get the built CUDA 13.2 wheel. It needs an NVIDIA driver even when every layer is placed on the CPU. On Windows it loads only after torch, whose CUDA build holds the cuBLAS library it needs; `privacy_bench.models` imports torch first for that reason.
-- **Every other platform** builds from source. On a Mac that needs the Xcode command line tools, and the build includes llama.cpp's Metal GPU backend. The upstream 0.3.36 macOS wheels currently fail zip validation, so their URLs are kept only as references in `pyproject.toml`.
+- **With an NVIDIA GPU**, Windows and Linux on x64 get the package's built CUDA 13.2 wheel, pinned by its hash in `uv.lock`. It runs a model on the GPU or on the CPU. The wheel needs NVIDIA's cuBLAS library, and on Linux its CUDA runtime, and holds neither. The `cu132` group installs them from NVIDIA's `nvidia-cublas` and `nvidia-cuda-runtime` packages, and `privacy_bench.models` loads them before llama.cpp. Only Windows is checked; nothing here has run on Linux.
+- **Without one**, `uv sync` compiles the package, because 0.3.37 has no built CPU wheel. That needs CMake and a C++ compiler, which on Windows come with the Visual Studio build tools, and it took about four minutes on the desktop. The build uses only the CPU.
+- **Every other platform** compiles it too. On a Mac that needs the Xcode command line tools, and the build includes llama.cpp's Metal GPU backend.
 
-Models resolve from the standard Hugging Face cache (`~/.cache/huggingface/hub`), and every condition pins a full commit. Runs never download, so fetch a condition's model once while online:
+Models resolve from the standard Hugging Face cache (`~/.cache/huggingface/hub`), and every condition pins a full commit. Runs never download, so fetch a condition's model file once while online:
 
 ```powershell
-uv run pbench download conditions/classification/embeddinggemma2-bf16-definitions.toml
+uv run pbench download conditions/classification/appsi139/embeddinggemma2-gguf-q8-cpu-head-linear-balanced-tuned-appsi139-balanced-50.toml
 ```
 
 ## Running and comparing
@@ -179,19 +179,13 @@ A comparison file names its `task` and its `runs`, as paths under `results/runs/
 ### Classification
 
 ```powershell
-uv run pbench run conditions/classification/embeddinggemma2-bf16-definitions.toml
-uv run pbench compare comparisons/pilot-models-embeddinggemma2.toml
+uv run pbench run conditions/classification/appsi139/embeddinggemma2-gguf-q8-cpu-head-linear-balanced-tuned-appsi139-balanced-50.toml
+uv run pbench compare comparisons/appsi139-balanced-50-llama-cpp.toml
 ```
 
 A classification comparison's `[scoring]` names the `gold` labels to score against and, optionally, a smaller `sample` that every run covers.
 
-Some classification strategies apply weights fitted to labeled examples, such as a small classification head on frozen embeddings. Fit them once, before the runs that use them:
-
-```powershell
-uv run pbench fit fits/classification/embeddinggemma2-opp115-heads.toml
-```
-
-`fit` checks every example against the input limit before embedding any, refuses an existing output folder, and writes `fit.toml`, `fit.json`, and `weights.safetensors` under `results/fits/<task>/<fit>/<UTC start>/`. `fit.json` records the same provenance as a run, the cross-validation results, and the hash of the weights, which a run checks before it loads them.
+One classification strategy still runs: `embedding-head` embeds a sentence with a GGUF file and applies a small head that was fitted to labeled examples. The heads are in the fit records under `results/fits/<task>/<fit>/<UTC start>/`, each with `fit.toml`, `fit.json`, and `weights.safetensors`. `fit.json` records the same provenance as a run, the cross-validation results, and the hash of the weights, which a run checks before it loads them. `pbench fit` made the records and is retired ([History](#history)): it embedded the examples with the torch build of EmbeddingGemma 2, so the command now only says so. The other four strategies are retired too, and `pbench run` refuses their conditions; their recorded runs still compare.
 
 [docs/classification.md](docs/classification.md) describes the task's data, scoring, and fits in detail, and how an `embedding-head` condition embeds with a GGUF file through llama.cpp.
 
@@ -235,10 +229,9 @@ judgments = "rewrite-keypoints-v3"
 
 ## Extending
 
-- **Another model for an existing strategy:** add a condition file with the model's pinned commit, then `pbench download` and `pbench run`. A rewrite condition names a GGUF file. The classification strategies `prompted` and `jev-choice` are retired and take no new condition.
+- **Another model for an existing strategy:** add a condition file with the model's pinned commit, then `pbench download` and `pbench run`. Every condition names a GGUF file. Of the classification strategies only `embedding-head` takes a new condition, and its file must be converted from the checkpoint that a recorded fit embedded with.
 - **Another rewrite prompt:** add a file under `prompts/rewrite/` and conditions that name it. Editing a prompt in place is fine while iterating; copy it under a new name once a variant is worth comparing, because comparisons label runs by prompt name.
 - **A new strategy:** add a class under `tasks/<task>/strategies/` and register it in that package's `STRATEGIES`. Reuse a backend from `models/`, or add one there that knows nothing about the task.
-- **A new kind of fit:** add a fitter to the task's `FITTERS` that turns a fit file into a report and named float32 tensors. The shared fit record stores and checks them.
 - **A new task:** add `tasks/<name>/` with a task object that selects items, builds strategies, evaluates responses, and supplies its comparison panels, notes, and any extra comparison files, then register it in `tasks/__init__.py`. The run loop, run records, model backends, and cost panels apply unchanged.
 
 ## History
@@ -246,3 +239,5 @@ judgments = "rewrite-keypoints-v3"
 The benchmark began in the `C:\Projects\AirLLM` workspace, which stays as an archive of its original runs, logs, and AirLLM experiments. The six runs behind its last comparison plot were imported into `results/runs/` with [tools/import_legacy_runs.py](tools/import_legacy_runs.py): each import checked its condition, data, and per-sentence input hashes, and reproduced the original metrics exactly. Rerunning those conditions with this code reproduced every prediction: Qwen3-14B token for token although it ran under a newer transformers, and privacy-model and JEV-9B with bit-identical logits under the original libraries.
 
 The transformers chat backend and the JEV-9B backend are retired, and bitsandbytes, peft, and accelerate have left the environment, because the rewriter and the classifier now run through llama.cpp. With them went the conditions of the prompted Qwen3-14B classification runs, of the JEV-9B runs, and of every rewrite run that did not read a GGUF file: BF16, INT8, and NF4, on the GPU and on the CPU. Every run record, fit, and judgment is unchanged, and every comparison still regenerates, because each retired strategy keeps the label and timing note that a comparison reads. This checkout cannot make those runs again: `pbench run` refuses their conditions. Commit `20b2891` is the last that runs them, and each run's `condition.toml` and `run.json` hold its condition and its packages. `tools/import_legacy_runs.py` builds a run's strategy, so it also imports a Qwen3-14B or JEV-9B run only at that commit.
+
+Torch left next, and llama.cpp is now the only model library in the environment. The sequence-classifier backend that ran privacy-model and the sentence-transformers backend that ran EmbeddingGemma 2 are retired. With them went the `classifier-head` and `embedding-similarity` strategies, every `embedding-head` condition that named no GGUF file, and the fitters with their fit files; `pbench fit` now only says that it is retired. torch, torchvision, transformers, sentence-transformers, tokenizers, and scikit-learn are out of `pyproject.toml` and `uv.lock`. Every run record, fit, and judgment is unchanged again, and every comparison still regenerates. The fitted heads still load, and the GGUF conditions apply them with NumPy. This checkout cannot run privacy-model, the torch build of EmbeddingGemma 2, or embedding similarity, and it cannot fit a head. Commit `029af0a` is the last that can, and each fit record's `fit.toml` holds its fit file. `tools/import_legacy_runs.py` imports a privacy-model run only at that commit.

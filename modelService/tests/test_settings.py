@@ -1,37 +1,49 @@
 from dataclasses import replace
 
 import pytest
-import torch
 
-from model_service.settings import DEFAULT_CONDITIONS, Settings
+from model_service import settings as settings_module
+from model_service.settings import DEFAULT_CONDITIONS, DEFAULT_REWRITE_CONDITIONS, Settings
 
 
 @pytest.fixture(autouse=True)
 def no_service_environment(monkeypatch):
-    for name in ("MODEL_SERVICE_CONDITION", "MODEL_SERVICE_DEVICE", "MODEL_SERVICE_IDLE_RELEASE_SECONDS"):
+    for name in ("MODEL_SERVICE_CONDITION", "MODEL_SERVICE_REWRITE_CONDITION", "MODEL_SERVICE_DEVICE",
+                 "MODEL_SERVICE_IDLE_RELEASE_SECONDS"):
         monkeypatch.delenv(name, raising=False)
 
 
-@pytest.mark.parametrize("available, native_bf16, device", [
-    (True, True, "cuda"),
-    (False, False, "cpu"),
-    (True, False, "cpu"),
-])
-def test_the_default_condition_follows_the_hardware(monkeypatch, available, native_bf16, device):
-    monkeypatch.setattr(torch.cuda, "is_available", lambda: available)
-    # Like torch, count emulated bf16 as support unless the caller excludes it.
-    monkeypatch.setattr(torch.cuda, "is_bf16_supported",
-                        lambda including_emulation=True: available and (native_bf16 or including_emulation))
+# A CUDA build of llama.cpp answers no while it sees no NVIDIA GPU, as a build without a GPU backend does.
+@pytest.mark.parametrize("sees_gpu, device", [(True, "gpu"), (False, "cpu")])
+def test_the_default_condition_follows_what_llama_cpp_can_use(monkeypatch, sees_gpu, device):
+    monkeypatch.setattr(settings_module, "gpu_offload_supported", lambda: sees_gpu)
     settings = Settings.from_env()
     assert settings.condition is None
     assert settings.condition_path == DEFAULT_CONDITIONS[device]
+    assert settings.rewrite_condition_path == DEFAULT_REWRITE_CONDITIONS[device]
 
 
-def test_a_device_picks_its_default_condition_whatever_the_hardware(monkeypatch):
-    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
-    assert Settings(device="cuda").condition_path == DEFAULT_CONDITIONS["cuda"]
+def test_a_device_picks_its_default_conditions_whatever_the_hardware(monkeypatch):
+    monkeypatch.setattr(settings_module, "gpu_offload_supported", lambda: False)
+    assert Settings(device="gpu").condition_path == DEFAULT_CONDITIONS["gpu"]
+    assert Settings(device="gpu").rewrite_condition_path == DEFAULT_REWRITE_CONDITIONS["gpu"]
     monkeypatch.setenv("MODEL_SERVICE_DEVICE", "CPU")
     assert Settings.from_env().condition_path == DEFAULT_CONDITIONS["cpu"]
+
+
+def test_a_given_rewrite_condition_is_kept_and_may_come_with_a_device(monkeypatch):
+    given = DEFAULT_REWRITE_CONDITIONS["cpu"]
+    # The device still picks the classifier's default condition; the rewrite condition names its own device.
+    settings = Settings(rewrite_condition=str(given), device="gpu")
+    assert (settings.rewrite_condition_path, settings.condition_path) == (given, DEFAULT_CONDITIONS["gpu"])
+    monkeypatch.setenv("MODEL_SERVICE_REWRITE_CONDITION", str(given))
+    assert Settings.from_env().rewrite_condition == given
+
+
+def test_only_gpu_and_cpu_name_a_device():
+    # The conditions say gpu, whichever GPU backend llama.cpp was built with.
+    with pytest.raises(ValueError, match="device must be gpu, cpu, or unset, not 'cuda'"):
+        Settings(device="cuda")
 
 
 def test_a_given_condition_is_kept(monkeypatch):

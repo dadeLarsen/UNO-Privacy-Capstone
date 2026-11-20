@@ -44,12 +44,13 @@ block points back to the original sentence spans.
   chosen.
 - **Rewrites** call the pinned GGUF chat model already installed with `modelService/`;
   the API never downloads a model. A job selects the classified sentences named in
-  `sentence_ids` (or the whole policy), sends their exact text to modelService, and
-  stores the returned rewrite with `source_sentence_ids` and review `warnings`. All UI
-  styles currently use the evaluated `summary-v3` prompt; the rewriter reports that
-  limitation as a warning rather than pretending the styles were evaluated separately.
-  If the GGUF file has not been downloaded, the job fails with a structured
-  `model_service_error` that includes the one-time `pbench download` command.
+  `sentence_ids` (or the whole policy), sends only their exact text to modelService,
+  and stores the returned rewrite with those sentences' IDs as `source_sentence_ids`.
+  modelService runs one prompt, the evaluated `summary-v3`, for every style; the API
+  says so in each rewrite's `warnings` rather than pretending the styles were evaluated
+  separately, and adds a warning when modelService marks the rewrite `truncated` or
+  `reasoning`. If the GGUF file has not been downloaded, the job fails with
+  `model_service_error` and modelService's message, which says to run `pbench download`.
 
 ## Setup and run
 
@@ -81,7 +82,7 @@ If the model service is down, classification returns HTTP 503 with
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `API_MODEL_SERVICE_URL` | `http://127.0.0.1:8002` | Loopback URL of modelService |
+| `API_MODEL_SERVICE_URL` | `http://127.0.0.1:8000` | Loopback URL of modelService |
 | `API_HOST` / `API_PORT` | `127.0.0.1` / `8001` | Loopback bind address and port |
 | `API_CORS_ORIGINS` | Vite dev and preview origins | Comma-separated loopback origins |
 | `API_MAX_CHARACTERS` | `200000` | Same limit as modelService |

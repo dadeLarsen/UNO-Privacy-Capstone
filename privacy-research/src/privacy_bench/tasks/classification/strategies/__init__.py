@@ -1,7 +1,7 @@
 """Ways to classify a sentence, by condition ``strategy`` name.
 
-``prompted`` and ``jev-choice`` are retired: they stay registered so that comparisons can describe their
-recorded runs, and each refuses a condition.
+Only ``embedding-head`` runs. The other four are retired: they stay registered so that comparisons can
+describe their recorded runs, and each refuses a condition.
 """
 
 from .classifier_head import ClassifierHeadStrategy
