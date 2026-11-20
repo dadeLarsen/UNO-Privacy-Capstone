@@ -66,9 +66,9 @@ Choose one of the two setups. Each installs the service, caches the two pinned m
 files while online (296 MiB and 2.55 GiB), and runs the tests. A model's two default
 conditions pin the same file, so either pair of downloads serves the GPU and the CPU.
 
-**With an NVIDIA GPU.** This installs the CUDA 13.2 builds of torch and llama.cpp.
-They need a newer NVIDIA driver than CUDA 12.8 did: NVIDIA names 595.45.04 as the
-oldest for Linux and gives no number for Windows, where it was checked on driver
+**With an NVIDIA GPU.** This installs the CUDA 13.2 build of llama.cpp and the NVIDIA
+libraries it needs. CUDA 13.2 needs a recent NVIDIA driver: NVIDIA names 595.45.04 as
+the oldest for Linux and gives no number for Windows, where it was checked on driver
 610.88:
 
 ```powershell
@@ -83,8 +83,8 @@ runs on the CPU. The service then prints one line at startup, `ggml_cuda_init: f
 to initialize CUDA`, and runs the CPU condition. That was checked with the GPU hidden
 (`CUDA_VISIBLE_DEVICES=-1`), not yet on a computer without an NVIDIA driver.
 
-**Without an NVIDIA GPU.** This installs the much smaller CPU build of torch and
-compiles llama.cpp:
+**Without an NVIDIA GPU.** This compiles llama.cpp for the CPU alone and installs none
+of NVIDIA's libraries:
 
 ```powershell
 $env:UV_NO_SYNC = "1"    # keep `uv run` from installing the CUDA build; set it in your profile
@@ -98,12 +98,13 @@ Set `UV_NO_SYNC` before any other `uv` command. After pulling a change to `uv.lo
 rerun the `uv sync` line.
 
 Both setups install `llama-cpp-python`, which runs both GGUF files through
-llama.cpp. With an NVIDIA GPU, Windows and Linux on x64 get a built CUDA wheel. Without
-one, and on every other platform, `uv sync` compiles the package: that needs CMake and a
-C++ compiler, which are the Visual Studio build tools on Windows and the Xcode command
-line tools on a Mac. A Mac's build includes llama.cpp's Metal GPU backend. The
-benchmark's README says more under Setup. torch is still installed, because the
-benchmark's other classifiers use it; the service itself no longer does.
+llama.cpp. It is the only model library that the service and the benchmark install.
+With an NVIDIA GPU, Windows and Linux on x64 get a built CUDA wheel and NVIDIA's cuBLAS
+library for it; only Windows is checked. Without one, and on every other platform,
+`uv sync` compiles the package: that needs CMake and a C++ compiler, which are the
+Visual Studio build tools on Windows and the Xcode command line tools on a Mac. A Mac's
+build includes llama.cpp's Metal GPU backend. The benchmark's README says more under
+Setup.
 
 Some checkpoints may require accepting their license on Hugging Face first. The service
 itself never downloads; it reads the snapshot from the local cache.
@@ -128,17 +129,17 @@ no model is released in the middle of one. On the desktop, a rewrite of an 86-wo
 passage that had to load the rewriter first took 2.0 s on the GPU and 8.0 s on the CPU,
 against 0.5 s and 6.2 s with the rewriter loaded. Labeling 42 sentences right after a
 rewrite took 1.4 s and 1.9 s, against 0.6 s and 1.0 s. Through label, rewrite, label,
-rewrite, the process's working set peaked at 5.0 GiB on the CPU, and its GPU memory
-at 3.7 GiB on the GPU.
+rewrite, the process's working set peaked at 4.4 GiB on the CPU, and its GPU memory
+at 3.6 GiB on the GPU.
 
 The service also releases the loaded model after 300 seconds without an analyze or
 rewrite request, on the GPU and on the CPU; `MODEL_SERVICE_IDLE_RELEASE_SECONDS`
 changes the time. The next request loads the model again before it answers, which took
 0.4 to 0.5 s for the classifier on the desktop, and `/health` reports ready throughout.
 Measured on the desktop, a release of the classifier returned about 0.7 GiB of system
-memory on the CPU. On the GPU it took the process from about 790 MiB of GPU memory to
-390 MiB: the process keeps its CUDA context until it exits, so its GPU memory falls
-but not to zero.
+memory on the CPU and left the process with a working set of 0.3 GiB. On the GPU it
+took the process from about 790 MiB of GPU memory to 390 MiB: the process keeps its
+CUDA context until it exits, so its GPU memory falls but not to zero.
 
 These examples work in Windows PowerShell 5.1 and in PowerShell 7. They call
 `curl.exe` because 5.1 makes `curl` an alias of `Invoke-WebRequest`, and they pipe the
@@ -246,7 +247,7 @@ src/model_service/
   taxonomy.json  each category's display name, definition, and color, keyed by its name
 tests/
   test_api.py        routes with a fake classifier and rewriter (no model or GPU needed)
-  test_classifier.py default conditions, label order, and releasing the model
+  test_classifier.py default conditions, the label and its scores, and releasing the model
   test_idle.py       when a model is released, with fake models and a fake clock
   test_rewriter.py   default rewrite conditions, the rewrite's text and status, and releasing the model
   test_sentences.py  splitter behavior and offsets
