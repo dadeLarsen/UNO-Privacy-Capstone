@@ -53,7 +53,7 @@ class GgufSentenceEmbedder:
         if limit > model_limit:
             raise ValueError(f"Requested input limit {limit} exceeds the model limit {model_limit}")
         # The context takes its pooling from the file. A fitted head is only valid for the pooling its
-        # examples were embedded with, and the sentence-transformers backend accepts the mean alone.
+        # examples were embedded with, and every recorded fit pooled by the mean.
         pooling = llm.pooling_type()
         if pooling != llama_cpp.LLAMA_POOLING_TYPE_MEAN:
             raise ValueError(f"{self.path.name} pools with llama.cpp pooling type {pooling}, not the mean "

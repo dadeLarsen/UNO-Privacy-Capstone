@@ -6,7 +6,6 @@ from ...core.files import read_json
 from ...core.protocols import Selection
 from . import report
 from .data import References, accepted_gold_digest, load_accepted_gold, read_dataset, sample_strata, select_rows
-from .fitting import FITTERS
 from .scoring import write_evaluation
 from .strategies import STRATEGIES
 from .taxonomy import LABELS, taxonomy_metadata
@@ -74,11 +73,3 @@ class ClassificationTask:
     @staticmethod
     def write_comparison_files(rows: list, scoring: dict, output) -> list:
         return []
-
-    def fit(self, spec) -> dict:
-        try:
-            fitter = FITTERS[spec.kind]
-        except KeyError:
-            raise ValueError(f"Unknown classification fit kind {spec.kind!r}; "
-                             f"available: {', '.join(sorted(FITTERS)) or 'none'}") from None
-        return fitter(spec).run()

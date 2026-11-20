@@ -101,9 +101,3 @@ class Task(Protocol):
 
     def write_comparison_files(self, rows: list, scoring: dict, output: Path) -> list:
         """Write any task-specific comparison files, such as rewrites side by side; returns their paths."""
-
-    def fit(self, spec) -> dict:
-        """Fit what a fit file describes: {"report": JSON-safe details, "tensors": name -> float32 array}.
-
-        A task with nothing to fit raises ValueError.
-        """
