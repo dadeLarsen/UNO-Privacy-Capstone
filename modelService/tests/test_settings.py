@@ -3,12 +3,13 @@ from dataclasses import replace
 import pytest
 
 from model_service import settings as settings_module
-from model_service.settings import DEFAULT_CONDITIONS, Settings
+from model_service.settings import DEFAULT_CONDITIONS, DEFAULT_REWRITE_CONDITIONS, Settings
 
 
 @pytest.fixture(autouse=True)
 def no_service_environment(monkeypatch):
-    for name in ("MODEL_SERVICE_CONDITION", "MODEL_SERVICE_DEVICE", "MODEL_SERVICE_IDLE_RELEASE_SECONDS"):
+    for name in ("MODEL_SERVICE_CONDITION", "MODEL_SERVICE_REWRITE_CONDITION", "MODEL_SERVICE_DEVICE",
+                 "MODEL_SERVICE_IDLE_RELEASE_SECONDS"):
         monkeypatch.delenv(name, raising=False)
 
 
@@ -19,13 +20,24 @@ def test_the_default_condition_follows_what_llama_cpp_can_use(monkeypatch, sees_
     settings = Settings.from_env()
     assert settings.condition is None
     assert settings.condition_path == DEFAULT_CONDITIONS[device]
+    assert settings.rewrite_condition_path == DEFAULT_REWRITE_CONDITIONS[device]
 
 
-def test_a_device_picks_its_default_condition_whatever_the_hardware(monkeypatch):
+def test_a_device_picks_its_default_conditions_whatever_the_hardware(monkeypatch):
     monkeypatch.setattr(settings_module, "gpu_offload_supported", lambda: False)
     assert Settings(device="gpu").condition_path == DEFAULT_CONDITIONS["gpu"]
+    assert Settings(device="gpu").rewrite_condition_path == DEFAULT_REWRITE_CONDITIONS["gpu"]
     monkeypatch.setenv("MODEL_SERVICE_DEVICE", "CPU")
     assert Settings.from_env().condition_path == DEFAULT_CONDITIONS["cpu"]
+
+
+def test_a_given_rewrite_condition_is_kept_and_may_come_with_a_device(monkeypatch):
+    given = DEFAULT_REWRITE_CONDITIONS["cpu"]
+    # The device still picks the classifier's default condition; the rewrite condition names its own device.
+    settings = Settings(rewrite_condition=str(given), device="gpu")
+    assert (settings.rewrite_condition_path, settings.condition_path) == (given, DEFAULT_CONDITIONS["gpu"])
+    monkeypatch.setenv("MODEL_SERVICE_REWRITE_CONDITION", str(given))
+    assert Settings.from_env().rewrite_condition == given
 
 
 def test_only_gpu_and_cpu_name_a_device():
