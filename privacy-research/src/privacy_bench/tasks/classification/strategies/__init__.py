@@ -1,4 +1,8 @@
-"""Ways to classify a sentence, by condition ``strategy`` name."""
+"""Ways to classify a sentence, by condition ``strategy`` name.
+
+``prompted`` and ``jev-choice`` are retired: they stay registered so that comparisons can describe their
+recorded runs, and each refuses a condition.
+"""
 
 from .classifier_head import ClassifierHeadStrategy
 from .embedding_head import EmbeddingHeadStrategy

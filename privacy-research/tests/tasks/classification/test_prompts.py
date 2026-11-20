@@ -1,6 +1,6 @@
 import pytest
 
-from privacy_bench.core.files import digest_json
+from privacy_bench.core.files import digest_json, digest_text
 from privacy_bench.tasks.classification.prompts import build_prompt, load_prompt, validate_prompt_spec
 from privacy_bench.tasks.classification.taxonomy import LABELS, SOURCE_LABELS
 
@@ -41,6 +41,12 @@ def test_committed_definitions_prompt_matches_the_hash_used_by_earlier_runs():
     spec = load_prompt("definitions")
     assert digest_json(spec) == "a25626922f5d711ece2aed2c7ac2f2908cae0aa73323f43448b9ec488b85e947"
     assert set(spec["definitions"]) == set(LABELS) and spec["guidance"] == []
+
+
+def test_definitions_prompt_for_a_sentence_matches_the_hash_its_recorded_runs_hold(pilot_rows):
+    # The prompted strategy is retired; this is the prompt hash the September Qwen3-14B runs recorded.
+    prompt = build_prompt(pilot_rows["8396"].text, load_prompt("definitions"))
+    assert digest_text(prompt) == "aebb52a3885c2e9c1f0ae07734f4d75c09251c424cf3924ec58930569e947fa5"
 
 
 def test_unknown_prompt_names_and_path_tricks_are_rejected():

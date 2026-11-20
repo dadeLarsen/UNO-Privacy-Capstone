@@ -4,14 +4,11 @@ version = "0.1.0"
 description = "Model benchmarks for an offline privacy-policy reader."
 requires-python = ">=3.12,<3.13"
 dependencies = [
-    "accelerate==1.15.0",
-    "bitsandbytes==0.50.2",
     "huggingface-hub==1.33.0",
     "jinja2==3.1.6",
     "llama-cpp-python==0.3.37",
     "matplotlib==3.11.2",
     "numpy==2.5.3",
-    "peft==0.21.0",
     "pyphen==0.18.1",
     "safetensors==0.8.0",
     "scikit-learn==1.9.1",
@@ -72,7 +69,6 @@ constraint-dependencies = [
     "networkx==3.6.1",
     "packaging==26.3",
     "pillow==12.3.0",
-    "psutil==7.2.2",
     "pygments==2.21.0",
     "pyparsing==3.3.2",
     "python-dateutil==2.9.0.post0",

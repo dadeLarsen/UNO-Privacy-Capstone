@@ -2,8 +2,7 @@
 
 from ...core.conditions import Condition, take_settings
 from ...core.files import digest_text
-from ...models.chat_model import CHAT_TEMPLATE_KWARGS, ChatModel
-from ...models.gguf_chat_model import GgufChatModel
+from ...models.gguf_chat_model import CHAT_TEMPLATE_KWARGS, GgufChatModel
 from ...models.hub import download_snapshot, require_commit, resolve_snapshot, snapshot_identity
 from .data import load_prompt, render
 
@@ -20,13 +19,13 @@ class PromptedRewriteStrategy:
 
     def __init__(self, condition: Condition):
         context = f"Condition {condition.name!r} [model]"
-        if "file" in condition.model:
-            # A GGUF file runs through llama.cpp, which has no compute type and no default device.
-            self.model = take_settings(condition.model, context,
-                                       required=("id", "revision", "precision", "file", "device"))
-        else:
-            self.model = take_settings(condition.model, context, required=("id", "revision", "precision"),
-                                       optional={"device": "cuda", "compute": "bf16"})
+        if "file" not in condition.model:
+            raise ValueError(f"{context} names no GGUF file. The prompted strategy runs a GGUF file through "
+                             "llama.cpp; its transformers backend is retired. Recorded transformers runs still "
+                             "compare, and History in README.md names the last commit that runs one")
+        # llama.cpp has no compute type and no default device.
+        self.model = take_settings(condition.model, context,
+                                   required=("id", "revision", "precision", "file", "device"))
         require_commit(self.model["id"], self.model["revision"])
         self.options = take_settings(condition.options, f"Condition {condition.name!r} [options]",
                                      required=("prompt",), optional={"max_new_tokens": 1024, "seed": 42})
@@ -39,18 +38,14 @@ class PromptedRewriteStrategy:
                 "max_new_tokens": self.options["max_new_tokens"], "seed": self.options["seed"], "batch_size": 1}
 
     def download(self) -> dict:
-        snapshot = download_snapshot(self.model["id"], self.model["revision"], only=self.model.get("file"))
+        snapshot = download_snapshot(self.model["id"], self.model["revision"], only=self.model["file"])
         return snapshot_identity(self.model["id"], self.model["revision"], snapshot)
 
     def load(self) -> dict:
-        settings = {"precision": self.model["precision"], "device": self.model["device"],
-                    "max_new_tokens": self.options["max_new_tokens"], "seed": self.options["seed"]}
-        if "file" in self.model:
-            snapshot = resolve_snapshot(self.model["id"], self.model["revision"], self.model["file"])
-            self._backend = GgufChatModel(snapshot / self.model["file"], **settings)
-        else:
-            snapshot = resolve_snapshot(self.model["id"], self.model["revision"])
-            self._backend = ChatModel(snapshot, compute=self.model["compute"], **settings)
+        snapshot = resolve_snapshot(self.model["id"], self.model["revision"], self.model["file"])
+        self._backend = GgufChatModel(snapshot / self.model["file"], precision=self.model["precision"],
+                                      device=self.model["device"], max_new_tokens=self.options["max_new_tokens"],
+                                      seed=self.options["seed"])
         identity = snapshot_identity(self.model["id"], self.model["revision"], snapshot)
         return {**identity, **self._backend.load()}
 
