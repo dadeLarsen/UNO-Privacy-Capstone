@@ -2,8 +2,8 @@
 
 A localhost-only Python service that runs the project's chosen classifier on a privacy
 policy and returns one category per sentence, and that rewrites a passage in plain
-language. It is the first piece of the app's backend; the browser UI is not wired to
-it yet.
+language. The browser reaches it only through [`api/`](../api/), which turns its
+answers into the app's policies, summaries, and rewrite jobs.
 
 The service reuses `privacy-research/` rather than loading a model itself. A
 **condition** file pins the model file, the fitted head, the instruction prefix, and
@@ -260,12 +260,13 @@ tests/
 - **The rest of rewriting.** `/rewrite` rewrites one passage with one summary prompt.
   It has none of the three styles (FR-09 to FR-11), does not link the rewrite to its
   source sentences (FR-12), does not rewrite a whole policy section by section
-  (FR-13), and reports no progress and cannot be cancelled (FR-17, FR-18).
+  (FR-13), and reports no progress and cannot be cancelled (FR-17, FR-18). `api/`
+  links each rewrite to the sentences it sent and runs it as a job that the browser
+  polls and can cancel; a cancel stops the api waiting, but the service still finishes
+  the rewrite.
 - **Model choice by memory tier.** The service chooses between the GPU and the CPU
   at startup and runs the same head on both. Choosing a model by memory tier is
   FR-19. An NVIDIA GPU is used through CUDA and an Apple GPU through Metal; a
   computer with an AMD or Intel GPU runs on the CPU.
 - **History and caching across restarts.** The service keeps an in-memory cache only.
   Nothing is written to disk.
-- **Browser wiring.** `frontend/` still uses example data and does not call this
-  service.
