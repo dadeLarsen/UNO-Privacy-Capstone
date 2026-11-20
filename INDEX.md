@@ -35,14 +35,14 @@ UI does not call it yet, and rewriting is not implemented.
 
 A small FastAPI service that reuses the benchmark's pinned classifier. It binds to
 localhost only, never downloads at request time, and returns exact character offsets
-for every sentence. It runs the same fitted head on an NVIDIA GPU or on the CPU, and
-chooses between them at startup.
+for every sentence. It runs the same fitted head on the same GGUF file through
+llama.cpp, on a GPU or on the CPU, and chooses between them at startup.
 
 | File | Status | Contents |
 | --- | --- | --- |
 | [README.md](modelService/README.md) | Current | Setup, run, API examples, configuration, and what is not implemented |
 | [pyproject.toml](modelService/pyproject.toml) | Current | Dependencies, the CUDA and CPU groups for torch and llama-cpp-python, and the `model-service` command |
-| [src/model_service/](modelService/src/model_service/) | Current | `app.py` routes, `classifier.py` benchmark adapter, `idle.py` idle GPU release, `sentences.py` splitter, `settings.py` configuration and the GPU or CPU choice, and `taxonomy.py` with `taxonomy.json`, the benchmark's ten categories plus each one's display name, definition, and color |
+| [src/model_service/](modelService/src/model_service/) | Current | `app.py` routes, `classifier.py` benchmark adapter, `idle.py` idle release of the model, `sentences.py` splitter, `settings.py` configuration and the GPU or CPU choice, and `taxonomy.py` with `taxonomy.json`, the benchmark's ten categories plus each one's display name, definition, and color |
 | [tests/](modelService/tests/) | Current | API and idle-release tests with a fake classifier, and classifier, splitter, settings, and taxonomy tests; no model or GPU needed |
 
 ## App requirements: [docs/](docs/)
@@ -145,7 +145,7 @@ One-time scripts that froze data files or imported runs. Each refuses to overwri
 | Path | Status | Contents |
 | --- | --- | --- |
 | [conditions/classification/](privacy-research/conditions/classification/) | Current | One run condition per file, on the OPP-115 pilot. Names read `<model>-<precision>-<method>`: `definitions` is EmbeddingGemma 2's similarity to the definitions, with a suffix naming its instruction prefix, and `head-<name>` is a fitted head. `privacy-model-fp32` has no method: it classifies the raw sentence. The Qwen3-14B and JEV-9B conditions went with the retired `prompted` and `jev-choice` strategies; each of their runs keeps its own copy as `condition.toml`. |
-| [conditions/classification/appsi139/](privacy-research/conditions/classification/appsi139/) | Current | The same conditions on APPSI-139 samples, named `…-appsi139-<sample>`. `-tuned` and `-full` heads are prior-shifted at the tuned strength and at strength 1. The two `fp32-cpu` conditions run the tuned balanced head on the CPU in fp32. The eight `gguf` conditions run that head on a GGUF build of EmbeddingGemma 2 through llama.cpp: the `bf16` and the `q8` file, each on the CPU and on the GPU, on the test half and on the balanced sample. Every other condition runs on the GPU. |
+| [conditions/classification/appsi139/](privacy-research/conditions/classification/appsi139/) | Current | The same conditions on APPSI-139 samples, named `…-appsi139-<sample>`. `-tuned` and `-full` heads are prior-shifted at the tuned strength and at strength 1. The two `fp32-cpu` conditions run the tuned balanced head on the CPU in fp32. The eight `gguf` conditions run that head on a GGUF build of EmbeddingGemma 2 through llama.cpp: the `bf16` and the `q8` file, each on the CPU and on the GPU, on the test half and on the balanced sample. The two `limit2048` conditions are the model service's defaults: the `q8` file on the GPU and on the CPU, with an input limit of 2,048 tokens where the others take 8,192. Every other condition runs on the GPU. |
 | [conditions/rewrite/](privacy-research/conditions/rewrite/) | Current | Rewrite conditions on the 20 passages, named `<model>-<precision>-<prompt>`. The two `q4km` conditions run a 4-bit GGUF build of Qwen3.5-4B through llama.cpp, on the CPU or, with `-gpu`, on its GPU backend. The 37 conditions of the transformers runs went with that backend; each of those runs keeps its own copy as `condition.toml`. |
 | [conditions/rewrite/holdout/](privacy-research/conditions/rewrite/holdout/) | Current | The same two `q4km` conditions on the held-out passages, named `…-holdout`. The 28 transformers conditions went the same way. |
 | [prompts/rewrite/](privacy-research/prompts/rewrite/) | Current | Rewrite prompt files, editable: each run copies the prompt it used into its `input.json`. `summary-baseline` is a generic summary prompt for a first comparison; `summary-v2` adds length, format, and faithfulness instructions; `summary-v3` also forbids making a promise stronger or weaker. |

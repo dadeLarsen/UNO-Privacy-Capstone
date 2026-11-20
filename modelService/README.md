@@ -6,12 +6,13 @@ backend; the browser UI is not wired to it yet, and rewriting is not implemented
 because no rewriter has been chosen (AR-02).
 
 The service reuses `privacy-research/` rather than loading a model itself. A
-**condition** file pins the checkpoint, the fitted head, the instruction prefix, and
+**condition** file pins the model file, the fitted head, the instruction prefix, and
 the category order, and the benchmark's strategy checks the fitted weight hashes
 before inference. By default the service runs the prior-shifted EmbeddingGemma 2
-linear head, the classifier that met NFR-05 on both APPSI-139 samples. It has one
-condition for that head on an NVIDIA GPU (bf16) and one on the CPU (fp32), and picks
-between them at startup, so every computer gets the same head.
+linear head, the classifier that met NFR-05 on both APPSI-139 samples. The embeddings
+come from a Q8_0 GGUF build of EmbeddingGemma 2 (296 MiB) through llama.cpp. The
+service has one condition for the GPU and one for the CPU, with the same file and
+head, and picks between them at startup, so every computer gets the same classifier.
 
 ## What it does
 
@@ -28,10 +29,11 @@ UI can highlight the original text without re-splitting it. `label_id` follows
 `privacy_bench.tasks.classification.taxonomy`, the category order the model was
 fitted on.
 
-A sentence the model cannot classify, such as one over the model's token limit, does
-not fail the request. It comes back with `label_id` and `label` set to `null` and an
-`error` that gives the reason, and every other sentence keeps its label. With
-`include_scores`, its `scores` is `null` too.
+A sentence the model cannot classify, such as one over the condition's token limit,
+does not fail the request. It comes back with `label_id` and `label` set to `null` and
+an `error` that gives the reason, and every other sentence keeps its label. With
+`include_scores`, its `scores` is `null` too. The default conditions take 2,048 tokens
+per sentence; the longest sentence in the benchmark's two datasets has 472.
 
 The service never logs policy text. It binds to a loopback address only, loads models
 from the local Hugging Face cache, and never downloads at request time (NFR-01,
@@ -45,41 +47,45 @@ every command below from this folder. Installing the service also installs the
 benchmark and its `pbench` command, so `privacy-research/` needs no setup of its own.
 
 Choose one of the two setups. Each installs the service, caches the pinned model
-files while online, and runs the tests. Both default conditions pin the same
-checkpoint, so either download serves the GPU and the CPU.
+file while online, and runs the tests. Both default conditions pin the same file, so
+either download serves the GPU and the CPU.
 
-**With an NVIDIA GPU.** This installs the CUDA 13.2 build of torch. It needs a newer
-NVIDIA driver than the CUDA 12.8 build did: NVIDIA names 595.45.04 as the oldest for
-Linux and gives no number for Windows, where it was checked on driver 610.88:
+**With an NVIDIA GPU.** This installs the CUDA 13.2 builds of torch and llama.cpp.
+They need a newer NVIDIA driver than CUDA 12.8 did: NVIDIA names 595.45.04 as the
+oldest for Linux and gives no number for Windows, where it was checked on driver
+610.88:
 
 ```powershell
 uv sync
-uv run pbench download ../privacy-research/conditions/classification/appsi139/embeddinggemma2-bf16-head-linear-balanced-tuned-appsi139-test-half.toml
+uv run pbench download ../privacy-research/conditions/classification/appsi139/embeddinggemma2-gguf-q8-gpu-head-linear-balanced-tuned-limit2048-appsi139-test-half.toml
 uv run pytest
 ```
 
-This setup also works without an NVIDIA GPU, because the CUDA build of torch also
-runs on the CPU. That was checked with the GPU hidden (`CUDA_VISIBLE_DEVICES=-1`),
-not yet on a computer without an NVIDIA driver.
+This setup also works without an NVIDIA GPU, because the CUDA build of llama.cpp also
+runs on the CPU. The service then prints one line at startup, `ggml_cuda_init: failed
+to initialize CUDA`, and runs the CPU condition. That was checked with the GPU hidden
+(`CUDA_VISIBLE_DEVICES=-1`), not yet on a computer without an NVIDIA driver.
 
-**Without an NVIDIA GPU.** This installs the much smaller CPU build of torch:
+**Without an NVIDIA GPU.** This installs the much smaller CPU build of torch and
+compiles llama.cpp:
 
 ```powershell
 $env:UV_NO_SYNC = "1"    # keep `uv run` from installing the CUDA build; set it in your profile
 uv sync --no-group cu132 --group cpu
-uv run pbench download ../privacy-research/conditions/classification/appsi139/embeddinggemma2-fp32-cpu-head-linear-balanced-tuned-appsi139-test-half.toml
+uv run pbench download ../privacy-research/conditions/classification/appsi139/embeddinggemma2-gguf-q8-cpu-head-linear-balanced-tuned-limit2048-appsi139-test-half.toml
 uv run pytest
 ```
 
 Set `UV_NO_SYNC` before any other `uv` command. After pulling a change to `uv.lock`,
 rerun the `uv sync` line.
 
-Both setups also install `llama-cpp-python`, which the benchmark's rewrite task uses to
-run GGUF models through llama.cpp. The service loads it at startup but does not use it
-yet. With an NVIDIA GPU, Windows and Linux on x64 get a built CUDA wheel. Without one,
-and on every other platform, `uv sync` compiles the package: that needs CMake and a C++
-compiler, which are the Visual Studio build tools on Windows and the Xcode command line
-tools on a Mac. The benchmark's README says more under Setup.
+Both setups install `llama-cpp-python`, which runs the classifier's GGUF file through
+llama.cpp. With an NVIDIA GPU, Windows and Linux on x64 get a built CUDA wheel. Without
+one, and on every other platform, `uv sync` compiles the package: that needs CMake and a
+C++ compiler, which are the Visual Studio build tools on Windows and the Xcode command
+line tools on a Mac. A Mac's build includes llama.cpp's Metal GPU backend. The
+benchmark's README says more under Setup. torch is still installed, because the
+benchmark's other classifiers use it; the service itself no longer does.
 
 Some checkpoints may require accepting their license on Hugging Face first. The service
 itself never downloads; it reads the snapshot from the local cache.
@@ -92,15 +98,18 @@ uv run model-service
 ```
 
 The service listens on `http://127.0.0.1:8000`. At startup it runs the GPU condition
-when torch finds an NVIDIA GPU with native bf16 (the RTX 30 series and newer), and
-the CPU condition on every other computer. `/health` reports the device in use.
+when the installed llama.cpp build has a GPU backend that finds a GPU: CUDA with an
+NVIDIA GPU on Windows and Linux, Metal on a Mac. Every other computer runs the CPU
+condition. `/health` reports the device in use. The service was run on the desktop's
+RTX 4090 and on its CPU; on a Mac only the benchmark has run this file.
 
-On a GPU, the service frees the model's GPU memory after 300 seconds without an
-analyze request (NFR-03); `MODEL_SERVICE_IDLE_RELEASE_SECONDS` changes the time. The
-next request loads the model again before it answers, which took about 2 s on an
-RTX 4090, and `/health` reports ready throughout. The process keeps its CUDA context
-until it exits, so its GPU memory falls but not to zero. On the CPU the model stays
-loaded.
+The service releases the model after 300 seconds without an analyze request (NFR-03),
+on the GPU and on the CPU; `MODEL_SERVICE_IDLE_RELEASE_SECONDS` changes the time. The
+next request loads the model again before it answers, which took 0.4 to 0.5 s on the
+desktop, and `/health` reports ready throughout. Measured on the desktop, a release
+returned about 0.7 GiB of system memory on the CPU. On the GPU it took the process
+from about 790 MiB of GPU memory to 390 MiB: the process keeps its CUDA context until
+it exits, so its GPU memory falls but not to zero.
 
 These examples work in Windows PowerShell 5.1 and in PowerShell 7. They call
 `curl.exe` because 5.1 makes `curl` an alias of `Invoke-WebRequest`, and they pipe the
@@ -138,10 +147,10 @@ Example response (abridged):
     }
   ],
   "model": {
-    "id": "google/embeddinggemma-2",
-    "revision": "914f7f89142e33e77833254d9c9b90c3cef7303b",
-    "precision": "bf16",
-    "device": "cuda:0",
+    "id": "ggml-org/embeddinggemma-2-GGUF",
+    "revision": "6ea3e3a309d12a4779cfda98b8c19800d2d5da71",
+    "precision": "q8_0",
+    "device": "gpu",
     "strategy": "embedding-head",
     "head": "linear-balanced-tuned",
     "taxonomy_id": "opp115-10-other",
@@ -154,14 +163,14 @@ Example response (abridged):
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `MODEL_SERVICE_CONDITION` | unset | Condition TOML to run instead of a default condition. It names its own device, so it cannot be combined with a device |
-| `MODEL_SERVICE_DEVICE` | the detected hardware | `cuda` or `cpu`: which of the two default conditions to run. Cannot be combined with a condition |
+| `MODEL_SERVICE_CONDITION` | unset | Condition TOML to run instead of a default condition. It must name a GGUF file. It names its own device, so it cannot be combined with a device |
+| `MODEL_SERVICE_DEVICE` | the detected hardware | `gpu` or `cpu`: which of the two default conditions to run. Cannot be combined with a condition |
 | `MODEL_SERVICE_HOST` | `127.0.0.1` | Must be a loopback address |
 | `MODEL_SERVICE_PORT` | `8000` | Listening port |
 | `MODEL_SERVICE_MAX_CHARACTERS` | `200000` | Maximum policy length |
 | `MODEL_SERVICE_CACHE_SIZE` | `4096` | Sentences kept in the in-memory cache |
 | `MODEL_SERVICE_PRELOAD` | `true` | Load the model at startup |
-| `MODEL_SERVICE_IDLE_RELEASE_SECONDS` | `300` | Seconds without an analyze request before the service frees the model's GPU memory. On the CPU the model stays loaded |
+| `MODEL_SERVICE_IDLE_RELEASE_SECONDS` | `300` | Seconds without an analyze request before the service releases the model, on the GPU and on the CPU |
 | `MODEL_SERVICE_CORS_ORIGINS` | `http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173` | Allowed browser origins |
 
 Command-line flags `--condition`, `--device`, `--host`, `--port`, and `--no-preload`
@@ -174,7 +183,7 @@ condition and a device, whether each comes from a flag or a variable.
 src/model_service/
   app.py         FastAPI routes, upload handling, and response shape
   classifier.py  privacy_bench condition/strategy adapter and sentence cache
-  idle.py        frees the model's GPU memory once the service has been idle
+  idle.py        releases the model once the service has been idle
   sentences.py   offset-preserving sentence splitter
   settings.py    environment and CLI configuration, and the GPU or CPU choice
   taxonomy.py    the ten categories: names and order from privacy_bench, the rest from taxonomy.json
@@ -195,8 +204,8 @@ tests/
   and a response that links each block to its source sentence IDs.
 - **Model choice by memory tier.** The service chooses between the GPU and the CPU
   at startup and runs the same head on both. Choosing a model by memory tier is
-  FR-19. Only NVIDIA GPUs are used; a computer with an AMD, Intel, or Apple GPU runs
-  on the CPU.
+  FR-19. An NVIDIA GPU is used through CUDA and an Apple GPU through Metal; a
+  computer with an AMD or Intel GPU runs on the CPU.
 - **History and caching across restarts.** The service keeps an in-memory cache only.
   Nothing is written to disk.
 - **Browser wiring.** `frontend/` still uses example data and does not call this

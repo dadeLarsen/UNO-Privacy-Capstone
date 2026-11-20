@@ -1,24 +1,21 @@
 """Adapter between the HTTP service and the benchmark's classification strategies.
 
 The service deliberately reuses ``privacy_bench`` instead of loading a model itself:
-the condition pins the checkpoint, the fitted head, the instruction prefix, and the
+the condition pins the GGUF file, the fitted head, the instruction prefix, and the
 label order, and the strategy checks the fitted weight hashes before inference.
 """
 
 from collections import OrderedDict
 from dataclasses import dataclass
 import gc
-import os
 from pathlib import Path
 from threading import RLock
-import time
 from types import SimpleNamespace
 from typing import Protocol
 
 from privacy_bench.core.conditions import load_condition
 from privacy_bench.tasks import get_task
 from privacy_bench.tasks.classification.scoring import parse_response
-import torch
 
 from .taxonomy import LABELS, TAXONOMY
 
@@ -53,9 +50,12 @@ class PrivacyBenchClassifier:
             raise ValueError(
                 f"modelService needs a classification condition, not {condition.task!r}: {condition_path}"
             )
+        if "file" not in condition.model:
+            # A release only drops the model. That returns a llama.cpp model's memory, and not a torch model's.
+            raise ValueError(
+                f"modelService runs a GGUF file through llama.cpp, and [model] of {condition_path} names no file"
+            )
         self._condition = condition
-        # Weights loaded by worker threads that then exit can never give their memory back after a release.
-        os.environ.setdefault("HF_DEACTIVATE_ASYNC_LOAD", "1")
         self._strategy = get_task(condition.task).build_strategy(condition)
         self._cache_size = cache_size
         self._cache: OrderedDict[str, Classification] = OrderedDict()
@@ -102,16 +102,9 @@ class PrivacyBenchClassifier:
             # Building a strategy loads no model, so a fresh one replaces the one that holds the model.
             self._strategy = get_task(self._condition.task).build_strategy(self._condition)
             self._loaded = False
-            # The dropped model sits in reference cycles, so only a collection frees it, and torch keeps
-            # the freed blocks for itself until empty_cache() hands them back to the GPU.
+            # The collection makes sure the dropped model is freed now, even if something holds it in a
+            # reference cycle. llama.cpp then returns its memory, whichever thread releases.
             gc.collect()
-            torch.cuda.empty_cache()
-            # torch's CPU allocator hands freed memory back to the system only while it frees another large
-            # block, and not within 0.1 s of the first free, so one short-lived block makes it return the model.
-            # After a GPU release it returned no host memory, so the GPU skips the wait.
-            if self._metadata is not None and self._metadata["device"] == "cpu":
-                time.sleep(0.1)
-                torch.empty(32 * 2**20, dtype=torch.uint8)
 
     def classify(self, sentence: str) -> Classification:
         if not isinstance(sentence, str) or not sentence.strip():

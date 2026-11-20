@@ -22,7 +22,7 @@ def main(argv=None) -> None:
     )
     parser.add_argument(
         "--device",
-        choices=("cuda", "cpu"),
+        choices=("gpu", "cpu"),
         help="Run the default GPU or CPU condition (default: detected). Cannot be combined with a condition.",
     )
     parser.add_argument("--host", help="Loopback address to bind (default: 127.0.0.1).")

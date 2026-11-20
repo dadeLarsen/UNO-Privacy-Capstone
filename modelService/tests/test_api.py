@@ -163,8 +163,8 @@ def test_lazy_mode_reports_not_ready_until_the_first_request(classifier):
         assert test_client.get("/health").json()["ready"] is True
 
 
-def test_an_idle_gpu_model_is_released_and_the_next_request_loads_it_again():
-    classifier = FakeClassifier(device="cuda:0")
+def test_an_idle_model_is_released_and_the_next_request_loads_it_again():
+    classifier = FakeClassifier()
     with TestClient(create_app(Settings(idle_release_seconds=1), classifier)) as test_client:
         assert classifier.loaded
         deadline = time.monotonic() + 10

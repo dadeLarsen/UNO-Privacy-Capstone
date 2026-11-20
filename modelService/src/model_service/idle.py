@@ -1,12 +1,11 @@
-"""Free the model's GPU memory once the service has been idle (NFR-03).
+"""Free the model's memory once the service has been idle (NFR-03).
 
-A loaded model holds GPU memory that other programs could use. After the idle time with no
-request, the model is released, and the next request loads it again. On the CPU the model
-stays loaded: NFR-03 names GPU memory, and a computer without a GPU has the least time to
-spare for a reload. A release there returns system RAM only when it runs on the thread that
-loaded the model, and check() runs on another. On one thread, six load and release cycles
-of the default CPU condition took the process from about 1.47 GiB above its start to 0.16
-to 0.20 GiB after each release.
+A loaded model holds memory that other programs could use: GPU memory on the GPU, system
+RAM on the CPU. After the idle time with no request, the model is released, and the next
+request loads it again. The check runs on another thread than the one that loaded the
+model, and through llama.cpp that returns the memory all the same: in eight load and
+release cycles of each default condition, two of them with the load on a thread that had
+ended, the process stayed within 40 MiB of its level after the first release.
 """
 
 from contextlib import contextmanager
@@ -51,8 +50,7 @@ class IdleRelease:
             if remaining > 0:
                 return remaining
             self._idle_since = None
-            metadata = self._classifier.metadata()
-            if metadata is not None and str(metadata.get("device")).startswith("cuda"):
+            if self._classifier.metadata() is not None:
                 self._classifier.release()
-                logger.info("Released the model's GPU memory after %s s without a request", self.idle_seconds)
+                logger.info("Released the model after %s s without a request", self.idle_seconds)
             return self.idle_seconds
