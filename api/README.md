@@ -82,7 +82,7 @@ If the model service is down, classification returns HTTP 503 with
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `API_MODEL_SERVICE_URL` | `http://127.0.0.1:8002` | Loopback URL of modelService |
+| `API_MODEL_SERVICE_URL` | `http://127.0.0.1:8000` | Loopback URL of modelService |
 | `API_HOST` / `API_PORT` | `127.0.0.1` / `8001` | Loopback bind address and port |
 | `API_CORS_ORIGINS` | Vite dev and preview origins | Comma-separated loopback origins |
 | `API_MAX_CHARACTERS` | `200000` | Same limit as modelService |

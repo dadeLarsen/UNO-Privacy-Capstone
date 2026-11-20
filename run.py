@@ -24,7 +24,7 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-DEFAULT_MODEL_PORT = 8002
+DEFAULT_MODEL_PORT = 8000
 DEFAULT_API_PORT = 8001
 DEFAULT_WEB_PORT = 5173
 

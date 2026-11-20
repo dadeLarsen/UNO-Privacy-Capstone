@@ -124,7 +124,7 @@ def default_model_service_handler():
 def model_http() -> httpx.Client:
     return httpx.Client(
         transport=httpx.MockTransport(model_service_handler),
-        base_url="http://127.0.0.1:8002",
+        base_url="http://127.0.0.1:8000",
         trust_env=False,
     )
 
@@ -134,7 +134,7 @@ def model_client_factory():
     def create(handler=model_service_handler) -> ModelServiceClient:
         http = httpx.Client(
             transport=httpx.MockTransport(handler),
-            base_url="http://127.0.0.1:8002",
+            base_url="http://127.0.0.1:8000",
             trust_env=False,
         )
         return ModelServiceClient(http)

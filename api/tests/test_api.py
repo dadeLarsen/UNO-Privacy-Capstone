@@ -230,7 +230,7 @@ def test_model_service_outage_returns_structured_error() -> None:
 
     http = httpx.Client(
         transport=httpx.MockTransport(outage),
-        base_url="http://127.0.0.1:8002",
+        base_url="http://127.0.0.1:8000",
         trust_env=False,
     )
     app = create_app(Settings(), client=ModelServiceClient(http))
