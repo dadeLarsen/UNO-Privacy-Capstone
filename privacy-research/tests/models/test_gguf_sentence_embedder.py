@@ -100,6 +100,8 @@ def test_tiny_file_loads_on_the_cpu_and_records_what_ran(counter):
     assert metadata["llama_cpp_python_version"] == llama_cpp.__version__
     assert metadata["threads"] >= 1 and metadata["load_seconds"] >= 0
     json.dumps(metadata)
+    # The score array that llama-cpp-python allocates for sampling is gone; embedding never reads it.
+    assert embedder._llm.scores.shape == (0, len(TOKENS))
 
 
 def test_the_embedding_is_the_normalized_mean_over_every_token(counter):
