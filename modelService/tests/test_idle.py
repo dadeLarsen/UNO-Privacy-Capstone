@@ -11,7 +11,7 @@ class Clock:
 
 
 class FakeClassifier:
-    """Only what IdleRelease asks of a classifier: where the model is loaded, and to release it."""
+    """Only what IdleRelease asks of a classifier: whether it has loaded a model, and to release it."""
 
     def __init__(self, device):
         self.device = device
@@ -24,7 +24,7 @@ class FakeClassifier:
         self.releases += 1
 
 
-def make(device="cuda:0"):
+def make(device="gpu"):
     clock, classifier = Clock(), FakeClassifier(device)
     return clock, classifier, IdleRelease(classifier, IDLE_SECONDS, clock=clock)
 
@@ -87,11 +87,11 @@ def test_a_released_model_is_released_again_only_after_it_is_used_again():
     assert classifier.releases == 2
 
 
-def test_the_model_stays_loaded_on_the_cpu():
+def test_the_model_is_released_on_the_cpu_too():
     clock, classifier, idle = make("cpu")
     clock.now = 5000
     assert idle.check() == IDLE_SECONDS
-    assert classifier.releases == 0
+    assert classifier.releases == 1
 
 
 def test_a_model_that_was_never_loaded_is_not_released():

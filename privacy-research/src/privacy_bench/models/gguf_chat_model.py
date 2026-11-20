@@ -31,10 +31,18 @@ def chat_messages(prompt: str, system: str | None) -> list:
     return turns if system is None else [{"role": "system", "content": system}, *turns]
 
 
+def gpu_offload_supported() -> bool:
+    """Whether the installed llama.cpp build has a GPU backend with a device to use.
+
+    A CUDA build answers no on a computer without an NVIDIA GPU, and while the GPU is hidden.
+    """
+    return llama_cpp.llama_supports_gpu_offload()
+
+
 def placement(device: str) -> dict:
     """The model parameters that put every layer on the GPU backend, or the whole model on the CPU."""
     if device == "gpu":
-        if not llama_cpp.llama_supports_gpu_offload():
+        if not gpu_offload_supported():
             raise RuntimeError("The installed llama.cpp build has no GPU backend; run a condition with device cpu")
         return {"n_gpu_layers": -1}
     # With zero layers on the GPU, a build that has a GPU backend still sends large prompt batches to it.

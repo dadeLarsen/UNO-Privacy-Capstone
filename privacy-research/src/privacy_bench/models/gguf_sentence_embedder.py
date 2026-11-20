@@ -38,6 +38,10 @@ class GgufSentenceEmbedder:
         llm = llama_cpp.Llama(model_path=str(self.path), embedding=True, n_ctx=limit, n_batch=limit, n_ubatch=limit,
                               verbose=False, **placed)
         load_seconds = time.perf_counter() - started
+        # llama-cpp-python allocates a score for every vocabulary entry of every token in the batch, which is
+        # 1 MiB per token of the limit for EmbeddingGemma 2. Embedding reads no score, and Windows counts the
+        # whole array as committed memory, so the array goes.
+        llm.scores = np.ndarray((0, llm.scores.shape[1]), dtype=np.single)
         described = dict(llm.metadata)
         # Sentences are embedded as plain text behind a prefix; a chat template in the file is not used.
         described.pop("tokenizer.chat_template", None)

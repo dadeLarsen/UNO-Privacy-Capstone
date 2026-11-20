@@ -1,6 +1,3 @@
-import os
-import time
-
 import pytest
 
 from model_service.classifier import PrivacyBenchClassifier
@@ -29,7 +26,7 @@ class CheckpointOrderStrategy:
         return {"raw_output": '{"label_id": 8}', "model_label_id": 3, "logits": LOGITS}
 
 
-@pytest.mark.parametrize("device", ["cuda", "cpu"])
+@pytest.mark.parametrize("device", ["gpu", "cpu"])
 def test_default_conditions_build_without_loading_the_model(device):
     classifier = PrivacyBenchClassifier(DEFAULT_CONDITIONS[device])
     assert classifier.condition.strategy == "embedding-head"
@@ -37,19 +34,20 @@ def test_default_conditions_build_without_loading_the_model(device):
     assert classifier.metadata() is None
 
 
-def test_a_classifier_loads_weights_on_the_calling_thread_unless_the_user_chose_otherwise(monkeypatch):
-    monkeypatch.delenv("HF_DEACTIVATE_ASYNC_LOAD", raising=False)
-    PrivacyBenchClassifier(DEFAULT_CONDITIONS["cpu"])
-    assert os.environ["HF_DEACTIVATE_ASYNC_LOAD"] == "1"
-
-    monkeypatch.setenv("HF_DEACTIVATE_ASYNC_LOAD", "0")
-    PrivacyBenchClassifier(DEFAULT_CONDITIONS["cpu"])
-    assert os.environ["HF_DEACTIVATE_ASYNC_LOAD"] == "0"
+def test_both_default_conditions_run_the_same_file_and_fitted_head_at_the_service_limit():
+    gpu, cpu = (PrivacyBenchClassifier(DEFAULT_CONDITIONS[device]).condition for device in ("gpu", "cpu"))
+    assert gpu.options == cpu.options
+    assert gpu.options["max_input_tokens"] == 2048
+    assert {**gpu.model, "device": "cpu"} == cpu.model
+    assert cpu.model["file"] == "embeddinggemma-2-Q8_0.gguf"
 
 
-def test_both_default_conditions_use_the_same_fitted_head():
-    cuda, cpu = (PrivacyBenchClassifier(DEFAULT_CONDITIONS[device]).condition for device in ("cuda", "cpu"))
-    assert cuda.options == cpu.options
+def test_a_condition_that_names_no_gguf_file_is_refused(tmp_path):
+    text = DEFAULT_CONDITIONS["cpu"].read_text(encoding="utf-8")
+    condition = tmp_path / "no-file.toml"
+    condition.write_text(text.replace('file = "embeddinggemma-2-Q8_0.gguf"\n', ""), encoding="utf-8")
+    with pytest.raises(ValueError, match="names no file"):
+        PrivacyBenchClassifier(condition)
 
 
 def test_a_checkpoint_with_its_own_label_order_gets_benchmark_labels_and_scores(monkeypatch):
@@ -78,17 +76,3 @@ def test_a_release_drops_the_loaded_strategy_keeps_the_metadata_and_the_next_use
     monkeypatch.setattr(classifier, "_strategy", reloaded)
     assert classifier.classify("We collect your email address.").label_id == 8
     assert (loaded.loads, reloaded.loads) == (1, 1)
-
-
-@pytest.mark.parametrize(("device", "waits"), [("cpu", [0.1]), ("cuda:0", [])])
-def test_only_a_release_on_the_cpu_waits_for_the_allocator(monkeypatch, device, waits):
-    classifier = PrivacyBenchClassifier(DEFAULT_CONDITIONS["cpu"], cache_size=0)
-    strategy = CheckpointOrderStrategy()
-    monkeypatch.setattr(strategy, "load", lambda: {"device": device})
-    monkeypatch.setattr(classifier, "_strategy", strategy)
-    classifier.load()
-    sleeps = []
-    monkeypatch.setattr(time, "sleep", sleeps.append)
-
-    classifier.release()
-    assert sleeps == waits

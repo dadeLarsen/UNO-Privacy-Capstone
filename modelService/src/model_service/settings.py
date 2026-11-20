@@ -5,22 +5,25 @@ the condition, device, host, port, and preload behavior. The service refuses to 
 to anything except a loopback address (NFR-02).
 
 Without a condition, the service runs one of two default conditions, the same fitted
-head on the GPU or on the CPU. The device picks between them and is detected when
-unset. A condition names its own device, so it cannot be combined with one.
+head and the same GGUF file through llama.cpp on the GPU or on the CPU. The device
+picks between them and is detected when unset. A condition names its own device, so
+it cannot be combined with one.
 """
 
 from dataclasses import dataclass
 import os
 from pathlib import Path
 
-import torch
+from privacy_bench.models.gguf_chat_model import gpu_offload_supported
 
 SERVICE_ROOT = Path(__file__).resolve().parents[2]
 REPO_ROOT = SERVICE_ROOT.parent
 CONDITIONS = REPO_ROOT / "privacy-research" / "conditions" / "classification" / "appsi139"
+# The benchmark's conditions of this file take 8,192 tokens, and llama.cpp sizes its buffers for the limit.
+# These take 2,048, four times the longest sentence in both datasets.
 DEFAULT_CONDITIONS = {
-    "cuda": CONDITIONS / "embeddinggemma2-bf16-head-linear-balanced-tuned-appsi139-test-half.toml",
-    "cpu": CONDITIONS / "embeddinggemma2-fp32-cpu-head-linear-balanced-tuned-appsi139-test-half.toml",
+    "gpu": CONDITIONS / "embeddinggemma2-gguf-q8-gpu-head-linear-balanced-tuned-limit2048-appsi139-test-half.toml",
+    "cpu": CONDITIONS / "embeddinggemma2-gguf-q8-cpu-head-linear-balanced-tuned-limit2048-appsi139-test-half.toml",
 }
 LOOPBACK_HOSTS = frozenset({"127.0.0.1", "::1", "localhost"})
 DEFAULT_CORS_ORIGINS = (
@@ -58,11 +61,9 @@ def _env_int(name: str, default: int, *, minimum: int) -> int:
 
 def detect_device() -> str:
     """The device whose default condition this computer can run."""
-    # By default torch counts emulated bf16 as support. NVIDIA cards older than the RTX 30 series only
-    # emulate it, and the GPU condition is untested on them, so they take the CPU condition.
-    if torch.cuda.is_available() and torch.cuda.is_bf16_supported(including_emulation=False):
-        return "cuda"
-    return "cpu"
+    # llama.cpp answers for its own build: CUDA on Windows and Linux, Metal on a Mac. A CUDA build that sees
+    # no NVIDIA GPU answers no, so a computer without one takes the CPU condition.
+    return "gpu" if gpu_offload_supported() else "cpu"
 
 
 @dataclass(frozen=True)
@@ -76,15 +77,15 @@ class Settings:
     max_characters: int = 200_000
     cache_size: int = 4096
     preload: bool = True
-    # Seconds without a request before the model's GPU memory is released (NFR-03).
+    # Seconds without a request before the model is released (NFR-03).
     idle_release_seconds: int = 300
     cors_origins: tuple[str, ...] = DEFAULT_CORS_ORIGINS
 
     def __post_init__(self):
         if self.condition is not None and not isinstance(self.condition, Path):
             object.__setattr__(self, "condition", Path(self.condition))
-        if self.device not in (None, "cuda", "cpu"):
-            raise ValueError(f"device must be cuda, cpu, or unset, not {self.device!r}")
+        if self.device not in (None, "gpu", "cpu"):
+            raise ValueError(f"device must be gpu, cpu, or unset, not {self.device!r}")
         if self.condition is not None and self.device is not None:
             raise ValueError(
                 f"Set a condition or a device, not both: got condition {self.condition} and device "
