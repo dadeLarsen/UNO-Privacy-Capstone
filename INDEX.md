@@ -30,16 +30,18 @@ Data, configuration, and results entries have a status:
 | [privacy-research/](privacy-research/) | The model benchmark: a self-contained Python project with its own environment |
 | [.gitignore](.gitignore) | Ignores for the whole repository; `privacy-research/` adds its own |
 
-The browser interface now calls `api/`, which calls `modelService/`. Classification
-and extractive category summaries work; rewriting waits on a chosen model (AR-02).
+The browser interface now calls `api/`, which calls `modelService/`. Classification,
+extractive category summaries, and GGUF rewrites work locally. The rewriter uses one
+evaluated `summary-v3` prompt for all three UI styles; style-specific prompts are not
+yet evaluated.
 
 ## Frontend-facing API: [api/](api/)
 
 A small FastAPI service in its own folder. The browser talks only to this API; it
 forwards text to `modelService/`, returns classifications first, and later returns
-source-linked summaries through pollable jobs. Policies and jobs live in memory and
-expire after an hour. The rewriter route is part of the contract but reports that no
-rewriter has been chosen (AR-02); summaries are extractive for now.
+source-linked summaries and rewrites through pollable jobs. Policies and jobs live in
+memory and expire after an hour. Summaries are extractive; rewrites call the pinned
+GGUF rewriter in `modelService/`.
 
 | File | Status | Contents |
 | --- | --- | --- |
@@ -187,6 +189,6 @@ One-time scripts that froze data files or imported runs. Each refuses to overwri
 
 | File | Contents |
 | --- | --- |
-| [pyproject.toml](privacy-research/pyproject.toml), [uv.lock](privacy-research/uv.lock), [.python-version](privacy-research/.python-version) | Python 3.12 and every package pinned, transitive ones included; torch comes from the CUDA 13.2 index, and llama-cpp-python 0.3.37 from its built CUDA 13.2 wheel on Windows and Linux x64, pinned by hash, or from source with the `cpu` group and on every other platform. |
+| [pyproject.toml](privacy-research/pyproject.toml), [uv.lock](privacy-research/uv.lock), [.python-version](privacy-research/.python-version) | Python 3.12 and every package pinned, transitive ones included; the default `cpu` group uses CPU torch and a prebuilt llama-cpp-python 0.3.36 wheel on Windows and Linux x64, pinned by hash, while the opt-in `cu132` group uses CUDA 13.2 builds. Every other platform builds llama.cpp from source; the broken upstream macOS wheels are kept as commented references. |
 | [.gitattributes](privacy-research/.gitattributes) | LF line endings, and no line-ending conversion under `data/` and `results/`, whose bytes are hashed. |
 | [.gitignore](privacy-research/.gitignore) | The environment, caches, and the generated `results/` folders. |

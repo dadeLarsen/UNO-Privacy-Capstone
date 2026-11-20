@@ -16,8 +16,10 @@ from types import SimpleNamespace
 from typing import Protocol
 
 from privacy_bench.core.conditions import load_condition
+from privacy_bench.models.hub import resolve_snapshot
 from privacy_bench.tasks import get_task
 
+from .settings import REPO_ROOT
 from .taxonomy import TAXONOMY
 
 NUMBER = re.compile(r"\b\d+(?:[.,]\d+)?\b")
@@ -36,12 +38,23 @@ class RewrittenPassage:
     warnings: tuple[str, ...]
 
 
+class RewriterUnavailable(Exception):
+    """The rewriter is integrated, but its pinned model file is not cached locally."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+        self.message = message
+
+
 class Rewriter(Protocol):
     def load(self) -> dict:
         """Load the model unless it is loaded and return its safe provenance metadata."""
 
     def metadata(self) -> dict | None:
         """Return the model's metadata, or None before its first load."""
+
+    def status(self) -> dict:
+        """Report whether the pinned model is cached and whether it is loaded."""
 
     def rewrite(self, text: str, style: str) -> RewrittenPassage:
         """Rewrite one passage and flag details a human should check."""
@@ -56,6 +69,7 @@ class PrivacyBenchRewriter:
             raise ValueError(
                 f"modelService needs a rewrite condition, not {condition.task!r}: {condition_path}"
             )
+        self._condition_path = Path(condition_path).resolve()
         self._condition = condition
         self._strategy = get_task(condition.task).build_strategy(condition)
         self._lock = RLock()
@@ -66,7 +80,12 @@ class PrivacyBenchRewriter:
         with self._lock:
             if self._loaded:
                 return dict(self._metadata)
-            loaded = self._strategy.load()
+            try:
+                loaded = self._strategy.load()
+            except Exception as exc:
+                if _is_missing_model(exc):
+                    raise RewriterUnavailable(self._setup_message(exc)) from exc
+                raise
             prompt = getattr(self._strategy, "prompt", None)
             self._metadata = {
                 "id": loaded.get("model"),
@@ -86,6 +105,46 @@ class PrivacyBenchRewriter:
         with self._lock:
             return dict(self._metadata) if self._metadata is not None else None
 
+    def status(self) -> dict:
+        """Check the local cache without loading the model or touching the network."""
+        metadata = self.metadata()
+        try:
+            self._resolve_cached_file()
+            available = True
+            setup = None
+        except Exception as exc:
+            available = False
+            setup = self._setup_message(exc)
+        if metadata is not None:
+            state = "ready"
+        elif not available:
+            state = "not_downloaded"
+        else:
+            state = "available"
+        return {
+            "status": state,
+            "available": available,
+            "ready": metadata is not None,
+            "model": metadata,
+            "setup": setup,
+        }
+
+    def _resolve_cached_file(self) -> Path:
+        model = self._condition.model
+        return resolve_snapshot(model["id"], model["revision"], model["file"])
+
+    def _setup_message(self, exc: Exception) -> str:
+        try:
+            relative = self._condition_path.relative_to(REPO_ROOT / "privacy-research")
+            download = f"cd privacy-research && uv run pbench download {relative.as_posix()}"
+        except ValueError:
+            download = f"uv run pbench download {self._condition_path}"
+        return (
+            "The rewriter is wired into the app, but its pinned GGUF file is not in the local "
+            f"Hugging Face cache. Download it once with `{download}`. Classification and category "
+            "summaries keep working without it."
+        )
+
     def rewrite(self, text: str, style: str) -> RewrittenPassage:
         if not isinstance(text, str) or not text.strip():
             raise ValueError("text must be a nonempty string")
@@ -100,6 +159,12 @@ class PrivacyBenchRewriter:
             text=rewritten,
             warnings=_warnings(text, rewritten, response, style),
         )
+
+
+def _is_missing_model(exc: Exception) -> bool:
+    """Recognise the benchmark's offline cache miss without importing hub internals."""
+    text = str(exc)
+    return "not in the local Hugging Face cache" in text or "Cannot find the requested files" in text
 
 
 def _warnings(source: str, rewritten: str, response: dict, style: str) -> tuple[str, ...]:

@@ -186,6 +186,39 @@ def test_model_service_outage_returns_structured_error() -> None:
         assert detail["retryable"] is True
 
 
+def test_rewrite_job_preserves_rewriter_setup_error(
+    default_model_service_handler,
+    model_client_factory,
+) -> None:
+    def missing_model(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/rewrite":
+            return httpx.Response(
+                503,
+                json={
+                    "detail": {
+                        "code": "rewriter_model_not_downloaded",
+                        "message": "Run `uv run pbench download ...` once.",
+                        "retryable": False,
+                    }
+                },
+            )
+        return default_model_service_handler(request)
+
+    app = create_app(Settings(), client=model_client_factory(missing_model))
+    with TestClient(app) as client:
+        policy_id = new_policy(client)
+        assert client.post(f"/api/v1/policies/{policy_id}/classification").status_code == 200
+        started = client.post(
+            f"/api/v1/policies/{policy_id}/rewrites",
+            json={"style": "paraphrase"},
+        )
+        job = wait_for_job(client, started.json()["id"])
+    assert job["status"] == "failed"
+    assert job["error"]["code"] == "rewriter_model_not_downloaded"
+    assert job["error"]["retryable"] is False
+    assert "pbench download" in job["error"]["message"]
+
+
 def test_policy_ids_are_uuids(client: TestClient) -> None:
     policy_id = new_policy(client)
     assert UUID(policy_id)

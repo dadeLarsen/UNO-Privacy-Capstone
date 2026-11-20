@@ -4,6 +4,7 @@ import {
   classify,
   createPolicy,
   getCategories,
+  getHealth,
   getJob,
   getResults,
   startRewrite,
@@ -11,6 +12,7 @@ import {
   uploadPolicy,
   type AnalysisSnapshot,
   type Category,
+  type Health,
   type Job,
   type RewriteStyle,
   type Sentence,
@@ -56,6 +58,7 @@ function App() {
   const [policy, setPolicy] = useState(examplePolicy)
   const [policyId, setPolicyId] = useState<string | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
+  const [health, setHealth] = useState<Health | null>(null)
   const [snapshot, setSnapshot] = useState<AnalysisSnapshot | null>(null)
   const [activeCategories, setActiveCategories] = useState<Set<number>>(() => new Set())
   const [selectedSentences, setSelectedSentences] = useState<Set<number>>(() => new Set())
@@ -67,12 +70,13 @@ function App() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    getCategories()
-      .then((body) => {
-        setCategories(body.categories)
-        setActiveCategories(new Set(body.categories.map((category) => category.id)))
+    Promise.all([getCategories(), getHealth()])
+      .then(([categoryBody, healthBody]) => {
+        setCategories(categoryBody.categories)
+        setActiveCategories(new Set(categoryBody.categories.map((category) => category.id)))
+        setHealth(healthBody)
       })
-      .catch((cause: unknown) => setError(`Category list unavailable: ${messageOf(cause)}`))
+      .catch((cause: unknown) => setError(`API unavailable: ${messageOf(cause)}`))
   }, [])
 
   function editPolicy(value: string) {
@@ -169,7 +173,13 @@ function App() {
       }
       if (job.status === 'failed' || job.status === 'cancelled') {
         setError(job.error?.message ?? `${job.kind} job was cancelled`)
-        setStatus('Generation stopped')
+        setStatus(
+          job.error?.code === 'rewriter_model_not_downloaded'
+            ? 'Rewriter needs one-time model download'
+            : job.status === 'failed'
+              ? 'Generation failed'
+              : 'Generation stopped',
+        )
         setActiveJob(null)
         return
       }
@@ -240,6 +250,15 @@ function App() {
   const counts = new Map(snapshot?.classification?.counts.map((count) => [count.label_id, count.count]) ?? [])
   const sentences = snapshot?.classification?.sentences ?? previewSentences(policy)
   const analyzed = snapshot?.classification !== null && snapshot?.classification !== undefined
+  const rewriterStatus = health?.rewriter_status ?? (health ? 'available' : 'checking')
+  const rewriterLabel = {
+    ready: 'Rewriter ready',
+    available: 'Rewriter available',
+    not_downloaded: 'Model download needed',
+    unavailable: 'Rewriter unavailable',
+    checking: 'Checking rewriter…',
+  }[rewriterStatus] ?? 'Rewriter available'
+  const rewriterSetup = health?.rewriter_setup
 
   return (
     <div className="app-shell">
@@ -374,13 +393,21 @@ function App() {
           <section className="rewrite-panel">
             <div className="panel-heading">
               <div><span className="step">03</span><h2>Make it clearer</h2></div>
-              <span className="spark">✦</span>
+              <span className={`rewriter-badge ${rewriterStatus}`}>{rewriterLabel}</span>
             </div>
             <p className="rewrite-copy">
-              Choose a reading style and select sentences above, or rewrite the whole policy. The local
-              GGUF rewriter runs on this device. Until style-specific prompts are evaluated, every style
-              uses the benchmark's <strong>summary-v3</strong> prompt; warnings flag details to check.
+              The rewriter is wired in and runs locally. Choose a reading style and select sentences
+              above, or rewrite the whole policy. Until style-specific prompts are evaluated, every
+              style uses the benchmark's <strong>summary-v3</strong> prompt; warnings flag details to
+              check.
             </p>
+            {rewriterSetup && (
+              <div className="rewriter-setup" role="status">
+                <strong>One-time setup needed.</strong> The rewriter code is ready; only its pinned
+                GGUF model file is missing from this device.
+                <code>{rewriterSetup}</code>
+              </div>
+            )}
             <div className="rewrite-options">
               {(Object.keys(styleLabels) as RewriteStyle[]).map((style) => (
                 <button
@@ -408,7 +435,7 @@ function App() {
             </div>
             <div className="rewrite-result">
               <span className="result-label">
-                {snapshot?.rewrites.length ? styleLabels[rewriteMode] : 'No rewrite yet'}
+                {snapshot?.rewrites.length ? styleLabels[rewriteMode] : 'No rewrite generated yet'}
               </span>
               {snapshot?.rewrites.length ? (
                 snapshot.rewrites.map((item) => (
@@ -426,9 +453,9 @@ function App() {
                 ))
               ) : (
                 <p>
-                  No rewrite yet. Analyze a policy, choose a style, then generate a source-linked
-                  rewrite. If the GGUF model has not been downloaded yet, the job reports the setup
-                  command you need.
+                  Analyze a policy, choose a style, then generate a source-linked rewrite. The
+                  rewriter is available locally; if its one-time model download is missing, the job
+                  reports the exact setup command.
                 </p>
               )}
             </div>

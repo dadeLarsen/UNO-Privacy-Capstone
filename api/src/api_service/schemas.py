@@ -322,6 +322,9 @@ class Health(BaseModel):
     api_version: str
     model_service_ready: bool
     model: ModelProfile | None = None
+    rewriter_ready: bool = False
+    rewriter_status: str = "available"
+    rewriter_setup: str | None = None
 
 
 class ErrorEnvelope(BaseModel):

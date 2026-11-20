@@ -1,9 +1,10 @@
 # modelService
 
-A localhost-only Python service that runs the project's chosen classifier on a privacy
-policy and returns one category per sentence. It is the first piece of the app's
-backend; the browser UI is not wired to it yet, and rewriting is not implemented
-because no rewriter has been chosen (AR-02).
+A localhost-only Python service that runs the project's pinned models. It classifies
+a privacy policy into one category per sentence and rewrites selected passages with
+the pinned GGUF chat model. The browser reaches it through `api/`. All three UI styles
+currently use the evaluated `summary-v3` prompt; style-specific prompts are not yet
+evaluated.
 
 The service reuses `privacy-research/` rather than loading a model itself. A
 **condition** file pins the checkpoint, the fitted head, the instruction prefix, and
@@ -21,6 +22,7 @@ between them at startup, so every computer gets the same head.
 | `GET /categories` | — | The ten categories, definitions, display names, and colors |
 | `POST /analyze` | JSON `{"text": "...", "include_scores": false}` | One label per sentence, with exact character offsets |
 | `POST /analyze/upload` | multipart `.txt` file, optional `include_scores` query | Same response as `/analyze` |
+| `POST /rewrite` | JSON `{"text": "...", "style": "...", "source_sentence_ids": [...]}` | A rewritten passage, review warnings, and the pinned rewriter's identity |
 
 Each sentence in the response has `id`, `text`, `start`, `end`, `label_id`, and
 `label`. `start` and `end` are offsets into the policy exactly as submitted, so the
@@ -44,45 +46,51 @@ depends on `privacy-research` by path, so both folders must stay side by side. R
 every command below from this folder. Installing the service also installs the
 benchmark and its `pbench` command, so `privacy-research/` needs no setup of its own.
 
-Choose one of the two setups. Each installs the service, caches the pinned model
-files while online, and runs the tests. Both default conditions pin the same
-checkpoint, so either download serves the GPU and the CPU.
+The default setup is CPU-only. It installs CPU builds of torch and `llama-cpp-python`
+0.3.36, so it works on a computer with no NVIDIA driver and needs no C++ build tools
+on Windows and Linux x64:
 
-**With an NVIDIA GPU.** This installs the CUDA 13.2 build of torch. It needs a newer
+```powershell
+uv sync
+uv run pbench download ../privacy-research/conditions/classification/appsi139/embeddinggemma2-fp32-cpu-head-linear-balanced-tuned-appsi139-test-half.toml
+uv run pytest
+```
+
+**With an NVIDIA GPU.** Opt into the CUDA 13.2 builds instead. This needs a newer
 NVIDIA driver than the CUDA 12.8 build did: NVIDIA names 595.45.04 as the oldest for
 Linux and gives no number for Windows, where it was checked on driver 610.88:
 
 ```powershell
-uv sync
+$env:UV_NO_SYNC = "1"    # keep `uv run` from reinstalling the CPU default; set it in your profile
+uv sync --no-group cpu --group cu132
 uv run pbench download ../privacy-research/conditions/classification/appsi139/embeddinggemma2-bf16-head-linear-balanced-tuned-appsi139-test-half.toml
-uv run pytest
-```
-
-This setup also works without an NVIDIA GPU, because the CUDA build of torch also
-runs on the CPU. That was checked with the GPU hidden (`CUDA_VISIBLE_DEVICES=-1`),
-not yet on a computer without an NVIDIA driver.
-
-**Without an NVIDIA GPU.** This installs the much smaller CPU build of torch:
-
-```powershell
-$env:UV_NO_SYNC = "1"    # keep `uv run` from installing the CUDA build; set it in your profile
-uv sync --no-group cu132 --group cpu
-uv run pbench download ../privacy-research/conditions/classification/appsi139/embeddinggemma2-fp32-cpu-head-linear-balanced-tuned-appsi139-test-half.toml
 uv run pytest
 ```
 
 Set `UV_NO_SYNC` before any other `uv` command. After pulling a change to `uv.lock`,
 rerun the `uv sync` line.
 
-Both setups also install `llama-cpp-python`, which the benchmark's rewrite task uses to
-run GGUF models through llama.cpp. The service loads it at startup but does not use it
-yet. With an NVIDIA GPU, Windows and Linux on x64 get a built CUDA wheel. Without one,
-and on every other platform, `uv sync` compiles the package: that needs CMake and a C++
-compiler, which are the Visual Studio build tools on Windows and the Xcode command line
-tools on a Mac. The benchmark's README says more under Setup.
+Both setups install `llama-cpp-python` 0.3.36, which the rewriter uses through the
+benchmark's GGUF chat backend. The service imports it only when a rewrite is actually
+requested. The default `cpu` group uses a prebuilt CPU wheel on Windows and Linux x64;
+it needs neither an NVIDIA driver nor CUDA libraries, even though the rewrite condition
+places every layer on the CPU. The `cu132` group uses a prebuilt CUDA wheel, which does
+need an NVIDIA driver, including for CPU-only placement. Other platforms still build
+from source; on a Mac that needs the Xcode command line tools. The upstream 0.3.36 macOS
+wheels currently fail zip validation, so their URLs are kept only as references in
+`pyproject.toml`. The benchmark's README says more under Setup.
 
 Some checkpoints may require accepting their license on Hugging Face first. The service
-itself never downloads; it reads the snapshot from the local cache.
+itself never downloads; it reads the snapshot from the local cache. Download the pinned
+rewriter once while online:
+
+```powershell
+uv run pbench download ../privacy-research/conditions/rewrite/qwen3.5-4b-q4km-cpu-summary-v3.toml
+```
+
+GPU users can point that command at the `qwen3.5-4b-q4km-gpu-summary-v3.toml` condition
+instead; both name the same GGUF file. A rewrite request without the cached file returns
+HTTP 503 with this command in the error message.
 
 ## Run
 
@@ -157,7 +165,8 @@ Example response (abridged):
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `MODEL_SERVICE_CONDITION` | unset | Condition TOML to run instead of a default condition. It names its own device, so it cannot be combined with a device |
+| `MODEL_SERVICE_CONDITION` | unset | Classification condition TOML to run instead of a default condition. It names its own device, so it cannot be combined with a device |
+| `MODEL_SERVICE_REWRITE_CONDITION` | default for the selected device | GGUF rewrite condition TOML to use instead of the pinned Qwen3.5-4B `summary-v3` condition |
 | `MODEL_SERVICE_DEVICE` | the detected hardware | `cuda` or `cpu`: which of the two default conditions to run. Cannot be combined with a condition |
 | `MODEL_SERVICE_HOST` | `127.0.0.1` | Must be a loopback address |
 | `MODEL_SERVICE_PORT` | `8002` | Listening port |
@@ -167,8 +176,8 @@ Example response (abridged):
 | `MODEL_SERVICE_IDLE_RELEASE_SECONDS` | `300` | Seconds without an analyze request before the service frees the model's GPU memory. On the CPU the model stays loaded |
 | `MODEL_SERVICE_CORS_ORIGINS` | `http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173` | Allowed browser origins |
 
-Command-line flags `--condition`, `--device`, `--host`, `--port`, and `--no-preload`
-override the environment for one run. The service refuses to start with both a
+Command-line flags `--condition`, `--rewrite-condition`, `--device`, `--host`, `--port`,
+and `--no-preload` override the environment for one run. The service refuses to start with both a
 condition and a device, whether each comes from a flag or a variable.
 
 ## Layout
@@ -193,9 +202,11 @@ tests/
 
 ## Not implemented yet
 
-- **Rewrites.** No rewriter has been evaluated (AR-02), so there is no `/rewrite`
-  route. Adding one should follow the same pattern: a pinned condition, a strategy,
-  and a response that links each block to its source sentence IDs.
+- **Style-specific rewrite prompts.** All three UI styles use the evaluated
+  `summary-v3` prompt. Each rewrite reports that limitation as a warning until separate
+  prompts are evaluated.
+- **Rewriter idle release.** The classifier is released after an idle period; the
+  rewriter stays loaded until the process exits.
 - **Model choice by memory tier.** The service chooses between the GPU and the CPU
   at startup and runs the same head on both. Choosing a model by memory tier is
   FR-19. Only NVIDIA GPUs are used; a computer with an AMD, Intel, or Apple GPU runs

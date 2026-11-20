@@ -57,7 +57,13 @@ textarea:focus { border-color: #2687d8; box-shadow: 0 0 0 3px rgb(38 135 216 / 1
 .rewrite-panel h2 { color: #fff; }
 .rewrite-panel .step { color: #78d3ce; }
 .spark { color: #f2c94c; font-size: 24px; }
+.rewriter-badge { padding: 4px 8px; border: 1px solid #3d6d7d; border-radius: 999px; color: #a9d8d4; font: 700 9px 'Courier New', monospace; text-transform: uppercase; letter-spacing: .06em; }
+.rewriter-badge.ready, .rewriter-badge.available { border-color: #3f8d79; color: #9de6c6; }
+.rewriter-badge.not_downloaded { border-color: #b8860b; color: #f2c94c; }
+.rewriter-badge.unavailable { border-color: #a34a3a; color: #ffb4a8; }
 .rewrite-copy { margin: 0 0 18px; color: #b9ced0; font-size: 12px; line-height: 1.55; }
+.rewriter-setup { margin: -6px 0 18px; padding: 10px 12px; border-left: 3px solid #f2c94c; background: #1b4a5c; color: #e8dfb2; font-size: 11px; line-height: 1.5; }
+.rewriter-setup code { display: block; margin-top: 7px; color: #fff4c7; font: 10px 'Courier New', monospace; overflow-wrap: anywhere; }
 .rewrite-options { display: grid; gap: 7px; }
 .rewrite-options button { display: flex; align-items: center; gap: 9px; padding: 9px 10px; border: 1px solid #376172; border-radius: 3px; color: #d2e4e5; background: #1a4659; text-align: left; font-size: 11px; }
 .rewrite-options button span { color: #7fd8d0; font-size: 15px; }

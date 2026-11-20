@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = "==3.12.*"
 resolution-markers = [
     "(platform_machine != 'x86_64' and sys_platform == 'linux') or (platform_machine != 'AMD64' and sys_platform == 'win32') or (sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'win32')",
@@ -172,40 +172,40 @@ wheels = [
 
 [package.optional-dependencies]
 cublas = [
-    { name = "nvidia-cublas", marker = "(platform_machine != 'aarch64' and platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'aarch64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
-    { name = "nvidia-cuda-nvrtc", marker = "(platform_machine != 'aarch64' and platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'aarch64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "nvidia-cublas", marker = "(platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "nvidia-cuda-nvrtc", marker = "(platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
 ]
 cudart = [
-    { name = "nvidia-cuda-runtime", marker = "(platform_machine != 'aarch64' and platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'aarch64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "nvidia-cuda-runtime", marker = "(platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
 ]
 cufft = [
-    { name = "nvidia-cufft", marker = "(platform_machine != 'aarch64' and platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'aarch64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
-    { name = "nvidia-nvjitlink", marker = "(platform_machine != 'aarch64' and platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'aarch64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "nvidia-cufft", marker = "(platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "nvidia-nvjitlink", marker = "(platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
 ]
 cufile = [
-    { name = "nvidia-cufile", marker = "(platform_machine != 'aarch64' and platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'aarch64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "nvidia-cufile", marker = "(platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
 ]
 cupti = [
-    { name = "nvidia-cuda-cupti", marker = "(platform_machine != 'aarch64' and platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'aarch64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "nvidia-cuda-cupti", marker = "(platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
 ]
 cusolver = [
-    { name = "nvidia-cublas", marker = "(platform_machine != 'aarch64' and platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'aarch64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
-    { name = "nvidia-cusolver", marker = "(platform_machine != 'aarch64' and platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'aarch64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
-    { name = "nvidia-cusparse", marker = "(platform_machine != 'aarch64' and platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'aarch64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
-    { name = "nvidia-nvjitlink", marker = "(platform_machine != 'aarch64' and platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'aarch64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "nvidia-cublas", marker = "(platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "nvidia-cusolver", marker = "(platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "nvidia-cusparse", marker = "(platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "nvidia-nvjitlink", marker = "(platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
 ]
 cusparse = [
-    { name = "nvidia-cusparse", marker = "(platform_machine != 'aarch64' and platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'aarch64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
-    { name = "nvidia-nvjitlink", marker = "(platform_machine != 'aarch64' and platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'aarch64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "nvidia-cusparse", marker = "(platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "nvidia-nvjitlink", marker = "(platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
 ]
 nvjitlink = [
-    { name = "nvidia-nvjitlink", marker = "(platform_machine != 'aarch64' and platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'aarch64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "nvidia-nvjitlink", marker = "(platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
 ]
 nvrtc = [
-    { name = "nvidia-cuda-nvrtc", marker = "(platform_machine != 'aarch64' and platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'aarch64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "nvidia-cuda-nvrtc", marker = "(platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
 ]
 nvtx = [
-    { name = "nvidia-nvtx", marker = "(platform_machine != 'aarch64' and platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'aarch64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "nvidia-nvtx", marker = "(platform_machine == 'aarch64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
 ]
 
 [[package]]
@@ -322,7 +322,7 @@ dependencies = [
     { name = "click" },
     { name = "filelock" },
     { name = "fsspec" },
-    { name = "hf-xet", marker = "platform_machine == 'AMD64' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'arm64' or platform_machine == 'x86_64' or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "hf-xet", marker = "platform_machine == 'AMD64' or platform_machine == 'aarch64' or platform_machine == 'amd64' or platform_machine == 'arm64' or platform_machine == 'x86_64'" },
     { name = "httpx" },
     { name = "packaging" },
     { name = "pyyaml" },
@@ -404,7 +404,7 @@ wheels = [
 
 [[package]]
 name = "llama-cpp-python"
-version = "0.3.37"
+version = "0.3.36"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
     "(platform_machine != 'x86_64' and sys_platform == 'linux') or (platform_machine != 'AMD64' and sys_platform == 'win32') or (sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'win32')",
@@ -413,28 +413,28 @@ resolution-markers = [
     "sys_platform == 'darwin'",
 ]
 dependencies = [
-    { name = "diskcache", marker = "(platform_machine != 'x86_64' and sys_platform == 'linux') or (platform_machine != 'AMD64' and sys_platform == 'win32') or (sys_platform != 'linux' and sys_platform != 'win32') or (sys_platform == 'linux' and extra == 'group-13-privacy-bench-cpu') or (sys_platform == 'linux' and extra != 'group-13-privacy-bench-cu132') or (sys_platform == 'win32' and extra == 'group-13-privacy-bench-cpu') or (sys_platform == 'win32' and extra != 'group-13-privacy-bench-cu132')" },
-    { name = "jinja2", marker = "(platform_machine != 'x86_64' and sys_platform == 'linux') or (platform_machine != 'AMD64' and sys_platform == 'win32') or (sys_platform != 'linux' and sys_platform != 'win32') or (sys_platform == 'linux' and extra == 'group-13-privacy-bench-cpu') or (sys_platform == 'linux' and extra != 'group-13-privacy-bench-cu132') or (sys_platform == 'win32' and extra == 'group-13-privacy-bench-cpu') or (sys_platform == 'win32' and extra != 'group-13-privacy-bench-cu132')" },
-    { name = "numpy", marker = "(platform_machine != 'x86_64' and sys_platform == 'linux') or (platform_machine != 'AMD64' and sys_platform == 'win32') or (sys_platform != 'linux' and sys_platform != 'win32') or (sys_platform == 'linux' and extra == 'group-13-privacy-bench-cpu') or (sys_platform == 'linux' and extra != 'group-13-privacy-bench-cu132') or (sys_platform == 'win32' and extra == 'group-13-privacy-bench-cpu') or (sys_platform == 'win32' and extra != 'group-13-privacy-bench-cu132')" },
-    { name = "typing-extensions", marker = "(platform_machine != 'x86_64' and sys_platform == 'linux') or (platform_machine != 'AMD64' and sys_platform == 'win32') or (sys_platform != 'linux' and sys_platform != 'win32') or (sys_platform == 'linux' and extra == 'group-13-privacy-bench-cpu') or (sys_platform == 'linux' and extra != 'group-13-privacy-bench-cu132') or (sys_platform == 'win32' and extra == 'group-13-privacy-bench-cpu') or (sys_platform == 'win32' and extra != 'group-13-privacy-bench-cu132')" },
+    { name = "diskcache", marker = "(platform_machine != 'AMD64' and platform_machine != 'x86_64') or (platform_machine == 'AMD64' and sys_platform == 'linux') or (platform_machine == 'x86_64' and sys_platform == 'win32') or (sys_platform != 'linux' and sys_platform != 'win32') or (extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "jinja2", marker = "(platform_machine != 'AMD64' and platform_machine != 'x86_64') or (platform_machine == 'AMD64' and sys_platform == 'linux') or (platform_machine == 'x86_64' and sys_platform == 'win32') or (sys_platform != 'linux' and sys_platform != 'win32') or (extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "numpy", marker = "(platform_machine != 'AMD64' and platform_machine != 'x86_64') or (platform_machine == 'AMD64' and sys_platform == 'linux') or (platform_machine == 'x86_64' and sys_platform == 'win32') or (sys_platform != 'linux' and sys_platform != 'win32') or (extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "typing-extensions", marker = "(platform_machine != 'AMD64' and platform_machine != 'x86_64') or (platform_machine == 'AMD64' and sys_platform == 'linux') or (platform_machine == 'x86_64' and sys_platform == 'win32') or (sys_platform != 'linux' and sys_platform != 'win32') or (extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7f/9a/3ebc0b3ef42b8d9cc7d15dc9b147b3e8ce11bfdb61eb381c3eb7d9762373/llama_cpp_python-0.3.37.tar.gz", hash = "sha256:bf4108fc76e933ea4969b61b1e281a2d232dd3e43361d1fdca5e2e029d62f729", size = 80885950, upload-time = "2026-11-15T09:14:07.435Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ec/e9/e7de2b0463ea3ffbf0ede6cb21b58c1258a8f6521aae45ca773a59fe7cf3/llama_cpp_python-0.3.36.tar.gz", hash = "sha256:832db0699007f1be95a7e41ef12e88926b02ba836461e36a36372db2760c1a2e", size = 76589250, upload-time = "2026-10-01T05:48:01.345Z" }
 
 [[package]]
 name = "llama-cpp-python"
-version = "0.3.37"
-source = { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.37-cu132/llama_cpp_python-0.3.37-py3-none-manylinux_2_35_x86_64.whl" }
+version = "0.3.36"
+source = { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36-cu132/llama_cpp_python-0.3.36-py3-none-manylinux_2_35_x86_64.whl" }
 resolution-markers = [
     "platform_machine == 'x86_64' and sys_platform == 'linux'",
 ]
 dependencies = [
-    { name = "diskcache", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-13-privacy-bench-cu132') or (platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
-    { name = "jinja2", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-13-privacy-bench-cu132') or (platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
-    { name = "numpy", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-13-privacy-bench-cu132') or (platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
-    { name = "typing-extensions", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-13-privacy-bench-cu132') or (platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "diskcache", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "jinja2", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "numpy", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "typing-extensions", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
 ]
 wheels = [
-    { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.37-cu132/llama_cpp_python-0.3.37-py3-none-manylinux_2_35_x86_64.whl", hash = "sha256:cfa87260d45fb61986be4ffd76a12210261d7b19aef403fe94a8b8d3050a051c" },
+    { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36-cu132/llama_cpp_python-0.3.36-py3-none-manylinux_2_35_x86_64.whl", hash = "sha256:808bc0344d77351efcd2aa19fc978799de9f07ce7313e135bbc202bf4aac136e" },
 ]
 
 [package.metadata]
@@ -470,19 +470,115 @@ provides-extras = ["server", "test", "dev", "all"]
 
 [[package]]
 name = "llama-cpp-python"
-version = "0.3.37"
-source = { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.37-cu132/llama_cpp_python-0.3.37-py3-none-win_amd64.whl" }
+version = "0.3.36"
+source = { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36-cu132/llama_cpp_python-0.3.36-py3-none-win_amd64.whl" }
 resolution-markers = [
     "platform_machine == 'AMD64' and sys_platform == 'win32'",
 ]
 dependencies = [
-    { name = "diskcache", marker = "(platform_machine == 'AMD64' and sys_platform == 'win32' and extra == 'group-13-privacy-bench-cu132') or (platform_machine != 'AMD64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'win32' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
-    { name = "jinja2", marker = "(platform_machine == 'AMD64' and sys_platform == 'win32' and extra == 'group-13-privacy-bench-cu132') or (platform_machine != 'AMD64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'win32' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
-    { name = "numpy", marker = "(platform_machine == 'AMD64' and sys_platform == 'win32' and extra == 'group-13-privacy-bench-cu132') or (platform_machine != 'AMD64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'win32' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
-    { name = "typing-extensions", marker = "(platform_machine == 'AMD64' and sys_platform == 'win32' and extra == 'group-13-privacy-bench-cu132') or (platform_machine != 'AMD64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'win32' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "diskcache", marker = "(platform_machine == 'AMD64' and sys_platform == 'win32' and extra == 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "jinja2", marker = "(platform_machine == 'AMD64' and sys_platform == 'win32' and extra == 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "numpy", marker = "(platform_machine == 'AMD64' and sys_platform == 'win32' and extra == 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "typing-extensions", marker = "(platform_machine == 'AMD64' and sys_platform == 'win32' and extra == 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
 ]
 wheels = [
-    { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.37-cu132/llama_cpp_python-0.3.37-py3-none-win_amd64.whl", hash = "sha256:ba1afbd5b7f5010cdb4c3312a504eac7e562b7aae34c8d16c4f5b7e1d761ecab" },
+    { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36-cu132/llama_cpp_python-0.3.36-py3-none-win_amd64.whl", hash = "sha256:ab50d521cb1a844f14a37245be6b455c53476186d9cc9d25a5e38f3f34137768" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "diskcache", specifier = ">=5.6.1" },
+    { name = "fastapi", marker = "extra == 'server'", specifier = ">=0.100.0" },
+    { name = "fastapi", marker = "extra == 'test'", specifier = ">=0.100.0" },
+    { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.24.1" },
+    { name = "httpx", marker = "extra == 'test'", specifier = ">=0.24.1" },
+    { name = "huggingface-hub", marker = "extra == 'test'", specifier = ">=0.23.0" },
+    { name = "jinja2", specifier = ">=2.11.3" },
+    { name = "llama-cpp-python", extras = ["dev", "server", "test"], marker = "extra == 'all'" },
+    { name = "mkdocs", marker = "extra == 'dev'", specifier = ">=1.4.3" },
+    { name = "mkdocs-material", marker = "extra == 'dev'", specifier = ">=9.1.18" },
+    { name = "mkdocstrings", extras = ["python"], marker = "extra == 'dev'", specifier = ">=0.22.0" },
+    { name = "numpy", specifier = ">=1.20.0" },
+    { name = "pydantic-settings", marker = "extra == 'server'", specifier = ">=2.0.1" },
+    { name = "pydantic-settings", marker = "extra == 'test'", specifier = ">=2.0.1" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.4.0" },
+    { name = "pytest", marker = "extra == 'test'", specifier = ">=7.4.0" },
+    { name = "pyyaml", marker = "extra == 'server'", specifier = ">=5.1" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.15.7" },
+    { name = "scipy", marker = "extra == 'test'", specifier = ">=1.10" },
+    { name = "sse-starlette", marker = "extra == 'server'", specifier = ">=1.6.1" },
+    { name = "sse-starlette", marker = "extra == 'test'", specifier = ">=1.6.1" },
+    { name = "starlette-context", marker = "extra == 'server'", specifier = ">=0.3.6,<0.4" },
+    { name = "starlette-context", marker = "extra == 'test'", specifier = ">=0.3.6,<0.4" },
+    { name = "twine", marker = "extra == 'dev'", specifier = ">=4.0.2" },
+    { name = "typing-extensions", specifier = ">=4.5.0" },
+    { name = "uvicorn", marker = "extra == 'server'", specifier = ">=0.22.0" },
+]
+provides-extras = ["server", "test", "dev", "all"]
+
+[[package]]
+name = "llama-cpp-python"
+version = "0.3.36"
+source = { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36/llama_cpp_python-0.3.36-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl" }
+resolution-markers = [
+    "platform_machine == 'x86_64' and sys_platform == 'linux'",
+]
+dependencies = [
+    { name = "diskcache", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "jinja2", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "numpy", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "typing-extensions", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+]
+wheels = [
+    { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36/llama_cpp_python-0.3.36-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:c8a3e98093e950d7a770f794842e36f2db82b2933e8762ed7b5ffd435011e8e4" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "diskcache", specifier = ">=5.6.1" },
+    { name = "fastapi", marker = "extra == 'server'", specifier = ">=0.100.0" },
+    { name = "fastapi", marker = "extra == 'test'", specifier = ">=0.100.0" },
+    { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.24.1" },
+    { name = "httpx", marker = "extra == 'test'", specifier = ">=0.24.1" },
+    { name = "huggingface-hub", marker = "extra == 'test'", specifier = ">=0.23.0" },
+    { name = "jinja2", specifier = ">=2.11.3" },
+    { name = "llama-cpp-python", extras = ["dev", "server", "test"], marker = "extra == 'all'" },
+    { name = "mkdocs", marker = "extra == 'dev'", specifier = ">=1.4.3" },
+    { name = "mkdocs-material", marker = "extra == 'dev'", specifier = ">=9.1.18" },
+    { name = "mkdocstrings", extras = ["python"], marker = "extra == 'dev'", specifier = ">=0.22.0" },
+    { name = "numpy", specifier = ">=1.20.0" },
+    { name = "pydantic-settings", marker = "extra == 'server'", specifier = ">=2.0.1" },
+    { name = "pydantic-settings", marker = "extra == 'test'", specifier = ">=2.0.1" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.4.0" },
+    { name = "pytest", marker = "extra == 'test'", specifier = ">=7.4.0" },
+    { name = "pyyaml", marker = "extra == 'server'", specifier = ">=5.1" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.15.7" },
+    { name = "scipy", marker = "extra == 'test'", specifier = ">=1.10" },
+    { name = "sse-starlette", marker = "extra == 'server'", specifier = ">=1.6.1" },
+    { name = "sse-starlette", marker = "extra == 'test'", specifier = ">=1.6.1" },
+    { name = "starlette-context", marker = "extra == 'server'", specifier = ">=0.3.6,<0.4" },
+    { name = "starlette-context", marker = "extra == 'test'", specifier = ">=0.3.6,<0.4" },
+    { name = "twine", marker = "extra == 'dev'", specifier = ">=4.0.2" },
+    { name = "typing-extensions", specifier = ">=4.5.0" },
+    { name = "uvicorn", marker = "extra == 'server'", specifier = ">=0.22.0" },
+]
+provides-extras = ["server", "test", "dev", "all"]
+
+[[package]]
+name = "llama-cpp-python"
+version = "0.3.36"
+source = { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36/llama_cpp_python-0.3.36-py3-none-win_amd64.whl" }
+resolution-markers = [
+    "platform_machine == 'AMD64' and sys_platform == 'win32'",
+]
+dependencies = [
+    { name = "diskcache", marker = "(platform_machine == 'AMD64' and sys_platform == 'win32' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "jinja2", marker = "(platform_machine == 'AMD64' and sys_platform == 'win32' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "numpy", marker = "(platform_machine == 'AMD64' and sys_platform == 'win32' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "typing-extensions", marker = "(platform_machine == 'AMD64' and sys_platform == 'win32' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+]
+wheels = [
+    { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36/llama_cpp_python-0.3.36-py3-none-win_amd64.whl", hash = "sha256:ae5e88a2cf464e5a2dde7c8898c2d5c71cc24d03cac6396bf7509456bde0b9fb" },
 ]
 
 [package.metadata]
@@ -836,12 +932,15 @@ wheels = [
 name = "privacy-bench"
 version = "0.1.0"
 source = { editable = "." }
+default-groups = ["cpu", "dev"]
 dependencies = [
     { name = "huggingface-hub" },
     { name = "jinja2" },
-    { name = "llama-cpp-python", version = "0.3.37", source = { registry = "https://pypi.org/simple" }, marker = "(platform_machine != 'x86_64' and sys_platform == 'linux') or (platform_machine != 'AMD64' and sys_platform == 'win32') or (sys_platform != 'linux' and sys_platform != 'win32') or (sys_platform == 'linux' and extra == 'group-13-privacy-bench-cpu') or (sys_platform == 'linux' and extra != 'group-13-privacy-bench-cu132') or (sys_platform == 'win32' and extra == 'group-13-privacy-bench-cpu') or (sys_platform == 'win32' and extra != 'group-13-privacy-bench-cu132')" },
-    { name = "llama-cpp-python", version = "0.3.37", source = { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.37-cu132/llama_cpp_python-0.3.37-py3-none-manylinux_2_35_x86_64.whl" }, marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-13-privacy-bench-cu132') or (platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
-    { name = "llama-cpp-python", version = "0.3.37", source = { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.37-cu132/llama_cpp_python-0.3.37-py3-none-win_amd64.whl" }, marker = "(platform_machine == 'AMD64' and sys_platform == 'win32' and extra == 'group-13-privacy-bench-cu132') or (platform_machine != 'AMD64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'win32' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "llama-cpp-python", version = "0.3.36", source = { registry = "https://pypi.org/simple" }, marker = "(platform_machine != 'AMD64' and platform_machine != 'x86_64') or (platform_machine == 'AMD64' and sys_platform == 'linux') or (platform_machine == 'x86_64' and sys_platform == 'win32') or (sys_platform != 'linux' and sys_platform != 'win32') or (extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "llama-cpp-python", version = "0.3.36", source = { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36-cu132/llama_cpp_python-0.3.36-py3-none-manylinux_2_35_x86_64.whl" }, marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "llama-cpp-python", version = "0.3.36", source = { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36-cu132/llama_cpp_python-0.3.36-py3-none-win_amd64.whl" }, marker = "(platform_machine == 'AMD64' and sys_platform == 'win32' and extra == 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "llama-cpp-python", version = "0.3.36", source = { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36/llama_cpp_python-0.3.36-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl" }, marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "llama-cpp-python", version = "0.3.36", source = { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36/llama_cpp_python-0.3.36-py3-none-win_amd64.whl" }, marker = "(platform_machine == 'AMD64' and sys_platform == 'win32' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
     { name = "matplotlib" },
     { name = "numpy" },
     { name = "pyphen" },
@@ -850,11 +949,11 @@ dependencies = [
     { name = "sentence-transformers" },
     { name = "tokenizers" },
     { name = "torch", version = "2.15.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform == 'darwin' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
-    { name = "torch", version = "2.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132')" },
+    { name = "torch", version = "2.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
     { name = "torch", version = "2.15.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform != 'darwin' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
     { name = "torch", version = "2.15.0+cu132", source = { registry = "https://download.pytorch.org/whl/cu132" }, marker = "extra == 'group-13-privacy-bench-cu132'" },
     { name = "torchvision", version = "0.29.2", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform == 'darwin' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
-    { name = "torchvision", version = "0.29.2", source = { registry = "https://pypi.org/simple" }, marker = "(extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132')" },
+    { name = "torchvision", version = "0.29.2", source = { registry = "https://pypi.org/simple" }, marker = "(extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
     { name = "torchvision", version = "0.29.2+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform != 'darwin' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
     { name = "torchvision", version = "0.29.2+cu132", source = { registry = "https://download.pytorch.org/whl/cu132" }, marker = "extra == 'group-13-privacy-bench-cu132'" },
     { name = "transformers" },
@@ -862,15 +961,18 @@ dependencies = [
 
 [package.dev-dependencies]
 cpu = [
+    { name = "llama-cpp-python", version = "0.3.36", source = { registry = "https://pypi.org/simple" }, marker = "(platform_machine != 'AMD64' and platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu') or (platform_machine == 'AMD64' and sys_platform == 'linux' and extra == 'group-13-privacy-bench-cpu') or (platform_machine == 'x86_64' and sys_platform == 'win32' and extra == 'group-13-privacy-bench-cpu') or (sys_platform != 'linux' and sys_platform != 'win32' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "llama-cpp-python", version = "0.3.36", source = { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36/llama_cpp_python-0.3.36-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl" }, marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "llama-cpp-python", version = "0.3.36", source = { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36/llama_cpp_python-0.3.36-py3-none-win_amd64.whl" }, marker = "(platform_machine == 'AMD64' and sys_platform == 'win32' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
     { name = "torch", version = "2.15.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform == 'darwin' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
     { name = "torch", version = "2.15.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform != 'darwin' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
     { name = "torchvision", version = "0.29.2", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform == 'darwin' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
     { name = "torchvision", version = "0.29.2+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform != 'darwin' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
 ]
 cu132 = [
-    { name = "llama-cpp-python", version = "0.3.37", source = { registry = "https://pypi.org/simple" }, marker = "(platform_machine != 'x86_64' and sys_platform == 'linux' and extra == 'group-13-privacy-bench-cu132') or (platform_machine != 'AMD64' and sys_platform == 'win32' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and sys_platform != 'win32' and extra == 'group-13-privacy-bench-cu132') or (sys_platform == 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform == 'win32' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
-    { name = "llama-cpp-python", version = "0.3.37", source = { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.37-cu132/llama_cpp_python-0.3.37-py3-none-manylinux_2_35_x86_64.whl" }, marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-13-privacy-bench-cu132') or (platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
-    { name = "llama-cpp-python", version = "0.3.37", source = { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.37-cu132/llama_cpp_python-0.3.37-py3-none-win_amd64.whl" }, marker = "(platform_machine == 'AMD64' and sys_platform == 'win32' and extra == 'group-13-privacy-bench-cu132') or (platform_machine != 'AMD64' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'win32' and extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "llama-cpp-python", version = "0.3.36", source = { registry = "https://pypi.org/simple" }, marker = "(platform_machine != 'AMD64' and platform_machine != 'x86_64' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'AMD64' and sys_platform == 'linux' and extra == 'group-13-privacy-bench-cu132') or (platform_machine == 'x86_64' and sys_platform == 'win32' and extra == 'group-13-privacy-bench-cu132') or (sys_platform != 'linux' and sys_platform != 'win32' and extra == 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "llama-cpp-python", version = "0.3.36", source = { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36-cu132/llama_cpp_python-0.3.36-py3-none-manylinux_2_35_x86_64.whl" }, marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "llama-cpp-python", version = "0.3.36", source = { url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36-cu132/llama_cpp_python-0.3.36-py3-none-win_amd64.whl" }, marker = "(platform_machine == 'AMD64' and sys_platform == 'win32' and extra == 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
     { name = "torch", version = "2.15.0+cu132", source = { registry = "https://download.pytorch.org/whl/cu132" } },
     { name = "torchvision", version = "0.29.2+cu132", source = { registry = "https://download.pytorch.org/whl/cu132" } },
 ]
@@ -882,7 +984,7 @@ dev = [
 requires-dist = [
     { name = "huggingface-hub", specifier = "==1.33.0" },
     { name = "jinja2", specifier = "==3.1.6" },
-    { name = "llama-cpp-python", specifier = "==0.3.37" },
+    { name = "llama-cpp-python", specifier = "==0.3.36" },
     { name = "matplotlib", specifier = "==3.11.2" },
     { name = "numpy", specifier = "==2.5.3" },
     { name = "pyphen", specifier = "==0.18.1" },
@@ -897,13 +999,16 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 cpu = [
+    { name = "llama-cpp-python", marker = "(platform_machine != 'AMD64' and platform_machine != 'x86_64') or (platform_machine == 'AMD64' and sys_platform == 'linux') or (platform_machine == 'x86_64' and sys_platform == 'win32') or (sys_platform != 'linux' and sys_platform != 'win32')", specifier = "==0.3.36" },
+    { name = "llama-cpp-python", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'", url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36/llama_cpp_python-0.3.36-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl" },
+    { name = "llama-cpp-python", marker = "platform_machine == 'AMD64' and sys_platform == 'win32'", url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36/llama_cpp_python-0.3.36-py3-none-win_amd64.whl" },
     { name = "torch", specifier = "==2.15.0", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "privacy-bench", group = "cpu" } },
     { name = "torchvision", specifier = "==0.29.2", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "privacy-bench", group = "cpu" } },
 ]
 cu132 = [
-    { name = "llama-cpp-python", marker = "(platform_machine != 'x86_64' and sys_platform == 'linux') or (platform_machine != 'AMD64' and sys_platform == 'win32') or (sys_platform != 'linux' and sys_platform != 'win32')", specifier = "==0.3.37" },
-    { name = "llama-cpp-python", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'", url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.37-cu132/llama_cpp_python-0.3.37-py3-none-manylinux_2_35_x86_64.whl" },
-    { name = "llama-cpp-python", marker = "platform_machine == 'AMD64' and sys_platform == 'win32'", url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.37-cu132/llama_cpp_python-0.3.37-py3-none-win_amd64.whl" },
+    { name = "llama-cpp-python", marker = "(platform_machine != 'AMD64' and platform_machine != 'x86_64') or (platform_machine == 'AMD64' and sys_platform == 'linux') or (platform_machine == 'x86_64' and sys_platform == 'win32') or (sys_platform != 'linux' and sys_platform != 'win32')", specifier = "==0.3.36" },
+    { name = "llama-cpp-python", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'", url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36-cu132/llama_cpp_python-0.3.36-py3-none-manylinux_2_35_x86_64.whl" },
+    { name = "llama-cpp-python", marker = "platform_machine == 'AMD64' and sys_platform == 'win32'", url = "https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36-cu132/llama_cpp_python-0.3.36-py3-none-win_amd64.whl" },
     { name = "torch", specifier = "==2.15.0", index = "https://download.pytorch.org/whl/cu132", conflict = { package = "privacy-bench", group = "cu132" } },
     { name = "torchvision", specifier = "==0.29.2", index = "https://download.pytorch.org/whl/cu132", conflict = { package = "privacy-bench", group = "cu132" } },
 ]
@@ -941,7 +1046,7 @@ name = "pytest"
 version = "9.1.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
     { name = "iniconfig" },
     { name = "packaging" },
     { name = "pluggy" },
@@ -1096,7 +1201,7 @@ dependencies = [
     { name = "scipy" },
     { name = "tokenizers" },
     { name = "torch", version = "2.15.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform == 'darwin' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
-    { name = "torch", version = "2.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132')" },
+    { name = "torch", version = "2.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
     { name = "torch", version = "2.15.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform != 'darwin' and extra == 'group-13-privacy-bench-cpu') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
     { name = "torch", version = "2.15.0+cu132", source = { registry = "https://download.pytorch.org/whl/cu132" }, marker = "extra == 'group-13-privacy-bench-cu132'" },
     { name = "tqdm" },
@@ -1216,18 +1321,18 @@ resolution-markers = [
 dependencies = [
     { name = "cuda-bindings", marker = "(sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
     { name = "cuda-toolkit", extra = ["cublas", "cudart", "cufft", "cufile", "cupti", "cusolver", "cusparse", "nvjitlink", "nvrtc", "nvtx"], marker = "(sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
-    { name = "filelock", marker = "(extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132')" },
-    { name = "fsspec", marker = "(extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132')" },
-    { name = "jinja2", marker = "(extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132')" },
-    { name = "networkx", marker = "(extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132')" },
+    { name = "filelock", marker = "(extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "fsspec", marker = "(extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "jinja2", marker = "(extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "networkx", marker = "(extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
     { name = "nvidia-cudnn-cu13", marker = "(sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
     { name = "nvidia-cusparselt-cu13", marker = "(sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
     { name = "nvidia-nccl-cu13", marker = "(sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
     { name = "nvidia-nvshmem-cu13", marker = "(sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
-    { name = "setuptools", marker = "(extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132')" },
-    { name = "sympy", marker = "(extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132')" },
+    { name = "setuptools", marker = "(extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "sympy", marker = "(extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
     { name = "triton", marker = "(sys_platform == 'linux' and extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
-    { name = "typing-extensions", marker = "(extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132')" },
+    { name = "typing-extensions", marker = "(extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/17/24/7b9b755e8c4dd2395c6a94bab6a4ed8aded1735ff2538bc63cbba8abeddd/torch-2.15.0-cp312-cp312-macosx_14_0_arm64.whl", hash = "sha256:593e5fd0c204284890d1c3dff643be34e549e1d24523e13402510f960d4da438", size = 138558517, upload-time = "2026-10-28T15:16:35.918Z" },
@@ -1321,9 +1426,9 @@ resolution-markers = [
     "sys_platform == 'darwin'",
 ]
 dependencies = [
-    { name = "numpy", marker = "(extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132')" },
-    { name = "pillow", marker = "(extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132')" },
-    { name = "torch", version = "2.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132') or (extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132')" },
+    { name = "numpy", marker = "(extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "pillow", marker = "(extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "torch", version = "2.15.0", source = { registry = "https://pypi.org/simple" }, marker = "(extra != 'group-13-privacy-bench-cpu' and extra != 'group-13-privacy-bench-cu132') or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/60/ec/ce97c46e5322b588b95be388f2c21878d014ca20838478e7aab59edd128a/torchvision-0.29.2-py3-none-macosx_14_0_arm64.whl", hash = "sha256:d412494ff011f24c884a3cffd33eba1cb45a0299d4e26c1e175113f9d3b3ebc7", size = 1823414, upload-time = "2026-10-28T15:21:31.892Z" },
@@ -1378,7 +1483,7 @@ name = "tqdm"
 version = "4.70.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/0d/ea/b2a5bd54b28a324dae8211928b2d730b6547500342c7e6c6dea08bd0a485/tqdm-4.70.1.tar.gz", hash = "sha256:cefd0eca11b2a37a3aee776544d4f4ae913f02688135b5556b8788dfa474afc4", size = 171846, upload-time = "2026-09-11T07:25:16.601Z" }
 wheels = [
@@ -1420,7 +1525,7 @@ version = "0.27.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "annotated-doc" },
-    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'group-13-privacy-bench-cpu' and extra == 'group-13-privacy-bench-cu132')" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
     { name = "rich" },
     { name = "shellingham" },
 ]

@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 
 from .classifier import Classifier, PrivacyBenchClassifier
 from .idle import IdleRelease
-from .rewriter import PrivacyBenchRewriter, Rewriter
+from .rewriter import PrivacyBenchRewriter, Rewriter, RewriterUnavailable
 from .sentences import split_sentences
 from .settings import Settings
 from .taxonomy import TAXONOMY
@@ -67,7 +67,12 @@ def create_app(
     @app.get("/health")
     def health():
         metadata = service.metadata()
-        return {"status": "ok" if metadata is not None else "loading", "ready": metadata is not None, "model": metadata}
+        return {
+            "status": "ok" if metadata is not None else "loading",
+            "ready": metadata is not None,
+            "model": metadata,
+            "rewriter": rewrite_service.status(),
+        }
 
     @app.get("/categories")
     def categories():
@@ -118,15 +123,26 @@ def create_app(
             raise HTTPException(status_code=422, detail="source_sentence_ids must be nonnegative.")
         try:
             metadata = rewrite_service.load()
+        except RewriterUnavailable as exc:
+            # A missing local model is a setup state, not a server fault. Keep the log readable.
+            logger.warning("%s", exc.message)
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "code": "rewriter_model_not_downloaded",
+                    "message": exc.message,
+                    "retryable": False,
+                },
+            ) from None
         except Exception as exc:
             logger.exception("Rewriter failed to load")
             raise HTTPException(
                 status_code=503,
-                detail=(
-                    f"Rewriter model unavailable: {exc}. Download it once with "
-                    "`uv run pbench download ../privacy-research/conditions/rewrite/"
-                    "qwen3.5-4b-q4km-cpu-summary-v3.toml`."
-                ),
+                detail={
+                    "code": "rewriter_load_failed",
+                    "message": f"Rewriter failed to load: {exc}",
+                    "retryable": True,
+                },
             ) from exc
         try:
             rewritten = rewrite_service.rewrite(request.text, request.style)

@@ -142,8 +142,16 @@ export function getCategories(): Promise<CategoryList> {
   return request<CategoryList>('/api/v1/categories')
 }
 
-export function getHealth(): Promise<{ status: string; model_service_ready: boolean }> {
-  return request('/api/v1/health')
+export type Health = {
+  status: string
+  model_service_ready: boolean
+  rewriter_ready?: boolean
+  rewriter_status?: 'ready' | 'available' | 'not_downloaded' | 'unavailable' | string
+  rewriter_setup?: string | null
+}
+
+export function getHealth(): Promise<Health> {
+  return request<Health>('/api/v1/health')
 }
 
 export function createPolicy(text: string): Promise<Policy> {

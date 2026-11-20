@@ -64,11 +64,12 @@ class ModelServiceClient:
                 retryable=True,
             ) from exc
         except httpx.HTTPStatusError as exc:
+            code, message, retryable = _problem_details(exc.response)
             raise ModelServiceError(
                 status_code=502 if exc.response.status_code >= 500 else exc.response.status_code,
-                code="model_service_error" if exc.response.status_code >= 500 else "model_service_rejected",
-                message=_detail(exc.response),
-                retryable=exc.response.status_code >= 500,
+                code=code,
+                message=message,
+                retryable=retryable,
             ) from exc
         try:
             body = response.json()
@@ -89,12 +90,22 @@ class ModelServiceClient:
         return body
 
 
-def _detail(response: httpx.Response) -> str:
+def _problem_details(response: httpx.Response) -> tuple[str, str, bool]:
+    """Preserve a structured model-service error code instead of flattening it into text."""
+    default_code = "model_service_error" if response.status_code >= 500 else "model_service_rejected"
+    default_retryable = response.status_code >= 500
+    fallback = f"Model service returned HTTP {response.status_code}."
     try:
         body = response.json()
     except ValueError:
-        return response.text.strip() or f"Model service returned HTTP {response.status_code}."
-    detail = body.get("detail", f"Model service returned HTTP {response.status_code}.")
+        return default_code, response.text.strip() or fallback, default_retryable
+    if not isinstance(body, dict):
+        return default_code, str(body), default_retryable
+    detail = body.get("detail", fallback)
     if isinstance(detail, dict):
-        return str(detail.get("message") or detail)
-    return str(detail)
+        return (
+            str(detail.get("code") or default_code),
+            str(detail.get("message") or fallback),
+            bool(detail.get("retryable", default_retryable)),
+        )
+    return default_code, str(detail), default_retryable

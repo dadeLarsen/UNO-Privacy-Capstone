@@ -21,17 +21,25 @@ Not planned for the first version: chat about a policy, PDF or DOCX import, lang
 
 ## Status
 
-The interface now calls [`api/`](api/), which forwards policies to [`modelService/`](modelService/) and returns one category per sentence plus source-linked category summaries. Classification and summaries work locally; rewriting waits on a chosen model. The work so far also chooses the models:
+The interface now calls [`api/`](api/), which forwards policies to [`modelService/`](modelService/) and returns one category per sentence, source-linked category summaries, and source-linked rewrites. Classification, summaries, and rewriting all run locally. The work so far also chooses the models:
 
 - **Classifier:** a linear head on EmbeddingGemma 2 embeddings leads, at about 0.04 s per sentence and 0.6 GiB, with accuracy close to much larger models. It has not yet been timed on a computer without a GPU.
-- **Rewriter:** not chosen; no rewriting has been evaluated.
+- **Rewriter:** Qwen3.5-4B Q4_K_M GGUF through llama.cpp, with the evaluated `summary-v3` prompt. It is about 10 s per passage on a desktop CPU and 2.6–2.7 s on tested GPUs. All three UI styles currently use `summary-v3`; style-specific prompts still need evaluation.
 - **Runtime:** AirLLM layer streaming, the original plan, was far too slow to use interactively and is now only a fallback for larger rewriters.
 
 Results and their caveats are in the [model research README](privacy-research/README.md).
 
 ## Run locally
 
-After the one-time setup in [`modelService/README.md`](modelService/README.md) and [`api/README.md`](api/README.md), start the whole app from this folder with:
+After the one-time setup in [`modelService/README.md`](modelService/README.md) and [`api/README.md`](api/README.md), download the pinned rewriter once while online:
+
+```bash
+cd privacy-research
+uv run pbench download conditions/rewrite/qwen3.5-4b-q4km-cpu-summary-v3.toml
+cd ..
+```
+
+GPU users can download `conditions/rewrite/qwen3.5-4b-q4km-gpu-summary-v3.toml` instead; both name the same GGUF file. The service never downloads at request time. Then start the whole app from this folder with:
 
 ```bash
 python3 run.py

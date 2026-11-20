@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 
 from model_service.app import create_app
 from model_service.classifier import Classification
-from model_service.rewriter import RewrittenPassage
+from model_service.rewriter import RewriterUnavailable, RewrittenPassage
 from model_service.settings import Settings
 from model_service.taxonomy import LABELS, TAXONOMY
 
@@ -195,6 +195,9 @@ class FakeRewriter:
     def metadata(self):
         return self.load()
 
+    def status(self):
+        return {"status": "ready", "available": True, "ready": True, "model": self.load(), "setup": None}
+
     def rewrite(self, text, style):
         return RewrittenPassage("We use your email for promotions.", ("Check numbers from the source.",))
 
@@ -214,3 +217,21 @@ def test_rewrite_returns_source_linked_text_and_warnings(classifier):
     assert body["rewrites"][0]["source_sentence_ids"] == [3]
     assert body["rewrites"][0]["warnings"]
     assert body["model"]["prompt"] == "summary-v3"
+
+
+class MissingRewriter(FakeRewriter):
+    def load(self):
+        raise RewriterUnavailable("Run `uv run pbench download ...` once.")
+
+
+def test_missing_rewrite_model_returns_actionable_setup_error(classifier):
+    with TestClient(create_app(Settings(), classifier, MissingRewriter())) as test_client:
+        response = test_client.post(
+            "/rewrite",
+            json={"text": "We share your email.", "source_sentence_ids": [1]},
+        )
+    assert response.status_code == 503
+    detail = response.json()["detail"]
+    assert detail["code"] == "rewriter_model_not_downloaded"
+    assert detail["retryable"] is False
+    assert "pbench download" in detail["message"]

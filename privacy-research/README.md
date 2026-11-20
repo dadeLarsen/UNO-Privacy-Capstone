@@ -131,30 +131,28 @@ A **model backend** loads a pinned checkpoint and runs one input without knowing
 
 [uv](https://docs.astral.sh/uv/) manages the environment; every package, including transitive ones, is pinned in `pyproject.toml` and `uv.lock`. Run every command below from this folder. The tests run offline and build tiny models on the CPU.
 
-Choose one of the two setups.
-
-**With an NVIDIA GPU.** This installs the CUDA 13.2 build of torch 2.15.0. It needs a newer NVIDIA driver than the CUDA 12.8 build did: NVIDIA names 595.45.04 as the oldest for Linux and gives no number for Windows, where it was checked on driver 610.88. Runs that started before `20261116` used torch 2.8.0 on CUDA 12.8, and each run's `run.json` lists its packages:
+The default setup is CPU-only. It installs CPU builds of torch 2.15.0 and `llama-cpp-python` 0.3.36. The tests pass on it, but runs with `device = "cuda"` will not start:
 
 ```powershell
 uv sync
 uv run pytest
 ```
 
-**Without an NVIDIA GPU.** This installs the much smaller CPU build of torch. The tests pass on it, but runs with `device = "cuda"` will not start:
+**With an NVIDIA GPU.** Opt into the CUDA 13.2 builds. This needs a newer NVIDIA driver than the CUDA 12.8 build did: NVIDIA names 595.45.04 as the oldest for Linux and gives no number for Windows, where it was checked on driver 610.88. Runs that started before `20261116` used torch 2.8.0 on CUDA 12.8, and each run's `run.json` lists its packages:
 
 ```powershell
-$env:UV_NO_SYNC = "1"    # keep `uv run` from installing the CUDA build; set it in your profile
-uv sync --no-group cu132 --group cpu
+$env:UV_NO_SYNC = "1"    # keep `uv run` from reinstalling the CPU default; set it in your profile
+uv sync --no-group cpu --group cu132
 uv run pytest
 ```
 
 Set `UV_NO_SYNC` before any other `uv` command. After pulling a change to `uv.lock`, rerun the `uv sync` line.
 
-Both setups also install `llama-cpp-python` 0.3.37, which runs GGUF models through llama.cpp. The rewrite runs through llama.cpp recorded so far used 0.3.36, and each run's `run.json` names its version.
+Both setups install `llama-cpp-python` 0.3.36, the version used by the rewrite runs recorded so far; each run's `run.json` names its version.
 
-- **With an NVIDIA GPU**, Windows and Linux on x64 get the package's built CUDA 13.2 wheel, pinned by its hash in `uv.lock`. It runs a model on the GPU or on the CPU. On Windows it loads only after torch, whose CUDA build holds the cuBLAS library it needs; `privacy_bench.models` imports torch first for that reason.
-- **Without one**, `uv sync` compiles the package, because 0.3.37 has no built CPU wheel. That needs CMake and a C++ compiler, which on Windows come with the Visual Studio build tools, and it took about four minutes on the desktop. The build uses only the CPU.
-- **Every other platform** compiles it too. On a Mac that needs the Xcode command line tools, and the build includes llama.cpp's Metal GPU backend.
+- **CPU default**: Windows and Linux on x64 get the package's prebuilt CPU wheel, pinned by its hash in `uv.lock`. It needs no NVIDIA driver or CUDA library and computes on the CPU, which is what the app's rewrite condition does.
+- **CUDA opt-in**: Windows and Linux on x64 get the built CUDA 13.2 wheel. It needs an NVIDIA driver even when every layer is placed on the CPU. On Windows it loads only after torch, whose CUDA build holds the cuBLAS library it needs; `privacy_bench.models` imports torch first for that reason.
+- **Every other platform** builds from source. On a Mac that needs the Xcode command line tools, and the build includes llama.cpp's Metal GPU backend. The upstream 0.3.36 macOS wheels currently fail zip validation, so their URLs are kept only as references in `pyproject.toml`.
 
 Models resolve from the standard Hugging Face cache (`~/.cache/huggingface/hub`), and every condition pins a full commit. Runs never download, so fetch a condition's model once while online:
 

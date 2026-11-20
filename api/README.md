@@ -22,7 +22,7 @@ disk, logged, or sent off the machine (FR-22 off by default, NFR-01, NFR-02).
 | `GET /policies/{id}` | `Policy` | Implemented |
 | `POST /policies/{id}/classification` | `Classification` | Implemented; calls modelService `/analyze` |
 | `POST /policies/{id}/summaries` | `202 Job` | Implemented; **extractive** summaries from classified sentences |
-| `POST /policies/{id}/rewrites` | `202 Job` | Contract implemented; job fails with `generator_not_available` until AR-02 picks a rewriter |
+| `POST /policies/{id}/rewrites` | `202 Job` | Implemented; calls modelService `/rewrite` and returns source-linked rewrites |
 | `GET /jobs/{id}` | `Job` | Implemented; poll for progress and result |
 | `DELETE /jobs/{id}` | `204` | Implemented; cancels a queued or running job |
 | `GET /policies/{id}/results` | `AnalysisResults` | Implemented; non-blocking snapshot |
@@ -42,10 +42,14 @@ block points back to the original sentence spans.
   under each category, with their source IDs. This needs no model download and cannot
   change what the policy says. It is a stand-in until a generative summarizer is
   chosen.
-- **Rewrites** are not available. No rewriter has been chosen (AR-02), and the app
-  must not download one at request time. A rewrite job finishes as `failed` with
-  `error.code: "generator_not_available"`; the frontend shows that message. When a
-  rewriter is chosen, only `src/api_service/generation.py` needs to change.
+- **Rewrites** call the pinned GGUF chat model already installed with `modelService/`;
+  the API never downloads a model. A job selects the classified sentences named in
+  `sentence_ids` (or the whole policy), sends their exact text to modelService, and
+  stores the returned rewrite with `source_sentence_ids` and review `warnings`. All UI
+  styles currently use the evaluated `summary-v3` prompt; the rewriter reports that
+  limitation as a warning rather than pretending the styles were evaluated separately.
+  If the GGUF file has not been downloaded, the job fails with a structured
+  `model_service_error` that includes the one-time `pbench download` command.
 
 ## Setup and run
 
