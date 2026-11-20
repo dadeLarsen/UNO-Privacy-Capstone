@@ -2,15 +2,15 @@
 
 Experiments and measurements that decide which models the [Privacy Policy Reader](../README.md) should use, and the evidence behind each choice. The app needs two: a classifier that puts each sentence of a policy into one of ten categories, and a rewriter for its three actions (**Paraphrase**, **Simplify for Kids**, and **Simplify for Adults**). Both must run offline on a computer with **8–12 GB of total memory**. This work answers analysis requirements AR-01 and AR-02 in the [requirements](../docs/Requirements-Document.md#6-analysis-requirements).
 
-All measurements so far used one Windows PC with an **RTX 4090 (24 GiB) and 64 GB RAM**.
+Unless a result says otherwise, the measurements used one Windows PC with an **RTX 4090 (24 GiB) and 64 GB RAM**. Some llama.cpp runs also ran on an M4 Pro MacBook with 24 GB.
 
 ## Current direction
 
 | | **A. Classifier + separate rewriter** | **B. One base model with adapters** |
 | --- | --- | --- |
 | Shape | A small model labels sentences; a separate generative model rewrites. | One backbone; a task adapter classifies, and the same backbone rewrites. |
-| Tested so far | `skythrone/privacy-model`, and EmbeddingGemma 2 with and without a fitted head. No rewriter tested. | `autotrust/JEV-9B`: a Qwen3.5-9B base with an unmerged LoRA judge adapter and a decision head. Classification only. |
-| Open question | A fitted head on EmbeddingGemma 2 ties the large models when every category counts equally. Shifted toward APPSI-139's category mix, it ties privacy-model on that mix instead, but no head yet leads on both (below). | Whether the base model, with the adapter disabled, rewrites well enough. |
+| Tested so far | `skythrone/privacy-model`, and EmbeddingGemma 2 with and without a fitted head. Nine rewriters, judged on 40 policy sections ([rewriting findings](docs/rewriting-findings.md)). The model service runs EmbeddingGemma 2 with a fitted head and Qwen3.5-4B at 4-bit, both through llama.cpp. | `autotrust/JEV-9B`: a Qwen3.5-9B base with an unmerged LoRA judge adapter and a decision head. Classification only. Its backend is retired ([History](#history)), so this checkout cannot run it. |
+| Open question | A fitted head on EmbeddingGemma 2 ties the large models when every category counts equally. Shifted toward APPSI-139's category mix, it ties privacy-model on that mix instead, but no head yet leads on both (below). Which rewriter and prompt the app ships (AR-02). | Whether the base model, with the adapter disabled, rewrites well enough. |
 
 Other working decisions: hardware tiers (roughly 2–4, 8–12, and 16+ GB of RAM) may use different models; AirLLM layer streaming is tentative because it is very slow; and the app classifies one category per sentence for now, while the method should be able to return several later.
 

@@ -53,6 +53,8 @@ a second GGUF file, and only one of the two models is in memory at a time.
 | --- | --- | --- |
 | [Requirements-Document.md](docs/Requirements-Document.md) | Current | Draft of Chapter 2 of the final report. Goal model, functional requirements FR-01 to FR-27 with MoSCoW priorities, wireframes, object model, nonfunctional requirements NFR-01 to NFR-09, analysis requirements AR-01, AR-02, and AR-04, external interfaces, and requirements not implemented. |
 | [Requirements-Outline.md](docs/Requirements-Outline.md) | Current | The course's outline for that chapter. |
+| [Mid-Semester-Report.md](docs/Mid-Semester-Report.md) | Historical | Draft of Chapters 1–5 of the final report. By its own statement it describes the repository as of 2026-11-13, before the move to llama.cpp, so its libraries, setup, and model status are those of that date. |
+| [report-figures/](docs/report-figures/) | Historical | The object model and the analyze and rewrite sequence diagrams of the mid-semester report (figures 7, 10, and 11), as PNG and SVG. |
 | [requirements-figures/](docs/requirements-figures/) | Current | The goal model ([goal-model.svg](docs/requirements-figures/goal-model.svg), and [goal-model-pistar.txt](docs/requirements-figures/goal-model-pistar.txt) to open in piStar with **File → Load Model**), the thesis interface screenshot (W1), and wireframes W2–W5 as SVG. |
 
 ## Model research: [privacy-research/](privacy-research/)
