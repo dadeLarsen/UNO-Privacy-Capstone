@@ -24,26 +24,28 @@ Data, configuration, and results entries have a status:
 | Path | Contents |
 | --- | --- |
 | [docs/](docs/) | Requirements and design for the app |
-| [modelService/](modelService/) | The localhost-only model service: classifies a policy and returns one category per sentence |
+| [modelService/](modelService/) | The localhost-only model service: classifies a policy and returns one category per sentence, and rewrites a passage |
 | [privacy-research/](privacy-research/) | The model benchmark: a self-contained Python project with its own environment |
 | [.gitignore](.gitignore) | Ignores for the whole repository; `privacy-research/` adds its own |
 
 The browser interface is still a scaffold. `modelService/` is the first app code; the
-UI does not call it yet, and rewriting is not implemented.
+UI does not call it yet, and it rewrites a passage with one prompt, not yet in the
+three styles.
 
 ## Model service: [modelService/](modelService/)
 
-A small FastAPI service that reuses the benchmark's pinned classifier. It binds to
-localhost only, never downloads at request time, and returns exact character offsets
-for every sentence. It runs the same fitted head on the same GGUF file through
-llama.cpp, on a GPU or on the CPU, and chooses between them at startup.
+A small FastAPI service that reuses the benchmark's pinned classifier and rewriter. It
+binds to localhost only, never downloads at request time, and returns exact character
+offsets for every sentence. It runs the same fitted head on the same GGUF file through
+llama.cpp, on a GPU or on the CPU, and chooses between them at startup. The rewriter is
+a second GGUF file, and only one of the two models is in memory at a time.
 
 | File | Status | Contents |
 | --- | --- | --- |
 | [README.md](modelService/README.md) | Current | Setup, run, API examples, configuration, and what is not implemented |
 | [pyproject.toml](modelService/pyproject.toml) | Current | Dependencies, the CUDA and CPU groups for torch and llama-cpp-python, and the `model-service` command |
-| [src/model_service/](modelService/src/model_service/) | Current | `app.py` routes, `classifier.py` benchmark adapter, `idle.py` idle release of the model, `sentences.py` splitter, `settings.py` configuration and the GPU or CPU choice, and `taxonomy.py` with `taxonomy.json`, the benchmark's ten categories plus each one's display name, definition, and color |
-| [tests/](modelService/tests/) | Current | API and idle-release tests with a fake classifier, and classifier, splitter, settings, and taxonomy tests; no model or GPU needed |
+| [src/model_service/](modelService/src/model_service/) | Current | `app.py` routes, `classifier.py` and `rewriter.py` benchmark adapters, `idle.py` which keeps one model in memory and releases it when the service is idle, `sentences.py` splitter, `settings.py` configuration and the GPU or CPU choice, and `taxonomy.py` with `taxonomy.json`, the benchmark's ten categories plus each one's display name, definition, and color |
+| [tests/](modelService/tests/) | Current | API and one-model-in-memory tests with fake models, and classifier, rewriter, splitter, settings, and taxonomy tests; no model or GPU needed |
 
 ## App requirements: [docs/](docs/)
 

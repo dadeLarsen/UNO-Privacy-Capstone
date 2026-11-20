@@ -8,6 +8,9 @@ Without a condition, the service runs one of two default conditions, the same fi
 head and the same GGUF file through llama.cpp on the GPU or on the CPU. The device
 picks between them and is detected when unset. A condition names its own device, so
 it cannot be combined with one.
+
+The rewriter has two default conditions of its own, picked by the same device. A
+rewrite condition replaces them and names its own device too.
 """
 
 from dataclasses import dataclass
@@ -24,6 +27,11 @@ CONDITIONS = REPO_ROOT / "privacy-research" / "conditions" / "classification" / 
 DEFAULT_CONDITIONS = {
     "gpu": CONDITIONS / "embeddinggemma2-gguf-q8-gpu-head-linear-balanced-tuned-limit2048-appsi139-test-half.toml",
     "cpu": CONDITIONS / "embeddinggemma2-gguf-q8-cpu-head-linear-balanced-tuned-limit2048-appsi139-test-half.toml",
+}
+REWRITE_CONDITIONS = REPO_ROOT / "privacy-research" / "conditions" / "rewrite"
+DEFAULT_REWRITE_CONDITIONS = {
+    "gpu": REWRITE_CONDITIONS / "qwen3.5-4b-q4km-gpu-summary-v3.toml",
+    "cpu": REWRITE_CONDITIONS / "qwen3.5-4b-q4km-cpu-summary-v3.toml",
 }
 LOOPBACK_HOSTS = frozenset({"127.0.0.1", "::1", "localhost"})
 DEFAULT_CORS_ORIGINS = (
@@ -71,6 +79,7 @@ class Settings:
     # Holds only a condition that was given, never a default: replace() runs __post_init__ again, and a
     # default stored here would then look like a condition given together with a device.
     condition: Path | None = None
+    rewrite_condition: Path | None = None
     device: str | None = None
     host: str = "127.0.0.1"
     port: int = 8000
@@ -82,8 +91,10 @@ class Settings:
     cors_origins: tuple[str, ...] = DEFAULT_CORS_ORIGINS
 
     def __post_init__(self):
-        if self.condition is not None and not isinstance(self.condition, Path):
-            object.__setattr__(self, "condition", Path(self.condition))
+        for name in ("condition", "rewrite_condition"):
+            value = getattr(self, name)
+            if value is not None and not isinstance(value, Path):
+                object.__setattr__(self, name, Path(value))
         if self.device not in (None, "gpu", "cpu"):
             raise ValueError(f"device must be gpu, cpu, or unset, not {self.device!r}")
         if self.condition is not None and self.device is not None:
@@ -93,8 +104,9 @@ class Settings:
                 "default conditions. Check --condition, --device, MODEL_SERVICE_CONDITION, and "
                 "MODEL_SERVICE_DEVICE."
             )
-        if not self.condition_path.is_file():
-            raise ValueError(f"Condition file does not exist: {self.condition_path}")
+        for path in (self.condition_path, self.rewrite_condition_path):
+            if not path.is_file():
+                raise ValueError(f"Condition file does not exist: {path}")
         if self.host not in LOOPBACK_HOSTS:
             raise ValueError(f"The service only listens on localhost; refusing host {self.host!r}")
         if not 1 <= self.port <= 65535:
@@ -113,13 +125,20 @@ class Settings:
         """The condition to run: the one given, else the default for the device, detected when unset."""
         return self.condition or DEFAULT_CONDITIONS[self.device or detect_device()]
 
+    @property
+    def rewrite_condition_path(self) -> Path:
+        """The rewrite condition to run: the one given, else the default for the device, detected when unset."""
+        return self.rewrite_condition or DEFAULT_REWRITE_CONDITIONS[self.device or detect_device()]
+
     @classmethod
     def from_env(cls) -> "Settings":
         condition = os.environ.get("MODEL_SERVICE_CONDITION")
+        rewrite_condition = os.environ.get("MODEL_SERVICE_REWRITE_CONDITION")
         device = os.environ.get("MODEL_SERVICE_DEVICE")
         origins = os.environ.get("MODEL_SERVICE_CORS_ORIGINS")
         return cls(
             condition=Path(condition) if condition else None,
+            rewrite_condition=Path(rewrite_condition) if rewrite_condition else None,
             device=(device or "").strip().lower() or None,
             host=os.environ.get("MODEL_SERVICE_HOST", "127.0.0.1").strip(),
             port=_env_int("MODEL_SERVICE_PORT", 8000, minimum=1),

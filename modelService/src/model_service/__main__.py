@@ -15,15 +15,18 @@ from .settings import Settings
 def main(argv=None) -> None:
     parser = argparse.ArgumentParser(
         prog="model-service",
-        description="Classify uploaded privacy policies with the pinned local classifier.",
+        description="Classify and rewrite privacy policies with the pinned local models.",
     )
     parser.add_argument(
         "--condition", type=Path, help="Classification condition TOML to run instead of a default one."
     )
     parser.add_argument(
+        "--rewrite-condition", type=Path, help="Rewrite condition TOML to run instead of a default one."
+    )
+    parser.add_argument(
         "--device",
         choices=("gpu", "cpu"),
-        help="Run the default GPU or CPU condition (default: detected). Cannot be combined with a condition.",
+        help="Run the default GPU or CPU conditions (default: detected). Cannot be combined with --condition.",
     )
     parser.add_argument("--host", help="Loopback address to bind (default: 127.0.0.1).")
     parser.add_argument("--port", type=int, help="Port to bind (default: 8000).")
@@ -34,6 +37,8 @@ def main(argv=None) -> None:
     changes = {}
     if args.condition is not None:
         changes["condition"] = args.condition
+    if args.rewrite_condition is not None:
+        changes["rewrite_condition"] = args.rewrite_condition
     if args.device is not None:
         changes["device"] = args.device
     if args.host is not None:

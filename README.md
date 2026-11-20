@@ -21,10 +21,10 @@ Not planned for the first version: chat about a policy, PDF or DOCX import, lang
 
 ## Status
 
-The interface is still a scaffold. [`modelService/`](modelService/) now runs the chosen classifier on a pasted or uploaded policy and returns one category per sentence; the browser UI does not call it yet, and rewriting is not built. The work so far also chooses the models:
+The interface is still a scaffold. [`modelService/`](modelService/) now runs the chosen classifier on a pasted or uploaded policy and returns one category per sentence, and it rewrites a passage with one summary prompt; the browser UI does not call it yet, and the three rewrite styles are not built. The work so far also chooses the models:
 
 - **Classifier:** a linear head on EmbeddingGemma 2 embeddings leads, at about 0.04 s per sentence and 0.6 GiB, with accuracy close to much larger models. It has not yet been timed on a computer without a GPU.
-- **Rewriter:** not chosen; no rewriting has been evaluated.
+- **Rewriter:** not settled (AR-02). The service runs Qwen3.5-4B at 4-bit through llama.cpp with the `summary-v3` prompt, the pair that [the rewriting findings](privacy-research/docs/rewriting-findings.md) judged; the prompt is still being tuned.
 - **Runtime:** AirLLM layer streaming, the original plan, was far too slow to use interactively and is now only a fallback for larger rewriters.
 
 Results and their caveats are in the [model research README](privacy-research/README.md).
