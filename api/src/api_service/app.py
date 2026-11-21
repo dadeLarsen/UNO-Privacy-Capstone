@@ -336,6 +336,8 @@ def _run_rewrite(
     try:
         sections = rewrite_sections(text, classification, request)
         total = len(sections)
+        # The job carries its finished sections while it runs, so a cancel or a failure keeps them.
+        result = None
         for section in sections:
             # A cancel stops the job between two sections. modelService still finishes the one it has.
             if job.cancel.is_set():
@@ -346,13 +348,15 @@ def _run_rewrite(
                 len(rewrites),
                 total,
                 f"Rewriting section {len(rewrites) + 1} of {total}",
+                result,
             )
             model, rewrite = rewritten_section(section, request.style, model_client)
             rewrites.append(rewrite)
+            result = RewriteResult(policy_id=job.policy_id, model=model, style=request.style, rewrites=list(rewrites))
         store.finish_job(
             job_id,
             status=JobStatus.SUCCEEDED,
-            result=RewriteResult(policy_id=job.policy_id, model=model, style=request.style, rewrites=rewrites),
+            result=result,
             progress=JobProgress(stage="done", completed=total, total=total),
         )
     except JobCancelled:

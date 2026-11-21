@@ -1,4 +1,5 @@
 import json
+import threading
 import time
 from uuid import UUID
 
@@ -266,6 +267,92 @@ def test_a_selection_is_rewritten_in_policy_order_and_breaks_where_it_skips_a_se
 
     assert sent == ["Aa one is here.", "Aa three. Aa four."]
     assert [item["source_sentence_ids"] for item in job["result"]["rewrites"]] == [[0], [2, 3]]
+
+
+def test_a_cancelled_rewrite_keeps_its_finished_sections_and_starts_no_new_one(
+    default_model_service_handler,
+    model_client_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("api_service.generation.SECTION_CHARACTERS", 30)
+    sent: list[str] = []
+    third_section_started = threading.Event()
+    release = threading.Event()
+    workers: list[threading.Thread] = []
+
+    def start_worker(target, *args: object) -> None:
+        workers.append(threading.Thread(target=target, args=args, daemon=True))
+        workers[-1].start()
+
+    monkeypatch.setattr("api_service.app._start_thread", start_worker)
+
+    def stuck_in_the_third_section(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/rewrite" and len(sent) == 2:
+            sent.append(json.loads(request.content)["text"])
+            third_section_started.set()
+            assert release.wait(5)
+            return default_model_service_handler(request)
+        return recording_rewrites(default_model_service_handler, sent)(request)
+
+    app = create_app(Settings(), client=model_client_factory(stuck_in_the_third_section))
+    with TestClient(app) as client:
+        policy_id = new_policy(client, SECTIONED_POLICY)
+        assert client.post(f"/api/v1/policies/{policy_id}/classification").status_code == 200
+        started = client.post(f"/api/v1/policies/{policy_id}/rewrites", json={"style": "paraphrase"})
+        job_id = started.json()["id"]
+        assert third_section_started.wait(5)
+
+        running = client.get(f"/api/v1/jobs/{job_id}").json()
+        assert running["status"] == "running"
+        assert running["progress"] == {
+            "stage": "rewriting",
+            "completed": 2,
+            "total": 4,
+            "message": "Rewriting section 3 of 4",
+        }
+        assert len(running["result"]["rewrites"]) == 2
+
+        assert client.delete(f"/api/v1/jobs/{job_id}").status_code == 204
+        cancelled = client.get(f"/api/v1/jobs/{job_id}").json()
+        assert cancelled["status"] == "cancelled"
+        assert cancelled["progress"] == {"stage": "cancelled", "completed": 2, "total": 4, "message": None}
+        assert [item["source_sentence_ids"] for item in cancelled["result"]["rewrites"]] == [[0, 1, 2], [3]]
+        snapshot = client.get(f"/api/v1/policies/{policy_id}/results").json()
+        assert snapshot["phase"] == "results_ready"
+        assert [item["id"] for item in snapshot["rewrites"]] == [item["id"] for item in cancelled["result"]["rewrites"]]
+
+        # modelService finishes the section it has. The job drops that rewrite and sends no fourth section.
+        release.set()
+        workers[0].join(5)
+        assert not workers[0].is_alive()
+        assert len(sent) == 3
+        assert client.get(f"/api/v1/jobs/{job_id}").json() == cancelled
+
+
+def test_a_rewrite_that_fails_at_a_section_keeps_the_sections_before_it(
+    default_model_service_handler,
+    model_client_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("api_service.generation.SECTION_CHARACTERS", 30)
+    sent: list[str] = []
+
+    def refuses_the_third_section(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/rewrite" and len(sent) == 2:
+            return httpx.Response(413, json={"detail": "Input has 5000 tokens; it exceeds the 4096-token context."})
+        return recording_rewrites(default_model_service_handler, sent)(request)
+
+    app = create_app(Settings(), client=model_client_factory(refuses_the_third_section))
+    with TestClient(app) as client:
+        policy_id, job = rewrite_job(client, {"style": "paraphrase"}, SECTIONED_POLICY)
+        snapshot = client.get(f"/api/v1/policies/{policy_id}/results").json()
+
+    assert job["status"] == "failed"
+    assert job["error"]["code"] == "model_service_rejected"
+    assert "5000 tokens" in job["error"]["message"]
+    assert job["progress"] == {"stage": "model_service_error", "completed": 2, "total": 4, "message": None}
+    assert [item["source_sentence_ids"] for item in job["result"]["rewrites"]] == [[0, 1, 2], [3]]
+    assert len(snapshot["rewrites"]) == 2
 
 
 @pytest.mark.parametrize("status", ["truncated", "reasoning"])
