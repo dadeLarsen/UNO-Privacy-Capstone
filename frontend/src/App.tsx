@@ -1,5 +1,6 @@
 import { useEffect, useState, type ChangeEvent, type CSSProperties } from 'react'
 import {
+  ApiError,
   cancelJob,
   classify,
   createPolicy,
@@ -79,13 +80,32 @@ function App() {
       .catch((cause: unknown) => setError(`API unavailable: ${messageOf(cause)}`))
   }, [])
 
-  function editPolicy(value: string) {
-    setPolicy(value)
+  function forgetPolicy() {
     setPolicyId(null)
     setSnapshot(null)
     setSelectedSentences(new Set())
+  }
+
+  function editPolicy(value: string) {
+    setPolicy(value)
+    forgetPolicy()
     setError(null)
     setStatus('Ready to analyze')
+  }
+
+  function showFailure(cause: unknown, failedStatus: string) {
+    if (cause instanceof ApiError && cause.code === 'not_found') {
+      // The API dropped the policy or its job. The text is still on the page, so the next Analyze sends it again.
+      forgetPolicy()
+      setError(
+        'The API no longer has this policy in memory. It clears a policy after an hour without use, ' +
+          'and when it restarts. Click Analyze categories to run it again.',
+      )
+      setStatus('Ready to analyze')
+      return
+    }
+    setError(messageOf(cause))
+    setStatus(failedStatus)
   }
 
   function toggleCategory(id: number) {
@@ -128,8 +148,7 @@ function App() {
         setActiveCategories(new Set(categories.map((category) => category.id)))
       }
     } catch (cause: unknown) {
-      setError(messageOf(cause))
-      setStatus('Analysis failed')
+      showFailure(cause, 'Analysis failed')
     } finally {
       setBusy(false)
     }
@@ -144,9 +163,7 @@ function App() {
     try {
       const text = await file.text()
       setPolicy(text)
-      setPolicyId(null)
-      setSnapshot(null)
-      setSelectedSentences(new Set())
+      forgetPolicy()
       const uploaded = await uploadPolicy(file)
       setPolicyId(uploaded.id)
       const result = await classify(uploaded.id)
@@ -201,8 +218,7 @@ function App() {
       setStatus('Summarizing by category…')
       await pollJob(job.id, id)
     } catch (cause: unknown) {
-      setError(messageOf(cause))
-      setStatus('Summary failed')
+      showFailure(cause, 'Summary failed')
       setActiveJob(null)
     } finally {
       setBusy(false)
@@ -226,8 +242,7 @@ function App() {
       setStatus(`Generating ${styleLabels[rewriteMode]}…`)
       await pollJob(job.id, id)
     } catch (cause: unknown) {
-      setError(messageOf(cause))
-      setStatus('Rewrite failed')
+      showFailure(cause, 'Rewrite failed')
       setActiveJob(null)
     } finally {
       setBusy(false)

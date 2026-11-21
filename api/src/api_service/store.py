@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import hashlib
 import threading
+import time
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
 from .errors import NotFound, PolicyTooLong
@@ -40,11 +41,13 @@ class PolicyRecord:
     classification: Classification | None = None
     latest_summary: SummaryResult | None = None
     latest_rewrite: RewriteResult | None = None
+    # A time.monotonic() reading. The policy expires when this is one TTL old.
+    last_used: float = field(default_factory=time.monotonic)
 
 
 class Store:
     def __init__(self, ttl_seconds: int = 3600) -> None:
-        self._ttl = timedelta(seconds=ttl_seconds)
+        self._ttl = ttl_seconds
         self._lock = threading.RLock()
         self._policies: dict[UUID, PolicyRecord] = {}
         self._jobs: dict[UUID, JobRecord] = {}
@@ -77,6 +80,7 @@ class Store:
             record = self._policies.get(policy_id)
             if record is None:
                 raise NotFound("Policy")
+            record.last_used = time.monotonic()
             return record
 
     def set_classification(self, policy_id: UUID, classification: Classification) -> None:
@@ -103,6 +107,8 @@ class Store:
             record = self._jobs.get(job_id)
             if record is None:
                 raise NotFound("Job")
+            # Polling a job is use of its policy, so a long job cannot outlive it.
+            self.get_policy(record.policy_id)
             return record
 
     def set_progress(self, job_id: UUID, stage: str, completed: int, total: int, message: str | None = None) -> None:
@@ -178,8 +184,8 @@ class Store:
             )
 
     def _expire_locked(self) -> None:
-        cutoff = datetime.now(timezone.utc) - self._ttl
-        stale = {pid for pid, record in self._policies.items() if record.policy.created_at < cutoff}
+        cutoff = time.monotonic() - self._ttl
+        stale = {pid for pid, record in self._policies.items() if record.last_used < cutoff}
         for policy_id in stale:
             del self._policies[policy_id]
         for job_id, record in list(self._jobs.items()):

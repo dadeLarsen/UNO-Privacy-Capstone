@@ -118,6 +118,16 @@ export type RewriteStyle = 'paraphrase' | 'simplify_for_kids' | 'simplify_for_ad
 
 type Detail = string | { code: string; message: string; retryable: boolean } | undefined
 
+// `code` is the API's stable error code, such as 'not_found'; it is absent when the answer had none.
+export class ApiError extends Error {
+  code: string | undefined
+
+  constructor(message: string, code?: string) {
+    super(message)
+    this.code = code
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, init)
   if (!response.ok) {
@@ -128,7 +138,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       detail = undefined
     }
     const message = typeof detail === 'string' ? detail : detail?.message
-    throw new Error(message ?? `Request failed with HTTP ${response.status}`)
+    const code = typeof detail === 'string' ? undefined : detail?.code
+    throw new ApiError(message ?? `Request failed with HTTP ${response.status}`, code)
   }
   if (response.status === 204) return undefined as T
   return (await response.json()) as T

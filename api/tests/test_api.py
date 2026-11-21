@@ -90,6 +90,24 @@ def test_a_policy_over_the_character_limit_is_refused_with_the_reason(client: Te
         assert "200,000 characters" in response.json()["detail"]["message"]
 
 
+def test_a_policy_expires_an_hour_after_its_last_use_not_its_creation(client: TestClient) -> None:
+    policy_id = new_policy(client)
+    assert client.post(f"/api/v1/policies/{policy_id}/classification").status_code == 200
+    job_id = client.post(f"/api/v1/policies/{policy_id}/summaries", json={}).json()["id"]
+    record = client.app.state.store.get_policy(UUID(policy_id))
+
+    # Each request comes 59 minutes after the one before it; polling a job counts as use of its policy.
+    for path in (f"/api/v1/policies/{policy_id}", f"/api/v1/jobs/{job_id}", f"/api/v1/policies/{policy_id}/results"):
+        record.last_used -= 59 * 60
+        assert client.get(path).status_code == 200, path
+
+    record.last_used -= 61 * 60
+    expired = client.get(f"/api/v1/policies/{policy_id}")
+    assert expired.status_code == 404
+    assert expired.json()["detail"]["code"] == "not_found"
+    assert client.get(f"/api/v1/jobs/{job_id}").status_code == 404
+
+
 def test_classification_is_returned_before_any_summary(client: TestClient) -> None:
     policy_id = new_policy(client)
     classified = client.post(f"/api/v1/policies/{policy_id}/classification", json={})

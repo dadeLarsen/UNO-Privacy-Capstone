@@ -8,8 +8,8 @@ summaries back in one stable contract.
 frontend (browser)  --HTTP-->  api/  --HTTP-->  modelService/  --local files--> models
 ```
 
-Policy text is held in memory only and expires after an hour. Nothing is written to
-disk, logged, or sent off the machine (FR-22 off by default, NFR-01, NFR-02).
+Policy text is held in memory only and expires an hour after its last use. Nothing is
+written to disk, logged, or sent off the machine (FR-22 off by default, NFR-01, NFR-02).
 
 ## What works now
 
@@ -77,7 +77,9 @@ the frontend together with the URLs wired correctly.
 `GET /api/v1/health` reports `status: "ok"` only when the model service is ready.
 If the model service is down, classification returns HTTP 503 with
 `detail.code: "model_service_unavailable"`. A policy over 200,000 characters, pasted or
-uploaded, gets HTTP 413 with `detail.code: "policy_too_long"`.
+uploaded, gets HTTP 413 with `detail.code: "policy_too_long"`. A request for a policy
+that has expired gets HTTP 404 with `detail.code: "not_found"`; the page then asks the
+user to analyze the text again.
 
 ### Configuration
 
@@ -87,7 +89,7 @@ uploaded, gets HTTP 413 with `detail.code: "policy_too_long"`.
 | `API_HOST` / `API_PORT` | `127.0.0.1` / `8001` | Loopback bind address and port |
 | `API_CORS_ORIGINS` | Vite dev and preview origins | Comma-separated loopback origins |
 | `API_REQUEST_TIMEOUT_SECONDS` | `120` | Timeout for modelService calls |
-| `API_POLICY_TTL_SECONDS` | `3600` | How long an in-memory policy and its jobs live |
+| `API_POLICY_TTL_SECONDS` | `3600` | How long an in-memory policy and its jobs live after the policy's last use; polling a job counts as use |
 
 `python -m api_service --host 127.0.0.1 --port 8001` overrides the host and port for
 one run. Both must be loopback addresses.
@@ -100,7 +102,7 @@ uv run pytest
 ```
 
 The tests use a fake modelService through `httpx.MockTransport`, so no model or GPU
-is needed. They cover upload validation, the length limit, the
+is needed. They cover upload validation, the length limit, expiry, the
 classification-first ordering, per-category summaries, job cancellation,
 rewriter-unavailable errors, and modelService outages.
 
