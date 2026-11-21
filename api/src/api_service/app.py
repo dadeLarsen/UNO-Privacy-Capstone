@@ -25,6 +25,7 @@ from .schemas import (
     CategoryList,
     Classification,
     ClassificationRequest,
+    ErrorEnvelope,
     GenerationKind,
     Health,
     Job,
@@ -60,7 +61,13 @@ def create_app(
         if owns_client:
             model_client.close()
 
-    app = FastAPI(title="Privacy Policy Reader API", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(
+        title="Privacy Policy Reader API",
+        version="0.1.0",
+        lifespan=lifespan,
+        # Without this, the generated docs show FastAPI's own 422 body, which the handlers below never send.
+        responses={"default": {"model": ErrorEnvelope, "description": "Error with a stable code"}},
+    )
     app.state.settings = settings
     app.state.client = model_client
     app.state.store = policies

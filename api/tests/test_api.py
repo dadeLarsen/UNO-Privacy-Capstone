@@ -7,7 +7,6 @@ import pytest
 from fastapi.testclient import TestClient
 
 from api_service.app import create_app
-from api_service.client import ModelServiceClient
 from api_service.generation import JobCancelled
 from api_service.schemas import MAX_POLICY_CHARACTERS
 from api_service.settings import Settings
@@ -266,16 +265,11 @@ def test_job_can_be_cancelled(client: TestClient, monkeypatch: pytest.MonkeyPatc
     assert client.get(f"/api/v1/jobs/{job_id}").json()["status"] == "cancelled"
 
 
-def test_model_service_outage_returns_structured_error() -> None:
+def test_model_service_outage_returns_structured_error(model_client_factory) -> None:
     def outage(request: httpx.Request) -> httpx.Response:
         raise httpx.ConnectError("refused", request=request)
 
-    http = httpx.Client(
-        transport=httpx.MockTransport(outage),
-        base_url="http://127.0.0.1:8000",
-        trust_env=False,
-    )
-    app = create_app(Settings(), client=ModelServiceClient(http))
+    app = create_app(Settings(), client=model_client_factory(outage))
     with TestClient(app) as client:
         policy_id = new_policy(client)
         response = client.post(f"/api/v1/policies/{policy_id}/classification")

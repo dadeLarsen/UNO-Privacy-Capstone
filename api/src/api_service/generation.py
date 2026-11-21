@@ -51,9 +51,8 @@ def extractive_summaries(
     ]
     wanted = set(category_ids) if category_ids else None
     summaries: list[Summary] = []
-    total = len(classification.counts) or 1
 
-    for index, count in enumerate(classification.counts):
+    for count in classification.counts:
         if cancel.is_set():
             raise JobCancelled
         if wanted is not None and count.label_id not in wanted:
