@@ -52,6 +52,8 @@ function App() {
   const [selectedSentences, setSelectedSentences] = useState<Set<number>>(() => new Set())
   const [highlighted, setHighlighted] = useState(true)
   const [activeJob, setActiveJob] = useState<Job | null>(null)
+  // The latest rewrite job as last polled. It stays after the job ends, to say whether the rewrite is whole.
+  const [rewriteJob, setRewriteJob] = useState<Job | null>(null)
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState('Ready to analyze')
   const [error, setError] = useState<string | null>(null)
@@ -71,6 +73,7 @@ function App() {
     setPolicyId(null)
     setSnapshot(null)
     setSelectedSentences(new Set())
+    setRewriteJob(null)
   }
 
   function editPolicy(value: string) {
@@ -172,20 +175,28 @@ function App() {
   async function pollJob(jobId: string, id: string) {
     for (;;) {
       const job = await getJob(jobId)
-      setActiveJob(job)
+      if (job.kind === 'rewrite') setRewriteJob(job)
+      if (job.status === 'queued' || job.status === 'running') {
+        setActiveJob(job)
+        await new Promise((resolve) => setTimeout(resolve, 250))
+        continue
+      }
+      setActiveJob(null)
+      // A cancelled or failed rewrite keeps the sections it finished, so every ending loads the results.
+      setSnapshot(await getResults(id))
+      const name = job.kind === 'summary' ? 'Summary' : 'Rewrite'
+      const sections = job.kind === 'rewrite' && job.progress ? job.progress : null
       if (job.status === 'succeeded') {
-        setSnapshot(await getResults(id))
         setStatus(job.kind === 'summary' ? 'Summaries ready' : 'Rewrite ready')
-        setActiveJob(null)
-        return
+      } else if (job.status === 'failed') {
+        setError(job.error?.message ?? `${name} failed`)
+        setStatus(sections ? `${name} failed at section ${sections.completed + 1} of ${sections.total}` : `${name} failed`)
+      } else {
+        setStatus(
+          sections ? `${name} cancelled after ${sections.completed} of ${sections.total} sections` : `${name} cancelled`,
+        )
       }
-      if (job.status === 'failed' || job.status === 'cancelled') {
-        setError(job.error?.message ?? `${job.kind} job was cancelled`)
-        setStatus(job.status === 'failed' ? 'Generation failed' : 'Generation stopped')
-        setActiveJob(null)
-        return
-      }
-      await new Promise((resolve) => setTimeout(resolve, 250))
+      return
     }
   }
 
@@ -231,10 +242,9 @@ function App() {
   async function cancelActiveJob() {
     if (!activeJob) return
     try {
+      // The poll that follows sees the cancelled job, loads what it finished, and says how far it was.
       await cancelJob(activeJob.id)
       setActiveJob(null)
-      setStatus('Cancelled')
-      setError('Generation was cancelled.')
     } catch (cause: unknown) {
       setError(messageOf(cause))
     }
@@ -377,7 +387,13 @@ function App() {
 
           <RewritePanel
             busy={busy}
+            scope={
+              selectedSentences.size
+                ? `${selectedSentences.size} selected ${selectedSentences.size === 1 ? 'sentence' : 'sentences'}`
+                : 'the whole policy'
+            }
             activeJob={activeJob}
+            rewriteJob={rewriteJob}
             rewrites={snapshot?.rewrites ?? []}
             onRewrite={rewrite}
             onSummarize={summarize}
