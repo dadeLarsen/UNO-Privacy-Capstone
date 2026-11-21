@@ -1,20 +1,23 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState, type ChangeEvent, type CSSProperties } from 'react'
+import {
+  cancelJob,
+  classify,
+  createPolicy,
+  getCategories,
+  getHealth,
+  getJob,
+  getResults,
+  startRewrite,
+  startSummaries,
+  uploadPolicy,
+  type AnalysisSnapshot,
+  type Category,
+  type Health,
+  type Job,
+  type RewriteStyle,
+  type Sentence,
+} from './api'
 import './App.css'
-
-type Category = { name: string; color: string; tint: string }
-
-const categories: Category[] = [
-  { name: 'First Party Collection/Use', color: '#e8754e', tint: '#fff0ea' },
-  { name: 'Third Party Sharing/Collection', color: '#6ea84f', tint: '#eef7e8' },
-  { name: 'Other', color: '#b39a75', tint: '#f5f0e9' },
-  { name: 'User Choice/Control', color: '#507bc7', tint: '#edf3ff' },
-  { name: 'Do Not Track', color: '#9367a8', tint: '#f4ecf8' },
-  { name: 'International and Specific Audiences', color: '#dd657c', tint: '#fff0f2' },
-  { name: 'Data Security', color: '#3aab9c', tint: '#e9f8f5' },
-  { name: 'Policy Change', color: '#a57bc1', tint: '#f5eff9' },
-  { name: 'Data Retention', color: '#e3a33b', tint: '#fff6df' },
-  { name: 'User Access, Edit and Deletion', color: '#31a8b5', tint: '#e7f7f8' },
-]
 
 const examplePolicy = `At BrightCart, your privacy is important to us. When you sign up, place an order, or contact our support team, we collect personal information such as your name, email address, shipping details, and payment method to process your requests and improve your shopping experience.
 
@@ -22,55 +25,441 @@ We may share certain information, such as your email address, with trusted third
 
 You have the ability to manage your communication preferences at any time. To stop receiving promotional emails, simply click the unsubscribe link in any message or update your account settings.`
 
-const categoryForSentence = [0, 0, 1, 1, 3, 3]
+const styleLabels: Record<RewriteStyle, string> = {
+  paraphrase: 'Paraphrase',
+  simplify_for_kids: 'Simplify for Kids',
+  simplify_for_adults: 'Simplify for Adults',
+}
+
+const styleIcons: Record<RewriteStyle, string> = {
+  paraphrase: '↗',
+  simplify_for_kids: '☼',
+  simplify_for_adults: '◌',
+}
+
+function messageOf(error: unknown): string {
+  return error instanceof Error ? error.message : String(error)
+}
+
+function previewSentences(text: string): Sentence[] {
+  return [...text.matchAll(/[^.!?]+[.!?]*/g)]
+    .map((match, id) => {
+      const value = match[0].trim()
+      return { id, text: value, start: 0, end: value.length, label_id: null, label: null }
+    })
+    .filter((sentence) => sentence.text.length > 0)
+}
+
+function tintOf(category: Category): string {
+  return category.tint ?? `${category.color}1a`
+}
 
 function App() {
   const [policy, setPolicy] = useState(examplePolicy)
-  const [analyzed, setAnalyzed] = useState(true)
+  const [policyId, setPolicyId] = useState<string | null>(null)
+  const [categories, setCategories] = useState<Category[]>([])
+  const [health, setHealth] = useState<Health | null>(null)
+  const [snapshot, setSnapshot] = useState<AnalysisSnapshot | null>(null)
+  const [activeCategories, setActiveCategories] = useState<Set<number>>(() => new Set())
+  const [selectedSentences, setSelectedSentences] = useState<Set<number>>(() => new Set())
   const [highlighted, setHighlighted] = useState(true)
-  const [activeCategories, setActiveCategories] = useState(() => new Set(categories.map(({ name }) => name)))
-  const [rewriteMode, setRewriteMode] = useState('Simplify for Adults')
-  const sentences = useMemo(() => policy.match(/[^.!?]+[.!?]+/g)?.map((text) => text.trim()) ?? [], [policy])
-  const categoryCounts = categories.map((category, index) => ({ ...category, count: categoryForSentence.filter((categoryIndex) => categoryIndex === index).length }))
+  const [rewriteMode, setRewriteMode] = useState<RewriteStyle>('simplify_for_adults')
+  const [activeJob, setActiveJob] = useState<Job | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [status, setStatus] = useState('Ready to analyze')
+  const [error, setError] = useState<string | null>(null)
 
-  function toggleCategory(name: string) {
+  useEffect(() => {
+    Promise.all([getCategories(), getHealth()])
+      .then(([categoryBody, healthBody]) => {
+        setCategories(categoryBody.categories)
+        setActiveCategories(new Set(categoryBody.categories.map((category) => category.id)))
+        setHealth(healthBody)
+      })
+      .catch((cause: unknown) => setError(`API unavailable: ${messageOf(cause)}`))
+  }, [])
+
+  function editPolicy(value: string) {
+    setPolicy(value)
+    setPolicyId(null)
+    setSnapshot(null)
+    setSelectedSentences(new Set())
+    setError(null)
+    setStatus('Ready to analyze')
+  }
+
+  function toggleCategory(id: number) {
     setActiveCategories((current) => {
       const next = new Set(current)
-      if (next.has(name)) next.delete(name)
-      else next.add(name)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
       return next
     })
   }
+
+  function toggleSentence(id: number) {
+    if (!snapshot?.classification) return
+    setSelectedSentences((current) => {
+      const next = new Set(current)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  async function ensurePolicy(): Promise<string> {
+    if (policyId) return policyId
+    const created = await createPolicy(policy)
+    setPolicyId(created.id)
+    return created.id
+  }
+
+  async function analyze() {
+    setBusy(true)
+    setError(null)
+    setStatus('Analyzing…')
+    try {
+      const id = await ensurePolicy()
+      const result = await classify(id)
+      const current = await getResults(id)
+      setSnapshot(current)
+      setStatus(`Analyzed locally · ${result.sentences.length} sentences`)
+      if (activeCategories.size === 0 && categories.length) {
+        setActiveCategories(new Set(categories.map((category) => category.id)))
+      }
+    } catch (cause: unknown) {
+      setError(messageOf(cause))
+      setStatus('Analysis failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function onFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setBusy(true)
+    setError(null)
+    setStatus(`Reading ${file.name}…`)
+    try {
+      const text = await file.text()
+      setPolicy(text)
+      setPolicyId(null)
+      setSnapshot(null)
+      setSelectedSentences(new Set())
+      const uploaded = await uploadPolicy(file)
+      setPolicyId(uploaded.id)
+      const result = await classify(uploaded.id)
+      setSnapshot(await getResults(uploaded.id))
+      setStatus(`Analyzed ${file.name} · ${result.sentences.length} sentences`)
+    } catch (cause: unknown) {
+      setError(messageOf(cause))
+      setStatus('Upload failed')
+    } finally {
+      setBusy(false)
+      event.target.value = ''
+    }
+  }
+
+  async function pollJob(jobId: string, id: string) {
+    for (;;) {
+      const job = await getJob(jobId)
+      setActiveJob(job)
+      if (job.status === 'succeeded') {
+        setSnapshot(await getResults(id))
+        setStatus(job.kind === 'summary' ? 'Summaries ready' : 'Rewrite ready')
+        setActiveJob(null)
+        return
+      }
+      if (job.status === 'failed' || job.status === 'cancelled') {
+        setError(job.error?.message ?? `${job.kind} job was cancelled`)
+        setStatus(
+          job.error?.code === 'rewriter_model_not_downloaded'
+            ? 'Rewriter needs one-time model download'
+            : job.status === 'failed'
+              ? 'Generation failed'
+              : 'Generation stopped',
+        )
+        setActiveJob(null)
+        return
+      }
+      await new Promise((resolve) => setTimeout(resolve, 250))
+    }
+  }
+
+  async function summarize() {
+    setBusy(true)
+    setError(null)
+    try {
+      const id = await ensurePolicy()
+      if (!snapshot?.classification) {
+        await classify(id)
+        setSnapshot(await getResults(id))
+      }
+      const job = await startSummaries(id)
+      setActiveJob(job)
+      setStatus('Summarizing by category…')
+      await pollJob(job.id, id)
+    } catch (cause: unknown) {
+      setError(messageOf(cause))
+      setStatus('Summary failed')
+      setActiveJob(null)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function rewrite() {
+    setBusy(true)
+    setError(null)
+    try {
+      const id = await ensurePolicy()
+      if (!snapshot?.classification) {
+        await classify(id)
+        setSnapshot(await getResults(id))
+      }
+      const selected = selectedSentences.size
+        ? [...selectedSentences].sort((left, right) => left - right)
+        : undefined
+      const job = await startRewrite(id, rewriteMode, selected)
+      setActiveJob(job)
+      setStatus(`Generating ${styleLabels[rewriteMode]}…`)
+      await pollJob(job.id, id)
+    } catch (cause: unknown) {
+      setError(messageOf(cause))
+      setStatus('Rewrite failed')
+      setActiveJob(null)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function cancelActiveJob() {
+    if (!activeJob) return
+    try {
+      await cancelJob(activeJob.id)
+      setActiveJob(null)
+      setStatus('Cancelled')
+      setError('Generation was cancelled.')
+    } catch (cause: unknown) {
+      setError(messageOf(cause))
+    }
+  }
+
+  const categoryMap = new Map(categories.map((category) => [category.id, category]))
+  const counts = new Map(snapshot?.classification?.counts.map((count) => [count.label_id, count.count]) ?? [])
+  const sentences = snapshot?.classification?.sentences ?? previewSentences(policy)
+  const analyzed = snapshot?.classification !== null && snapshot?.classification !== undefined
+  const rewriterStatus = health?.rewriter_status ?? (health ? 'available' : 'checking')
+  const rewriterLabel = {
+    ready: 'Rewriter ready',
+    available: 'Rewriter available',
+    not_downloaded: 'Model download needed',
+    unavailable: 'Rewriter unavailable',
+    checking: 'Checking rewriter…',
+  }[rewriterStatus] ?? 'Rewriter available'
+  const rewriterSetup = health?.rewriter_setup
 
   return (
     <div className="app-shell">
       <aside className="category-rail">
         <div className="rail-label">Categories</div>
         <div className="category-list">
-          {categoryCounts.map((category) => <label className="category-chip" key={category.name} style={{ backgroundColor: category.color }}><input checked={activeCategories.has(category.name)} onChange={() => toggleCategory(category.name)} type="checkbox" /><span>{category.name}</span><strong>{category.count}</strong></label>)}
+          {categories.map((category) => (
+            <label className="category-chip" key={category.id} style={{ backgroundColor: category.color }}>
+              <input
+                checked={activeCategories.has(category.id)}
+                onChange={() => toggleCategory(category.id)}
+                type="checkbox"
+              />
+              <span>{category.display_name}</span>
+              <strong>{counts.get(category.id) ?? 0}</strong>
+            </label>
+          ))}
         </div>
         <div className="rail-footnote">Local analysis<br /><span>Nothing leaves this device</span></div>
       </aside>
 
       <main className="workspace">
-        <header className="topbar"><div><p className="eyebrow">Privacy Policy Reader</p><h1>See what a policy really says.</h1></div><span className="offline-badge"><i /> Offline mode</span></header>
+        <header className="topbar">
+          <div>
+            <p className="eyebrow">Privacy Policy Reader</p>
+            <h1>See what a policy really says.</h1>
+            <p className="api-status">{status}</p>
+          </div>
+          <span className="offline-badge"><i /> Offline mode</span>
+        </header>
+
+        {error && <div className="api-error" role="alert">{error}</div>}
 
         <section className="intro-panel">
-          <div className="panel-heading"><div><span className="step">01</span><h2>Bring in a policy</h2></div><span className="status-dot">{analyzed ? 'Analyzed locally' : 'Ready to analyze'}</span></div>
-          <textarea aria-label="Privacy policy text" value={policy} onChange={(event) => { setPolicy(event.target.value); setAnalyzed(false) }} />
-          <div className="action-row"><span className="character-count">{policy.length.toLocaleString()} characters · {sentences.length} sentences</span><button className="primary-button" onClick={() => { setAnalyzed(true); setHighlighted(true) }} type="button"><span>Analyze categories</span><b>→</b></button></div>
+          <div className="panel-heading">
+            <div><span className="step">01</span><h2>Bring in a policy</h2></div>
+            <span className="status-dot">{analyzed ? 'Analyzed locally' : 'Ready to analyze'}</span>
+          </div>
+          <textarea
+            aria-label="Privacy policy text"
+            value={policy}
+            onChange={(event) => editPolicy(event.target.value)}
+          />
+          <div className="action-row">
+            <span className="character-count">
+              {policy.length.toLocaleString()} characters · {sentences.length} sentences
+            </span>
+            <div className="button-row">
+              <label className="secondary-button">
+                Open .txt
+                <input type="file" accept=".txt,text/plain" onChange={onFileChange} disabled={busy} />
+              </label>
+              <button className="primary-button" onClick={analyze} disabled={busy} type="button">
+                <span>Analyze categories</span><b>→</b>
+              </button>
+            </div>
+          </div>
         </section>
 
         <div className="content-grid">
           <section className="results-panel">
-            <div className="panel-heading result-heading"><div><span className="step">02</span><h2>Sentence map</h2></div><label className="toggle-label"><input checked={highlighted && analyzed} disabled={!analyzed} onChange={(event) => setHighlighted(event.target.checked)} type="checkbox" /><span className="toggle" /> Highlight categories</label></div>
+            <div className="panel-heading result-heading">
+              <div><span className="step">02</span><h2>Sentence map</h2></div>
+              <label className="toggle-label">
+                <input
+                  checked={highlighted && analyzed}
+                  disabled={!analyzed}
+                  onChange={(event) => setHighlighted(event.target.checked)}
+                  type="checkbox"
+                />
+                <span className="toggle" /> Highlight categories
+              </label>
+            </div>
+            {analyzed && (
+              <p className="selection-hint">
+                {selectedSentences.size
+                  ? `${selectedSentences.size} sentence${selectedSentences.size === 1 ? '' : 's'} selected for rewriting. Click again to deselect.`
+                  : 'Click sentences to select them for rewriting. With none selected, the whole policy is used.'}
+              </p>
+            )}
             <div className="sentence-list">
-              {sentences.map((sentence, index) => { const category = categories[categoryForSentence[index] ?? index % categories.length]; const isVisible = highlighted && activeCategories.has(category.name) && analyzed; return <div className={`sentence ${isVisible ? 'is-highlighted' : ''}`} key={`${sentence}-${index}`} style={{ '--sentence-tint': category.tint, '--sentence-color': category.color } as React.CSSProperties}><span className="sentence-number">{String(index + 1).padStart(2, '0')}</span><p>{sentence}</p>{analyzed && <span className="sentence-tag">{category.name}</span>}</div> })}
+              {sentences.map((sentence) => {
+                const category = sentence.label_id === null ? undefined : categoryMap.get(sentence.label_id)
+                const isVisible = highlighted && category !== undefined && activeCategories.has(sentence.label_id!)
+                const isSelected = selectedSentences.has(sentence.id)
+                return (
+                  <div
+                    aria-pressed={analyzed ? isSelected : undefined}
+                    className={`sentence ${isVisible ? 'is-highlighted' : ''} ${isSelected ? 'is-selected' : ''}`}
+                    key={sentence.id}
+                    onClick={() => toggleSentence(sentence.id)}
+                    onKeyDown={(event) => {
+                      if (analyzed && (event.key === 'Enter' || event.key === ' ')) {
+                        event.preventDefault()
+                        toggleSentence(sentence.id)
+                      }
+                    }}
+                    role={analyzed ? 'button' : undefined}
+                    style={
+                      category
+                        ? { '--sentence-tint': tintOf(category), '--sentence-color': category.color } as CSSProperties
+                        : undefined
+                    }
+                    tabIndex={analyzed ? 0 : undefined}
+                  >
+                    <span className="sentence-number">{String(sentence.id + 1).padStart(2, '0')}</span>
+                    <p>{sentence.text}</p>
+                    {category && <span className="sentence-tag">{category.display_name}</span>}
+                    {sentence.error && <span className="sentence-error">{sentence.error}</span>}
+                  </div>
+                )
+              })}
               {!sentences.length && <div className="empty-state">Paste policy text above to see sentence-level results.</div>}
             </div>
+
+            {snapshot?.summaries.length ? (
+              <div className="summary-list">
+                <h3>Category summaries</h3>
+                {snapshot.summaries.map((summary) => (
+                  <div className="summary-item" key={summary.label_id}>
+                    <strong>{summary.category}</strong>
+                    <p>{summary.text}</p>
+                    <span className="source-link">
+                      Sources: {summary.source_sentence_ids.map((id) => id + 1).join(', ')}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </section>
 
-          <section className="rewrite-panel"><div className="panel-heading"><div><span className="step">03</span><h2>Make it clearer</h2></div><span className="spark">✦</span></div><p className="rewrite-copy">Choose a reading style. The rewrite keeps the original details and stays on your device.</p><div className="rewrite-options">{['Simplify for Kids', 'Simplify for Adults', 'Paraphrase'].map((mode) => <button className={rewriteMode === mode ? 'selected' : ''} onClick={() => setRewriteMode(mode)} key={mode} type="button"><span>{mode === 'Paraphrase' ? '↗' : mode === 'Simplify for Kids' ? '☼' : '◌'}</span>{mode}</button>)}</div><div className="rewrite-result"><span className="result-label">{rewriteMode}</span><p>BrightCart uses your information to provide its services and make your shopping experience better. It may share your email with trusted partners who help send you relevant offers.</p><span className="source-link">Based on sentences 1–4 ↗</span></div></section>
+          <section className="rewrite-panel">
+            <div className="panel-heading">
+              <div><span className="step">03</span><h2>Make it clearer</h2></div>
+              <span className={`rewriter-badge ${rewriterStatus}`}>{rewriterLabel}</span>
+            </div>
+            <p className="rewrite-copy">
+              The rewriter is wired in and runs locally. Choose a reading style and select sentences
+              above, or rewrite the whole policy. Until style-specific prompts are evaluated, every
+              style uses the benchmark's <strong>summary-v3</strong> prompt; warnings flag details to
+              check.
+            </p>
+            {rewriterSetup && (
+              <div className="rewriter-setup" role="status">
+                <strong>One-time setup needed.</strong> The rewriter code is ready; only its pinned
+                GGUF model file is missing from this device.
+                <code>{rewriterSetup}</code>
+              </div>
+            )}
+            <div className="rewrite-options">
+              {(Object.keys(styleLabels) as RewriteStyle[]).map((style) => (
+                <button
+                  className={rewriteMode === style ? 'selected' : ''}
+                  onClick={() => setRewriteMode(style)}
+                  key={style}
+                  type="button"
+                >
+                  <span>{styleIcons[style]}</span>{styleLabels[style]}
+                </button>
+              ))}
+            </div>
+            <div className="rewrite-actions">
+              <button className="primary-button" onClick={rewrite} disabled={busy} type="button">
+                <span>Generate {styleLabels[rewriteMode]}</span><b>→</b>
+              </button>
+              <button className="secondary-button" onClick={summarize} disabled={busy} type="button">
+                Summarize categories
+              </button>
+              {activeJob && (
+                <button className="secondary-button" onClick={cancelActiveJob} type="button">
+                  Cancel {activeJob.progress?.stage ?? activeJob.status}
+                </button>
+              )}
+            </div>
+            <div className="rewrite-result">
+              <span className="result-label">
+                {snapshot?.rewrites.length ? styleLabels[rewriteMode] : 'No rewrite generated yet'}
+              </span>
+              {snapshot?.rewrites.length ? (
+                snapshot.rewrites.map((item) => (
+                  <div key={item.id}>
+                    <p>{item.text}</p>
+                    <span className="source-link">
+                      Sources: {item.source_sentence_ids.map((id) => id + 1).join(', ')}
+                    </span>
+                    {item.warnings.length ? (
+                      <ul className="rewrite-warnings">
+                        {item.warnings.map((warning) => <li key={warning}>{warning}</li>)}
+                      </ul>
+                    ) : null}
+                  </div>
+                ))
+              ) : (
+                <p>
+                  Analyze a policy, choose a style, then generate a source-linked rewrite. The
+                  rewriter is available locally; if its one-time model download is missing, the job
+                  reports the exact setup command.
+                </p>
+              )}
+            </div>
+          </section>
         </div>
       </main>
     </div>
