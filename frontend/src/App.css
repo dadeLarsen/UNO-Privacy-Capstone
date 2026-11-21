@@ -54,6 +54,7 @@ textarea:focus { border-color: #2687d8; box-shadow: 0 0 0 3px rgb(38 135 216 / 1
 .policy-card { padding: 14px 16px; }
 .column-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .rewrite-part { color: #58706a; font-size: 11px; }
+.rewrite-copy { display: flex; align-items: center; gap: 10px; margin-left: auto; color: #58706a; font-size: 11px; }
 .sentence-list { display: grid; gap: 4px; }
 .sentence { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: start; gap: 9px; padding: 9px 10px; border-left: 3px solid transparent; border-radius: 3px; font-size: 12px; line-height: 1.45; transition: background .2s; }
 .sentence.is-highlighted { background: var(--sentence-tint); border-left-color: var(--sentence-color); }

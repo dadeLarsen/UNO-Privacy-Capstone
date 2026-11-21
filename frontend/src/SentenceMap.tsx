@@ -122,6 +122,8 @@ function SentenceMap({
   const [view, setView] = useState<View>('both')
   // The sources of the link followed last, which the map outlines, and the sentence to bring into view.
   const [cited, setCited] = useState<{ ids: number[]; first: number } | null>(null)
+  // What the last copy did, beside its button: "Copied" for a moment, or why it failed.
+  const [copyNote, setCopyNote] = useState('')
 
   useEffect(() => {
     if (!cited) return
@@ -151,6 +153,17 @@ function SentenceMap({
     : []
   const style = rewriteJob?.result?.kind === 'rewrite' ? rewriteJob.result.style : null
   const ending = rewriteJob?.status === 'cancelled' ? ', cancelled' : rewriteJob?.status === 'failed' ? ', failed' : ' so far'
+
+  // Copies the rewrite as the page shows it: the sections that have one, in order, a blank line between them.
+  async function copyRewrite() {
+    try {
+      await navigator.clipboard.writeText(written.map((rewrite) => rewrite.text).join('\n\n'))
+      setCopyNote('Copied')
+      setTimeout(() => setCopyNote(''), 3000)
+    } catch (cause: unknown) {
+      setCopyNote(`Not copied: ${cause instanceof Error ? cause.message : String(cause)}`)
+    }
+  }
 
   function cite(ids: number[], first: number) {
     // The Rewrite view hides the original, where the link leads.
@@ -269,6 +282,12 @@ function SentenceMap({
                 <h2>Rewrite{style && ` · ${styleLabels[style]}`}</h2>
                 {written.length < blocks.length && (
                   <span className="rewrite-part">{written.length} of {blocks.length} sections{ending}</span>
+                )}
+                {written.length > 0 && (
+                  <div className="rewrite-copy">
+                    <span role="status">{copyNote}</span>
+                    <button className="secondary-button" onClick={copyRewrite} type="button">Copy rewrite</button>
+                  </div>
                 )}
               </div>
               {shared.length > 0 && (
