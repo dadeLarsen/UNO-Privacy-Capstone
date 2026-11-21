@@ -18,24 +18,13 @@ import {
   type Sentence,
 } from './api'
 import './App.css'
+import RewritePanel from './RewritePanel'
 
 const examplePolicy = `At BrightCart, your privacy is important to us. When you sign up, place an order, or contact our support team, we collect personal information such as your name, email address, shipping details, and payment method to process your requests and improve your shopping experience.
 
 We may share certain information, such as your email address, with trusted third-party marketing partners who assist us in delivering personalized promotions. These partners are required to maintain confidentiality and are not permitted to use your data for other purposes.
 
 You have the ability to manage your communication preferences at any time. To stop receiving promotional emails, simply click the unsubscribe link in any message or update your account settings.`
-
-const styleLabels: Record<RewriteStyle, string> = {
-  paraphrase: 'Paraphrase',
-  simplify_for_kids: 'Simplify for Kids',
-  simplify_for_adults: 'Simplify for Adults',
-}
-
-const styleIcons: Record<RewriteStyle, string> = {
-  paraphrase: '↗',
-  simplify_for_kids: '☼',
-  simplify_for_adults: '◌',
-}
 
 function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
@@ -62,7 +51,6 @@ function App() {
   const [activeCategories, setActiveCategories] = useState<Set<number>>(() => new Set())
   const [selectedSentences, setSelectedSentences] = useState<Set<number>>(() => new Set())
   const [highlighted, setHighlighted] = useState(true)
-  const [rewriteMode, setRewriteMode] = useState<RewriteStyle>('simplify_for_adults')
   const [activeJob, setActiveJob] = useState<Job | null>(null)
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState('Ready to analyze')
@@ -219,7 +207,7 @@ function App() {
     }
   }
 
-  async function rewrite() {
+  async function rewrite(style: RewriteStyle, label: string) {
     setBusy(true)
     setError(null)
     try {
@@ -228,9 +216,9 @@ function App() {
       const selected = selectedSentences.size
         ? [...selectedSentences].sort((left, right) => left - right)
         : undefined
-      const job = await startRewrite(id, rewriteMode, selected)
+      const job = await startRewrite(id, style, selected)
       setActiveJob(job)
-      setStatus(`Generating ${styleLabels[rewriteMode]}…`)
+      setStatus(`Generating ${label}…`)
       await pollJob(job.id, id)
     } catch (cause: unknown) {
       showFailure(cause, 'Rewrite failed')
@@ -387,68 +375,14 @@ function App() {
             ) : null}
           </section>
 
-          <section className="rewrite-panel">
-            <div className="panel-heading">
-              <div><span className="step">03</span><h2>Make it clearer</h2></div>
-            </div>
-            <p className="rewrite-copy">
-              The rewriter is wired in and runs locally. Choose a reading style and select sentences
-              above, or rewrite the whole policy. Until style-specific prompts are evaluated, every
-              style uses the benchmark's <strong>summary-v3</strong> prompt; warnings flag details to
-              check.
-            </p>
-            <div className="rewrite-options">
-              {(Object.keys(styleLabels) as RewriteStyle[]).map((style) => (
-                <button
-                  className={rewriteMode === style ? 'selected' : ''}
-                  onClick={() => setRewriteMode(style)}
-                  key={style}
-                  type="button"
-                >
-                  <span>{styleIcons[style]}</span>{styleLabels[style]}
-                </button>
-              ))}
-            </div>
-            <div className="rewrite-actions">
-              <button className="primary-button" onClick={rewrite} disabled={busy} type="button">
-                <span>Generate {styleLabels[rewriteMode]}</span><b>→</b>
-              </button>
-              <button className="secondary-button" onClick={summarize} disabled={busy} type="button">
-                Summarize categories
-              </button>
-              {activeJob && (
-                <button className="secondary-button" onClick={cancelActiveJob} type="button">
-                  Cancel {activeJob.progress?.stage ?? activeJob.status}
-                </button>
-              )}
-            </div>
-            <div className="rewrite-result">
-              <span className="result-label">
-                {snapshot?.rewrites.length ? 'Latest rewrite' : 'No rewrite generated yet'}
-              </span>
-              {snapshot?.rewrites.length ? (
-                snapshot.rewrites.map((item) => (
-                  <div key={item.id}>
-                    <p>{item.text}</p>
-                    <span className="source-link">
-                      Sources: {item.source_sentence_ids.map((id) => id + 1).join(', ')}
-                    </span>
-                    {item.warnings.length ? (
-                      <ul className="rewrite-warnings">
-                        {item.warnings.map((warning) => <li key={warning}>{warning}</li>)}
-                      </ul>
-                    ) : null}
-                  </div>
-                ))
-              ) : (
-                <p>
-                  Analyze a policy, choose a style, then generate a source-linked rewrite. The
-                  rewriter is available locally; if its one-time model download is missing, the job
-                  reports the exact setup command.
-                </p>
-              )}
-            </div>
-          </section>
+          <RewritePanel
+            busy={busy}
+            activeJob={activeJob}
+            rewrites={snapshot?.rewrites ?? []}
+            onRewrite={rewrite}
+            onSummarize={summarize}
+            onCancel={cancelActiveJob}
+          />
         </div>
       </main>
     </div>
