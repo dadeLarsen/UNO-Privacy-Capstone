@@ -238,6 +238,8 @@ function SentenceMap({
     const own = block.rewrite?.warnings.filter((warning) => !shared.includes(warning)) ?? []
     return (
       <div className={`row-rewrite ${block.rewrite ? '' : 'is-pending'}`}>
+        {/* Shown where the rewrite stands under its sentences and no column head names it. */}
+        <span className="rewrite-label">Rewrite</span>
         <p>{block.rewrite ? block.rewrite.text : pendingNote(rewriteJob, index)}</p>
         {sourceLinks(block.ids)}
         {own.length > 0 && (
