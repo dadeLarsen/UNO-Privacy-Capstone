@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent, type CSSProperties } from 'react'
+import { useEffect, useState, type ChangeEvent } from 'react'
 import {
   ApiError,
   cancelJob,
@@ -19,6 +19,7 @@ import {
 } from './api'
 import './App.css'
 import RewritePanel from './RewritePanel'
+import SentenceMap from './SentenceMap'
 
 const examplePolicy = `At BrightCart, your privacy is important to us. When you sign up, place an order, or contact our support team, we collect personal information such as your name, email address, shipping details, and payment method to process your requests and improve your shopping experience.
 
@@ -39,10 +40,6 @@ function previewSentences(text: string): Sentence[] {
     .filter((sentence) => sentence.text.length > 0)
 }
 
-function tintOf(category: Category): string {
-  return category.tint ?? `${category.color}1a`
-}
-
 function App() {
   const [policy, setPolicy] = useState(examplePolicy)
   const [policyId, setPolicyId] = useState<string | null>(null)
@@ -50,7 +47,6 @@ function App() {
   const [snapshot, setSnapshot] = useState<AnalysisSnapshot | null>(null)
   const [activeCategories, setActiveCategories] = useState<Set<number>>(() => new Set())
   const [selectedSentences, setSelectedSentences] = useState<Set<number>>(() => new Set())
-  const [highlighted, setHighlighted] = useState(true)
   const [activeJob, setActiveJob] = useState<Job | null>(null)
   // The latest rewrite job as last polled. It stays after the job ends, to say whether the rewrite is whole.
   const [rewriteJob, setRewriteJob] = useState<Job | null>(null)
@@ -315,59 +311,14 @@ function App() {
 
         <div className="content-grid">
           <section className="results-panel">
-            <div className="panel-heading result-heading">
-              <div><span className="step">02</span><h2>Sentence map</h2></div>
-              <label className="toggle-label">
-                <input
-                  checked={highlighted && analyzed}
-                  disabled={!analyzed}
-                  onChange={(event) => setHighlighted(event.target.checked)}
-                  type="checkbox"
-                />
-                <span className="toggle" /> Highlight categories
-              </label>
-            </div>
-            {analyzed && (
-              <p className="selection-hint">
-                {selectedSentences.size
-                  ? `${selectedSentences.size} sentence${selectedSentences.size === 1 ? '' : 's'} selected for rewriting. Click again to deselect.`
-                  : 'Click sentences to select them for rewriting. With none selected, the whole policy is used.'}
-              </p>
-            )}
-            <div className="sentence-list">
-              {sentences.map((sentence) => {
-                const category = sentence.label_id === null ? undefined : categoryMap.get(sentence.label_id)
-                const isVisible = highlighted && category !== undefined && activeCategories.has(sentence.label_id!)
-                const isSelected = selectedSentences.has(sentence.id)
-                return (
-                  <div
-                    aria-pressed={analyzed ? isSelected : undefined}
-                    className={`sentence ${isVisible ? 'is-highlighted' : ''} ${isSelected ? 'is-selected' : ''}`}
-                    key={sentence.id}
-                    onClick={() => toggleSentence(sentence.id)}
-                    onKeyDown={(event) => {
-                      if (analyzed && (event.key === 'Enter' || event.key === ' ')) {
-                        event.preventDefault()
-                        toggleSentence(sentence.id)
-                      }
-                    }}
-                    role={analyzed ? 'button' : undefined}
-                    style={
-                      category
-                        ? { '--sentence-tint': tintOf(category), '--sentence-color': category.color } as CSSProperties
-                        : undefined
-                    }
-                    tabIndex={analyzed ? 0 : undefined}
-                  >
-                    <span className="sentence-number">{String(sentence.id + 1).padStart(2, '0')}</span>
-                    <p>{sentence.text}</p>
-                    {category && <span className="sentence-tag">{category.display_name}</span>}
-                    {sentence.error && <span className="sentence-error">{sentence.error}</span>}
-                  </div>
-                )
-              })}
-              {!sentences.length && <div className="empty-state">Paste policy text above to see sentence-level results.</div>}
-            </div>
+            <SentenceMap
+              sentences={sentences}
+              analyzed={analyzed}
+              categories={categoryMap}
+              activeCategories={activeCategories}
+              selected={selectedSentences}
+              onToggle={toggleSentence}
+            />
 
             {snapshot?.summaries.length ? (
               <div className="summary-list">
