@@ -31,13 +31,21 @@ Results and their caveats are in the [model research README](privacy-research/RE
 
 ## Run locally
 
-After the one-time setup in [`modelService/README.md`](modelService/README.md), which downloads both models, and [`api/README.md`](api/README.md), start the whole app from this folder with:
+Setup needs [uv](https://docs.astral.sh/uv/), [Node.js](https://nodejs.org/) with npm, and the internet once. From this folder, run:
+
+```bash
+python3 run.py setup
+```
+
+It installs the model service, the API, and the frontend, and downloads the two pinned model files (296 MiB and 2.55 GiB). It stops at the first step that fails and names it. Where it finds `nvidia-smi`, it installs the CUDA 13.2 build of llama.cpp; elsewhere it compiles llama.cpp for the CPU, which needs CMake and a C++ compiler, as Setup in [`modelService/README.md`](modelService/README.md) explains. Run it again after pulling a change to a `uv.lock` or to `package-lock.json`.
+
+Then start the whole app from this folder with:
 
 ```bash
 python3 run.py
 ```
 
-On Windows, use `python run.py`. The launcher starts the model service on `127.0.0.1:8000`, the API on `127.0.0.1:8001`, and Vite on `127.0.0.1:5173`, wires their URLs together, prefixes their logs, and stops all three when you press Ctrl+C. The first model start can take a while; classification works once the model log says it is ready.
+On Windows, use `python` in place of `python3`. The launcher starts the model service on `127.0.0.1:8000`, the API on `127.0.0.1:8001`, and Vite on `127.0.0.1:5173`, wires their URLs together, prefixes their logs, and stops all three when you press Ctrl+C. The first model start can take a while; classification works once the model log says it is ready.
 
 Override any port with an environment variable:
 

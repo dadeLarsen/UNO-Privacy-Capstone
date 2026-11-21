@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""Start the whole local app from the repository root with one command.
+"""Set up and start the whole local app from the repository root.
 
-The launcher owns three localhost ports and wires the services together:
+`python run.py setup` installs every part's dependencies and downloads the pinned
+model files, once, while online. `python run.py` then starts the app. The launcher
+owns three localhost ports and wires the services together:
 
     browser -> frontend/ (Vite) -> api/ (FastAPI) -> modelService/ (classifier)
 
@@ -11,6 +13,7 @@ with the environment variables documented in the root README.
 
 from __future__ import annotations
 
+import argparse
 import os
 import shutil
 import signal
@@ -27,6 +30,14 @@ ROOT = Path(__file__).resolve().parent
 DEFAULT_MODEL_PORT = 8000
 DEFAULT_API_PORT = 8001
 DEFAULT_WEB_PORT = 5173
+# Every default condition in modelService/src/model_service/settings.py, relative to modelService/.
+# A model's GPU and CPU conditions pin the same file, so the second download finds it cached.
+MODEL_CONDITIONS = [
+    "../privacy-research/conditions/classification/appsi139/embeddinggemma2-gguf-q8-gpu-head-linear-balanced-tuned-limit2048-appsi139-test-half.toml",
+    "../privacy-research/conditions/classification/appsi139/embeddinggemma2-gguf-q8-cpu-head-linear-balanced-tuned-limit2048-appsi139-test-half.toml",
+    "../privacy-research/conditions/rewrite/qwen3.5-4b-q4km-gpu-summary-v3.toml",
+    "../privacy-research/conditions/rewrite/qwen3.5-4b-q4km-cpu-summary-v3.toml",
+]
 
 
 def _port(name: str, default: int) -> int:
@@ -140,6 +151,43 @@ def _request_stop(_signum, _frame) -> None:
     raise KeyboardInterrupt
 
 
+def _require_commands() -> tuple[str, str]:
+    uv = shutil.which("uv")
+    npm = shutil.which("npm")
+    if uv is None or npm is None:
+        missing = ", ".join(name for name, path in (("uv", uv), ("npm", npm)) if path is None)
+        raise SystemExit(f"Missing required command(s): {missing}. Install them and rerun.")
+    return uv, npm
+
+
+def setup() -> int:
+    """Install the dependencies and download the models in order; stop at the first failure."""
+    uv, npm = _require_commands()
+    # nvidia-smi comes with the NVIDIA driver; without one, the CUDA build has no GPU to use.
+    cuda = shutil.which("nvidia-smi") is not None
+    print(
+        "[setup] nvidia-smi found: installing the CUDA 13.2 build of llama.cpp."
+        if cuda
+        else "[setup] nvidia-smi not found: compiling llama.cpp for the CPU, which needs CMake and a C++ compiler.",
+        flush=True,
+    )
+    steps = [
+        ("modelService", [uv, "sync"] if cuda else [uv, "sync", "--no-group", "cu132", "--group", "cpu"]),
+        ("api", [uv, "sync"]),
+        ("frontend", [npm, "ci"]),
+        *(("modelService", [uv, "run", "--no-sync", "pbench", "download", path]) for path in MODEL_CONDITIONS),
+    ]
+    for folder, command in steps:
+        shown = " ".join([Path(command[0]).stem, *command[1:]])
+        print(f"\n[setup] {folder}> {shown}", flush=True)
+        code = subprocess.run(command, cwd=ROOT / folder, check=False).returncode
+        if code != 0:
+            print(f"\n[setup] Failed in {folder} with exit code {code}: {shown}", file=sys.stderr, flush=True)
+            return code
+    print("\n[setup] Done. Start the app with: python run.py", flush=True)
+    return 0
+
+
 def main() -> int:
     model_port = _port("MODEL_SERVICE_PORT", DEFAULT_MODEL_PORT)
     api_port = _port("API_PORT", DEFAULT_API_PORT)
@@ -156,14 +204,9 @@ def main() -> int:
                 f"{variable}=<free-port> and rerun."
             )
 
-    uv = shutil.which("uv")
-    npm = shutil.which("npm")
-    if uv is None or npm is None:
-        missing = ", ".join(name for name, path in (("uv", uv), ("npm", npm)) if path is None)
-        raise SystemExit(f"Missing required command(s): {missing}. Install them and rerun.")
-
-    if not (ROOT / "frontend" / "node_modules").is_dir():
-        raise SystemExit("Frontend dependencies are missing. Run: cd frontend && npm install")
+    uv, npm = _require_commands()
+    if not (ROOT / "modelService" / ".venv").is_dir() or not (ROOT / "frontend" / "node_modules").is_dir():
+        raise SystemExit("Dependencies are missing. Run: python run.py setup")
 
     env = os.environ.copy()
     env.update(
@@ -187,8 +230,9 @@ def main() -> int:
         print(f"[run] frontend     http://127.0.0.1:{web_port}", flush=True)
         print("[run] Ctrl+C stops all three.\n", flush=True)
 
+        # A sync here would swap the CPU build of llama.cpp that setup chose for the default CUDA one.
         processes.append(
-            ("model", _spawn("model", ROOT / "modelService", [uv, "run", "model-service"], env))
+            ("model", _spawn("model", ROOT / "modelService", [uv, "run", "--no-sync", "model-service"], env))
         )
         processes.append(
             ("api", _spawn("api", ROOT / "api", [uv, "run", "python", "-m", "api_service"], env))
@@ -231,4 +275,11 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    parser = argparse.ArgumentParser(description="Start the local app, or set it up first.")
+    parser.add_argument(
+        "command",
+        nargs="?",
+        choices=["setup"],
+        help="install the dependencies and download the pinned models, then exit",
+    )
+    raise SystemExit(setup() if parser.parse_args().command == "setup" else main())

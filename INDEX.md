@@ -24,7 +24,7 @@ Data, configuration, and results entries have a status:
 | Path | Contents |
 | --- | --- |
 | [docs/](docs/) | Requirements and design for the app |
-| [run.py](run.py) | One-command localhost launcher for the model service, API, and Vite frontend |
+| [run.py](run.py) | `python run.py setup` installs the model service, API, and frontend and downloads the pinned models; `python run.py` starts all three on localhost |
 | [frontend/](frontend/) | The browser interface, React and TypeScript on Vite; [src/api.ts](frontend/src/api.ts) is its client for `api/` |
 | [api/](api/) | The localhost-only frontend-facing API: uploads, classifications, summaries, and jobs |
 | [modelService/](modelService/) | The localhost-only model service: classifies a policy and returns one category per sentence, and rewrites a passage |
