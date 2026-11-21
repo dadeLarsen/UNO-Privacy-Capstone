@@ -280,7 +280,10 @@ class Job(BaseModel):
     created_at: datetime = Field(default_factory=_utcnow)
     updated_at: datetime = Field(default_factory=_utcnow)
     error: ApiErrorInfo | None = None
-    result: GenerationResult | None = None
+    result: GenerationResult | None = Field(
+        default=None,
+        description="A rewrite job that is running, cancelled, or failed holds the sections it finished.",
+    )
 
     @model_validator(mode="after")
     def result_matches_kind(self) -> Job:

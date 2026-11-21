@@ -18,24 +18,13 @@ import {
   type Sentence,
 } from './api'
 import './App.css'
+import RewritePanel from './RewritePanel'
 
 const examplePolicy = `At BrightCart, your privacy is important to us. When you sign up, place an order, or contact our support team, we collect personal information such as your name, email address, shipping details, and payment method to process your requests and improve your shopping experience.
 
 We may share certain information, such as your email address, with trusted third-party marketing partners who assist us in delivering personalized promotions. These partners are required to maintain confidentiality and are not permitted to use your data for other purposes.
 
 You have the ability to manage your communication preferences at any time. To stop receiving promotional emails, simply click the unsubscribe link in any message or update your account settings.`
-
-const styleLabels: Record<RewriteStyle, string> = {
-  paraphrase: 'Paraphrase',
-  simplify_for_kids: 'Simplify for Kids',
-  simplify_for_adults: 'Simplify for Adults',
-}
-
-const styleIcons: Record<RewriteStyle, string> = {
-  paraphrase: '↗',
-  simplify_for_kids: '☼',
-  simplify_for_adults: '◌',
-}
 
 function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
@@ -62,8 +51,9 @@ function App() {
   const [activeCategories, setActiveCategories] = useState<Set<number>>(() => new Set())
   const [selectedSentences, setSelectedSentences] = useState<Set<number>>(() => new Set())
   const [highlighted, setHighlighted] = useState(true)
-  const [rewriteMode, setRewriteMode] = useState<RewriteStyle>('simplify_for_adults')
   const [activeJob, setActiveJob] = useState<Job | null>(null)
+  // The latest rewrite job as last polled. It stays after the job ends, to say whether the rewrite is whole.
+  const [rewriteJob, setRewriteJob] = useState<Job | null>(null)
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState('Ready to analyze')
   const [error, setError] = useState<string | null>(null)
@@ -83,6 +73,7 @@ function App() {
     setPolicyId(null)
     setSnapshot(null)
     setSelectedSentences(new Set())
+    setRewriteJob(null)
   }
 
   function editPolicy(value: string) {
@@ -184,20 +175,28 @@ function App() {
   async function pollJob(jobId: string, id: string) {
     for (;;) {
       const job = await getJob(jobId)
-      setActiveJob(job)
+      if (job.kind === 'rewrite') setRewriteJob(job)
+      if (job.status === 'queued' || job.status === 'running') {
+        setActiveJob(job)
+        await new Promise((resolve) => setTimeout(resolve, 250))
+        continue
+      }
+      setActiveJob(null)
+      // A cancelled or failed rewrite keeps the sections it finished, so every ending loads the results.
+      setSnapshot(await getResults(id))
+      const name = job.kind === 'summary' ? 'Summary' : 'Rewrite'
+      const sections = job.kind === 'rewrite' && job.progress ? job.progress : null
       if (job.status === 'succeeded') {
-        setSnapshot(await getResults(id))
         setStatus(job.kind === 'summary' ? 'Summaries ready' : 'Rewrite ready')
-        setActiveJob(null)
-        return
+      } else if (job.status === 'failed') {
+        setError(job.error?.message ?? `${name} failed`)
+        setStatus(sections ? `${name} failed at section ${sections.completed + 1} of ${sections.total}` : `${name} failed`)
+      } else {
+        setStatus(
+          sections ? `${name} cancelled after ${sections.completed} of ${sections.total} sections` : `${name} cancelled`,
+        )
       }
-      if (job.status === 'failed' || job.status === 'cancelled') {
-        setError(job.error?.message ?? `${job.kind} job was cancelled`)
-        setStatus(job.status === 'failed' ? 'Generation failed' : 'Generation stopped')
-        setActiveJob(null)
-        return
-      }
-      await new Promise((resolve) => setTimeout(resolve, 250))
+      return
     }
   }
 
@@ -219,7 +218,7 @@ function App() {
     }
   }
 
-  async function rewrite() {
+  async function rewrite(style: RewriteStyle, label: string) {
     setBusy(true)
     setError(null)
     try {
@@ -228,9 +227,9 @@ function App() {
       const selected = selectedSentences.size
         ? [...selectedSentences].sort((left, right) => left - right)
         : undefined
-      const job = await startRewrite(id, rewriteMode, selected)
+      const job = await startRewrite(id, style, selected)
       setActiveJob(job)
-      setStatus(`Generating ${styleLabels[rewriteMode]}…`)
+      setStatus(`Generating ${label}…`)
       await pollJob(job.id, id)
     } catch (cause: unknown) {
       showFailure(cause, 'Rewrite failed')
@@ -243,10 +242,9 @@ function App() {
   async function cancelActiveJob() {
     if (!activeJob) return
     try {
+      // The poll that follows sees the cancelled job, loads what it finished, and says how far it was.
       await cancelJob(activeJob.id)
       setActiveJob(null)
-      setStatus('Cancelled')
-      setError('Generation was cancelled.')
     } catch (cause: unknown) {
       setError(messageOf(cause))
     }
@@ -387,68 +385,20 @@ function App() {
             ) : null}
           </section>
 
-          <section className="rewrite-panel">
-            <div className="panel-heading">
-              <div><span className="step">03</span><h2>Make it clearer</h2></div>
-            </div>
-            <p className="rewrite-copy">
-              The rewriter is wired in and runs locally. Choose a reading style and select sentences
-              above, or rewrite the whole policy. Until style-specific prompts are evaluated, every
-              style uses the benchmark's <strong>summary-v3</strong> prompt; warnings flag details to
-              check.
-            </p>
-            <div className="rewrite-options">
-              {(Object.keys(styleLabels) as RewriteStyle[]).map((style) => (
-                <button
-                  className={rewriteMode === style ? 'selected' : ''}
-                  onClick={() => setRewriteMode(style)}
-                  key={style}
-                  type="button"
-                >
-                  <span>{styleIcons[style]}</span>{styleLabels[style]}
-                </button>
-              ))}
-            </div>
-            <div className="rewrite-actions">
-              <button className="primary-button" onClick={rewrite} disabled={busy} type="button">
-                <span>Generate {styleLabels[rewriteMode]}</span><b>→</b>
-              </button>
-              <button className="secondary-button" onClick={summarize} disabled={busy} type="button">
-                Summarize categories
-              </button>
-              {activeJob && (
-                <button className="secondary-button" onClick={cancelActiveJob} type="button">
-                  Cancel {activeJob.progress?.stage ?? activeJob.status}
-                </button>
-              )}
-            </div>
-            <div className="rewrite-result">
-              <span className="result-label">
-                {snapshot?.rewrites.length ? 'Latest rewrite' : 'No rewrite generated yet'}
-              </span>
-              {snapshot?.rewrites.length ? (
-                snapshot.rewrites.map((item) => (
-                  <div key={item.id}>
-                    <p>{item.text}</p>
-                    <span className="source-link">
-                      Sources: {item.source_sentence_ids.map((id) => id + 1).join(', ')}
-                    </span>
-                    {item.warnings.length ? (
-                      <ul className="rewrite-warnings">
-                        {item.warnings.map((warning) => <li key={warning}>{warning}</li>)}
-                      </ul>
-                    ) : null}
-                  </div>
-                ))
-              ) : (
-                <p>
-                  Analyze a policy, choose a style, then generate a source-linked rewrite. The
-                  rewriter is available locally; if its one-time model download is missing, the job
-                  reports the exact setup command.
-                </p>
-              )}
-            </div>
-          </section>
+          <RewritePanel
+            busy={busy}
+            scope={
+              selectedSentences.size
+                ? `${selectedSentences.size} selected ${selectedSentences.size === 1 ? 'sentence' : 'sentences'}`
+                : 'the whole policy'
+            }
+            activeJob={activeJob}
+            rewriteJob={rewriteJob}
+            rewrites={snapshot?.rewrites ?? []}
+            onRewrite={rewrite}
+            onSummarize={summarize}
+            onCancel={cancelActiveJob}
+          />
         </div>
       </main>
     </div>

@@ -21,7 +21,7 @@ Not planned for the first version: chat about a policy, PDF or DOCX import, lang
 
 ## Status
 
-The interface calls [`api/`](api/), which forwards policies to [`modelService/`](modelService/) and returns one category per sentence, source-linked category summaries, and source-linked rewrites. Classification, summaries, and rewriting all run locally. The summaries quote classified sentences, and all three rewrite styles use the one summary prompt; style-specific prompts are not built. The work so far also chooses the models:
+The interface calls [`api/`](api/), which forwards policies to [`modelService/`](modelService/) and returns one category per sentence, source-linked category summaries, and source-linked rewrites. Classification, summaries, and rewriting all run locally. The summaries quote classified sentences, and all three rewrite styles use the one summary prompt; style-specific prompts are not built. A rewrite goes one section at a time and shows which section it is on, and a cancel keeps the sections that are finished. The work so far also chooses the models:
 
 - **Classifier:** a linear head on EmbeddingGemma 2 embeddings leads, with accuracy close to much larger models. The service runs it from a 296 MiB file through llama.cpp, at about 0.01 s per sentence on a GPU and 0.02 s on a CPU, timed on the desktop and on a MacBook. It has not yet been timed on a computer of the 8–12 GB target.
 - **Rewriter:** not settled (AR-02). The service runs Qwen3.5-4B at 4-bit through llama.cpp with the `summary-v3` prompt, the pair that [the rewriting findings](privacy-research/docs/rewriting-findings.md) judged; the prompt is still being tuned.

@@ -263,12 +263,15 @@ tests/
 ## Not implemented yet
 
 - **The rest of rewriting.** `/rewrite` rewrites one passage with one summary prompt.
-  It has none of the three styles (FR-09 to FR-11), does not link the rewrite to its
-  source sentences (FR-12), does not rewrite a whole policy section by section
-  (FR-13), and reports no progress and cannot be cancelled (FR-17, FR-18). `api/`
-  links each rewrite to the sentences it sent and runs it as a job that the browser
-  polls and can cancel; a cancel stops the api waiting, but the service still finishes
-  the rewrite.
+  It has none of the three styles (FR-09 to FR-11). The service itself does not link a
+  rewrite to its source sentences (FR-12), cut a policy into sections (FR-13), report
+  progress, or stop a generation (FR-17, FR-18); `api/` does the first three around
+  it. It cuts a policy into sections of about 2,000 characters, sends one `/rewrite`
+  request for each, links each rewrite to the sentences it sent, and runs them as a job
+  that the browser polls for "Rewriting section k of n" and can cancel. A cancel takes
+  effect between two sections and keeps the finished ones. The service still finishes
+  the section it has under way, because nothing stops a generation in the middle; that
+  waits on the target for Cancel (NFR-04).
 - **Model choice by memory tier.** The service chooses between the GPU and the CPU
   at startup and runs the same head on both. Choosing a model by memory tier is
   FR-19. An NVIDIA GPU is used through CUDA and an Apple GPU through Metal; a

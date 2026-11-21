@@ -25,7 +25,7 @@ Data, configuration, and results entries have a status:
 | --- | --- |
 | [docs/](docs/) | Requirements and design for the app |
 | [run.py](run.py) | `python run.py setup` installs the model service, API, and frontend and downloads the pinned models; `python run.py` starts all three on localhost |
-| [frontend/](frontend/) | The browser interface, React and TypeScript on Vite; [src/api.ts](frontend/src/api.ts) is its client for `api/` |
+| [frontend/](frontend/) | The browser interface, React and TypeScript on Vite; [src/api.ts](frontend/src/api.ts) is its client for `api/`, [src/App.tsx](frontend/src/App.tsx) is the page, and [src/RewritePanel.tsx](frontend/src/RewritePanel.tsx) is its rewrite panel |
 | [api/](api/) | The localhost-only frontend-facing API: uploads, classifications, summaries, and jobs |
 | [modelService/](modelService/) | The localhost-only model service: classifies a policy and returns one category per sentence, and rewrites a passage |
 | [privacy-research/](privacy-research/) | The model benchmark: a self-contained Python project with its own environment |
@@ -42,7 +42,8 @@ A small FastAPI service in its own folder. The browser talks only to this API; i
 forwards text to `modelService/`, returns classifications first, and later returns
 source-linked summaries and rewrites through pollable jobs. Policies and jobs live in
 memory and expire after an hour without use. Summaries are extractive; rewrites call
-the pinned GGUF rewriter in `modelService/`.
+the pinned GGUF rewriter in `modelService/`, one section of about 2,000 characters at
+a time, with progress by section and a cancel that keeps the finished sections.
 
 | File | Status | Contents |
 | --- | --- | --- |

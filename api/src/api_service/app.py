@@ -16,7 +16,7 @@ from fastapi.responses import JSONResponse
 
 from .client import ModelServiceClient
 from .errors import ApiProblem, ModelServiceError, PolicyTooLong
-from .generation import JobCancelled, extractive_summaries, rewritten_passage
+from .generation import JobCancelled, extractive_summaries, rewrite_sections, rewritten_section
 from .schemas import (
     MAX_POLICY_CHARACTERS,
     AnalysisResults,
@@ -35,7 +35,9 @@ from .schemas import (
     Policy,
     PolicyCreate,
     PolicySource,
+    Rewrite,
     RewriteRequest,
+    RewriteResult,
     SummaryRequest,
 )
 from .settings import Settings
@@ -240,6 +242,7 @@ def create_app(
             _run_rewrite,
             policies,
             job,
+            record.text,
             record.classification.model_copy(deep=True),
             body,
             model_client,
@@ -322,27 +325,39 @@ def _run_summary(
 def _run_rewrite(
     store: Store,
     job: JobRecord,
+    text: str,
     classification: Classification,
     request: RewriteRequest,
     model_client: ModelServiceClient,
 ) -> None:
     job_id = job.job.id
+    rewrites: list[Rewrite] = []
+    total = 1
     try:
-        store.set_progress(job_id, "loading_rewriter", 0, 1)
-        result = rewritten_passage(
-            job.policy_id,
-            classification,
-            request,
-            model_client=model_client,
-            cancel=job.cancel,
-        )
-        if job.cancel.is_set():
-            raise JobCancelled
+        sections = rewrite_sections(text, classification, request)
+        total = len(sections)
+        # The job carries its finished sections while it runs, so a cancel or a failure keeps them.
+        result = None
+        for section in sections:
+            # A cancel stops the job between two sections. modelService still finishes the one it has.
+            if job.cancel.is_set():
+                raise JobCancelled
+            store.set_progress(
+                job_id,
+                "rewriting",
+                len(rewrites),
+                total,
+                f"Rewriting section {len(rewrites) + 1} of {total}",
+                result,
+            )
+            model, rewrite = rewritten_section(section, request.style, model_client)
+            rewrites.append(rewrite)
+            result = RewriteResult(policy_id=job.policy_id, model=model, style=request.style, rewrites=list(rewrites))
         store.finish_job(
             job_id,
             status=JobStatus.SUCCEEDED,
             result=result,
-            progress=JobProgress(stage="done", completed=1, total=1),
+            progress=JobProgress(stage="done", completed=total, total=total),
         )
     except JobCancelled:
         store.cancel_job(job_id)
@@ -351,7 +366,7 @@ def _run_rewrite(
             job_id,
             status=JobStatus.FAILED,
             error=ApiErrorInfo(code=exc.code, message=exc.message, retryable=exc.retryable),
-            progress=JobProgress(stage="model_service_error", completed=0, total=1),
+            progress=JobProgress(stage="model_service_error", completed=len(rewrites), total=total),
         )
     except Exception as exc:
         logger.exception("Rewrite job %s failed", job_id)
@@ -359,5 +374,5 @@ def _run_rewrite(
             job_id,
             status=JobStatus.FAILED,
             error=ApiErrorInfo(code="generation_failed", message=str(exc), retryable=False),
-            progress=JobProgress(stage="failed", completed=0, total=1),
+            progress=JobProgress(stage="failed", completed=len(rewrites), total=total),
         )

@@ -22,9 +22,9 @@ written to disk, logged, or sent off the machine (FR-22 off by default, NFR-01, 
 | `GET /policies/{id}` | `Policy` | Implemented |
 | `POST /policies/{id}/classification` | `Classification` | Implemented; calls modelService `/analyze` |
 | `POST /policies/{id}/summaries` | `202 Job` | Implemented; **extractive** summaries from classified sentences |
-| `POST /policies/{id}/rewrites` | `202 Job` | Implemented; calls modelService `/rewrite` and returns source-linked rewrites |
-| `GET /jobs/{id}` | `Job` | Implemented; poll for progress and result |
-| `DELETE /jobs/{id}` | `204` | Implemented; cancels a queued or running job |
+| `POST /policies/{id}/rewrites` | `202 Job` | Implemented; calls modelService `/rewrite` once for each section and returns source-linked rewrites |
+| `GET /jobs/{id}` | `Job` | Implemented; poll for progress and result, and for a rewrite's finished sections while it runs |
+| `DELETE /jobs/{id}` | `204` | Implemented; cancels a queued or running job, which keeps its finished sections |
 | `GET /policies/{id}/results` | `AnalysisResults` | Implemented; non-blocking snapshot |
 
 ### Ordering guarantee
@@ -44,13 +44,53 @@ block points back to the original sentence spans.
   chosen.
 - **Rewrites** call the pinned GGUF chat model already installed with `modelService/`;
   the API never downloads a model. A job selects the classified sentences named in
-  `sentence_ids` (or the whole policy), sends only their exact text to modelService,
-  and stores the returned rewrite with those sentences' IDs as `source_sentence_ids`.
-  modelService runs one prompt, the evaluated `summary-v3`, for every style; the API
-  says so in each rewrite's `warnings` rather than pretending the styles were evaluated
-  separately, and adds a warning when modelService marks the rewrite `truncated` or
-  `reasoning`. If the GGUF file has not been downloaded, the job fails with
-  `model_service_error` and modelService's message, which says to run `pbench download`.
+  `sentence_ids` and `context_sentence_ids` (or the whole policy), sends only their
+  exact text to modelService, and stores each returned rewrite with its sentences' IDs
+  as `source_sentence_ids`. modelService runs one prompt, the evaluated `summary-v3`,
+  for every style; the API says so in each rewrite's `warnings` rather than pretending
+  the styles were evaluated separately, and adds a warning when modelService marks the
+  rewrite `truncated` or `reasoning`. If the GGUF file has not been downloaded, the job
+  fails with `model_service_error` and modelService's message, which says to run
+  `pbench download`.
+
+### Sections, progress, and cancel
+
+The rewriter takes 4,096 tokens with its prompt and its output, which leaves about
+14,000 characters for the passage (three real policies had 4.9 to 5.3 characters for a
+token), and the rewrites that were judged came from passages of at most 2,154
+characters. So a rewrite job cuts its sentences, in policy order, into sections of
+about 2,000 characters (`SECTION_CHARACTERS` in `generation.py`) and sends one
+`/rewrite` request for each. The result holds one rewrite for each section, each with
+the IDs of its own sentences (FR-13).
+
+- A section ends at a paragraph break where it can: a newline between two sentences,
+  or a place where the selection skips a sentence. A paragraph over the limit is cut
+  between sentences. A sentence over the limit is a section of its own, and the job
+  fails at it if modelService refuses its length.
+- A line that does not end a sentence, such as a heading or the line that opens a
+  list, stays with the paragraph after it.
+- The API does not choose context for a selection. It rewrites the sentences that the
+  request names.
+
+While a job runs, `progress` is `{"stage": "rewriting", "completed": 2, "total": 24,
+"message": "Rewriting section 3 of 24"}`, and `result` holds the sections finished so
+far (FR-17). The first section of a job takes longer when modelService must load the
+rewriter first; the API cannot see that load, so it has no stage of its own.
+
+`DELETE /jobs/{id}` marks the job `cancelled` at once. The job keeps the sections that
+were finished at that moment, in `result` and in `GET /policies/{id}/results`, and its
+`progress` keeps their count (FR-18). The job sends no further section. modelService
+still finishes the section it has under way, and the job drops that rewrite: nothing
+stops a generation in the middle, so a new rewrite waits for it. A job that fails at a
+section keeps the sections before it in the same way, with the reason in `error`. A
+job that ends before its first section leaves the policy's earlier rewrite in place.
+
+Measured through the page on the desktop (RTX 4090, Ryzen 9 7950X3D), one run each,
+with GitHub's privacy statement as its web page gives it to paste (40,628 characters,
+309 sentences): the job made 24 sections. On the GPU it took 21 s, 0.4 to 1.9 s for a
+section. On the CPU it took 4 min 48 s, 5.9 to 17.7 s for a section, so one section
+stays far inside the 120 s that the API waits for a modelService call. A cancel left
+the page idle 0.2 to 0.3 s after the click.
 
 ## Setup and run
 
@@ -103,8 +143,9 @@ uv run pytest
 
 The tests use a fake modelService through `httpx.MockTransport`, so no model or GPU
 is needed. They cover upload validation, the length limit, expiry, the
-classification-first ordering, per-category summaries, job cancellation,
-rewriter-unavailable errors, and modelService outages.
+classification-first ordering, per-category summaries, the cut into sections, progress,
+a cancel and a failure partway through a rewrite, rewriter-unavailable errors, and
+modelService outages.
 
 Frontend checks:
 
@@ -125,7 +166,7 @@ api/
     schemas.py               Pydantic request/response contract
     client.py                httpx adapter for modelService
     store.py                 in-memory policies and jobs with TTL
-    generation.py            extractive summaries and rewriter-unavailable error
+    generation.py            extractive summaries, the cut into sections, and one section's rewrite
     errors.py                stable error codes for the frontend
     settings.py              loopback-only configuration
     __main__.py              `python -m api_service`
@@ -140,6 +181,9 @@ api/
   colors come from modelService; the UI highlights and filters without another call.
 - **FR-02, FR-24:** UTF-8 `.txt` uploads only, with the same length limit as modelService.
 - **FR-12, FR-16:** generated blocks carry `source_sentence_ids`.
-- **FR-17, FR-18:** job progress, polling, and cancellation.
+- **FR-13:** a rewrite covers the selection or the whole policy, one section at a time.
+  Choosing context for a selection is not built.
+- **FR-17, FR-18:** job progress by section, polling, and a cancel between sections
+  that keeps the finished ones.
 - **NFR-01, NFR-02:** loopback-only bind and CORS; no downloads, no text logging,
   no disk writes.

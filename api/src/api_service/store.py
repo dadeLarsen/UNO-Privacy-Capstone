@@ -111,7 +111,16 @@ class Store:
             self.get_policy(record.policy_id)
             return record
 
-    def set_progress(self, job_id: UUID, stage: str, completed: int, total: int, message: str | None = None) -> None:
+    def set_progress(
+        self,
+        job_id: UUID,
+        stage: str,
+        completed: int,
+        total: int,
+        message: str | None = None,
+        result: GenerationResult | None = None,
+    ) -> None:
+        """Record how far a job is, with what it has finished so far when ``result`` is given."""
         with self._lock:
             record = self._jobs.get(job_id)
             if record is None or record.job.status in (JobStatus.SUCCEEDED, JobStatus.CANCELLED, JobStatus.FAILED):
@@ -122,6 +131,8 @@ class Store:
                 total=total,
                 message=message,
             )
+            if result is not None:
+                record.job.result = result
             record.job.status = JobStatus.RUNNING
             record.job.updated_at = datetime.now(timezone.utc)
 
@@ -139,18 +150,14 @@ class Store:
             if record is None or record.job.status in (JobStatus.SUCCEEDED, JobStatus.CANCELLED, JobStatus.FAILED):
                 return
             record.job.status = status
-            record.job.result = result
+            # A failed job gives no result here and keeps the one its progress recorded.
+            if result is not None:
+                record.job.result = result
             record.job.error = error
             if progress is not None:
                 record.job.progress = progress
             record.job.updated_at = datetime.now(timezone.utc)
-            if status is JobStatus.SUCCEEDED and result is not None:
-                policy = self._policies.get(record.policy_id)
-                if policy is not None:
-                    if isinstance(result, SummaryResult):
-                        policy.latest_summary = result
-                    elif isinstance(result, RewriteResult):
-                        policy.latest_rewrite = result
+            self._keep_result_locked(record)
 
     def cancel_job(self, job_id: UUID) -> bool:
         with self._lock:
@@ -159,9 +166,23 @@ class Store:
                 return False
             record.cancel.set()
             record.job.status = JobStatus.CANCELLED
-            record.job.progress = JobProgress(stage="cancelled", completed=0, total=1)
+            # The counts stay, so the job still says how far it was when it stopped.
+            progress = record.job.progress or JobProgress(stage="queued", completed=0, total=1)
+            record.job.progress = progress.model_copy(update={"stage": "cancelled", "message": None})
             record.job.updated_at = datetime.now(timezone.utc)
+            self._keep_result_locked(record)
             return True
+
+    def _keep_result_locked(self, record: JobRecord) -> None:
+        """Put what an ended job produced on its policy, also when a cancel or a failure ended it early."""
+        result = record.job.result
+        policy = self._policies.get(record.policy_id)
+        if policy is None:
+            return
+        if isinstance(result, SummaryResult):
+            policy.latest_summary = result
+        elif isinstance(result, RewriteResult):
+            policy.latest_rewrite = result
 
     def snapshot(self, policy_id: UUID) -> AnalysisResults:
         with self._lock:

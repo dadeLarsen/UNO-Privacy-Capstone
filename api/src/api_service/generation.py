@@ -2,8 +2,8 @@
 
 Summaries are extractive: they quote the already-classified sentences, so they need
 no download and cannot change what the policy says. Rewrites call the local model
-service's pinned GGUF rewriter; every result points back to the source sentence IDs
-the model actually received.
+service's pinned GGUF rewriter, one section of the policy at a time; every rewrite
+points back to the source sentence IDs the model actually received.
 """
 
 from __future__ import annotations
@@ -17,12 +17,16 @@ from .schemas import (
     ModelProfile,
     Rewrite,
     RewriteRequest,
-    RewriteResult,
+    RewriteStyle,
+    SentenceClassification,
     Summary,
     SummaryResult,
 )
 
 MAX_SENTENCES_PER_SUMMARY = 2
+# About the longest passage whose rewrites were judged (2,154 characters), so a section stays within
+# what privacy-research/docs/rewriting-findings.md measured.
+SECTION_CHARACTERS = 2000
 # modelService's `status` is the benchmark's verdict on a rewrite; `empty` fails the job instead.
 STATUS_WARNINGS = {
     "valid": None,
@@ -90,31 +94,68 @@ def extractive_summaries(
     )
 
 
-def rewritten_passage(
-    policy_id: UUID,
+def rewrite_sections(
+    text: str,
     classification: Classification,
     request: RewriteRequest,
-    *,
-    model_client: ModelServiceClient,
-    cancel: Event,
-) -> RewriteResult:
-    if cancel.is_set():
-        raise JobCancelled
+) -> list[list[SentenceClassification]]:
+    """Cut the sentences to rewrite, in policy order, into sections of about SECTION_CHARACTERS.
 
-    by_id = {sentence.id: sentence for sentence in classification.sentences}
-    source_ids = list(request.sentence_ids or [sentence.id for sentence in classification.sentences])
-    for sentence_id in request.context_sentence_ids:
-        if sentence_id not in source_ids:
-            source_ids.append(sentence_id)
-    selected = [by_id[sentence_id] for sentence_id in source_ids if sentence_id in by_id]
+    A section ends at a paragraph break where it can. A paragraph over the limit is cut between
+    sentences, and a sentence over the limit is a section of its own.
+    """
+    wanted = None if request.sentence_ids is None else {*request.sentence_ids, *request.context_sentence_ids}
+    selected = [sentence for sentence in classification.sentences if wanted is None or sentence.id in wanted]
     if not selected:
         raise ValueError("No classified sentences were selected for rewriting.")
 
-    passage = " ".join(sentence.text for sentence in selected)
-    body = model_client.rewrite(passage)
-    if cancel.is_set():
-        raise JobCancelled
+    # A paragraph ends at a newline in the policy, or where the selection skips a sentence. A line that
+    # does not end a sentence is a heading or opens a list, so it stays with the paragraph after it.
+    paragraphs: list[list[SentenceClassification]] = []
+    for sentence in selected:
+        previous = paragraphs[-1][-1] if paragraphs else None
+        if (
+            previous
+            and sentence.id == previous.id + 1
+            and ("\n" not in text[previous.end : sentence.start] or not _ends_a_sentence(previous.text))
+        ):
+            paragraphs[-1].append(sentence)
+        else:
+            paragraphs.append([sentence])
 
+    sections: list[list[SentenceClassification]] = []
+    size = 0
+    for paragraph in paragraphs:
+        if sections and size + _characters(paragraph) <= SECTION_CHARACTERS:
+            sections[-1].extend(paragraph)
+            size += _characters(paragraph)
+            continue
+        sections.append([])
+        size = 0
+        for sentence in paragraph:
+            if sections[-1] and size + _characters([sentence]) > SECTION_CHARACTERS:
+                sections.append([])
+                size = 0
+            sections[-1].append(sentence)
+            size += _characters([sentence])
+    return sections
+
+
+def _ends_a_sentence(text: str) -> bool:
+    return text.rstrip("\"')]}”’").endswith((".", "!", "?"))
+
+
+def _characters(sentences: list[SentenceClassification]) -> int:
+    """The length these sentences add to a passage, with the space that joins each to the next."""
+    return sum(len(sentence.text) + 1 for sentence in sentences)
+
+
+def rewritten_section(
+    section: list[SentenceClassification],
+    style: RewriteStyle,
+    model_client: ModelServiceClient,
+) -> tuple[ModelProfile, Rewrite]:
+    body = model_client.rewrite(" ".join(sentence.text for sentence in section))
     model = ModelProfile.model_validate(body["model"])
     status = body["status"]
     if status == "empty":
@@ -123,22 +164,15 @@ def rewritten_passage(
         raise ValueError(f"The model service returned an unknown rewrite status: {status!r}.")
     # modelService runs one prompt, so the style changes nothing yet; say so rather than imply otherwise.
     warnings = [
-        f"Every style uses the evaluated {model.prompt} prompt, including {request.style.value}; "
+        f"Every style uses the evaluated {model.prompt} prompt, including {style.value}; "
         "style-specific prompts have not been evaluated."
     ]
     if STATUS_WARNINGS[status]:
         warnings.append(STATUS_WARNINGS[status])
 
-    return RewriteResult(
-        policy_id=policy_id,
-        model=model,
-        style=request.style,
-        rewrites=[
-            Rewrite(
-                id=uuid4(),
-                text=body["rewrite"],
-                source_sentence_ids=[sentence.id for sentence in selected],
-                warnings=warnings,
-            )
-        ],
+    return model, Rewrite(
+        id=uuid4(),
+        text=body["rewrite"],
+        source_sentence_ids=[sentence.id for sentence in section],
+        warnings=warnings,
     )
