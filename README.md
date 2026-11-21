@@ -45,7 +45,7 @@ Then start the whole app from this folder with:
 python3 run.py
 ```
 
-On Windows, use `python` in place of `python3`. The launcher starts the model service on `127.0.0.1:8000`, the API on `127.0.0.1:8001`, and Vite on `127.0.0.1:5173`, wires their URLs together, prefixes their logs, and stops all three when you press Ctrl+C. The first model start can take a while; classification works once the model log says it is ready.
+On Windows, use `python` in place of `python3`. The launcher starts the model service on `127.0.0.1:8000`, the API on `127.0.0.1:8001`, and Vite on `127.0.0.1:5173`, wires their URLs together, prefixes their logs, and stops all three when you press Ctrl+C. The first model start can take a while; open the page once the launcher says that the model service, API, and frontend are listening.
 
 Override any port with an environment variable:
 

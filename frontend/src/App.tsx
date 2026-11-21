@@ -12,6 +12,7 @@ import {
   uploadPolicy,
   type AnalysisSnapshot,
   type Category,
+  type CategoryList,
   type Job,
   type RewriteStyle,
   type Sentence,
@@ -67,12 +68,14 @@ function App() {
   const [status, setStatus] = useState('Ready to analyze')
   const [error, setError] = useState<string | null>(null)
 
+  function showCategories(body: CategoryList) {
+    setCategories(body.categories)
+    setActiveCategories(new Set(body.categories.map((category) => category.id)))
+  }
+
   useEffect(() => {
     getCategories()
-      .then((body) => {
-        setCategories(body.categories)
-        setActiveCategories(new Set(body.categories.map((category) => category.id)))
-      })
+      .then(showCategories)
       .catch((cause: unknown) => setError(`API unavailable: ${messageOf(cause)}`))
   }, [])
 
@@ -130,15 +133,20 @@ function App() {
     return created.id
   }
 
+  async function classifyAndShow(id: string) {
+    // The list is empty when the page opened before the model service was ready.
+    if (!categories.length) showCategories(await getCategories())
+    const result = await classify(id)
+    setSnapshot(await getResults(id))
+    return result
+  }
+
   async function analyze() {
     setBusy(true)
     setError(null)
     setStatus('Analyzing…')
     try {
-      const id = await ensurePolicy()
-      const result = await classify(id)
-      const current = await getResults(id)
-      setSnapshot(current)
+      const result = await classifyAndShow(await ensurePolicy())
       setStatus(`Analyzed locally · ${result.sentences.length} sentences`)
       if (activeCategories.size === 0 && categories.length) {
         setActiveCategories(new Set(categories.map((category) => category.id)))
@@ -162,8 +170,7 @@ function App() {
       forgetPolicy()
       const uploaded = await uploadPolicy(file)
       setPolicyId(uploaded.id)
-      const result = await classify(uploaded.id)
-      setSnapshot(await getResults(uploaded.id))
+      const result = await classifyAndShow(uploaded.id)
       setStatus(`Analyzed ${file.name} · ${result.sentences.length} sentences`)
     } catch (cause: unknown) {
       setError(messageOf(cause))
@@ -199,10 +206,7 @@ function App() {
     setError(null)
     try {
       const id = await ensurePolicy()
-      if (!snapshot?.classification) {
-        await classify(id)
-        setSnapshot(await getResults(id))
-      }
+      if (!snapshot?.classification) await classifyAndShow(id)
       const job = await startSummaries(id)
       setActiveJob(job)
       setStatus('Summarizing by category…')
@@ -220,10 +224,7 @@ function App() {
     setError(null)
     try {
       const id = await ensurePolicy()
-      if (!snapshot?.classification) {
-        await classify(id)
-        setSnapshot(await getResults(id))
-      }
+      if (!snapshot?.classification) await classifyAndShow(id)
       const selected = selectedSentences.size
         ? [...selectedSentences].sort((left, right) => left - right)
         : undefined
