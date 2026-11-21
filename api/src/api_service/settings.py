@@ -28,7 +28,6 @@ class Settings:
     port: int = 8001
     cors_origins: tuple[str, ...] = DEFAULT_ORIGINS
     request_timeout_seconds: float = 120.0
-    max_characters: int = 200_000
     policy_ttl_seconds: int = 3600
 
     @classmethod
@@ -52,6 +51,5 @@ class Settings:
             request_timeout_seconds=float(
                 os.getenv("API_REQUEST_TIMEOUT_SECONDS", str(cls.request_timeout_seconds))
             ),
-            max_characters=int(os.getenv("API_MAX_CHARACTERS", str(cls.max_characters))),
             policy_ttl_seconds=int(os.getenv("API_POLICY_TTL_SECONDS", str(cls.policy_ttl_seconds))),
         )

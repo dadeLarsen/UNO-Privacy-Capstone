@@ -1,10 +1,10 @@
 import { useEffect, useState, type ChangeEvent, type CSSProperties } from 'react'
 import {
+  ApiError,
   cancelJob,
   classify,
   createPolicy,
   getCategories,
-  getHealth,
   getJob,
   getResults,
   startRewrite,
@@ -12,7 +12,7 @@ import {
   uploadPolicy,
   type AnalysisSnapshot,
   type Category,
-  type Health,
+  type CategoryList,
   type Job,
   type RewriteStyle,
   type Sentence,
@@ -58,7 +58,6 @@ function App() {
   const [policy, setPolicy] = useState(examplePolicy)
   const [policyId, setPolicyId] = useState<string | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
-  const [health, setHealth] = useState<Health | null>(null)
   const [snapshot, setSnapshot] = useState<AnalysisSnapshot | null>(null)
   const [activeCategories, setActiveCategories] = useState<Set<number>>(() => new Set())
   const [selectedSentences, setSelectedSentences] = useState<Set<number>>(() => new Set())
@@ -69,23 +68,43 @@ function App() {
   const [status, setStatus] = useState('Ready to analyze')
   const [error, setError] = useState<string | null>(null)
 
+  function showCategories(body: CategoryList) {
+    setCategories(body.categories)
+    setActiveCategories(new Set(body.categories.map((category) => category.id)))
+  }
+
   useEffect(() => {
-    Promise.all([getCategories(), getHealth()])
-      .then(([categoryBody, healthBody]) => {
-        setCategories(categoryBody.categories)
-        setActiveCategories(new Set(categoryBody.categories.map((category) => category.id)))
-        setHealth(healthBody)
-      })
+    getCategories()
+      .then(showCategories)
       .catch((cause: unknown) => setError(`API unavailable: ${messageOf(cause)}`))
   }, [])
 
-  function editPolicy(value: string) {
-    setPolicy(value)
+  function forgetPolicy() {
     setPolicyId(null)
     setSnapshot(null)
     setSelectedSentences(new Set())
+  }
+
+  function editPolicy(value: string) {
+    setPolicy(value)
+    forgetPolicy()
     setError(null)
     setStatus('Ready to analyze')
+  }
+
+  function showFailure(cause: unknown, failedStatus: string) {
+    if (cause instanceof ApiError && cause.code === 'not_found') {
+      // The API dropped the policy or its job. The text is still on the page, so the next Analyze sends it again.
+      forgetPolicy()
+      setError(
+        'The API no longer has this policy in memory. It clears a policy after an hour without use, ' +
+          'and when it restarts. Click Analyze categories to run it again.',
+      )
+      setStatus('Ready to analyze')
+      return
+    }
+    setError(messageOf(cause))
+    setStatus(failedStatus)
   }
 
   function toggleCategory(id: number) {
@@ -114,22 +133,26 @@ function App() {
     return created.id
   }
 
+  async function classifyAndShow(id: string) {
+    // The list is empty when the page opened before the model service was ready.
+    if (!categories.length) showCategories(await getCategories())
+    const result = await classify(id)
+    setSnapshot(await getResults(id))
+    return result
+  }
+
   async function analyze() {
     setBusy(true)
     setError(null)
     setStatus('Analyzing…')
     try {
-      const id = await ensurePolicy()
-      const result = await classify(id)
-      const current = await getResults(id)
-      setSnapshot(current)
+      const result = await classifyAndShow(await ensurePolicy())
       setStatus(`Analyzed locally · ${result.sentences.length} sentences`)
       if (activeCategories.size === 0 && categories.length) {
         setActiveCategories(new Set(categories.map((category) => category.id)))
       }
     } catch (cause: unknown) {
-      setError(messageOf(cause))
-      setStatus('Analysis failed')
+      showFailure(cause, 'Analysis failed')
     } finally {
       setBusy(false)
     }
@@ -144,13 +167,10 @@ function App() {
     try {
       const text = await file.text()
       setPolicy(text)
-      setPolicyId(null)
-      setSnapshot(null)
-      setSelectedSentences(new Set())
+      forgetPolicy()
       const uploaded = await uploadPolicy(file)
       setPolicyId(uploaded.id)
-      const result = await classify(uploaded.id)
-      setSnapshot(await getResults(uploaded.id))
+      const result = await classifyAndShow(uploaded.id)
       setStatus(`Analyzed ${file.name} · ${result.sentences.length} sentences`)
     } catch (cause: unknown) {
       setError(messageOf(cause))
@@ -173,13 +193,7 @@ function App() {
       }
       if (job.status === 'failed' || job.status === 'cancelled') {
         setError(job.error?.message ?? `${job.kind} job was cancelled`)
-        setStatus(
-          job.error?.code === 'rewriter_model_not_downloaded'
-            ? 'Rewriter needs one-time model download'
-            : job.status === 'failed'
-              ? 'Generation failed'
-              : 'Generation stopped',
-        )
+        setStatus(job.status === 'failed' ? 'Generation failed' : 'Generation stopped')
         setActiveJob(null)
         return
       }
@@ -192,17 +206,13 @@ function App() {
     setError(null)
     try {
       const id = await ensurePolicy()
-      if (!snapshot?.classification) {
-        await classify(id)
-        setSnapshot(await getResults(id))
-      }
+      if (!snapshot?.classification) await classifyAndShow(id)
       const job = await startSummaries(id)
       setActiveJob(job)
       setStatus('Summarizing by category…')
       await pollJob(job.id, id)
     } catch (cause: unknown) {
-      setError(messageOf(cause))
-      setStatus('Summary failed')
+      showFailure(cause, 'Summary failed')
       setActiveJob(null)
     } finally {
       setBusy(false)
@@ -214,10 +224,7 @@ function App() {
     setError(null)
     try {
       const id = await ensurePolicy()
-      if (!snapshot?.classification) {
-        await classify(id)
-        setSnapshot(await getResults(id))
-      }
+      if (!snapshot?.classification) await classifyAndShow(id)
       const selected = selectedSentences.size
         ? [...selectedSentences].sort((left, right) => left - right)
         : undefined
@@ -226,8 +233,7 @@ function App() {
       setStatus(`Generating ${styleLabels[rewriteMode]}…`)
       await pollJob(job.id, id)
     } catch (cause: unknown) {
-      setError(messageOf(cause))
-      setStatus('Rewrite failed')
+      showFailure(cause, 'Rewrite failed')
       setActiveJob(null)
     } finally {
       setBusy(false)
@@ -250,15 +256,6 @@ function App() {
   const counts = new Map(snapshot?.classification?.counts.map((count) => [count.label_id, count.count]) ?? [])
   const sentences = snapshot?.classification?.sentences ?? previewSentences(policy)
   const analyzed = snapshot?.classification !== null && snapshot?.classification !== undefined
-  const rewriterStatus = health?.rewriter_status ?? (health ? 'available' : 'checking')
-  const rewriterLabel = {
-    ready: 'Rewriter ready',
-    available: 'Rewriter available',
-    not_downloaded: 'Model download needed',
-    unavailable: 'Rewriter unavailable',
-    checking: 'Checking rewriter…',
-  }[rewriterStatus] ?? 'Rewriter available'
-  const rewriterSetup = health?.rewriter_setup
 
   return (
     <div className="app-shell">
@@ -393,7 +390,6 @@ function App() {
           <section className="rewrite-panel">
             <div className="panel-heading">
               <div><span className="step">03</span><h2>Make it clearer</h2></div>
-              <span className={`rewriter-badge ${rewriterStatus}`}>{rewriterLabel}</span>
             </div>
             <p className="rewrite-copy">
               The rewriter is wired in and runs locally. Choose a reading style and select sentences
@@ -401,13 +397,6 @@ function App() {
               style uses the benchmark's <strong>summary-v3</strong> prompt; warnings flag details to
               check.
             </p>
-            {rewriterSetup && (
-              <div className="rewriter-setup" role="status">
-                <strong>One-time setup needed.</strong> The rewriter code is ready; only its pinned
-                GGUF model file is missing from this device.
-                <code>{rewriterSetup}</code>
-              </div>
-            )}
             <div className="rewrite-options">
               {(Object.keys(styleLabels) as RewriteStyle[]).map((style) => (
                 <button
@@ -435,7 +424,7 @@ function App() {
             </div>
             <div className="rewrite-result">
               <span className="result-label">
-                {snapshot?.rewrites.length ? styleLabels[rewriteMode] : 'No rewrite generated yet'}
+                {snapshot?.rewrites.length ? 'Latest rewrite' : 'No rewrite generated yet'}
               </span>
               {snapshot?.rewrites.length ? (
                 snapshot.rewrites.map((item) => (

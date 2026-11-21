@@ -1,5 +1,7 @@
 """Application errors with stable codes for the frontend."""
 
+from .schemas import MAX_POLICY_CHARACTERS
+
 
 class ApiProblem(Exception):
     def __init__(
@@ -20,6 +22,15 @@ class ApiProblem(Exception):
 class NotFound(ApiProblem):
     def __init__(self, what: str) -> None:
         super().__init__(status_code=404, code="not_found", message=f"{what} was not found or has expired.")
+
+
+class PolicyTooLong(ApiProblem):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=413,
+            code="policy_too_long",
+            message=f"Policy is longer than {MAX_POLICY_CHARACTERS:,} characters.",
+        )
 
 
 class ModelServiceError(ApiProblem):
