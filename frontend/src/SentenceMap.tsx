@@ -82,8 +82,17 @@ function runsOf(ids: number[]): number[][] {
   return runs
 }
 
+type SourceLinksProps = {
+  ids: number[]
+  // The sentences the map outlines now, or null.
+  outlined: number[] | null
+  onCite: (ids: number[], first: number) => void
+  onHide: () => void
+}
+
 // One link for each run of source sentences. A link brings its run into view and outlines every source.
-function SourceLinks({ ids, onCite }: { ids: number[]; onCite: (ids: number[], first: number) => void }) {
+// While these sources are the outlined ones, a button beside the links takes the outline away.
+function SourceLinks({ ids, outlined, onCite, onHide }: SourceLinksProps) {
   return (
     <span className="source-link">
       {ids.length === 1 ? 'Source: ' : 'Sources: '}
@@ -101,6 +110,7 @@ function SourceLinks({ ids, onCite }: { ids: number[]; onCite: (ids: number[], f
           </a>
         </Fragment>
       ))}
+      {outlined?.join() === ids.join() && <button onClick={onHide} type="button">Hide outline</button>}
     </span>
   )
 }
@@ -120,8 +130,14 @@ function SentenceMap({
   summaries,
 }: Props) {
   const [view, setView] = useState<View>('both')
-  // The sources of the link followed last, which the map outlines, and the sentence to bring into view.
-  const [cited, setCited] = useState<{ ids: number[]; first: number } | null>(null)
+  // The sources of the link followed last and the sentence to bring into view, with the selection and
+  // the rewrite job of that moment.
+  const [cited, setCited] = useState<{
+    ids: number[]
+    first: number
+    selected: Set<number>
+    jobId: string | undefined
+  } | null>(null)
   // What the last copy did, beside its button: "Copied" for a moment, or why it failed.
   const [copyNote, setCopyNote] = useState('')
 
@@ -151,6 +167,11 @@ function SentenceMap({
   const shared = written.length
     ? written[0].warnings.filter((warning) => written.every((item) => item.warnings.includes(warning)))
     : []
+  // The outline is a pointer, not a state to keep: it goes when the reader selects anything, because it
+  // hides the selection's own outline, and when another rewrite starts, whose sections differ. The page
+  // makes a new selection set for every change, so a changed set means that the reader picked something.
+  const outlined =
+    cited && cited.selected === selected && cited.jobId === rewriteJob?.id ? cited.ids : null
   const style = rewriteJob?.result?.kind === 'rewrite' ? rewriteJob.result.style : null
   const ending = rewriteJob?.status === 'cancelled' ? ', cancelled' : rewriteJob?.status === 'failed' ? ', failed' : ' so far'
 
@@ -168,14 +189,18 @@ function SentenceMap({
   function cite(ids: number[], first: number) {
     // The Rewrite view hides the original, where the link leads.
     if (view === 'rewrite') setView('both')
-    setCited({ ids, first })
+    setCited({ ids, first, selected, jobId: rewriteJob?.id })
   }
+
+  const sourceLinks = (ids: number[]) => (
+    <SourceLinks ids={ids} outlined={outlined} onCite={cite} onHide={() => setCited(null)} />
+  )
 
   function sentenceRow(sentence: Sentence) {
     const category = sentence.label_id === null ? undefined : categories.get(sentence.label_id)
     const isVisible = highlighted && category !== undefined && !hiddenCategories.has(category.id)
     const isSelected = selected.has(sentence.id)
-    const isCited = cited?.ids.includes(sentence.id) ?? false
+    const isCited = outlined?.includes(sentence.id) ?? false
     return (
       <div
         aria-pressed={isSelected}
@@ -214,7 +239,7 @@ function SentenceMap({
     return (
       <div className={`row-rewrite ${block.rewrite ? '' : 'is-pending'}`}>
         <p>{block.rewrite ? block.rewrite.text : pendingNote(rewriteJob, index)}</p>
-        <SourceLinks ids={block.ids} onCite={cite} />
+        {sourceLinks(block.ids)}
         {own.length > 0 && (
           <ul className="rewrite-warnings">
             {own.map((warning) => <li key={warning}>{warning}</li>)}
@@ -233,7 +258,7 @@ function SentenceMap({
             <div className="summary-item" key={summary.label_id}>
               <strong>{summary.category}</strong>
               <p>{summary.text}</p>
-              <SourceLinks ids={summary.source_sentence_ids} onCite={cite} />
+              {sourceLinks(summary.source_sentence_ids)}
             </div>
           ))}
         </details>
@@ -252,7 +277,13 @@ function SentenceMap({
         </div>
       )}
 
-      <section className={`policy-rows ${shown === 'both' ? '' : 'is-single'}`}>
+      <section
+        className={`policy-rows ${shown === 'both' ? '' : 'is-single'}`}
+        onKeyDown={(event) => {
+          // A source link puts the focus on a sentence, far from the button that hides the outline.
+          if (event.key === 'Escape') setCited(null)
+        }}
+      >
         <div className="policy-row policy-heads">
           {shown !== 'rewrite' && (
             <div className="column-head">
@@ -302,7 +333,8 @@ function SentenceMap({
           shown === 'rewrite' && !row.block ? null : (
             <div className="policy-row policy-card" key={row.sentences[0].id}>
               {shown !== 'rewrite' && <div className="sentence-list">{row.sentences.map(sentenceRow)}</div>}
-              {shown !== 'original' && row.block && blockCell(row.block, row.index)}
+              {shown !== 'original' &&
+                (row.block ? blockCell(row.block, row.index) : <p className="row-outside">Not selected for this rewrite.</p>)}
             </div>
           ),
         )}
