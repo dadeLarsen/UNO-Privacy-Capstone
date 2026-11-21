@@ -74,6 +74,9 @@ def _spawn(label: str, cwd: Path, command: list[str], env: dict[str, str]) -> su
         "stdout": subprocess.PIPE,
         "stderr": subprocess.STDOUT,
         "text": True,
+        # Vite and llama.cpp write UTF-8; a byte that is not UTF-8 must not stop the log reader.
+        "encoding": "utf-8",
+        "errors": "replace",
         "bufsize": 1,
     }
     if os.name == "nt":
@@ -91,9 +94,9 @@ def _kill(process: subprocess.Popen[str], force: bool = False) -> None:
     if process.poll() is not None:
         return
     if os.name == "nt":
-        flags = ["/T", "/F"] if force else ["/T"]
+        # Windows refuses taskkill without /F for these console processes, so trying it first only delays the stop.
         subprocess.run(
-            ["taskkill", "/PID", str(process.pid), *flags],
+            ["taskkill", "/PID", str(process.pid), "/T", "/F"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             check=False,
@@ -189,6 +192,8 @@ def setup() -> int:
 
 
 def main() -> int:
+    # Piped or redirected on Windows, stdout is cp1252, which cannot encode every character a service logs.
+    sys.stdout.reconfigure(errors="replace")
     model_port = _port("MODEL_SERVICE_PORT", DEFAULT_MODEL_PORT)
     api_port = _port("API_PORT", DEFAULT_API_PORT)
     web_port = _port("FRONTEND_PORT", DEFAULT_WEB_PORT)
