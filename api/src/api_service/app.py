@@ -38,6 +38,8 @@ from .schemas import (
     Rewrite,
     RewriteRequest,
     RewriteResult,
+    RewriteStyle,
+    SentenceClassification,
     SummaryRequest,
 )
 from .settings import Settings
@@ -237,16 +239,17 @@ def create_app(
             )
         _check_sentence_ids(record, body.sentence_ids)
         _check_sentence_ids(record, body.context_sentence_ids or None)
-        job = policies.create_job(policy_id, GenerationKind.REWRITE.value)
-        _start_thread(
-            _run_rewrite,
-            policies,
-            job,
-            record.text,
-            record.classification.model_copy(deep=True),
-            body,
-            model_client,
+        try:
+            sections = rewrite_sections(record.text, record.classification.model_copy(deep=True), body)
+        except ValueError as exc:
+            raise ApiProblem(status_code=422, code="nothing_to_rewrite", message=str(exc)) from exc
+        # The job names its sections from the start, so the page can put each rewrite beside its sentences.
+        job = policies.create_job(
+            policy_id,
+            GenerationKind.REWRITE.value,
+            [[sentence.id for sentence in section] for section in sections],
         )
+        _start_thread(_run_rewrite, policies, job, sections, body.style, model_client)
         return job.job.model_copy(deep=True)
 
     @app.get("/api/v1/jobs/{job_id}", response_model=Job)
@@ -325,17 +328,14 @@ def _run_summary(
 def _run_rewrite(
     store: Store,
     job: JobRecord,
-    text: str,
-    classification: Classification,
-    request: RewriteRequest,
+    sections: list[list[SentenceClassification]],
+    style: RewriteStyle,
     model_client: ModelServiceClient,
 ) -> None:
     job_id = job.job.id
     rewrites: list[Rewrite] = []
-    total = 1
+    total = len(sections)
     try:
-        sections = rewrite_sections(text, classification, request)
-        total = len(sections)
         # The job carries its finished sections while it runs, so a cancel or a failure keeps them.
         result = None
         for section in sections:
@@ -350,9 +350,9 @@ def _run_rewrite(
                 f"Rewriting section {len(rewrites) + 1} of {total}",
                 result,
             )
-            model, rewrite = rewritten_section(section, request.style, model_client)
+            model, rewrite = rewritten_section(section, style, model_client)
             rewrites.append(rewrite)
-            result = RewriteResult(policy_id=job.policy_id, model=model, style=request.style, rewrites=list(rewrites))
+            result = RewriteResult(policy_id=job.policy_id, model=model, style=style, rewrites=list(rewrites))
         store.finish_job(
             job_id,
             status=JobStatus.SUCCEEDED,

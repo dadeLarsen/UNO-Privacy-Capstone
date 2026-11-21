@@ -132,6 +132,7 @@ def test_summary_job_attaches_extractive_summaries(client: TestClient) -> None:
     job = wait_for_job(client, started.json()["id"])
     assert job["status"] == "succeeded", job
     assert job["result"]["kind"] == "summary"
+    assert job["sections"] is None
 
     summaries = job["result"]["summaries"]
     assert len(summaries) == 2
@@ -267,6 +268,16 @@ def test_a_selection_is_rewritten_in_policy_order_and_breaks_where_it_skips_a_se
 
     assert sent == ["Aa one is here.", "Aa three. Aa four."]
     assert [item["source_sentence_ids"] for item in job["result"]["rewrites"]] == [[0], [2, 3]]
+    assert job["sections"] == [[0], [2, 3]]
+
+
+def test_a_rewrite_of_a_policy_without_sentences_is_refused(client: TestClient) -> None:
+    # modelService refuses such a policy itself. The fake returns no sentence for it.
+    policy_id = new_policy(client, " ")
+    assert client.post(f"/api/v1/policies/{policy_id}/classification").json()["sentences"] == []
+    response = client.post(f"/api/v1/policies/{policy_id}/rewrites", json={"style": "paraphrase"})
+    assert response.status_code == 422
+    assert response.json()["detail"]["code"] == "nothing_to_rewrite"
 
 
 def test_a_cancelled_rewrite_keeps_its_finished_sections_and_starts_no_new_one(
@@ -300,6 +311,8 @@ def test_a_cancelled_rewrite_keeps_its_finished_sections_and_starts_no_new_one(
         assert client.post(f"/api/v1/policies/{policy_id}/classification").status_code == 200
         started = client.post(f"/api/v1/policies/{policy_id}/rewrites", json={"style": "paraphrase"})
         job_id = started.json()["id"]
+        # The job names every section's sentences in its first answer, also the two it never rewrites.
+        assert started.json()["sections"] == [[0, 1, 2], [3], [4], [5, 6]]
         assert third_section_started.wait(5)
 
         running = client.get(f"/api/v1/jobs/{job_id}").json()
@@ -317,6 +330,7 @@ def test_a_cancelled_rewrite_keeps_its_finished_sections_and_starts_no_new_one(
         assert cancelled["status"] == "cancelled"
         assert cancelled["progress"] == {"stage": "cancelled", "completed": 2, "total": 4, "message": None}
         assert [item["source_sentence_ids"] for item in cancelled["result"]["rewrites"]] == [[0, 1, 2], [3]]
+        assert cancelled["sections"] == [[0, 1, 2], [3], [4], [5, 6]]
         snapshot = client.get(f"/api/v1/policies/{policy_id}/results").json()
         assert snapshot["phase"] == "results_ready"
         assert [item["id"] for item in snapshot["rewrites"]] == [item["id"] for item in cancelled["result"]["rewrites"]]
