@@ -150,8 +150,8 @@ def test_summaries_require_classification_first(client: TestClient) -> None:
     assert response.json()["detail"]["code"] == "classification_required"
 
 
-def rewrite_job(client: TestClient, body: dict) -> tuple[str, dict]:
-    policy_id = new_policy(client)
+def rewrite_job(client: TestClient, body: dict, text: str = POLICY) -> tuple[str, dict]:
+    policy_id = new_policy(client, text)
     assert client.post(f"/api/v1/policies/{policy_id}/classification").status_code == 200
     started = client.post(f"/api/v1/policies/{policy_id}/rewrites", json=body)
     assert started.status_code == 202, started.text
@@ -197,6 +197,75 @@ def test_rewrite_job_returns_source_linked_text_and_warnings(
     [warning] = result["rewrites"][0]["warnings"]
     assert "summary-v3" in warning and "simplify_for_kids" in warning
     assert snapshot["rewrites"][0]["text"] == "We use your email for promotions."
+
+
+def recording_rewrites(default_handler, sent: list[str]):
+    """The fake modelService, which also notes the passage of each /rewrite request."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/rewrite":
+            sent.append(json.loads(request.content)["text"])
+        return default_handler(request)
+
+    return handler
+
+
+# With a limit of 30 characters: two short paragraphs that fit one section together, a paragraph over the
+# limit, and a last paragraph that fits behind the long one's last sentence.
+SECTIONED_POLICY = "Aa one. Aa two.\nBb one.\n\nCc one is long. Cc two is long. Cc three is long.\nDd one."
+
+
+def test_a_long_rewrite_goes_to_the_rewriter_one_section_at_a_time(
+    default_model_service_handler,
+    model_client_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("api_service.generation.SECTION_CHARACTERS", 30)
+    sent: list[str] = []
+    app = create_app(Settings(), client=model_client_factory(recording_rewrites(default_model_service_handler, sent)))
+    with TestClient(app) as client:
+        policy_id, job = rewrite_job(client, {"style": "paraphrase"}, SECTIONED_POLICY)
+        snapshot = client.get(f"/api/v1/policies/{policy_id}/results").json()
+
+    # Paragraphs stay whole where they fit; the long one is cut between its sentences.
+    assert sent == ["Aa one. Aa two. Bb one.", "Cc one is long.", "Cc two is long.", "Cc three is long. Dd one."]
+    assert job["status"] == "succeeded", job
+    assert job["progress"] == {"stage": "done", "completed": 4, "total": 4, "message": None}
+    assert [item["source_sentence_ids"] for item in job["result"]["rewrites"]] == [[0, 1, 2], [3], [4], [5, 6]]
+    assert len(snapshot["rewrites"]) == 4
+
+
+def test_a_heading_stays_with_the_paragraph_after_it(
+    default_model_service_handler,
+    model_client_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("api_service.generation.SECTION_CHARACTERS", 30)
+    sent: list[str] = []
+    app = create_app(Settings(), client=model_client_factory(recording_rewrites(default_model_service_handler, sent)))
+    with TestClient(app) as client:
+        # The heading fits behind the first paragraph, but then it would end that section.
+        rewrite_job(client, {"style": "paraphrase"}, "Aa one is here.\n\nBb heading\n\nBb one is here.")
+
+    assert sent == ["Aa one is here.", "Bb heading Bb one is here."]
+
+
+def test_a_selection_is_rewritten_in_policy_order_and_breaks_where_it_skips_a_sentence(
+    default_model_service_handler,
+    model_client_factory,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("api_service.generation.SECTION_CHARACTERS", 30)
+    sent: list[str] = []
+    app = create_app(Settings(), client=model_client_factory(recording_rewrites(default_model_service_handler, sent)))
+    with TestClient(app) as client:
+        # The selection skips sentence 1, which makes a paragraph break there. Sentences 2 and 3 stay
+        # together, where a cut by length alone would put 2 behind 0.
+        body = {"style": "paraphrase", "sentence_ids": [3, 0], "context_sentence_ids": [2]}
+        _, job = rewrite_job(client, body, "Aa one is here. Aa two is here. Aa three. Aa four.")
+
+    assert sent == ["Aa one is here.", "Aa three. Aa four."]
+    assert [item["source_sentence_ids"] for item in job["result"]["rewrites"]] == [[0], [2, 3]]
 
 
 @pytest.mark.parametrize("status", ["truncated", "reasoning"])

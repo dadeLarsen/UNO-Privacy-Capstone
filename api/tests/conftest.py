@@ -73,7 +73,8 @@ def model_service_handler(request: httpx.Request) -> httpx.Response:
         payload = json.loads(request.content)
         text = payload["text"]
         sentences = []
-        for match in re.finditer(r"[^.!?]+[.!?]*", text):
+        # Like modelService's splitter, a blank line ends a sentence that has no punctuation, such as a heading.
+        for match in re.finditer(r"(?:[^.!?\n]|\n(?!\n))+[.!?]*", text):
             span = match.group().strip()
             if not span:
                 continue
