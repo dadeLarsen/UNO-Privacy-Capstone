@@ -8,8 +8,9 @@ button { cursor: pointer; }
 .rail-hint { margin: 0 10px 12px; color: #66736f; font-size: 10px; line-height: 1.4; }
 .category-list { display: grid; gap: 7px; }
 .category-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px; }
-.category-select { padding: 0 7px; border: 1px solid #b8c9c5; border-radius: 5px; color: #31564f; background: #fff; font-size: 10px; font-weight: 700; }
+.category-select { min-width: 58px; padding: 0 7px; border: 1px solid #b8c9c5; border-radius: 5px; color: #31564f; background: #fff; font-size: 10px; font-weight: 700; }
 .category-select:hover:enabled { border-color: #2687d8; color: #126ed1; }
+.category-select.is-on, .category-select.is-on:hover { border-color: #1d7f86; color: #fff; background: #1d7f86; }
 .category-select:disabled { opacity: .45; cursor: not-allowed; }
 .category-chip { display: grid; grid-template-columns: 13px 1fr auto; align-items: center; gap: 7px; min-height: 36px; padding: 7px 8px; border-radius: 5px; color: #fff; font-size: 10px; line-height: 1.15; box-shadow: 0 2px 0 rgb(24 49 60 / 10%); }
 .category-chip input { accent-color: #fff; width: 12px; height: 12px; margin: 0; }

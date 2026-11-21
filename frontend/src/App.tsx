@@ -165,9 +165,17 @@ function App() {
     })
   }
 
-  function selectCategory(labelId: number) {
-    const labeled = (sentences ?? []).filter((sentence) => sentence.label_id === labelId)
-    setSelectedSentences((current) => new Set([...current, ...labeled.map((sentence) => sentence.id)]))
+  // A category's Select button: adds its sentences to the selection, or takes them out when all are in it.
+  function toggleCategorySelection(ids: number[]) {
+    setSelectedSentences((current) => {
+      const next = new Set(current)
+      const allSelected = ids.every((id) => next.has(id))
+      for (const id of ids) {
+        if (allSelected) next.delete(id)
+        else next.add(id)
+      }
+      return next
+    })
   }
 
   async function onFileChange(event: ChangeEvent<HTMLInputElement>) {
@@ -275,11 +283,14 @@ function App() {
       <aside className="category-rail">
         <div className="rail-label">Categories</div>
         <p className="rail-hint">
-          A checkbox shows or hides a category's highlight. Select adds its sentences to the selection.
+          A checkbox shows or hides a category's highlight. Select adds its sentences to the selection, and
+          Deselect takes them out again.
         </p>
         <div className="category-list">
           {categories.map((category) => {
             const count = counts.get(category.id) ?? 0
+            const ids = (sentences ?? []).filter((sentence) => sentence.label_id === category.id).map((sentence) => sentence.id)
+            const allSelected = ids.length > 0 && ids.every((id) => selectedSentences.has(id))
             return (
               <div className="category-row" key={category.id}>
                 <label className="category-chip" style={{ backgroundColor: category.color }}>
@@ -292,13 +303,13 @@ function App() {
                   <strong>{count}</strong>
                 </label>
                 <button
-                  aria-label={`Select the ${count} ${category.display_name} ${count === 1 ? 'sentence' : 'sentences'}`}
-                  className="category-select"
-                  disabled={count === 0}
-                  onClick={() => selectCategory(category.id)}
+                  aria-label={`${allSelected ? 'Deselect' : 'Select'} the ${count} ${category.display_name} ${count === 1 ? 'sentence' : 'sentences'}`}
+                  className={`category-select ${allSelected ? 'is-on' : ''}`}
+                  disabled={ids.length === 0}
+                  onClick={() => toggleCategorySelection(ids)}
                   type="button"
                 >
-                  Select
+                  {allSelected ? 'Deselect' : 'Select'}
                 </button>
               </div>
             )
