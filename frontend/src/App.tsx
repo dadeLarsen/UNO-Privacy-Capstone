@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import {
   ApiError,
   cancelJob,
@@ -12,10 +12,8 @@ import {
   uploadPolicy,
   type AnalysisSnapshot,
   type Category,
-  type CategoryList,
   type Job,
   type RewriteStyle,
-  type Sentence,
 } from './api'
 import './App.css'
 import RewritePanel from './RewritePanel'
@@ -27,67 +25,110 @@ We may share certain information, such as your email address, with trusted third
 
 You have the ability to manage your communication preferences at any time. To stop receiving promotional emails, simply click the unsubscribe link in any message or update your account settings.`
 
+// How long a typed or pasted text must stay unchanged before the page labels it.
+const SETTLE_MS = 600
+// How long the page waits before it asks again while a local service is still starting.
+const RETRY_MS = 2000
+const CATEGORIZING = 'Categorizing sentences…'
+
+// The policy on the page. `file` is the file it was opened from, and `typed` marks an edit in the text box.
+type Source = { text: string; file?: File; typed?: boolean }
+
 function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
 }
 
-function previewSentences(text: string): Sentence[] {
-  return [...text.matchAll(/[^.!?]+[.!?]*/g)]
-    .map((match, id) => {
-      const value = match[0].trim()
-      return { id, text: value, start: 0, end: value.length, label_id: null, label: null }
-    })
-    .filter((sentence) => sentence.text.length > 0)
+// The local service that a failed request has to wait for, or null when the failure has another cause.
+function startingService(cause: unknown): string | null {
+  // The model service opens its port once its classifier has loaded. Until then the API answers with this code.
+  if (cause instanceof ApiError) return cause.code === 'model_service_unavailable' ? 'the model service' : null
+  // fetch rejects with a TypeError when nothing answers at the API's address.
+  return cause instanceof TypeError ? 'the API' : null
 }
 
 function App() {
-  const [policy, setPolicy] = useState(examplePolicy)
+  const [source, setSource] = useState<Source>({ text: examplePolicy })
   const [policyId, setPolicyId] = useState<string | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
   const [snapshot, setSnapshot] = useState<AnalysisSnapshot | null>(null)
-  const [activeCategories, setActiveCategories] = useState<Set<number>>(() => new Set())
+  const [hiddenCategories, setHiddenCategories] = useState<Set<number>>(() => new Set())
   const [selectedSentences, setSelectedSentences] = useState<Set<number>>(() => new Set())
   const [activeJob, setActiveJob] = useState<Job | null>(null)
   // The latest rewrite job as last polled. It stays after the job ends, to say whether the rewrite is whole.
   const [rewriteJob, setRewriteJob] = useState<Job | null>(null)
   const [busy, setBusy] = useState(false)
-  const [status, setStatus] = useState('Ready to analyze')
+  const [analysisFailed, setAnalysisFailed] = useState(false)
+  const [status, setStatus] = useState(CATEGORIZING)
   const [error, setError] = useState<string | null>(null)
+  // Counts the policies the page has held. A job compares it with the count at its start, and stops
+  // writing to the page once the page holds another policy.
+  const generation = useRef(0)
 
-  function showCategories(body: CategoryList) {
-    setCategories(body.categories)
-    setActiveCategories(new Set(body.categories.map((category) => category.id)))
-  }
-
+  // Label the policy as soon as it comes in. The cleanup drops the answer for a text that changed meanwhile.
   useEffect(() => {
-    getCategories()
-      .then(showCategories)
-      .catch((cause: unknown) => setError(`API unavailable: ${messageOf(cause)}`))
-  }, [])
+    if (!source.file && !source.text.trim()) return
+    let current = true
+    const timer = setTimeout(async () => {
+      let id: string | undefined
+      for (;;) {
+        try {
+          const list = await getCategories()
+          if (!current) return
+          setCategories(list.categories)
+          setStatus(CATEGORIZING)
+          id ??= (source.file ? await uploadPolicy(source.file) : await createPolicy(source.text)).id
+          const result = await classify(id)
+          const results = await getResults(id)
+          if (!current) return
+          setPolicyId(id)
+          setSnapshot(results)
+          const count = result.sentences.length
+          setStatus(`Analyzed ${source.file?.name ?? 'locally'} · ${count} ${count === 1 ? 'sentence' : 'sentences'}`)
+          return
+        } catch (cause: unknown) {
+          if (!current) return
+          const service = startingService(cause)
+          if (!service) {
+            setError(messageOf(cause))
+            setStatus('Analysis failed')
+            setAnalysisFailed(true)
+            return
+          }
+          setStatus(`Waiting for ${service} to start…`)
+          await new Promise((resolve) => setTimeout(resolve, RETRY_MS))
+          if (!current) return
+        }
+      }
+    }, source.typed ? SETTLE_MS : 0)
+    return () => {
+      current = false
+      clearTimeout(timer)
+    }
+  }, [source])
 
-  function forgetPolicy() {
+  // Put another policy on the page, or the same one again. Everything that belonged to the last one goes.
+  function load(next: Source) {
+    generation.current += 1
+    setSource(next)
     setPolicyId(null)
     setSnapshot(null)
     setSelectedSentences(new Set())
+    setActiveJob(null)
     setRewriteJob(null)
-  }
-
-  function editPolicy(value: string) {
-    setPolicy(value)
-    forgetPolicy()
+    setBusy(false)
+    setAnalysisFailed(false)
     setError(null)
-    setStatus('Ready to analyze')
+    setStatus(next.file || next.text.trim() ? CATEGORIZING : 'Paste a policy to begin')
   }
 
   function showFailure(cause: unknown, failedStatus: string) {
     if (cause instanceof ApiError && cause.code === 'not_found') {
-      // The API dropped the policy or its job. The text is still on the page, so the next Analyze sends it again.
-      forgetPolicy()
+      // The API dropped the policy or its job. The text is still on the page, so it goes to the API again.
+      load({ text: source.text, file: source.file })
       setError(
-        'The API no longer has this policy in memory. It clears a policy after an hour without use, ' +
-          'and when it restarts. Click Analyze categories to run it again.',
+        'The API no longer had this policy in memory. It clears a policy after an hour without use, ' +
+          'and when it restarts. The page has sent the text again; repeat the request when the labels are back.',
       )
-      setStatus('Ready to analyze')
       return
     }
     setError(messageOf(cause))
@@ -95,7 +136,7 @@ function App() {
   }
 
   function toggleCategory(id: number) {
-    setActiveCategories((current) => {
+    setHiddenCategories((current) => {
       const next = new Set(current)
       if (next.has(id)) next.delete(id)
       else next.add(id)
@@ -104,7 +145,6 @@ function App() {
   }
 
   function toggleSentence(id: number) {
-    if (!snapshot?.classification) return
     setSelectedSentences((current) => {
       const next = new Set(current)
       if (next.has(id)) next.delete(id)
@@ -113,73 +153,41 @@ function App() {
     })
   }
 
-  async function ensurePolicy(): Promise<string> {
-    if (policyId) return policyId
-    const created = await createPolicy(policy)
-    setPolicyId(created.id)
-    return created.id
-  }
-
-  async function classifyAndShow(id: string) {
-    // The list is empty when the page opened before the model service was ready.
-    if (!categories.length) showCategories(await getCategories())
-    const result = await classify(id)
-    setSnapshot(await getResults(id))
-    return result
-  }
-
-  async function analyze() {
-    setBusy(true)
-    setError(null)
-    setStatus('Analyzing…')
-    try {
-      const result = await classifyAndShow(await ensurePolicy())
-      setStatus(`Analyzed locally · ${result.sentences.length} sentences`)
-      if (activeCategories.size === 0 && categories.length) {
-        setActiveCategories(new Set(categories.map((category) => category.id)))
-      }
-    } catch (cause: unknown) {
-      showFailure(cause, 'Analysis failed')
-    } finally {
-      setBusy(false)
-    }
-  }
-
   async function onFileChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
+    const input = event.target
+    const file = input.files?.[0]
     if (!file) return
-    setBusy(true)
-    setError(null)
-    setStatus(`Reading ${file.name}…`)
     try {
-      const text = await file.text()
-      setPolicy(text)
-      forgetPolicy()
-      const uploaded = await uploadPolicy(file)
-      setPolicyId(uploaded.id)
-      const result = await classifyAndShow(uploaded.id)
-      setStatus(`Analyzed ${file.name} · ${result.sentences.length} sentences`)
+      // The text box shows the file's text. The API reads the file itself, and refuses one that is not UTF-8 text.
+      load({ text: await file.text(), file })
     } catch (cause: unknown) {
       setError(messageOf(cause))
       setStatus('Upload failed')
     } finally {
-      setBusy(false)
-      event.target.value = ''
+      input.value = ''
     }
   }
 
-  async function pollJob(jobId: string, id: string) {
+  async function pollJob(jobId: string, id: string, mine: number) {
     for (;;) {
       const job = await getJob(jobId)
+      if (mine !== generation.current) {
+        // The page holds another policy now, so this job would only keep the model service busy.
+        // The cancel fails when the job has ended already, which is as good.
+        cancelJob(jobId).catch(() => undefined)
+        return
+      }
       if (job.kind === 'rewrite') setRewriteJob(job)
       if (job.status === 'queued' || job.status === 'running') {
         setActiveJob(job)
         await new Promise((resolve) => setTimeout(resolve, 250))
         continue
       }
-      setActiveJob(null)
       // A cancelled or failed rewrite keeps the sections it finished, so every ending loads the results.
-      setSnapshot(await getResults(id))
+      const results = await getResults(id)
+      if (mine !== generation.current) return
+      setActiveJob(null)
+      setSnapshot(results)
       const name = job.kind === 'summary' ? 'Summary' : 'Rewrite'
       const sections = job.kind === 'rewrite' && job.progress ? job.progress : null
       if (job.status === 'succeeded') {
@@ -196,43 +204,38 @@ function App() {
     }
   }
 
-  async function summarize() {
+  // Start a summary or a rewrite job for the labeled policy, and follow it to its end.
+  async function runJob(start: (id: string) => Promise<Job>, startedStatus: string, failedStatus: string) {
+    if (!policyId) return
+    const mine = generation.current
     setBusy(true)
     setError(null)
     try {
-      const id = await ensurePolicy()
-      if (!snapshot?.classification) await classifyAndShow(id)
-      const job = await startSummaries(id)
-      setActiveJob(job)
-      setStatus('Summarizing by category…')
-      await pollJob(job.id, id)
+      const job = await start(policyId)
+      if (mine === generation.current) {
+        setActiveJob(job)
+        setStatus(startedStatus)
+      }
+      await pollJob(job.id, policyId, mine)
     } catch (cause: unknown) {
-      showFailure(cause, 'Summary failed')
-      setActiveJob(null)
+      if (mine === generation.current) {
+        setActiveJob(null)
+        showFailure(cause, failedStatus)
+      }
     } finally {
-      setBusy(false)
+      if (mine === generation.current) setBusy(false)
     }
   }
 
-  async function rewrite(style: RewriteStyle, label: string) {
-    setBusy(true)
-    setError(null)
-    try {
-      const id = await ensurePolicy()
-      if (!snapshot?.classification) await classifyAndShow(id)
-      const selected = selectedSentences.size
-        ? [...selectedSentences].sort((left, right) => left - right)
-        : undefined
-      const job = await startRewrite(id, style, selected)
-      setActiveJob(job)
-      setStatus(`Generating ${label}…`)
-      await pollJob(job.id, id)
-    } catch (cause: unknown) {
-      showFailure(cause, 'Rewrite failed')
-      setActiveJob(null)
-    } finally {
-      setBusy(false)
-    }
+  function summarize() {
+    void runJob((id) => startSummaries(id), 'Summarizing by category…', 'Summary failed')
+  }
+
+  function rewrite(style: RewriteStyle, label: string) {
+    const selected = selectedSentences.size
+      ? [...selectedSentences].sort((left, right) => left - right)
+      : undefined
+    void runJob((id) => startRewrite(id, style, selected), `Generating ${label}…`, 'Rewrite failed')
   }
 
   async function cancelActiveJob() {
@@ -248,8 +251,8 @@ function App() {
 
   const categoryMap = new Map(categories.map((category) => [category.id, category]))
   const counts = new Map(snapshot?.classification?.counts.map((count) => [count.label_id, count.count]) ?? [])
-  const sentences = snapshot?.classification?.sentences ?? previewSentences(policy)
-  const analyzed = snapshot?.classification !== null && snapshot?.classification !== undefined
+  const sentences = snapshot?.classification?.sentences ?? null
+  const hasPolicy = Boolean(source.file) || source.text.trim().length > 0
 
   return (
     <div className="app-shell">
@@ -259,7 +262,7 @@ function App() {
           {categories.map((category) => (
             <label className="category-chip" key={category.id} style={{ backgroundColor: category.color }}>
               <input
-                checked={activeCategories.has(category.id)}
+                checked={!hiddenCategories.has(category.id)}
                 onChange={() => toggleCategory(category.id)}
                 type="checkbox"
               />
@@ -276,7 +279,7 @@ function App() {
           <div>
             <p className="eyebrow">Privacy Policy Reader</p>
             <h1>See what a policy really says.</h1>
-            <p className="api-status">{status}</p>
+            <p className="api-status" role="status">{status}</p>
           </div>
           <span className="offline-badge"><i /> Offline mode</span>
         </header>
@@ -286,26 +289,21 @@ function App() {
         <section className="intro-panel">
           <div className="panel-heading">
             <div><span className="step">01</span><h2>Bring in a policy</h2></div>
-            <span className="status-dot">{analyzed ? 'Analyzed locally' : 'Ready to analyze'}</span>
           </div>
           <textarea
             aria-label="Privacy policy text"
-            value={policy}
-            onChange={(event) => editPolicy(event.target.value)}
+            value={source.text}
+            onChange={(event) => load({ text: event.target.value, typed: true })}
           />
           <div className="action-row">
             <span className="character-count">
-              {policy.length.toLocaleString()} characters · {sentences.length} sentences
+              {source.text.length.toLocaleString()} characters
+              {sentences && ` · ${sentences.length} ${sentences.length === 1 ? 'sentence' : 'sentences'}`}
             </span>
-            <div className="button-row">
-              <label className="secondary-button">
-                Open .txt
-                <input type="file" accept=".txt,text/plain" onChange={onFileChange} disabled={busy} />
-              </label>
-              <button className="primary-button" onClick={analyze} disabled={busy} type="button">
-                <span>Analyze categories</span><b>→</b>
-              </button>
-            </div>
+            <label className="secondary-button">
+              Open .txt
+              <input type="file" accept=".txt,text/plain" onChange={onFileChange} />
+            </label>
           </div>
         </section>
 
@@ -313,9 +311,10 @@ function App() {
           <section className="results-panel">
             <SentenceMap
               sentences={sentences}
-              analyzed={analyzed}
+              waiting={hasPolicy ? status : 'Paste policy text above to see sentence-level results.'}
+              onRetry={analysisFailed ? () => load({ text: source.text, file: source.file }) : undefined}
               categories={categoryMap}
-              activeCategories={activeCategories}
+              hiddenCategories={hiddenCategories}
               selected={selectedSentences}
               onToggle={toggleSentence}
             />
@@ -337,7 +336,7 @@ function App() {
           </section>
 
           <RewritePanel
-            busy={busy}
+            busy={busy || !sentences}
             scope={
               selectedSentences.size
                 ? `${selectedSentences.size} selected ${selectedSentences.size === 1 ? 'sentence' : 'sentences'}`

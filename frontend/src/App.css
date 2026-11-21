@@ -24,8 +24,6 @@ h1 { margin: 0; font-size: clamp(25px, 3vw, 39px); line-height: 1.06; letter-spa
 .panel-heading > div { display: flex; align-items: center; gap: 11px; }
 .panel-heading h2 { margin: 0; font-size: 18px; letter-spacing: -.02em; }
 .step { color: #2687d8; font: 700 11px 'Courier New', monospace; }
-.status-dot { color: #5e746d; font-size: 11px; }
-.status-dot::before { content: ''; display: inline-block; width: 7px; height: 7px; margin-right: 6px; background: #76b66b; border-radius: 50%; }
 textarea { display: block; width: 100%; min-height: 145px; resize: vertical; padding: 15px 16px; border: 1px solid #becfce; border-radius: 3px; color: #334552; background: #fbfdfc; font-size: 13px; line-height: 1.65; outline: none; }
 textarea:focus { border-color: #2687d8; box-shadow: 0 0 0 3px rgb(38 135 216 / 13%); }
 .action-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; }
@@ -52,6 +50,7 @@ textarea:focus { border-color: #2687d8; box-shadow: 0 0 0 3px rgb(38 135 216 / 1
 .sentence p { margin: 0; }
 .sentence-tag { align-self: center; max-width: 118px; padding: 3px 5px; color: var(--sentence-color); border: 1px solid color-mix(in srgb, var(--sentence-color) 45%, white); border-radius: 3px; font-size: 9px; line-height: 1.15; }
 .empty-state { padding: 30px; color: #73827d; text-align: center; font-size: 12px; }
+.empty-state p { margin: 0 0 12px; }
 .rewrite-panel { background: #12384c; border-color: #12384c; color: #e7f2f3; }
 .rewrite-panel .panel-heading { margin-bottom: 12px; }
 .rewrite-panel h2 { color: #fff; }
@@ -70,7 +69,6 @@ textarea:focus { border-color: #2687d8; box-shadow: 0 0 0 3px rgb(38 135 216 / 1
 .source-link { color: #6b7a72; font-size: 10px; }
 .api-status { margin: 9px 0 0; color: #cce8ff; font: 11px 'Courier New', monospace; }
 .api-error { margin-top: 12px; padding: 10px 14px; border-left: 3px solid #c0392b; background: #fdecea; color: #7d2419; font-size: 12px; }
-.button-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .secondary-button { display: inline-flex; align-items: center; padding: 9px 12px; border: 1px solid #b8c9c5; border-radius: 3px; color: #31564f; background: #fff; font-size: 12px; font-weight: 700; cursor: pointer; }
 .secondary-button:hover { border-color: #2687d8; color: #126ed1; }
 .secondary-button input { position: absolute; width: 1px; height: 1px; opacity: 0; }

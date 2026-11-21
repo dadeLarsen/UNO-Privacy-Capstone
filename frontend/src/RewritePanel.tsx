@@ -120,7 +120,7 @@ function RewritePanel({ busy, scope, activeJob, rewriteJob, rewrites, onRewrite,
           })
         ) : (
           <p>
-            Analyze a policy, choose a style, then generate a source-linked rewrite. The
+            Choose a style, then generate a source-linked rewrite. The
             rewriter is available locally; if its one-time model download is missing, the job
             reports the exact setup command.
           </p>

@@ -201,7 +201,7 @@ def create_app(
             raise ApiProblem(
                 status_code=409,
                 code="classification_required",
-                message="Analyze categories before asking for summaries.",
+                message="Classify the policy before asking for summaries.",
             )
         request = body or SummaryRequest()
         _check_sentence_ids(record, request.sentence_ids)
@@ -233,7 +233,7 @@ def create_app(
             raise ApiProblem(
                 status_code=409,
                 code="classification_required",
-                message="Analyze categories before asking for a rewrite.",
+                message="Classify the policy before asking for a rewrite.",
             )
         _check_sentence_ids(record, body.sentence_ids)
         _check_sentence_ids(record, body.context_sentence_ids or None)
