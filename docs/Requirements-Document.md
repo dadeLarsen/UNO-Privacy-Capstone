@@ -122,7 +122,7 @@ The app keeps the pasted text exactly as entered, paragraph breaks included, and
 
 **FR-04 [Must]** As a user, so that I can find what the policy says about each practice, I want each sentence labeled with one of ten categories. *(G2, G4, T6, R1)*
 
-Labeling starts when the user presses **Analyze Categories**. The categories are the thesis's ten:
+Labeling starts on its own as soon as a policy comes in: for the example policy when the app opens, for a file when it is opened, and for pasted or edited text once it stops changing. No button starts it. The categories are the thesis's ten:
 
 | Category | Definition |
 | --- | --- |
@@ -208,7 +208,7 @@ Scenario: Follow a source link
 
 **FR-13 [Should]** As a user, so that I can rewrite just the part I'm stuck on, I want rewrites to apply to my selection, or to the whole policy when nothing is selected, with the scope shown next to the buttons. *(G3, T3)*
 
-A whole-policy rewrite goes section by section against the source; it never summarizes earlier summaries. If a selection refers to something outside it ("these partners"), the needed context is sent along with it. Rewrites don't wait for classification.
+A whole-policy rewrite goes section by section against the source; it never summarizes earlier summaries. Rewrites don't wait for classification.
 
 **FR-14 [Should]** As a user, so that I can reuse or retry a rewrite, I want to copy it and regenerate it. *(G3)*
 
@@ -340,7 +340,7 @@ Measurable product qualities use GQM; the rest are narrative.
 
 Setup (NFR-08) needs the internet once, to install the dependencies and download the pinned model files. After that, starting the app and every feature work with no network. The app itself never downloads, and has no accounts, update checks, or telemetry. Model libraries run in offline mode and load only from local folders, so a missing file is an error, never a download.
 
-Verified with networking blocked after setup: start, Analyze Categories, all three rewrites, and a restart.
+Verified with networking blocked after setup: start, labeling, all three rewrites, and a restart.
 
 **NFR-02 [Must] Policy text stays on the computer.** *(Q1, Q9, D4)*
 
@@ -365,7 +365,7 @@ Policies and results are processed on the user's computer. Nothing is saved unle
 
 - **Goal:** Analyze the app's response times to judge whether it is usable, with respect to waiting time, from the user's point of view, on 8–12 GB computers.
 - **Questions:** How long does labeling a whole policy take? How long does a rewrite take? Does the interface stay usable while a rewrite runs? How quickly does Cancel take effect?
-- **Metrics:** time from Analyze Categories to labels shown, with the classifier cold and loaded, for the 42-sentence sample and a long policy; seconds per sentence; time to the first rewrite text and to the finished rewrite, by selection length; input delay during a rewrite; time from Cancel to idle.
+- **Metrics:** time from a paste to labels shown, with the classifier cold and loaded, for the 42-sentence sample and a long policy; seconds per sentence; time to the first rewrite text and to the finished rewrite, by selection length; input delay during a rewrite; time from Cancel to idle.
 - **Targets (provisional, no dedicated GPU):** highlighting and filters update in under 0.1 s with no model call; the 42-sentence sample is labeled within 5 s once the classifier is loaded; Cancel takes effect within 2 s. Rewrite targets are set after AR-02.
 
 **NFR-05 [Must] Accurate categories.** *(Q3, Q8)*
