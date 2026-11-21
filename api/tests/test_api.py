@@ -7,8 +7,8 @@ import pytest
 from fastapi.testclient import TestClient
 
 from api_service.app import create_app
-from api_service.client import ModelServiceClient
 from api_service.generation import JobCancelled
+from api_service.schemas import MAX_POLICY_CHARACTERS
 from api_service.settings import Settings
 
 POLICY = "We collect your email address. We share it with marketing partners."
@@ -64,6 +64,47 @@ def test_upload_only_accepts_utf8_txt(client: TestClient) -> None:
     assert good.status_code == 201
     assert good.json()["source"] == "upload"
     assert good.json()["filename"] == "policy.txt"
+
+
+def upload(client: TestClient, data: bytes) -> httpx.Response:
+    return client.post("/api/v1/policies/upload", files={"file": ("policy.txt", data, "text/plain")})
+
+
+def test_a_policy_over_the_character_limit_is_refused_with_the_reason(client: TestClient) -> None:
+    at_limit = "a" * MAX_POLICY_CHARACTERS
+    assert client.post("/api/v1/policies", json={"text": at_limit}).status_code == 201
+    assert upload(client, at_limit.encode()).status_code == 201
+    # The most bytes that 200,000 characters can take: four each, after a byte order mark.
+    assert upload(client, b"\xef\xbb\xbf" + "\U0001f512".encode() * MAX_POLICY_CHARACTERS).status_code == 201
+
+    over_limit = at_limit + "a"
+    for response in (
+        client.post("/api/v1/policies", json={"text": over_limit}),
+        # Few enough bytes to pass the upload route's read limit, so only the character count refuses it.
+        upload(client, over_limit.encode()),
+        upload(client, b"a" * (4 * MAX_POLICY_CHARACTERS + 4)),
+    ):
+        assert response.status_code == 413, response.text
+        assert response.json()["detail"]["code"] == "policy_too_long"
+        assert "200,000 characters" in response.json()["detail"]["message"]
+
+
+def test_a_policy_expires_an_hour_after_its_last_use_not_its_creation(client: TestClient) -> None:
+    policy_id = new_policy(client)
+    assert client.post(f"/api/v1/policies/{policy_id}/classification").status_code == 200
+    job_id = client.post(f"/api/v1/policies/{policy_id}/summaries", json={}).json()["id"]
+    record = client.app.state.store.get_policy(UUID(policy_id))
+
+    # Each request comes 59 minutes after the one before it; polling a job counts as use of its policy.
+    for path in (f"/api/v1/policies/{policy_id}", f"/api/v1/jobs/{job_id}", f"/api/v1/policies/{policy_id}/results"):
+        record.last_used -= 59 * 60
+        assert client.get(path).status_code == 200, path
+
+    record.last_used -= 61 * 60
+    expired = client.get(f"/api/v1/policies/{policy_id}")
+    assert expired.status_code == 404
+    assert expired.json()["detail"]["code"] == "not_found"
+    assert client.get(f"/api/v1/jobs/{job_id}").status_code == 404
 
 
 def test_classification_is_returned_before_any_summary(client: TestClient) -> None:
@@ -224,16 +265,11 @@ def test_job_can_be_cancelled(client: TestClient, monkeypatch: pytest.MonkeyPatc
     assert client.get(f"/api/v1/jobs/{job_id}").json()["status"] == "cancelled"
 
 
-def test_model_service_outage_returns_structured_error() -> None:
+def test_model_service_outage_returns_structured_error(model_client_factory) -> None:
     def outage(request: httpx.Request) -> httpx.Response:
         raise httpx.ConnectError("refused", request=request)
 
-    http = httpx.Client(
-        transport=httpx.MockTransport(outage),
-        base_url="http://127.0.0.1:8000",
-        trust_env=False,
-    )
-    app = create_app(Settings(), client=ModelServiceClient(http))
+    app = create_app(Settings(), client=model_client_factory(outage))
     with TestClient(app) as client:
         policy_id = new_policy(client)
         response = client.post(f"/api/v1/policies/{policy_id}/classification")

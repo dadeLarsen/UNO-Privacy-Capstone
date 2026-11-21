@@ -144,7 +144,7 @@ def _wait_until_listening(processes: list[tuple[str, subprocess.Popen[str]]], ur
                 print(f"[run] {label} exited with code {code} during startup.", file=sys.stderr, flush=True)
                 return
         if all(_http_reachable(url) for url in urls):
-            print("[run] API and frontend are listening.", flush=True)
+            print("[run] The model service, API, and frontend are listening.", flush=True)
             return
         time.sleep(0.25)
     print("[run] Startup check timed out; see the service logs above.", file=sys.stderr, flush=True)
@@ -257,6 +257,8 @@ def main() -> int:
         _wait_until_listening(
             processes,
             [
+                # The model service opens its port only once the classifier has loaded.
+                f"http://127.0.0.1:{model_port}/health",
                 f"http://127.0.0.1:{api_port}/api/v1/health",
                 f"http://127.0.0.1:{web_port}/",
             ],

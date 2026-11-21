@@ -41,8 +41,8 @@ yet evaluated.
 A small FastAPI service in its own folder. The browser talks only to this API; it
 forwards text to `modelService/`, returns classifications first, and later returns
 source-linked summaries and rewrites through pollable jobs. Policies and jobs live in
-memory and expire after an hour. Summaries are extractive; rewrites call the pinned
-GGUF rewriter in `modelService/`.
+memory and expire after an hour without use. Summaries are extractive; rewrites call
+the pinned GGUF rewriter in `modelService/`.
 
 | File | Status | Contents |
 | --- | --- | --- |

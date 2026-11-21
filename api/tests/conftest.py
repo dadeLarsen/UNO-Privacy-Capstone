@@ -121,15 +121,6 @@ def default_model_service_handler():
 
 
 @pytest.fixture
-def model_http() -> httpx.Client:
-    return httpx.Client(
-        transport=httpx.MockTransport(model_service_handler),
-        base_url="http://127.0.0.1:8000",
-        trust_env=False,
-    )
-
-
-@pytest.fixture
 def model_client_factory():
     def create(handler=model_service_handler) -> ModelServiceClient:
         http = httpx.Client(
@@ -143,7 +134,7 @@ def model_client_factory():
 
 
 @pytest.fixture
-def client(model_http: httpx.Client):
-    app = create_app(Settings(max_characters=1000), client=ModelServiceClient(model_http))
+def client(model_client_factory):
+    app = create_app(Settings(), client=model_client_factory())
     with TestClient(app) as test_client:
         yield test_client

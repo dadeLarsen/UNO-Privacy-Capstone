@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import codecs
 import logging
 import threading
 from contextlib import asynccontextmanager
@@ -14,15 +15,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .client import ModelServiceClient
-from .errors import ApiProblem, ModelServiceError
+from .errors import ApiProblem, ModelServiceError, PolicyTooLong
 from .generation import JobCancelled, extractive_summaries, rewritten_passage
 from .schemas import (
+    MAX_POLICY_CHARACTERS,
     AnalysisResults,
     ApiErrorInfo,
     CategoryCount,
     CategoryList,
     Classification,
     ClassificationRequest,
+    ErrorEnvelope,
     GenerationKind,
     Health,
     Job,
@@ -58,7 +61,13 @@ def create_app(
         if owns_client:
             model_client.close()
 
-    app = FastAPI(title="Privacy Policy Reader API", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(
+        title="Privacy Policy Reader API",
+        version="0.1.0",
+        lifespan=lifespan,
+        # Without this, the generated docs show FastAPI's own 422 body, which the handlers below never send.
+        responses={"default": {"model": ErrorEnvelope, "description": "Error with a stable code"}},
+    )
     app.state.settings = settings
     app.state.client = model_client
     app.state.store = policies
@@ -100,23 +109,14 @@ def create_app(
         try:
             body = model_client.health()
         except ApiProblem:
-            return Health(
-                status="unavailable",
-                api_version=app.version,
-                model_service_ready=False,
-                rewriter_status="unavailable",
-            )
+            return Health(status="unavailable", api_version=app.version, model_service_ready=False)
         model = ModelProfile.model_validate(body["model"]) if body.get("model") else None
         ready = bool(body.get("ready"))
-        rewriter = body.get("rewriter") if isinstance(body.get("rewriter"), dict) else {}
         return Health(
             status="ok" if ready else "degraded",
             api_version=app.version,
             model_service_ready=ready,
             model=model,
-            rewriter_ready=bool(rewriter.get("ready")),
-            rewriter_status=str(rewriter.get("status") or "available"),
-            rewriter_setup=rewriter.get("setup"),
         )
 
     @app.get("/api/v1/categories", response_model=CategoryList)
@@ -137,14 +137,12 @@ def create_app(
                 code="unsupported_file_type",
                 message="Upload a UTF-8 .txt file. PDF and DOCX import is not supported.",
             )
-        max_bytes = settings.max_characters * 4 + 1
-        data = file.file.read(max_bytes)
-        if len(data) >= max_bytes:
-            raise ApiProblem(
-                status_code=413,
-                code="policy_too_long",
-                message=f"Policy is longer than {settings.max_characters} characters.",
-            )
+        # A character takes at most four bytes in UTF-8, and decoding drops a byte order mark.
+        # This only bounds the read; the store counts the characters.
+        max_bytes = MAX_POLICY_CHARACTERS * 4 + len(codecs.BOM_UTF8)
+        data = file.file.read(max_bytes + 1)
+        if len(data) > max_bytes:
+            raise PolicyTooLong
         try:
             text = data.decode("utf-8-sig")
         except UnicodeDecodeError as exc:
