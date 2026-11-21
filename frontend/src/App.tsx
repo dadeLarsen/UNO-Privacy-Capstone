@@ -260,7 +260,7 @@ function App() {
     const selected = selectedSentences.size
       ? [...selectedSentences].sort((left, right) => left - right)
       : undefined
-    void runJob((id) => startRewrite(id, style, selected), `Generating ${label}…`, 'Rewrite failed')
+    void runJob((id) => startRewrite(id, style, selected), `Rewriting · ${label}…`, 'Rewrite failed')
   }
 
   async function cancelActiveJob() {

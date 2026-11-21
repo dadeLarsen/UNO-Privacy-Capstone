@@ -7,9 +7,17 @@ const styleIcons: Record<RewriteStyle, string> = {
   simplify_for_adults: '◌',
 }
 
+// What the button that starts a rewrite says for each style, before and after what it rewrites:
+// "Simplify the selection for kids".
+const styleActions: Record<RewriteStyle, [string, string]> = {
+  paraphrase: ['Paraphrase', ''],
+  simplify_for_kids: ['Simplify', ' for kids'],
+  simplify_for_adults: ['Simplify', ' for adults'],
+}
+
 type Props = {
   busy: boolean
-  // What Generate rewrites: the selection or the whole policy.
+  // What a rewrite takes: the selection or the whole policy.
   scope: string
   // Set while sentences are selected: empties the selection, so the scope is the whole policy again.
   onClearSelection?: () => void
@@ -24,6 +32,7 @@ type Props = {
 // is in the sentence map, beside the sentences it came from.
 function RewritePanel({ busy, scope, onClearSelection, activeJob, onRewrite, onSummarize, onCancel }: Props) {
   const [style, setStyle] = useState<RewriteStyle>('simplify_for_adults')
+  const [verb, audience] = styleActions[style]
   const progress = activeJob?.progress
 
   return (
@@ -37,7 +46,7 @@ function RewritePanel({ busy, scope, onClearSelection, activeJob, onRewrite, onS
             key={option}
             type="button"
           >
-            <span>{styleIcons[option]}</span>{styleLabels[option]}
+            <span aria-hidden="true">{styleIcons[option]}</span>{styleLabels[option]}
           </button>
         ))}
       </div>
@@ -54,7 +63,7 @@ function RewritePanel({ busy, scope, onClearSelection, activeJob, onRewrite, onS
           disabled={busy}
           type="button"
         >
-          <span>Generate {styleLabels[style]}</span><b>→</b>
+          <span>{verb} {onClearSelection ? 'the selection' : 'the policy'}{audience}</span><b>→</b>
         </button>
         <button className="secondary-button" onClick={onSummarize} disabled={busy} type="button">
           Summarize categories
