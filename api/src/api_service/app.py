@@ -102,23 +102,14 @@ def create_app(
         try:
             body = model_client.health()
         except ApiProblem:
-            return Health(
-                status="unavailable",
-                api_version=app.version,
-                model_service_ready=False,
-                rewriter_status="unavailable",
-            )
+            return Health(status="unavailable", api_version=app.version, model_service_ready=False)
         model = ModelProfile.model_validate(body["model"]) if body.get("model") else None
         ready = bool(body.get("ready"))
-        rewriter = body.get("rewriter") if isinstance(body.get("rewriter"), dict) else {}
         return Health(
             status="ok" if ready else "degraded",
             api_version=app.version,
             model_service_ready=ready,
             model=model,
-            rewriter_ready=bool(rewriter.get("ready")),
-            rewriter_status=str(rewriter.get("status") or "available"),
-            rewriter_setup=rewriter.get("setup"),
         )
 
     @app.get("/api/v1/categories", response_model=CategoryList)
