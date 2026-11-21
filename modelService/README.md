@@ -62,6 +62,11 @@ depends on `privacy-research` by path, so both folders must stay side by side. R
 every command below from this folder. Installing the service also installs the
 benchmark and its `pbench` command, so `privacy-research/` needs no setup of its own.
 
+From the repository root, `python run.py setup` runs one of these setups, without the
+tests, together with the setup of `api/` and `frontend/`: the first when it finds
+`nvidia-smi`, else the second. After the second, set `UV_NO_SYNC` as it says before you
+run `uv` in this folder yourself.
+
 Choose one of the two setups. Each installs the service, caches the two pinned model
 files while online (296 MiB and 2.55 GiB), and runs the tests. A model's two default
 conditions pin the same file, so either pair of downloads serves the GPU and the CPU.
