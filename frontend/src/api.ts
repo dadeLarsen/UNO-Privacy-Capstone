@@ -93,6 +93,8 @@ export type Job = {
   created_at: string
   updated_at: string
   error?: { code: string; message: string; retryable: boolean } | null
+  // A rewrite job's sections in the order it rewrites them, each as the IDs of its sentences.
+  sections?: number[][] | null
   result?: SummaryResult | RewriteResult | null
 }
 
@@ -115,6 +117,13 @@ export type AnalysisSnapshot = {
 }
 
 export type RewriteStyle = 'paraphrase' | 'simplify_for_kids' | 'simplify_for_adults'
+
+// What the page calls each style.
+export const styleLabels: Record<RewriteStyle, string> = {
+  paraphrase: 'Paraphrase',
+  simplify_for_kids: 'Simplify for Kids',
+  simplify_for_adults: 'Simplify for Adults',
+}
 
 type Detail = string | { code: string; message: string; retryable: boolean } | undefined
 

@@ -53,6 +53,7 @@ function App() {
   const [snapshot, setSnapshot] = useState<AnalysisSnapshot | null>(null)
   const [hiddenCategories, setHiddenCategories] = useState<Set<number>>(() => new Set())
   const [selectedSentences, setSelectedSentences] = useState<Set<number>>(() => new Set())
+  const [highlighted, setHighlighted] = useState(true)
   const [activeJob, setActiveJob] = useState<Job | null>(null)
   // The latest rewrite job as last polled. It stays after the job ends, to say whether the rewrite is whole.
   const [rewriteJob, setRewriteJob] = useState<Job | null>(null)
@@ -319,9 +320,7 @@ function App() {
         {error && <div className="api-error" role="alert">{error}</div>}
 
         <section className="intro-panel">
-          <div className="panel-heading">
-            <div><span className="step">01</span><h2>Bring in a policy</h2></div>
-          </div>
+          <h2>Bring in a policy</h2>
           <textarea
             aria-label="Privacy policy text"
             value={source.text}
@@ -339,50 +338,36 @@ function App() {
           </div>
         </section>
 
-        <div className="content-grid">
-          <section className="results-panel">
-            <SentenceMap
-              sentences={sentences}
-              waiting={hasPolicy ? status : 'Paste policy text above to see sentence-level results.'}
-              onRetry={analysisFailed ? () => load({ text: source.text, file: source.file }) : undefined}
-              categories={categoryMap}
-              hiddenCategories={hiddenCategories}
-              selected={selectedSentences}
-              onPick={pickSentence}
-            />
+        <RewritePanel
+          busy={busy || !sentences}
+          scope={
+            selectedSentences.size
+              ? `${selectedSentences.size} selected ${selectedSentences.size === 1 ? 'sentence' : 'sentences'}`
+              : 'the whole policy'
+          }
+          onClearSelection={selectedSentences.size ? () => setSelectedSentences(new Set()) : undefined}
+          activeJob={activeJob}
+          onRewrite={rewrite}
+          onSummarize={summarize}
+          onCancel={cancelActiveJob}
+        />
 
-            {snapshot?.summaries.length ? (
-              <div className="summary-list">
-                <h3>Category summaries</h3>
-                {snapshot.summaries.map((summary) => (
-                  <div className="summary-item" key={summary.label_id}>
-                    <strong>{summary.category}</strong>
-                    <p>{summary.text}</p>
-                    <span className="source-link">
-                      Sources: {summary.source_sentence_ids.map((id) => id + 1).join(', ')}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-          </section>
-
-          <RewritePanel
-            busy={busy || !sentences}
-            scope={
-              selectedSentences.size
-                ? `${selectedSentences.size} selected ${selectedSentences.size === 1 ? 'sentence' : 'sentences'}`
-                : 'the whole policy'
-            }
-            onClearSelection={selectedSentences.size ? () => setSelectedSentences(new Set()) : undefined}
-            activeJob={activeJob}
-            rewriteJob={rewriteJob}
-            rewrites={snapshot?.rewrites ?? []}
-            onRewrite={rewrite}
-            onSummarize={summarize}
-            onCancel={cancelActiveJob}
-          />
-        </div>
+        {/* The key gives each policy a map of its own, so no view or source outline carries over. */}
+        <SentenceMap
+          key={policyId ?? 'unlabeled'}
+          sentences={sentences}
+          waiting={hasPolicy ? status : 'Paste policy text above to see sentence-level results.'}
+          onRetry={analysisFailed ? () => load({ text: source.text, file: source.file }) : undefined}
+          categories={categoryMap}
+          hiddenCategories={hiddenCategories}
+          highlighted={highlighted}
+          onHighlight={setHighlighted}
+          selected={selectedSentences}
+          onPick={pickSentence}
+          rewriteJob={rewriteJob}
+          rewrites={snapshot?.rewrites ?? []}
+          summaries={snapshot?.summaries ?? []}
+        />
       </main>
     </div>
   )
