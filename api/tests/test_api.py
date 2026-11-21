@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from api_service.app import create_app
 from api_service.client import ModelServiceClient
 from api_service.generation import JobCancelled
+from api_service.schemas import MAX_POLICY_CHARACTERS
 from api_service.settings import Settings
 
 POLICY = "We collect your email address. We share it with marketing partners."
@@ -64,6 +65,29 @@ def test_upload_only_accepts_utf8_txt(client: TestClient) -> None:
     assert good.status_code == 201
     assert good.json()["source"] == "upload"
     assert good.json()["filename"] == "policy.txt"
+
+
+def upload(client: TestClient, data: bytes) -> httpx.Response:
+    return client.post("/api/v1/policies/upload", files={"file": ("policy.txt", data, "text/plain")})
+
+
+def test_a_policy_over_the_character_limit_is_refused_with_the_reason(client: TestClient) -> None:
+    at_limit = "a" * MAX_POLICY_CHARACTERS
+    assert client.post("/api/v1/policies", json={"text": at_limit}).status_code == 201
+    assert upload(client, at_limit.encode()).status_code == 201
+    # The most bytes that 200,000 characters can take: four each, after a byte order mark.
+    assert upload(client, b"\xef\xbb\xbf" + "\U0001f512".encode() * MAX_POLICY_CHARACTERS).status_code == 201
+
+    over_limit = at_limit + "a"
+    for response in (
+        client.post("/api/v1/policies", json={"text": over_limit}),
+        # Few enough bytes to pass the upload route's read limit, so only the character count refuses it.
+        upload(client, over_limit.encode()),
+        upload(client, b"a" * (4 * MAX_POLICY_CHARACTERS + 4)),
+    ):
+        assert response.status_code == 413, response.text
+        assert response.json()["detail"]["code"] == "policy_too_long"
+        assert "200,000 characters" in response.json()["detail"]["message"]
 
 
 def test_classification_is_returned_before_any_summary(client: TestClient) -> None:

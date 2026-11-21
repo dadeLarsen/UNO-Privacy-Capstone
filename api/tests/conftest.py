@@ -144,6 +144,6 @@ def model_client_factory():
 
 @pytest.fixture
 def client(model_http: httpx.Client):
-    app = create_app(Settings(max_characters=1000), client=ModelServiceClient(model_http))
+    app = create_app(Settings(), client=ModelServiceClient(model_http))
     with TestClient(app) as test_client:
         yield test_client

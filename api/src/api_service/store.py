@@ -8,8 +8,9 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from uuid import UUID, uuid4
 
-from .errors import NotFound
+from .errors import NotFound, PolicyTooLong
 from .schemas import (
+    MAX_POLICY_CHARACTERS,
     AnalysisPhase,
     AnalysisResults,
     ApiErrorInfo,
@@ -54,6 +55,9 @@ class Store:
         source: PolicySource,
         filename: str | None = None,
     ) -> PolicyRecord:
+        # Pasted and uploaded text both arrive here, so both get the same answer.
+        if len(text) > MAX_POLICY_CHARACTERS:
+            raise PolicyTooLong
         policy = Policy(
             id=uuid4(),
             source=source,

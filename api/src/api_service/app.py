@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import codecs
 import logging
 import threading
 from contextlib import asynccontextmanager
@@ -14,9 +15,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .client import ModelServiceClient
-from .errors import ApiProblem, ModelServiceError
+from .errors import ApiProblem, ModelServiceError, PolicyTooLong
 from .generation import JobCancelled, extractive_summaries, rewritten_passage
 from .schemas import (
+    MAX_POLICY_CHARACTERS,
     AnalysisResults,
     ApiErrorInfo,
     CategoryCount,
@@ -137,14 +139,12 @@ def create_app(
                 code="unsupported_file_type",
                 message="Upload a UTF-8 .txt file. PDF and DOCX import is not supported.",
             )
-        max_bytes = settings.max_characters * 4 + 1
-        data = file.file.read(max_bytes)
-        if len(data) >= max_bytes:
-            raise ApiProblem(
-                status_code=413,
-                code="policy_too_long",
-                message=f"Policy is longer than {settings.max_characters} characters.",
-            )
+        # A character takes at most four bytes in UTF-8, and decoding drops a byte order mark.
+        # This only bounds the read; the store counts the characters.
+        max_bytes = MAX_POLICY_CHARACTERS * 4 + len(codecs.BOM_UTF8)
+        data = file.file.read(max_bytes + 1)
+        if len(data) > max_bytes:
+            raise PolicyTooLong
         try:
             text = data.decode("utf-8-sig")
         except UnicodeDecodeError as exc:

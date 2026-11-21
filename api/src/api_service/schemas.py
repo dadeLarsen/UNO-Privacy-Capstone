@@ -113,7 +113,8 @@ class ModelProfile(BaseModel):
 class PolicyCreate(BaseModel):
     """Pasted text (FR-01) or the built-in example (FR-03)."""
 
-    text: str = Field(min_length=1, max_length=MAX_POLICY_CHARACTERS)
+    # No max_length: the store refuses a long policy with 413 and a message that says why.
+    text: str = Field(min_length=1)
     source: PolicySource = PolicySource.PASTE
     filename: str | None = Field(
         default=None,
