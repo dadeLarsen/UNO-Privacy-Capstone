@@ -63,6 +63,9 @@ function App() {
   // Counts the policies the page has held. A job compares it with the count at its start, and stops
   // writing to the page once the page holds another policy.
   const generation = useRef(0)
+  // The sentence last clicked or keyed, where a Shift range starts.
+  const anchor = useRef<number | null>(null)
+  const sentences = snapshot?.classification?.sentences ?? null
 
   // Label the policy as soon as it comes in. The cleanup drops the answer for a text that changed meanwhile.
   useEffect(() => {
@@ -109,6 +112,7 @@ function App() {
   // Put another policy on the page, or the same one again. Everything that belonged to the last one goes.
   function load(next: Source) {
     generation.current += 1
+    anchor.current = null
     setSource(next)
     setPolicyId(null)
     setSnapshot(null)
@@ -144,13 +148,25 @@ function App() {
     })
   }
 
-  function toggleSentence(id: number) {
+  // A click or a key on a sentence. With Shift it selects every sentence from the last one picked to this one.
+  function pickSentence(id: number, range: boolean) {
+    const from = range ? anchor.current : null
+    anchor.current = id
     setSelectedSentences((current) => {
       const next = new Set(current)
-      if (next.has(id)) next.delete(id)
+      if (from !== null) {
+        for (const sentence of sentences ?? []) {
+          if (sentence.id >= Math.min(from, id) && sentence.id <= Math.max(from, id)) next.add(sentence.id)
+        }
+      } else if (next.has(id)) next.delete(id)
       else next.add(id)
       return next
     })
+  }
+
+  function selectCategory(labelId: number) {
+    const labeled = (sentences ?? []).filter((sentence) => sentence.label_id === labelId)
+    setSelectedSentences((current) => new Set([...current, ...labeled.map((sentence) => sentence.id)]))
   }
 
   async function onFileChange(event: ChangeEvent<HTMLInputElement>) {
@@ -251,25 +267,41 @@ function App() {
 
   const categoryMap = new Map(categories.map((category) => [category.id, category]))
   const counts = new Map(snapshot?.classification?.counts.map((count) => [count.label_id, count.count]) ?? [])
-  const sentences = snapshot?.classification?.sentences ?? null
   const hasPolicy = Boolean(source.file) || source.text.trim().length > 0
 
   return (
     <div className="app-shell">
       <aside className="category-rail">
         <div className="rail-label">Categories</div>
+        <p className="rail-hint">
+          A checkbox shows or hides a category's highlight. Select adds its sentences to the selection.
+        </p>
         <div className="category-list">
-          {categories.map((category) => (
-            <label className="category-chip" key={category.id} style={{ backgroundColor: category.color }}>
-              <input
-                checked={!hiddenCategories.has(category.id)}
-                onChange={() => toggleCategory(category.id)}
-                type="checkbox"
-              />
-              <span>{category.display_name}</span>
-              <strong>{counts.get(category.id) ?? 0}</strong>
-            </label>
-          ))}
+          {categories.map((category) => {
+            const count = counts.get(category.id) ?? 0
+            return (
+              <div className="category-row" key={category.id}>
+                <label className="category-chip" style={{ backgroundColor: category.color }}>
+                  <input
+                    checked={!hiddenCategories.has(category.id)}
+                    onChange={() => toggleCategory(category.id)}
+                    type="checkbox"
+                  />
+                  <span>{category.display_name}</span>
+                  <strong>{count}</strong>
+                </label>
+                <button
+                  aria-label={`Select the ${count} ${category.display_name} ${count === 1 ? 'sentence' : 'sentences'}`}
+                  className="category-select"
+                  disabled={count === 0}
+                  onClick={() => selectCategory(category.id)}
+                  type="button"
+                >
+                  Select
+                </button>
+              </div>
+            )
+          })}
         </div>
         <div className="rail-footnote">Local analysis<br /><span>Nothing leaves this device</span></div>
       </aside>
@@ -316,7 +348,7 @@ function App() {
               categories={categoryMap}
               hiddenCategories={hiddenCategories}
               selected={selectedSentences}
-              onToggle={toggleSentence}
+              onPick={pickSentence}
             />
 
             {snapshot?.summaries.length ? (
@@ -342,6 +374,7 @@ function App() {
                 ? `${selectedSentences.size} selected ${selectedSentences.size === 1 ? 'sentence' : 'sentences'}`
                 : 'the whole policy'
             }
+            onClearSelection={selectedSentences.size ? () => setSelectedSentences(new Set()) : undefined}
             activeJob={activeJob}
             rewriteJob={rewriteJob}
             rewrites={snapshot?.rewrites ?? []}

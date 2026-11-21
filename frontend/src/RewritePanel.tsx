@@ -17,6 +17,8 @@ type Props = {
   busy: boolean
   // What Generate rewrites: the selection or the whole policy.
   scope: string
+  // Set while sentences are selected: empties the selection, so the scope is the whole policy again.
+  onClearSelection?: () => void
   // The job that runs now, of either kind.
   activeJob: Job | null
   // The latest rewrite job as last polled, also after it ended.
@@ -35,7 +37,17 @@ function partLabel(job: Job | null): string | null {
   return `Rewrite ${ending} · ${job.progress.completed} of ${job.progress.total} sections`
 }
 
-function RewritePanel({ busy, scope, activeJob, rewriteJob, rewrites, onRewrite, onSummarize, onCancel }: Props) {
+function RewritePanel({
+  busy,
+  scope,
+  onClearSelection,
+  activeJob,
+  rewriteJob,
+  rewrites,
+  onRewrite,
+  onSummarize,
+  onCancel,
+}: Props) {
   const [style, setStyle] = useState<RewriteStyle>('simplify_for_adults')
   // A rewrite job holds its finished sections while it runs and after it ends. The results hold the
   // same sections once it ends, and an earlier rewrite when the job ended before its first section.
@@ -70,7 +82,12 @@ function RewritePanel({ busy, scope, activeJob, rewriteJob, rewrites, onRewrite,
         ))}
       </div>
       <div className="rewrite-actions">
-        <p className="rewrite-scope">Scope: {scope}</p>
+        <p className="rewrite-scope">
+          Scope: {scope}
+          {onClearSelection && (
+            <button className="clear-selection" onClick={onClearSelection} type="button">Clear selection</button>
+          )}
+        </p>
         <button
           className="primary-button"
           onClick={() => onRewrite(style, styleLabels[style])}

@@ -5,7 +5,12 @@ button { cursor: pointer; }
 .app-shell { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100vh; background: linear-gradient(125deg, #eef3f1 0%, #f8faf8 56%, #edf4f8 100%); }
 .category-rail { padding: 30px 16px 24px; background: #f8faf7; border-right: 1px solid #dce4df; display: flex; flex-direction: column; }
 .rail-label { padding: 0 10px 15px; font: 700 11px/1.2 'Courier New', monospace; letter-spacing: .12em; text-transform: uppercase; color: #66736f; }
+.rail-hint { margin: 0 10px 12px; color: #66736f; font-size: 10px; line-height: 1.4; }
 .category-list { display: grid; gap: 7px; }
+.category-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px; }
+.category-select { padding: 0 7px; border: 1px solid #b8c9c5; border-radius: 5px; color: #31564f; background: #fff; font-size: 10px; font-weight: 700; }
+.category-select:hover:enabled { border-color: #2687d8; color: #126ed1; }
+.category-select:disabled { opacity: .45; cursor: not-allowed; }
 .category-chip { display: grid; grid-template-columns: 13px 1fr auto; align-items: center; gap: 7px; min-height: 36px; padding: 7px 8px; border-radius: 5px; color: #fff; font-size: 10px; line-height: 1.15; box-shadow: 0 2px 0 rgb(24 49 60 / 10%); }
 .category-chip input { accent-color: #fff; width: 12px; height: 12px; margin: 0; }
 .category-chip span { max-width: 124px; }
@@ -84,6 +89,8 @@ textarea:focus { border-color: #2687d8; box-shadow: 0 0 0 3px rgb(38 135 216 / 1
 .rewrite-actions .secondary-button { color: #d2e4e5; border-color: #376172; background: #1a4659; }
 .rewrite-actions .secondary-button:hover { color: #fff; border-color: #7fd8d0; }
 .rewrite-scope { margin: 0; color: #b9ced0; font-size: 11px; }
+.clear-selection { margin-left: 8px; padding: 2px 7px; border: 1px solid #376172; border-radius: 3px; color: #d2e4e5; background: transparent; font-size: 11px; }
+.clear-selection:hover { border-color: #7fd8d0; color: #fff; }
 .rewrite-progress { display: grid; gap: 6px; margin-top: 6px; font-size: 12px; }
 .rewrite-progress progress { width: 100%; accent-color: #7fd8d0; }
 .rewrite-result > div + div { margin-top: 14px; padding-top: 12px; border-top: 1px dashed #d6cda2; }

@@ -11,14 +11,15 @@ type Props = {
   categories: Map<number, Category>
   hiddenCategories: Set<number>
   selected: Set<number>
-  onToggle: (id: number) => void
+  // A click or a key on a sentence; `range` is true when Shift was held.
+  onPick: (id: number, range: boolean) => void
 }
 
 function tintOf(category: Category): string {
   return category.tint ?? `${category.color}1a`
 }
 
-function SentenceMap({ sentences, waiting, onRetry, categories, hiddenCategories, selected, onToggle }: Props) {
+function SentenceMap({ sentences, waiting, onRetry, categories, hiddenCategories, selected, onPick }: Props) {
   const [highlighted, setHighlighted] = useState(true)
 
   return (
@@ -39,8 +40,10 @@ function SentenceMap({ sentences, waiting, onRetry, categories, hiddenCategories
         <>
           <p className="selection-hint">
             {selected.size
-              ? `${selected.size} ${selected.size === 1 ? 'sentence' : 'sentences'} selected for rewriting. Click again to deselect.`
-              : 'Click sentences to select them for rewriting. With none selected, the whole policy is used.'}
+              ? `${selected.size} ${selected.size === 1 ? 'sentence' : 'sentences'} selected for rewriting. `
+              : 'With no sentence selected, a rewrite takes the whole policy. '}
+            Click a sentence to select or deselect it, and Shift-click another to select every sentence between
+            them. On the keyboard, Enter or Space is the click.
           </p>
           <div className="sentence-list">
             {sentences.map((sentence) => {
@@ -52,12 +55,16 @@ function SentenceMap({ sentences, waiting, onRetry, categories, hiddenCategories
                   aria-pressed={isSelected}
                   className={`sentence ${isVisible ? 'is-highlighted' : ''} ${isSelected ? 'is-selected' : ''}`}
                   key={sentence.id}
-                  onClick={() => onToggle(sentence.id)}
+                  onClick={(event) => onPick(sentence.id, event.shiftKey)}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter' || event.key === ' ') {
                       event.preventDefault()
-                      onToggle(sentence.id)
+                      onPick(sentence.id, event.shiftKey)
                     }
+                  }}
+                  onMouseDown={(event) => {
+                    // A Shift-click would also stretch the browser's text selection across the sentences.
+                    if (event.shiftKey) event.preventDefault()
                   }}
                   role="button"
                   style={
