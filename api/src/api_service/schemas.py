@@ -280,6 +280,11 @@ class Job(BaseModel):
     created_at: datetime = Field(default_factory=_utcnow)
     updated_at: datetime = Field(default_factory=_utcnow)
     error: ApiErrorInfo | None = None
+    sections: list[list[int]] | None = Field(
+        default=None,
+        description="A rewrite job's sections in the order it rewrites them, each as the IDs of its sentences. "
+        "Set when the job is created, so a page can lay the rewrite out before any section is finished.",
+    )
     result: GenerationResult | None = Field(
         default=None,
         description="A rewrite job that is running, cancelled, or failed holds the sections it finished.",

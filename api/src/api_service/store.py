@@ -87,13 +87,14 @@ class Store:
         with self._lock:
             self.get_policy(policy_id).classification = classification
 
-    def create_job(self, policy_id: UUID, kind: str) -> JobRecord:
+    def create_job(self, policy_id: UUID, kind: str, sections: list[list[int]] | None = None) -> JobRecord:
         job = Job(
             id=uuid4(),
             policy_id=policy_id,
             kind=kind,
             status=JobStatus.QUEUED,
             progress=JobProgress(stage="queued", completed=0, total=1),
+            sections=sections,
         )
         record = JobRecord(job=job, policy_id=policy_id)
         with self._lock:

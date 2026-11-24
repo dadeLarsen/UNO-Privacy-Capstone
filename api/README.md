@@ -63,6 +63,14 @@ about 2,000 characters (`SECTION_CHARACTERS` in `generation.py`) and sends one
 `/rewrite` request for each. The result holds one rewrite for each section, each with
 the IDs of its own sentences (FR-13).
 
+The job names the cut from its first answer on: `sections` lists every section as the
+IDs of its sentences, such as `[[0, 1, 2], [3], [4], [5, 6]]`, and `result.rewrites[i]`
+is the rewrite of `sections[i]`. The page uses it to put each rewrite beside its
+sentences before the first one is finished, and to show which sections a cancel or a
+failure left without a rewrite (FR-12). A summary job has no `sections`. A request that
+leaves nothing to rewrite gets HTTP 422 with `detail.code: "nothing_to_rewrite"` and no
+job.
+
 - A section ends at a paragraph break where it can: a newline between two sentences,
   or a place where the selection skips a sentence. A paragraph over the limit is cut
   between sentences. A sentence over the limit is a section of its own, and the job
@@ -116,10 +124,20 @@ the frontend together with the URLs wired correctly.
 
 `GET /api/v1/health` reports `status: "ok"` only when the model service is ready.
 If the model service is down, classification returns HTTP 503 with
-`detail.code: "model_service_unavailable"`. A policy over 200,000 characters, pasted or
-uploaded, gets HTTP 413 with `detail.code: "policy_too_long"`. A request for a policy
-that has expired gets HTTP 404 with `detail.code: "not_found"`; the page then asks the
-user to analyze the text again.
+`detail.code: "model_service_unavailable"`. The model service opens its port only once
+its classifier has loaded, so the page takes that code as "still starting": it says
+that it waits for the model service and asks again every 2 s. A policy over 200,000
+characters, pasted or uploaded, gets HTTP 413 with `detail.code: "policy_too_long"`. A
+request for a policy that has expired gets HTTP 404 with `detail.code: "not_found"`;
+the page then sends the text again on its own.
+
+The page classifies a policy as soon as it holds one, so every edit of the text box
+that settles for 0.6 s creates a policy here. Each lives until its hour without use
+is over; no route deletes one. Measured through the page on the desktop, two runs on
+each device with a fresh model service: GitHub's privacy statement had its labels 4.1
+and 4.3 s after the paste on the GPU, and 7.0 s after it on the CPU both times. The
+classification request took 3.3 and 6.0 s of that, and the wait for the text to
+settle 0.6 s.
 
 ### Configuration
 
@@ -143,9 +161,9 @@ uv run pytest
 
 The tests use a fake modelService through `httpx.MockTransport`, so no model or GPU
 is needed. They cover upload validation, the length limit, expiry, the
-classification-first ordering, per-category summaries, the cut into sections, progress,
-a cancel and a failure partway through a rewrite, rewriter-unavailable errors, and
-modelService outages.
+classification-first ordering, per-category summaries, the cut into sections and the
+job's list of them, progress, a cancel and a failure partway through a rewrite,
+rewriter-unavailable errors, and modelService outages.
 
 Frontend checks:
 
@@ -180,7 +198,8 @@ api/
 - **FR-01, FR-04–FR-06:** sentence IDs, exact offsets, labels, counts, and taxonomy
   colors come from modelService; the UI highlights and filters without another call.
 - **FR-02, FR-24:** UTF-8 `.txt` uploads only, with the same length limit as modelService.
-- **FR-12, FR-16:** generated blocks carry `source_sentence_ids`.
+- **FR-12, FR-16:** generated blocks carry `source_sentence_ids`, and a rewrite job
+  lists every section's sentences from its start.
 - **FR-13:** a rewrite covers the selection or the whole policy, one section at a time.
   Choosing context for a selection is not built.
 - **FR-17, FR-18:** job progress by section, polling, and a cancel between sections

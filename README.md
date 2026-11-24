@@ -7,7 +7,7 @@ The app rebuilds the parent thesis's classify-and-rewrite tool so that it runs l
 ## What it does
 
 1. **Paste a policy.** The text is kept exactly as entered and split into sentences, which every label and rewrite points back to.
-2. **Analyze Categories.** Each sentence gets one of ten categories. A highlight toggle shades sentences by category, with a legend, per-category counts, and filters.
+2. **Categories.** Each sentence gets one of ten categories as soon as the policy comes in; no button starts it. A highlight toggle shades sentences by category, with a legend, per-category counts, and filters.
 3. **Rewrite.** **Paraphrase**, **Simplify for Kids**, and **Simplify for Adults** rewrite a selection, or the whole policy when nothing is selected. Each rewrite appears beside the original, linked to the sentences it came from, and may not drop a condition, number, or hedge to read more simply.
 
 The categories are the thesis's ten: First Party Collection/Use, Third Party Sharing/Collection, User Choice/Control, Do Not Track, International and Specific Audiences, Data Security, Policy Change, Data Retention, User Access, Edit and Deletion, and Other.
@@ -21,7 +21,7 @@ Not planned for the first version: chat about a policy, PDF or DOCX import, lang
 
 ## Status
 
-The interface calls [`api/`](api/), which forwards policies to [`modelService/`](modelService/) and returns one category per sentence, source-linked category summaries, and source-linked rewrites. Classification, summaries, and rewriting all run locally. The summaries quote classified sentences, and all three rewrite styles use the one summary prompt; style-specific prompts are not built. A rewrite goes one section at a time and shows which section it is on, and a cancel keeps the sections that are finished. The work so far also chooses the models:
+The interface calls [`api/`](api/), which forwards policies to [`modelService/`](modelService/) and returns one category per sentence, source-linked category summaries, and source-linked rewrites. Classification, summaries, and rewriting all run locally. The summaries quote classified sentences, and all three rewrite styles use the one summary prompt; style-specific prompts are not built. A rewrite goes one section at a time and shows which section it is on, and a cancel keeps the sections that are finished. Each section's rewrite stands beside the sentences it came from, with links back to them, and the whole rewrite can be copied; regenerating one is not built. Sentences are selected one at a time, by range with Shift, or by category. The work so far also chooses the models:
 
 - **Classifier:** a linear head on EmbeddingGemma 2 embeddings leads, with accuracy close to much larger models. The service runs it from a 296 MiB file through llama.cpp, at about 0.01 s per sentence on a GPU and 0.02 s on a CPU, timed on the desktop and on a MacBook. It has not yet been timed on a computer of the 8–12 GB target.
 - **Rewriter:** not settled (AR-02). The service runs Qwen3.5-4B at 4-bit through llama.cpp with the `summary-v3` prompt, the pair that [the rewriting findings](privacy-research/docs/rewriting-findings.md) judged; the prompt is still being tuned.
@@ -45,7 +45,7 @@ Then start the whole app from this folder with:
 python3 run.py
 ```
 
-On Windows, use `python` in place of `python3`. The launcher starts the model service on `127.0.0.1:8000`, the API on `127.0.0.1:8001`, and Vite on `127.0.0.1:5173`, wires their URLs together, prefixes their logs, and stops all three when you press Ctrl+C. The first model start can take a while; open the page once the launcher says that the model service, API, and frontend are listening.
+On Windows, use `python` in place of `python3`. The launcher starts the model service on `127.0.0.1:8000`, the API on `127.0.0.1:8001`, and Vite on `127.0.0.1:5173`, wires their URLs together, prefixes their logs, and stops all three when you press Ctrl+C. The first model start can take a while. A page opened before the launcher says that the model service, API, and frontend are listening says which of them it waits for, and labels the example policy once they are up.
 
 Override any port with an environment variable:
 
